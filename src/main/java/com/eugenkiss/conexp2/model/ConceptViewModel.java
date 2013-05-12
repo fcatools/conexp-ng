@@ -6,17 +6,17 @@ import javax.swing.JComponent;
 import com.eugenkiss.conexp2.view.DocumentView;
 
 /**
- * For the lattice view, the concepttable and so on
+ * Maybe Model is the wrong name, since it knows the Views
  * 
  * @author David
  * 
  */
-public interface ConceptViewModel {
+public interface ConceptViewModel{
 
 	public JComponent getSettings();
 
 	public DocumentView getDocument();
-
+	
 	public String getTabName();
 
 	public Icon getIcon();

@@ -1,9 +1,6 @@
 package com.eugenkiss.conexp2.view;
 
-import java.awt.GridLayout;
-
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 
 
 public class ContextView extends DocumentView {

@@ -20,9 +20,10 @@ public abstract class DocumentView extends JPanel {
 	protected JComponent view;
 
 	public DocumentView() {
+		toolbar.setFloatable(false);
 		add(toolbar);
-	} 
-	
+	}
+
 	public void addToolbarElement(JButton element) {
 		toolbar.add(element);
 	}
