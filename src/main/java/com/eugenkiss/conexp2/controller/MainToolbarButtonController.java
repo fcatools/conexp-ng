@@ -3,45 +3,32 @@ package com.eugenkiss.conexp2.controller;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
-import com.eugenkiss.conexp2.model.ConceptViewModel;
+
+import com.eugenkiss.conexp2.view.DocumentView;
 
 public class MainToolbarButtonController implements ActionListener {
 
 	private JTabbedPane tabs;
-	private ConceptViewModel cvm;
+	private DocumentView cvm;
 
 	private boolean firstStart = true;
 	private int TabNumber;
 
-	public MainToolbarButtonController(ConceptViewModel cvm, JTabbedPane tabPane) {
+	public MainToolbarButtonController(DocumentView cvm, JTabbedPane tabPane) {
 		this.cvm = cvm;
 		tabs = tabPane;
 	}
 
 	public void actionPerformed(ActionEvent arg0) {
-		if (arg0.getSource() instanceof JButton) {
-			if (firstStart) {
-				JSplitPane splitPane = new JSplitPane(
-						JSplitPane.HORIZONTAL_SPLIT);
-				splitPane.setOneTouchExpandable(true);
-				splitPane.add(cvm.getSettings(), JSplitPane.LEFT);
-				splitPane.add(cvm.getDocument(), JSplitPane.RIGHT);
-				TabNumber = tabs.getTabCount();
-				tabs.insertTab(cvm.getTabName(), cvm.getIcon(), splitPane,
-						cvm.getToolTip(), TabNumber);
-				
-				firstStart = false;
-			}
-			tabs.setSelectedIndex(TabNumber);
+		if (firstStart) {
+
+			TabNumber = tabs.getTabCount();
+			tabs.insertTab(cvm.getTabName(), cvm.getIcon(), cvm.getDocument(),
+					cvm.getToolTip(), TabNumber);
+
+			firstStart = false;
 		}
-
-		else if (arg0.getSource() instanceof JComboBox<?>) {
-
-		}
-
+		tabs.setSelectedIndex(TabNumber);
 	}
 }

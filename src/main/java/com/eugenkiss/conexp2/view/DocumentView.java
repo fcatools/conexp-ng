@@ -1,8 +1,10 @@
 package com.eugenkiss.conexp2.view;
 
+import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
 
 /**
@@ -17,11 +19,25 @@ public abstract class DocumentView extends JPanel {
 
 	protected JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
 
-	protected JComponent view;
+	protected JComponent view, settings;
 
-	public DocumentView() {
+	
+	public abstract DocumentView getDocument();
+	
+	public abstract String getTabName();
+
+	public abstract Icon getIcon();
+
+	public abstract String getToolTip();
+	
+	public void addSplitPane() {
+		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+		splitPane.setOneTouchExpandable(true);
+		splitPane.add(settings, JSplitPane.LEFT);
+		splitPane.add(view, JSplitPane.RIGHT);
 		toolbar.setFloatable(false);
-		add(toolbar);
+		view.add(toolbar);
+		add(splitPane);
 	}
 
 	public void addToolbarElement(JButton element) {
