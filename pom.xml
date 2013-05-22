@@ -10,7 +10,9 @@
   <url>http://maven.apache.org</url>
 
   <properties>
-    <!-- PROJECT ENCODING PROPERTIES -->
+    <maven.compiler.source>1.7</maven.compiler.source>
+	  <maven.compiler.target>1.7</maven.compiler.target>
+	  <slf4j.version>1.7.5</slf4j.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
   </properties>

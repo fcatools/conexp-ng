@@ -1,6 +1,8 @@
 package com.eugenkiss.conexp2.gui;
 
 import java.awt.BorderLayout;
+
+import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -17,7 +19,7 @@ public abstract class View extends JPanel {
 
 	protected JComponent view, settings;
 
-	protected JPanel document;
+	protected JPanel panel;
 
 	protected JSplitPane splitPane;
 
@@ -32,16 +34,20 @@ public abstract class View extends JPanel {
 	public void init() {
 		setLayout(new BorderLayout());
 
-		document = new JPanel();
 		toolbar.setFloatable(false);
-		document.setLayout(new BorderLayout());
-		document.add(toolbar, BorderLayout.WEST);
-		document.add(view, BorderLayout.CENTER);
 		
-		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+		panel = new JPanel();
+		panel.setLayout(new BorderLayout());
+		panel.add(toolbar, BorderLayout.WEST);
+		panel.add(view, BorderLayout.CENTER);
+		
+		// Important to make split pane divider properly visible on osx
+        settings.setBorder(BorderFactory.createLoweredSoftBevelBorder());
+        panel.setBorder(BorderFactory.createLoweredSoftBevelBorder());
+		
+		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, settings, panel);
 		splitPane.setOneTouchExpandable(true);
-		splitPane.add(settings, JSplitPane.LEFT);
-		splitPane.add(document, JSplitPane.RIGHT);
+        splitPane.setBorder(null);
 		add(splitPane);
 	}
 
