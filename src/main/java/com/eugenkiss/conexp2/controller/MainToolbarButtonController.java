@@ -10,13 +10,13 @@ import com.eugenkiss.conexp2.view.DocumentView;
 public class MainToolbarButtonController implements ActionListener {
 
 	private JTabbedPane tabs;
-	private DocumentView cvm;
+	private DocumentView dv;
 
 	private boolean firstStart = true;
 	private int TabNumber;
 
-	public MainToolbarButtonController(DocumentView cvm, JTabbedPane tabPane) {
-		this.cvm = cvm;
+	public MainToolbarButtonController(DocumentView dv, JTabbedPane tabPane) {
+		this.dv = dv;
 		tabs = tabPane;
 	}
 
@@ -24,9 +24,8 @@ public class MainToolbarButtonController implements ActionListener {
 		if (firstStart) {
 
 			TabNumber = tabs.getTabCount();
-			tabs.insertTab(cvm.getTabName(), cvm.getIcon(), cvm.getDocument(),
-					cvm.getToolTip(), TabNumber);
-
+			tabs.insertTab(dv.getTabName(), dv.getIcon(), dv.getDocument(),
+					dv.getToolTip(), TabNumber);
 			firstStart = false;
 		}
 		tabs.setSelectedIndex(TabNumber);

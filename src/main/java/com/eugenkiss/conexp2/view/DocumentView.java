@@ -1,5 +1,8 @@
 package com.eugenkiss.conexp2.view;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
+
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -21,6 +24,7 @@ public abstract class DocumentView extends JPanel {
 
 	protected JComponent view, settings;
 
+	protected JSplitPane splitPane;
 	
 	public abstract DocumentView getDocument();
 	
@@ -31,7 +35,7 @@ public abstract class DocumentView extends JPanel {
 	public abstract String getToolTip();
 	
 	public void addSplitPane() {
-		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		splitPane.setOneTouchExpandable(true);
 		splitPane.add(settings, JSplitPane.LEFT);
 		splitPane.add(view, JSplitPane.RIGHT);
@@ -39,7 +43,7 @@ public abstract class DocumentView extends JPanel {
 		view.add(toolbar);
 		add(splitPane);
 	}
-
+	
 	public void addToolbarElement(JButton element) {
 		toolbar.add(element);
 	}
