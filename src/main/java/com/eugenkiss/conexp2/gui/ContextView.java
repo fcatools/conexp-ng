@@ -3,7 +3,7 @@ package com.eugenkiss.conexp2.gui;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 
-public class ContextView extends DocumentView {
+public class ContextView extends View {
 
 	private static final long serialVersionUID = 1660117627650529212L;
 
@@ -26,7 +26,7 @@ public class ContextView extends DocumentView {
 		return null;
 	}
 
-	public DocumentView getDocument() {
+	public View getDocument() {
 		return new ContextView();
 	}
 }

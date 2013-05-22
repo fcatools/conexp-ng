@@ -9,7 +9,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
 
 
-public abstract class DocumentView extends JPanel {
+public abstract class View extends JPanel {
 
 	protected static final long serialVersionUID = -873702052790459127L;
 
@@ -21,7 +21,7 @@ public abstract class DocumentView extends JPanel {
 
 	protected JSplitPane splitPane;
 
-	public abstract DocumentView getDocument();
+	public abstract View getDocument();
 
 	public abstract String getTabName();
 

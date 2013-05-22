@@ -3,11 +3,11 @@ package com.eugenkiss.conexp2.gui;
 import javax.swing.Icon;
 import javax.swing.JTextArea;
 
-public class AssociationView extends View {
+public class ImplicationView extends View {
 
 	private static final long serialVersionUID = -6377834669097012170L;
 
-	public AssociationView() {
+	public ImplicationView() {
 		view = new JTextArea("Hi");
 		settings = new AssociationSettings();
 		init();
@@ -18,7 +18,7 @@ public class AssociationView extends View {
 	}
 
 	public String getTabName() {
-		return "Association Rules";
+		return "Implication Rules";
 	}
 
 	public Icon getIcon() {
@@ -26,6 +26,6 @@ public class AssociationView extends View {
 	}
 
 	public String getToolTip() {
-		return "calc Associations";
+		return "calc implications";
 	}
 }

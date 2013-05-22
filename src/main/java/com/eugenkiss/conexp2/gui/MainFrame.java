@@ -6,24 +6,40 @@ import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
 
 public class MainFrame extends JFrame {
-	
 
 	private static final long serialVersionUID = -3768163989667340886L;
 
-	private JTabbedPane tabPane = new JTabbedPane();
+	private JTabbedPane tabPane;
+	private View contextView;
+	private View latticeView;
+	private View associationView;
+	private View implicationView;
 	
 	public MainFrame() {
+		tabPane = new JTabbedPane();
 		tabPane.setTabPlacement(JTabbedPane.BOTTOM);
 		tabPane.setOpaque(false);
 		add(tabPane);
-		add(new MainToolbar(tabPane), BorderLayout.PAGE_START);
-
 		
+		contextView = new ContextView();
+		latticeView = new LatticeView();
+		associationView = new AssociationView();
+		implicationView = new ImplicationView();
+		addTab(tabPane, contextView, 0);
+		addTab(tabPane, latticeView, 1);
+		addTab(tabPane, associationView, 2);
+		addTab(tabPane, implicationView, 3);
+		
+		add(new MainToolbar(tabPane), BorderLayout.PAGE_START);
 
 		setSize(1100, 600);
 		setVisible(true);
-		setTitle("Concept Explorer Reloaded");
+		setTitle("ConExp2 - ../example.cex");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	}
+	
+	private static void addTab(JTabbedPane t, View v, int i) {
+		t.insertTab(v.getTabName(), v.getIcon(), v.getDocument(), v.getToolTip(), i);
 	}
 	
 }

@@ -4,7 +4,7 @@ import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 
-public class LatticeView extends DocumentView {
+public class LatticeView extends View {
 	private static final long serialVersionUID = 1660117627650529212L;
 
 	public LatticeView() {
@@ -18,7 +18,7 @@ public class LatticeView extends DocumentView {
 	}
 
 	public String getTabName() {
-		return "Lattice line diagram";
+		return "Lattice Diagram";
 	}
 
 	public JComponent getSettings() {
@@ -29,7 +29,7 @@ public class LatticeView extends DocumentView {
 		return null;
 	}
 
-	public DocumentView getDocument() {
+	public View getDocument() {
 
 		return new LatticeView();
 	}
