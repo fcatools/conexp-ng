@@ -2,20 +2,26 @@ package com.eugenkiss.conexp2.view;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JToolBar;
-
-import com.eugenkiss.conexp2.controller.MainToolbarButtonController;
+import javax.swing.KeyStroke;
 
 public class MainToolbar extends JToolBar {
 
 	private static final long serialVersionUID = -3495670613141172867L;
 
-	public MainToolbar(JTabbedPane tabPane) {
+	private JTabbedPane tabs;
 
+	public MainToolbar(JTabbedPane tabPane) {
+		this.tabs = tabPane;
 		JButton button = null;
 
 		button = new JButton("New Context");
@@ -32,18 +38,11 @@ public class MainToolbar extends JToolBar {
 
 		addSeparator();
 
-		button = new JButton("Edit Context");
-		button.setName("editContext");
-		button.addActionListener(new MainToolbarButtonController(
-				new ContextView(), tabPane));
-		add(button);
-		button.doClick();
+		addButton(new ContextView(), KeyStroke.getKeyStroke(KeyEvent.VK_E,
+				InputEvent.CTRL_DOWN_MASK), true);
 
-		button = new JButton("Build Lattice");
-		button.setName("buildLattice");
-		button.addActionListener(new MainToolbarButtonController(
-				new LatticeView(), tabPane));
-		add(button);
+		addButton(new LatticeView(), KeyStroke.getKeyStroke(KeyEvent.VK_L,
+				InputEvent.CTRL_DOWN_MASK), false);
 
 		button = new JButton("Count Concepts");
 		button.setName("countConcepts");
@@ -81,11 +80,46 @@ public class MainToolbar extends JToolBar {
 
 		add(button);
 
-		button = new JButton("Calc Associations");
-		button.setName("calcAssociations");
-		button.addActionListener(new MainToolbarButtonController(
-				new AssociationView(), tabPane));
-		add(button);
-
+		addButton(new AssociationView(), KeyStroke.getKeyStroke(KeyEvent.VK_A,
+				InputEvent.CTRL_DOWN_MASK), false);
 	}
+
+	private void addButton(DocumentView dv, KeyStroke ks, boolean startView) {
+		JButton button = new JButton();
+		Action click = new ShowDocument(dv);
+		button.setAction(click);
+		button.setName(dv.getToolTip());
+		button.setText(dv.getToolTip());
+		getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+				.put(ks, button.getName());
+		getActionMap().put(button.getName(), click);
+		add(button);
+		if (startView)
+			button.doClick();
+	}
+
+	private class ShowDocument extends AbstractAction {
+
+		private static final long serialVersionUID = 45594299517529193L;
+		private DocumentView dv;
+
+		private boolean firstStart = true;
+		private int tabNumber;
+
+		public ShowDocument(DocumentView dv) {
+			this.dv = dv;
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			if (firstStart) {
+
+				tabNumber = tabs.getTabCount();
+				tabs.insertTab(dv.getTabName(), dv.getIcon(), dv.getDocument(),
+						dv.getToolTip(), tabNumber);
+				firstStart = false;
+			}
+			tabs.setSelectedIndex(tabNumber);
+		}
+	}
+
 }

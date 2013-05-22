@@ -10,7 +10,7 @@ public class AssociationView extends DocumentView {
 	public AssociationView() {
 		view = new JTextArea("Hi");
 		settings = new AssociationSettings();
-		addSplitPane();
+		init();
 	}
 
 	public DocumentView getDocument() {
@@ -26,6 +26,6 @@ public class AssociationView extends DocumentView {
 	}
 
 	public String getToolTip() {
-		return "Assoziationen bla";
+		return "calc Associations";
 	}
 }

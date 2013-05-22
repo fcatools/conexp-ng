@@ -25,4 +25,5 @@ public class MainFrame extends JFrame {
 		setTitle("Concept Explorer Reloaded");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
+	
 }

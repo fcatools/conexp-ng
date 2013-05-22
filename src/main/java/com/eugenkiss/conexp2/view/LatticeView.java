@@ -10,11 +10,11 @@ public class LatticeView extends DocumentView {
 	public LatticeView() {
 		view = new JLabel("Hier Verbanddiagramm");
 		settings = new JLabel("Lattice Settings");
-		addSplitPane();
+		init();
 	}
 
 	public String getToolTip() {
-		return "Lattice test";
+		return "Build Lattice";
 	}
 
 	public String getTabName() {
