@@ -33,7 +33,6 @@ public class MainFrame extends JFrame {
 		add(new MainToolbar(tabPane), BorderLayout.PAGE_START);
 
 		setSize(1100, 600);
-		setVisible(true);
 		setTitle("ConExp2 - ../example.cex");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
