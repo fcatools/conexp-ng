@@ -1,7 +1,6 @@
 package com.eugenkiss.conexp2.view;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 
 import javax.swing.Icon;
 import javax.swing.JButton;
@@ -35,6 +34,7 @@ public abstract class DocumentView extends JPanel {
 	public abstract String getToolTip();
 	
 	public void addSplitPane() {
+		setLayout(new BorderLayout());
 		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		splitPane.setOneTouchExpandable(true);
 		splitPane.add(settings, JSplitPane.LEFT);
