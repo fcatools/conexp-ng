@@ -1,6 +1,6 @@
 package com.eugenkiss.conexp2;
 
-import com.eugenkiss.conexp2.view.MainFrame;
+import com.eugenkiss.conexp2.gui.MainFrame;
 
 public class Main {
 
