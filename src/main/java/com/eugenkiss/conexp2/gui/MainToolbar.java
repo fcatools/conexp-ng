@@ -13,6 +13,8 @@ public class MainToolbar extends JToolBar {
 
 
 	public MainToolbar() {
+		this.setFloatable(false);
+		
 		JButton button = null;
 
 		button = new JButton("New");
