@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 
 import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
-import javax.swing.JToolBar;
 
 public class MainFrame extends JFrame {
 
