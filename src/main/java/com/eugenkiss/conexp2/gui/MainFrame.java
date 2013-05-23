@@ -30,7 +30,7 @@ public class MainFrame extends JFrame {
 		addTab(tabPane, associationView, 2);
 		addTab(tabPane, implicationView, 3);
 		
-		add(new MainToolbar(tabPane), BorderLayout.PAGE_START);
+		add(new MainToolbar(), BorderLayout.PAGE_START);
 
 		setSize(1100, 600);
 		setTitle("ConExp2 - ../example.cex");

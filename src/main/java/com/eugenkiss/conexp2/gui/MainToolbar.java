@@ -5,17 +5,14 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
-import javax.swing.JTabbedPane;
 import javax.swing.JToolBar;
 
 public class MainToolbar extends JToolBar {
 
 	private static final long serialVersionUID = -3495670613141172867L;
 
-	private JTabbedPane tabs;
 
-	public MainToolbar(JTabbedPane tabPane) {
-		this.tabs = tabPane;
+	public MainToolbar() {
 		JButton button = null;
 
 		button = new JButton("New");
