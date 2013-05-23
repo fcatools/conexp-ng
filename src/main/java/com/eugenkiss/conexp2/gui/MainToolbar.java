@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JToolBar;
 
@@ -11,8 +12,11 @@ public class MainToolbar extends JToolBar {
 
 	private static final long serialVersionUID = -3495670613141172867L;
 
+	private final JFrame mainFrame;
+	private final JButton saveButton;
 
-	public MainToolbar() {
+	public MainToolbar(JFrame mainFrame) {
+		this.mainFrame = mainFrame;
 		this.setFloatable(false);
 		
 		JButton button = null;
@@ -25,9 +29,17 @@ public class MainToolbar extends JToolBar {
 		button.setName("openFile");
 		add(button);
 
-		button = new JButton("Save");
-		button.setName("saveFile");
-		add(button);
+		saveButton = new JButton("Save");
+		saveButton.setName("saveFile");
+		// TODO: Maybe create an (public) Action since we want to also save from the exit prompt
+		//       when there are unsaved changes.
+		saveButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				JOptionPane.showMessageDialog(MainToolbar.this,
+						"Save");
+			}
+		});
+		add(saveButton);
 
 		button = new JButton("Save as");
 		button.setName("saveAsFile");
@@ -80,5 +92,14 @@ public class MainToolbar extends JToolBar {
 		button.setName("help");
 		add(button);
 	}
+	
+	public void enableSaveButton() {
+		saveButton.setEnabled(true);
+	}
+
+	public void disableSaveButton() {
+		saveButton.setEnabled(false);
+	}
 
 }
+
