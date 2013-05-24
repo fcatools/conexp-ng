@@ -13,6 +13,7 @@
     <maven.compiler.source>1.7</maven.compiler.source>
 	  <maven.compiler.target>1.7</maven.compiler.target>
 	  <slf4j.version>1.7.5</slf4j.version>
+    <!-- PROJECT ENCODING PROPERTIES -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
   </properties>
@@ -56,6 +57,12 @@
     <dependency>
       <groupId>fcalib</groupId>
       <artifactId>fcalib</artifactId>
+      <version>0.10.2</version>
+    </dependency>
+    <!-- FCAApi -->
+    <dependency>
+      <groupId>fcaapi</groupId>
+      <artifactId>fcaapi</artifactId>
       <version>0.10.2</version>
     </dependency>
     <!-- Batik (TODO: Maybe not everything will be needed) -->

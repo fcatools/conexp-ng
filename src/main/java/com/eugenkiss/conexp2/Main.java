@@ -15,6 +15,11 @@ import java.util.Properties;
 import javax.swing.JFrame;
 
 import com.eugenkiss.conexp2.gui.MainFrame;
+import com.google.common.collect.Sets;
+
+import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
+import de.tudresden.inf.tcs.fcalib.FormalContext;
+import de.tudresden.inf.tcs.fcalib.FullObject;
 
 /**
  * 
@@ -25,9 +30,25 @@ import com.eugenkiss.conexp2.gui.MainFrame;
 public class Main {
 	
 	public static final boolean isMacOS = System.getProperty("mrj.version") != null;
-
+	public static final String optionsFileName = new File(getSettingsDirectory(), "options.prop").getPath();
+	
+	
 	public static void main(String... args) {
-		final JFrame f = new MainFrame();
+		ProgramState testState = new ProgramState();
+		testState.filePath = "../example.cex";
+		testState.context = new FormalContext<>();
+		testState.context.addAttribute("a");
+		testState.context.addAttribute("b");
+		testState.context.addAttribute("c");
+		try {
+			testState.context.addObject(new FullObject<String, String>("x", Sets.newHashSet("a", "b")));
+			testState.context.addObject(new FullObject<String, String>("y", Sets.newHashSet("b", "c")));
+			testState.context.addObject(new FullObject<String, String>("z"));
+		} catch (IllegalObjectException e1) {
+			e1.printStackTrace();
+		}
+		
+		final JFrame f = new MainFrame(testState);
         f.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         f.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent we) {
@@ -53,7 +74,6 @@ public class Main {
         f.setVisible(true);
 	}
 	
-    public static final String optionsFileName = new File(getSettingsDirectory(), "options.prop").getPath();
 
     /** Store location & size of UI */
     private static void storeOptions(Frame f) throws Exception {

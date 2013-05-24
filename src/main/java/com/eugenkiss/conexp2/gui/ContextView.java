@@ -1,32 +1,18 @@
 package com.eugenkiss.conexp2.gui;
 
-import javax.swing.Icon;
 import javax.swing.JLabel;
+
+import com.eugenkiss.conexp2.ProgramState;
 
 public class ContextView extends View {
 
 	private static final long serialVersionUID = 1660117627650529212L;
 
-	public ContextView() {
+	public ContextView(ProgramState state) {
+		super(state);
 		view = new JLabel("Hier Tabelle");
 		settings = new JLabel("Context Settings");
-		init();
+		super.init();
 	}
 
-	public String getToolTip() {
-		return "Edit Context";
-	}
-
-	public String getTabName() {
-
-		return "Context Editor";
-	}
-
-	public Icon getIcon() {
-		return null;
-	}
-
-	public View getDocument() {
-		return new ContextView();
-	}
 }
