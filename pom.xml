@@ -210,6 +210,14 @@
         <configuration>
           <mainClass>com.eugenkiss.conexp2.Main</mainClass>
           <executable>java</executable>
+          <arguments>
+            <argument>-Xdock:name=ConExp2</argument>
+            <argument>-classpath</argument>
+            <!-- automatically creates the classpath using all project dependencies,
+                 also adding the project build directory -->
+            <classpath/>
+            <argument>com.eugenkiss.conexp2.Main</argument>
+          </arguments>
         </configuration>
       </plugin>
       <!-- JAR -->
