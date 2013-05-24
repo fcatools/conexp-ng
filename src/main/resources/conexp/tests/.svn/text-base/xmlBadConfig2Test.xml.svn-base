@@ -1,5 +1,0 @@
-<strategymodel>
-    <strategy label="one" class="one.test"/>
-    <strategy label="two"/>
-</strategymodel>
-

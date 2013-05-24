@@ -1,9 +1,0 @@
-<strategymodel>
-    <strategy label="Minimal intersections" class="conexp.core.layout.MinIntersectionLayout"/>
-    <strategy label="Chain decomposition" class="conexp.core.layout.chaindecomposition.ChainDecompositionLayout"/>
-    <strategy label="Freese Layout" class="conexp.core.layout.FreeseLayout"/>
-<!--    <strategy label="Freese Quantative Layout" class="conexp.core.layout.FreeseQuantativeLayout"/> -->
-
-    <strategy label="Force Layout" class="conexp.core.layout.ForceLayout"/>
-<!--    <strategy label="Layered Layout" class="conexp.core.layout.layeredlayout.LayeredLayoter"/> -->
-</strategymodel>

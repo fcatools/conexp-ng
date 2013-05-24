@@ -1,4 +1,0 @@
-Trace = off
-TraceBuffer_Level = world
-TraceLog_Level = usage
-Error_loading_L&F_msg = Error loading L&F: 
