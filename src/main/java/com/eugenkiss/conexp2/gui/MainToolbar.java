@@ -1,7 +1,9 @@
 package com.eugenkiss.conexp2.gui;
 
-import java.awt.Dimension;
-import java.awt.Point;
+import static com.eugenkiss.conexp2.gui.Util.centerDialogInsideMainFrame;
+import static com.eugenkiss.conexp2.gui.Util.createButton;
+
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -11,66 +13,69 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JToolBar;
 
+import com.eugenkiss.conexp2.OS;
+
 public class MainToolbar extends JToolBar {
 
 	private static final long serialVersionUID = -3495670613141172867L;
 
 	private final JFrame mainFrame;
+	private final JButton newButton;
+	private final JButton openButton;
 	private final JButton saveButton;
-
+	private final JButton saveAsButton;
+	private final JButton undoButton;
+	private final JButton redoButton;
+	private final JButton countButton;
+	private final JButton exploreButton;
+	private final JButton helpButton;
+	
 	public MainToolbar(final JFrame mainFrame) {
 		this.mainFrame = mainFrame;
 		this.setFloatable(false);
+		if (OS.isMacOsX) {
+			this.setMargin(new Insets(getInsets().top, getInsets().left + 2, getInsets().bottom, getInsets().right));
+		}
 		
-		JButton button = null;
-
-		button = new JButton("New");
-		button.setName("newContext");
-		add(button);
-
-		button = new JButton("Open");
-		button.setName("openFile");
-		add(button);
-
-		saveButton = new JButton("Save");
-		saveButton.setName("saveFile");
+		// Add buttons
+		newButton = createButton("New Context", "newContext", "conexp/new.gif");
+		add(newButton);
+		openButton = createButton("Open Context", "openContext", "conexp/open.gif");
+		add(openButton);
+		saveButton = createButton("Save Contex", "saveContext", "conexp/save.gif");
+		add(saveButton);
+		saveAsButton = createButton("Save as another Context", "saveAsContext", "conexp/save.gif");
+		add(saveAsButton);
+		addSeparator();
+		undoButton = createButton("Undo", "undo", "conexp/Undo.gif");
+		add(undoButton);
+		redoButton = createButton("Redo", "redo", "conexp/Redo.gif");
+		add(redoButton);
+		addSeparator();
+		countButton = createButton("Count Concepts", "countConcepts", "conexp/numConcepts.gif");
+		add(countButton);
+		exploreButton = createButton("Explore Attributes", "exploreAttributes", "conexp/attrExploration.gif");
+		add(exploreButton);
+		addSeparator();
+		helpButton = createButton("Help", "help", "conexp/question.gif");
+		// TODO: Align to the right
+		add(helpButton);
+		
+		// Add actions
 		// TODO: Maybe create an (public) Action since we want to also save from the exit prompt
 		//       when there are unsaved changes.
 		saveButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				JOptionPane.showMessageDialog(MainToolbar.this,
-						"Save");
+				JOptionPane.showMessageDialog(MainToolbar.this, "Save");
 			}
 		});
-		add(saveButton);
-
-		button = new JButton("Save as");
-		button.setName("saveAsFile");
-		add(button);
-		
-		button = new JButton("Undo");
-		button.setName("undo");
-		add(button);
-		
-		button = new JButton("Redo");
-		button.setName("redo");
-		add(button);
-		
-		addSeparator();
-
-		button = new JButton("Count Concepts");
-		button.setName("countConcepts");
-		button.addActionListener(new ActionListener() {
+		countButton.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent arg0) {
 				showMessageDialog("10 Concepts");
 			}
 		});
-		add(button);
-
-		button = new JButton("Attribute Exploration");
-		button.setName("attributeExploration");
-		button.addActionListener(new ActionListener() {
+		exploreButton.addActionListener(new ActionListener() {
 			// Maybe it is an own class worth
 			public void actionPerformed(ActionEvent arg0) {
 
@@ -90,13 +95,6 @@ public class MainToolbar extends JToolBar {
 				*/
 			}
 		});
-		add(button);
-		
-		addSeparator();
-		
-		button = new JButton("Help");
-		button.setName("help");
-		add(button);
 	}
 	
 	public void enableSaveButton() {
@@ -106,24 +104,30 @@ public class MainToolbar extends JToolBar {
 	public void disableSaveButton() {
 		saveButton.setEnabled(false);
 	}
+	
+	public void enableUndoButton() {
+		undoButton.setEnabled(true);
+	}
+
+	public void disableUndoButton() {
+		undoButton.setEnabled(false);
+	}
+
+	public void enableRedoButton() {
+		redoButton.setEnabled(true);
+	}
+
+	public void disableRedoButton() {
+		redoButton.setEnabled(false);
+	}
 
 	// TODO: Needs to be improved
 	private void showMessageDialog(String message) {
 		JOptionPane pane = new JOptionPane();
 	    JDialog dialog = pane.createDialog(mainFrame, message);
 	    dialog.pack();
-        centerDialogInsideMainFrame(dialog);
+        centerDialogInsideMainFrame(mainFrame, dialog);
         dialog.setVisible(true);
-	}
-	
-	// Needed as 'setLocationRelativeTo' doesn't work properly in a multi-monitor setup
-	private void centerDialogInsideMainFrame(JDialog dialog) {
-        Dimension dialogSize = dialog.getSize();
-        Dimension frameSize = mainFrame.getSize();
-        Point frameLocation = mainFrame.getLocation();
-        int x = frameLocation.x + ((frameSize.width - dialogSize.width) / 2);
-        int y = frameLocation.y + ((frameSize.height - dialogSize.height) / 2);
-        dialog.setLocation(x, y);	
 	}
 	
 }

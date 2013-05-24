@@ -1,0 +1,23 @@
+# AttributeExplorerUserCallbackImplementation  specific messages
+#the EmptyPremiseQuestion intentionally uses only {1} parameters, because {0} parameter is empty
+#@supressWarning
+AttributeExplorerUserCallbackImplementation.EmptyPremiseQuestion =  Is it true, that all objects have attribute(s) {1}?
+AttributeExplorerUserCallbackImplementation.NotEmptyPremiseQuestion =  Is it true, that when object has attribute(s) {0}, that it also has attribute(s) {1}?
+AttributeExplorerUserCallbackImplementation.StopAttributeExplorationCaption = Stop Attribute Exploration
+AttributeExplorerUserCallbackImplementation.ConfirmImplicationMessage = Confirm or reject implication
+AttributeExplorerUserCallbackImplementation.CounterExampleCaption = Provide counter example
+
+#attribute explorer errors
+AttributeExplorer.Error.CounterExampleDoesntContainWholePremise = {0} doesn't contain all the attributes from premise of implication. Following attribute(s) are missing: {1}
+AttributeExplorer.Error.CounterExampleContainWholeConclusion = {0} shouldn't contain at least one of the following attributes: {1}.
+AttributeExplorer.Error.CounterExampleContradictEarlierAcceptedImplications = {0} violates following earlier accepted implications: {1}.
+
+#counter example dialog
+CounterExampleQuery.AcceptImplicationLabel = Accept Implication
+CounterExampleQuery.ConfirmCounterExampleLabel = Provide counterexample
+CounterExampleQuery.StopAttributeExplorationLabel = Stop
+
+
+Global.ErrorMessage = Error
+Global.YesMessage = Yes
+Global.NoMessage = No

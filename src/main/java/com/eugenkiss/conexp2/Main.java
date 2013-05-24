@@ -23,6 +23,8 @@ import com.eugenkiss.conexp2.gui.MainFrame;
  *
  */
 public class Main {
+	
+	public static final boolean isMacOS = System.getProperty("mrj.version") != null;
 
 	public static void main(String... args) {
 		final JFrame f = new MainFrame();

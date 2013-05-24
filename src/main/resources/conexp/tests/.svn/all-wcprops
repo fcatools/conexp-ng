@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/pcj/!svn/ver/8/conexp/src/conexp/frontend/resources/tests
+END
+xmlEmptyModelTest.xml
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/pcj/!svn/ver/8/conexp/src/conexp/frontend/resources/tests/xmlEmptyModelTest.xml
+END
+docTest.cex
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/pcj/!svn/ver/8/conexp/src/conexp/frontend/resources/tests/docTest.cex
+END
+xmlConfigTest.xml
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/pcj/!svn/ver/8/conexp/src/conexp/frontend/resources/tests/xmlConfigTest.xml
+END
+xmlBadXmlTest.xml
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/pcj/!svn/ver/8/conexp/src/conexp/frontend/resources/tests/xmlBadXmlTest.xml
+END
+xmlBadConfig1Test.xml
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/pcj/!svn/ver/8/conexp/src/conexp/frontend/resources/tests/xmlBadConfig1Test.xml
+END
+xmlBadConfig2Test.xml
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/pcj/!svn/ver/8/conexp/src/conexp/frontend/resources/tests/xmlBadConfig2Test.xml
+END
