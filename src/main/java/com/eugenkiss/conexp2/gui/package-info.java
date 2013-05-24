@@ -5,11 +5,11 @@
  * <p>
  * The code adheres to the following style.
  * <ul>
- * <li>{@link javax.swing.Action Action}s and 
- *     {@link javax.swing.ActionMap ActionMap}s are preferred over 
+ * <li>{@link javax.swing.Action Action}s and
+ *     {@link javax.swing.ActionMap ActionMap}s are preferred over
  *     {@link javax.swing.ActionListener ActionListener}s.
- * <li>{@link javax.swing.event.ChangeListener ChangeListener}s and 
- *     {@link java.beans.PropertyChangeListener PropertyChangeListener}s are preferred over 
+ * <li>{@link javax.swing.event.ChangeListener ChangeListener}s and
+ *     {@link java.beans.PropertyChangeListener PropertyChangeListener}s are preferred over
  *     {@link java.util.Observer Observer}s and
  *     {@link java.util.Observable Observable}s.
  * </ul>

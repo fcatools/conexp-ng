@@ -22,33 +22,33 @@ import de.tudresden.inf.tcs.fcalib.FormalContext;
 import de.tudresden.inf.tcs.fcalib.FullObject;
 
 /**
- * 
+ *
  * The code for (re)storing the window location is from:
  * <href a="http://stackoverflow.com/a/7778332/283607">What is the best practice for setting JFrame locations in Java?</a>
  *
  */
 public class Main {
-	
-	public static final boolean isMacOS = System.getProperty("mrj.version") != null;
-	public static final String optionsFileName = new File(getSettingsDirectory(), "options.prop").getPath();
-	
-	
-	public static void main(String... args) {
-		ProgramState testState = new ProgramState();
-		testState.filePath = "../example.cex";
-		testState.context = new FormalContext<>();
-		testState.context.addAttribute("a");
-		testState.context.addAttribute("b");
-		testState.context.addAttribute("c");
-		try {
-			testState.context.addObject(new FullObject<String, String>("x", Sets.newHashSet("a", "b")));
-			testState.context.addObject(new FullObject<String, String>("y", Sets.newHashSet("b", "c")));
-			testState.context.addObject(new FullObject<String, String>("z"));
-		} catch (IllegalObjectException e1) {
-			e1.printStackTrace();
-		}
-		
-		final JFrame f = new MainFrame(testState);
+
+    public static final boolean isMacOS = System.getProperty("mrj.version") != null;
+    public static final String optionsFileName = new File(getSettingsDirectory(), "options.prop").getPath();
+
+
+    public static void main(String... args) {
+        ProgramState testState = new ProgramState();
+        testState.filePath = "../example.cex";
+        testState.context = new FormalContext<>();
+        testState.context.addAttribute("a");
+        testState.context.addAttribute("b");
+        testState.context.addAttribute("c");
+        try {
+            testState.context.addObject(new FullObject<String, String>("x", Sets.newHashSet("a", "b")));
+            testState.context.addObject(new FullObject<String, String>("y", Sets.newHashSet("b", "c")));
+            testState.context.addObject(new FullObject<String, String>("z"));
+        } catch (IllegalObjectException e1) {
+            e1.printStackTrace();
+        }
+
+        final JFrame f = new MainFrame(testState);
         f.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         f.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent we) {
@@ -72,8 +72,8 @@ public class Main {
             f.setLocationByPlatform(true);
         }
         f.setVisible(true);
-	}
-	
+    }
+
 
     /** Store location & size of UI */
     private static void storeOptions(Frame f) throws Exception {
@@ -112,7 +112,7 @@ public class Main {
 
         f.setBounds(r);
     }
-    
+
     // http://stackoverflow.com/a/193987/283607
     private static File getSettingsDirectory() {
         String userHome = System.getProperty("user.home");

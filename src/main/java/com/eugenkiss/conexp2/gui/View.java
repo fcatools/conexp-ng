@@ -14,42 +14,42 @@ import com.eugenkiss.conexp2.ProgramState;
 
 public abstract class View extends JPanel {
 
-	protected static final long serialVersionUID = -873702052790459127L;
+    protected static final long serialVersionUID = -873702052790459127L;
 
-	protected ProgramState state;
-	
-	protected JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
+    protected ProgramState state;
 
-	protected JComponent view, settings;
+    protected JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
 
-	protected JPanel panel;
+    protected JComponent view, settings;
 
-	protected JSplitPane splitPane;
-	
-	View(ProgramState state) {
-		this.state = state;
-	}
-	
-	protected void init() {
-		setLayout(new BorderLayout());
-		panel = new JPanel();
-		panel.setLayout(new BorderLayout());
+    protected JPanel panel;
 
-		toolbar.setFloatable(false);
-		
-		panel.add(toolbar, BorderLayout.WEST);
-		panel.add(view, BorderLayout.CENTER);
-		
-		// Important to make split pane divider properly visible on osx
-		if (OS.isMacOsX) {
-	        settings.setBorder(BorderFactory.createLoweredSoftBevelBorder());
-	        panel.setBorder(BorderFactory.createLoweredSoftBevelBorder());
-		}
-		
-		splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, settings, panel);
-		splitPane.setOneTouchExpandable(true);
+    protected JSplitPane splitPane;
+
+    View(ProgramState state) {
+        this.state = state;
+    }
+
+    protected void init() {
+        setLayout(new BorderLayout());
+        panel = new JPanel();
+        panel.setLayout(new BorderLayout());
+
+        toolbar.setFloatable(false);
+
+        panel.add(toolbar, BorderLayout.WEST);
+        panel.add(view, BorderLayout.CENTER);
+
+        // Important to make split pane divider properly visible on osx
+        if (OS.isMacOsX) {
+            settings.setBorder(BorderFactory.createLoweredSoftBevelBorder());
+            panel.setBorder(BorderFactory.createLoweredSoftBevelBorder());
+        }
+
+        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, settings, panel);
+        splitPane.setOneTouchExpandable(true);
         splitPane.setBorder(null);
-		add(splitPane);
-	}
-	
+        add(splitPane);
+    }
+
 }
