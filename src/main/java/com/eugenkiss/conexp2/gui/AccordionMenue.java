@@ -15,7 +15,6 @@ import javax.swing.JToggleButton;
 @SuppressWarnings("serial")
 public class AccordionMenue extends JPanel {
 
-	// Variables declaration - do not modify//GEN-BEGIN:variables
 	private javax.swing.ButtonGroup bg;
 	private List<ExpandableButton> buttons = new ArrayList<ExpandableButton>();
 	private HashMap<ExpandableButton, JComponent> entries = new HashMap<ExpandableButton, JComponent>();

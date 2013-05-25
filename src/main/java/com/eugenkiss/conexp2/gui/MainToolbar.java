@@ -59,7 +59,7 @@ public class MainToolbar extends JToolBar {
         add(exploreButton);
         addSeparator();
         helpButton = createButton("Help", "help", "conexp/question.gif");
-        // TODO: Align to the right
+        add(Box.createGlue());
         add(helpButton);
 
         // Add actions
