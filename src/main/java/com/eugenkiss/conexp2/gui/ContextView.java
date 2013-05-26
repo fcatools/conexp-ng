@@ -44,13 +44,13 @@ public class ContextView extends View {
     private final JButton reduceContextButton;
     private final JButton transposeContextButton;
 
-	public ContextView(final ProgramState state) {
-		super(state);
+    public ContextView(final ProgramState state) {
+        super(state);
 
         panel = new JPanel();
         panel.setLayout(new BorderLayout());
 
-		matrix = new ContextMatrix(new ContextTableModel(state.context), panel.getBackground());
+        matrix = new ContextMatrix(new ContextTableModel(state.context), panel.getBackground());
         JScrollPane scrollPane = ContextMatrix.createStripedJScrollPane(matrix, panel.getBackground());
         toolbar.setFloatable(false);
         toolbar.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, Color.LIGHT_GRAY));
@@ -78,18 +78,18 @@ public class ContextView extends View {
         toolbar.add(reduceContextButton);
         transposeContextButton = createButton("Transpose Context", "transposeContext", "conexp/transpose.gif");
         toolbar.add(transposeContextButton);
-	}
+    }
 
 }
 
 // inspired by http://explodingpixels.wordpress.com/2009/05/18/creating-a-better-jtable/
 class ContextMatrix extends JTable {
 
-	private static final long serialVersionUID = -7474568014425724962L;
+    private static final long serialVersionUID = -7474568014425724962L;
 
     Color BACKGROUND_COLOR = Color.LIGHT_GRAY;
-	private static final Color EVEN_ROW_COLOR = new Color(241, 245, 250);
-	private static final Color ODD_ROW_COLOR = new Color(255, 255, 255);
+    private static final Color EVEN_ROW_COLOR = new Color(241, 245, 250);
+    private static final Color ODD_ROW_COLOR = new Color(255, 255, 255);
     private static final Color TABLE_GRID_COLOR = new Color(0xd9d9d9);
 
     public ContextMatrix(TableModel dm, Color bg) {
@@ -108,21 +108,21 @@ class ContextMatrix extends JTable {
         // grid lines over the entire viewport.
         setShowGrid(false);
         this.getModel().addTableModelListener(new TableModelListener() {
-			@Override
-			public void tableChanged(TableModelEvent e) {
-				alignCells();
-			}
+            @Override
+            public void tableChanged(TableModelEvent e) {
+                alignCells();
+            }
         });
         alignCells();
     }
 
-	private void alignCells() {
-		DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-		centerRenderer.setHorizontalAlignment(JLabel.CENTER);
-		for (int i = 0; i < getColumnCount(); i++) {
-			getColumnModel().getColumn(i).setCellRenderer( centerRenderer );
-		}
-	}
+    private void alignCells() {
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
+        for (int i = 0; i < getColumnCount(); i++) {
+            getColumnModel().getColumn(i).setCellRenderer( centerRenderer );
+        }
+    }
 
     @Override
     public Component prepareRenderer(TableCellRenderer renderer, int row,
@@ -145,14 +145,14 @@ class ContextMatrix extends JTable {
      */
     private static class StripedViewport extends JViewport {
 
-		private static final long serialVersionUID = 171992496170114834L;
+        private static final long serialVersionUID = 171992496170114834L;
 
-	    Color BACKGROUND_COLOR = Color.LIGHT_GRAY;
+        Color BACKGROUND_COLOR = Color.LIGHT_GRAY;
 
-		private final JTable fTable;
+        private final JTable fTable;
 
         public StripedViewport(JTable table, Color bg) {
-        	BACKGROUND_COLOR = bg;
+            BACKGROUND_COLOR = bg;
             fTable = table;
             setBackground(BACKGROUND_COLOR);
             setOpaque(false);
@@ -189,7 +189,7 @@ class ContextMatrix extends JTable {
         private void paintBackground(Graphics g) {
             g.setColor(BACKGROUND_COLOR);
             g.fillRect(g.getClipBounds().x, g.getClipBounds().y,
-            		   g.getClipBounds().width, g.getClipBounds().height);
+                       g.getClipBounds().width, g.getClipBounds().height);
         }
 
         private void paintStripedBackground(Graphics g) {
@@ -236,42 +236,42 @@ class ContextMatrix extends JTable {
 
 class ContextTableModel extends AbstractTableModel {
 
-	private static final long serialVersionUID = -1509387655329719071L;
+    private static final long serialVersionUID = -1509387655329719071L;
 
-	private static final String X = "X";
+    private static final String X = "X";
 
-	private final FormalContext<String,String> context;
+    private final FormalContext<String,String> context;
 
-	ContextTableModel(FormalContext<String,String> context) {
-		this.context = context;
-	}
+    ContextTableModel(FormalContext<String,String> context) {
+        this.context = context;
+    }
 
-	@Override
-	public int getRowCount() {
-		return context.getObjectCount() + 1;
-	}
+    @Override
+    public int getRowCount() {
+        return context.getObjectCount() + 1;
+    }
 
-	@Override
-	public int getColumnCount() {
-		return context.getAttributeCount() + 1;
-	}
+    @Override
+    public int getColumnCount() {
+        return context.getAttributeCount() + 1;
+    }
 
-	@Override
-	public Object getValueAt(int rowIndex, int columnIndex) {
-		if (columnIndex == 0 && rowIndex == 0) {
-			return "";
-		}
-		else if (columnIndex == 0) {
-			return String.format("<html><div style='margin:2px 4px'><b>%s</b></div></html>",
-					context.getObjectAtIndex(rowIndex - 1).getIdentifier());
-		}
-		else if (rowIndex == 0) {
-			return String.format("<html><div style='margin:2px 4px'><b>%s</b></div></html>",
-			        context.getAttributeAtIndex(columnIndex - 1));
-		}
-		return context.objectHasAttribute(
-				context.getObjectAtIndex(rowIndex - 1),
-				context.getAttributeAtIndex(columnIndex - 1)) ? X : "";
-	}
+    @Override
+    public Object getValueAt(int rowIndex, int columnIndex) {
+        if (columnIndex == 0 && rowIndex == 0) {
+            return "";
+        }
+        else if (columnIndex == 0) {
+            return String.format("<html><div style='margin:2px 4px'><b>%s</b></div></html>",
+                    context.getObjectAtIndex(rowIndex - 1).getIdentifier());
+        }
+        else if (rowIndex == 0) {
+            return String.format("<html><div style='margin:2px 4px'><b>%s</b></div></html>",
+                    context.getAttributeAtIndex(columnIndex - 1));
+        }
+        return context.objectHasAttribute(
+                context.getObjectAtIndex(rowIndex - 1),
+                context.getAttributeAtIndex(columnIndex - 1)) ? X : "";
+    }
 
 }

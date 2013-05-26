@@ -7,9 +7,9 @@ import de.tudresden.inf.tcs.fcalib.FormalContext;
 import de.tudresden.inf.tcs.fcalib.FullObject;
 
 public interface ILatticeAlgorithm {
-	
-	
-	public boolean init(FormalContext context);
 
-	
+
+    public boolean init(FormalContext context);
+
+
 }
