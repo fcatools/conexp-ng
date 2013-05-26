@@ -1,9 +1,15 @@
 package com.eugenkiss.conexp2.draw;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import de.tudresden.inf.tcs.fcalib.utils.ListSet;
+
 public class Node {
 
-	private String[] objects;
-	private String[] attributes;
+	private List<String> objects;
+	private List<String> attributes;
 	private int x;
 	private int y;
 
@@ -14,11 +20,18 @@ public class Node {
 	 * @param x
 	 * @param y
 	 */
-	public Node(String[] objects, String[] attributes, int x, int y) {
+	public Node(List<String> objects, List<String> attributes, int x, int y) {
 		this.objects = objects;
 		this.attributes = attributes;
 		this.x = x;
 		this.y = y;
+	}
+	
+	public Node(){
+		this.objects = new ArrayList<>();
+		this.attributes = new ArrayList<>();
+		this.x = 0;
+		this.y = 0;
 	}
 
 	public int getX() {
@@ -36,21 +49,13 @@ public class Node {
 	public void setY(int y) {
 		this.y = y;
 	}
-
-	public String[] getObjects() {
-		return objects;
+	
+	public void addObject(String s){
+		objects.add(s);
 	}
-
-	public void setObjects(String[] objects) {
-		this.objects = objects;
-	}
-
-	public String[] getAttributes() {
-		return attributes;
-	}
-
-	public void setAttributes(String[] attributes) {
-		this.attributes = attributes;
+	
+	public void addAttribut(String s){
+		attributes.add(s);
 	}
 
 }
