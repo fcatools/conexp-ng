@@ -1,25 +1,17 @@
 package com.eugenkiss.conexp2;
 
-import java.awt.Frame;
-import java.awt.Rectangle;
+import com.eugenkiss.conexp2.gui.MainFrame;
+import com.eugenkiss.conexp2.model.FormalContext;
+import com.google.common.collect.Sets;
+import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
+import de.tudresden.inf.tcs.fcalib.FullObject;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.Properties;
-
-import javax.swing.JFrame;
-
-import com.eugenkiss.conexp2.gui.MainFrame;
-import com.google.common.collect.Sets;
-
-import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
-import de.tudresden.inf.tcs.fcalib.FormalContext;
-import de.tudresden.inf.tcs.fcalib.FullObject;
 
 /**
  *
@@ -29,20 +21,19 @@ import de.tudresden.inf.tcs.fcalib.FullObject;
  */
 public class Main {
 
-    public static final boolean isMacOS = System.getProperty("mrj.version") != null;
     public static final String optionsFileName = new File(getSettingsDirectory(), "options.prop").getPath();
 
 
     public static void main(String... args) {
         ProgramState testState = new ProgramState();
         testState.filePath = "../example.cex";
-        testState.context = new FormalContext<>();
+        testState.context = new FormalContext();
         testState.context.addAttribute("a");
         testState.context.addAttribute("b");
         testState.context.addAttribute("c");
         try {
-            testState.context.addObject(new FullObject<String, String>("x", Sets.newHashSet("a", "b")));
-            testState.context.addObject(new FullObject<String, String>("y", Sets.newHashSet("b", "c")));
+            testState.context.addObject(new FullObject<>("x", Sets.newHashSet("a", "b")));
+            testState.context.addObject(new FullObject<>("y", Sets.newHashSet("b", "c")));
             testState.context.addObject(new FullObject<String, String>("z"));
         } catch (IllegalObjectException e1) {
             e1.printStackTrace();

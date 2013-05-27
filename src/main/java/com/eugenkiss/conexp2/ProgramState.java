@@ -1,6 +1,6 @@
 package com.eugenkiss.conexp2;
 
-import de.tudresden.inf.tcs.fcalib.FormalContext;
+import com.eugenkiss.conexp2.model.FormalContext;
 
 /**
  * Contains context, lattice, implications, filePath, snapshots etc.
@@ -14,6 +14,6 @@ import de.tudresden.inf.tcs.fcalib.FormalContext;
 public class ProgramState {
 
     public String filePath;
-    public FormalContext<String, String> context;
+    public FormalContext context;
 
 }

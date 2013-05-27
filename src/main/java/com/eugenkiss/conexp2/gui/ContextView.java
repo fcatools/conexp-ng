@@ -1,40 +1,25 @@
 package com.eugenkiss.conexp2.gui;
 
-import static com.eugenkiss.conexp2.gui.Util.createButton;
+import com.eugenkiss.conexp2.ProgramState;
+import de.tudresden.inf.tcs.fcalib.FormalContext;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Graphics;
+import javax.swing.*;
+import javax.swing.event.TableModelEvent;
+import javax.swing.table.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JViewport;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableModel;
-
-import com.eugenkiss.conexp2.ProgramState;
-
-import de.tudresden.inf.tcs.fcalib.FormalContext;
+import static com.eugenkiss.conexp2.gui.Util.createButton;
 
 public class ContextView extends View {
 
     private static final long serialVersionUID = 1660117627650529212L;
 
     private final ContextMatrix matrix;
+    private final ContextMatrixModel matrixModel;
     private final JButton addObjectButton;
     private final JButton clarifyObjectsButton;
     private final JButton reduceObjectsButton;
@@ -50,7 +35,8 @@ public class ContextView extends View {
         panel = new JPanel();
         panel.setLayout(new BorderLayout());
 
-        matrix = new ContextMatrix(new ContextTableModel(state.context), panel.getBackground());
+        matrixModel = new ContextMatrixModel(state.context);
+        matrix = new ContextMatrix(matrixModel, panel.getBackground());
         JScrollPane scrollPane = ContextMatrix.createStripedJScrollPane(matrix, panel.getBackground());
         toolbar.setFloatable(false);
         toolbar.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, Color.LIGHT_GRAY));
@@ -78,17 +64,29 @@ public class ContextView extends View {
         toolbar.add(reduceContextButton);
         transposeContextButton = createButton("Transpose Context", "transposeContext", "conexp/transpose.gif");
         toolbar.add(transposeContextButton);
+
+        // Add actions
+        transposeContextButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                state.context.transpose();
+                matrixModel.fireTableDataChanged();
+            }
+        });
+
+        // Force an update of the table
+        matrixModel.fireTableStructureChanged();
     }
 
 }
 
 // inspired by http://explodingpixels.wordpress.com/2009/05/18/creating-a-better-jtable/
-class ContextMatrix extends JTable {
+class ContextMatrix extends JTable implements TableCellRenderer {
 
     private static final long serialVersionUID = -7474568014425724962L;
 
     Color BACKGROUND_COLOR = Color.LIGHT_GRAY;
-    private static final Color EVEN_ROW_COLOR = new Color(241, 245, 250);
+    private static final Color HEADER_COLOR = new Color(245, 245, 250);
+    private static final Color EVEN_ROW_COLOR = new Color(252, 252, 252);
     private static final Color ODD_ROW_COLOR = new Color(255, 255, 255);
     private static final Color TABLE_GRID_COLOR = new Color(0xd9d9d9);
 
@@ -107,12 +105,14 @@ class ContextMatrix extends JTable {
         // turn off grid painting as we'll handle this manually in order to paint
         // grid lines over the entire viewport.
         setShowGrid(false);
-        this.getModel().addTableModelListener(new TableModelListener() {
-            @Override
-            public void tableChanged(TableModelEvent e) {
-                alignCells();
-            }
-        });
+        this.setDefaultRenderer(String.class, this);
+        this.getModel().addTableModelListener(this);
+        this.setRowSelectionAllowed(false);
+    }
+
+    @Override
+    public void tableChanged(TableModelEvent e) {
+        super.tableChanged(e);
         alignCells();
     }
 
@@ -124,6 +124,15 @@ class ContextMatrix extends JTable {
         }
     }
 
+    public Component getTableCellRendererComponent(
+            JTable table, Object string,
+            boolean isSelected, boolean hasFocus,
+            int row, int column) {
+        Color newColor = new Color(200, 200, 255);
+        setBackground(newColor);
+        return this;
+    }
+
     @Override
     public Component prepareRenderer(TableCellRenderer renderer, int row,
                                      int column) {
@@ -133,6 +142,7 @@ class ContextMatrix extends JTable {
         // through.
         if (component instanceof JComponent) {
             ((JComponent)component).setOpaque(getSelectionModel().isSelectedIndex(row));
+            ((JComponent)component).setOpaque(false);
         }
         return component;
     }
@@ -182,7 +192,10 @@ class ContextMatrix extends JTable {
         protected void paintComponent(Graphics g) {
             paintBackground(g);
             paintStripedBackground(g);
+            paintVerticalHeaderBackground(g);
+            paintHorizontalHeaderBackground(g);
             paintGridLines(g);
+//            paintEmptyCorner(g);
             super.paintComponent(g);
         }
 
@@ -196,14 +209,51 @@ class ContextMatrix extends JTable {
             int rowHeight = fTable.getRowHeight();
             int tableWidth = fTable.getWidth();
             for (int j = 0; j < fTable.getRowCount(); j++) {
-                g.setColor(getRowColor(j));
+                g.setColor(j % 2 == 0 ? EVEN_ROW_COLOR : ODD_ROW_COLOR);
                 g.fillRect(0, j * rowHeight, tableWidth, rowHeight);
             }
         }
 
-        private Color getRowColor(int row) {
-            return row % 2 == 0 ? EVEN_ROW_COLOR : ODD_ROW_COLOR;
+        private void paintVerticalHeaderBackground(Graphics g) {
+            int tableHeight = fTable.getHeight();
+            int firstColumnWidth = fTable.getColumnModel().getColumn(0).getWidth();
+            int rowHeight = fTable.getRowHeight();
+            g.setColor(HEADER_COLOR);
+            g.fillRect(0, 0, firstColumnWidth, tableHeight);
+
+            g.setColor(new Color(255,255,255));
+            g.drawLine(firstColumnWidth - 2, rowHeight, firstColumnWidth - 2, tableHeight);
+            g.setColor(new Color(235,235,235));
+            g.drawLine(firstColumnWidth, rowHeight, firstColumnWidth, tableHeight);
+            for (int j = 0; j < fTable.getRowCount() + 1; j++) {
+                g.setColor(new Color(255,255,255));
+                g.drawLine(0, j * rowHeight - 1, firstColumnWidth - 1, j * rowHeight - 1);
+            }
         }
+
+        private void paintHorizontalHeaderBackground(Graphics g) {
+            int tableWidth = fTable.getWidth();
+            int firstRowHeight = fTable.getRowHeight();
+            int columnWidth = fTable.getColumnModel().getColumn(0).getWidth();
+            g.setColor(HEADER_COLOR);
+            g.fillRect(0, 0, tableWidth, firstRowHeight);
+
+            g.setColor(new Color(255, 255, 255));
+            g.drawLine(columnWidth, firstRowHeight - 1, tableWidth, firstRowHeight - 1);
+            g.setColor(new Color(235, 235, 235));
+            g.drawLine(columnWidth, firstRowHeight+1, tableWidth, firstRowHeight+1);
+            for (int j = 1; j < fTable.getColumnCount() + 1; j++) {
+                g.setColor(new Color(255,255,255));
+                g.drawLine(j * columnWidth - 2, 0, j * columnWidth - 2, firstRowHeight - 1);
+            }
+        }
+
+//        private void paintEmptyCorner(Graphics g) {
+//            int rowHeight = fTable.getRowHeight();
+//            int firstColumnWidth = fTable.getColumnModel().getColumn(0).getWidth();
+//            g.setColor(BACKGROUND_COLOR);
+//            g.fillRect(0, 1, firstColumnWidth - 1, rowHeight - 1);
+//        }
 
         private void paintGridLines(Graphics g) {
             int rowHeight = fTable.getRowHeight();
@@ -234,15 +284,13 @@ class ContextMatrix extends JTable {
 
 }
 
-class ContextTableModel extends AbstractTableModel {
+class ContextMatrixModel extends AbstractTableModel {
 
     private static final long serialVersionUID = -1509387655329719071L;
 
-    private static final String X = "X";
-
     private final FormalContext<String,String> context;
 
-    ContextTableModel(FormalContext<String,String> context) {
+    ContextMatrixModel(FormalContext<String, String> context) {
         this.context = context;
     }
 
@@ -271,7 +319,7 @@ class ContextTableModel extends AbstractTableModel {
         }
         return context.objectHasAttribute(
                 context.getObjectAtIndex(rowIndex - 1),
-                context.getAttributeAtIndex(columnIndex - 1)) ? X : "";
+                context.getAttributeAtIndex(columnIndex - 1)) ? "X" : "";
     }
 
 }
