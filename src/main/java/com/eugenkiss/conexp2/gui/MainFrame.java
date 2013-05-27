@@ -1,17 +1,13 @@
 package com.eugenkiss.conexp2.gui;
 
-import java.awt.BorderLayout;
+import com.eugenkiss.conexp2.ProgramState;
+
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-
-import javax.swing.AbstractAction;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JTabbedPane;
-import javax.swing.KeyStroke;
-
-import com.eugenkiss.conexp2.ProgramState;
 
 public class MainFrame extends JFrame {
 
@@ -33,6 +29,7 @@ public class MainFrame extends JFrame {
         tabPane = new JTabbedPane();
         tabPane.setTabPlacement(JTabbedPane.BOTTOM);
         tabPane.setOpaque(false);
+        tabPane.setBorder(new EmptyBorder(0,8,8,8));
         add(tabPane);
 
         contextView = new ContextView(state);

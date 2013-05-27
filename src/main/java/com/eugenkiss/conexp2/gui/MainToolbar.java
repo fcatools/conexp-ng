@@ -1,20 +1,14 @@
 package com.eugenkiss.conexp2.gui;
 
-import static com.eugenkiss.conexp2.gui.Util.centerDialogInsideMainFrame;
-import static com.eugenkiss.conexp2.gui.Util.createButton;
+import com.eugenkiss.conexp2.OS;
 
-import java.awt.Insets;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.Box;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JToolBar;
-
-import com.eugenkiss.conexp2.OS;
+import static com.eugenkiss.conexp2.gui.Util.centerDialogInsideMainFrame;
+import static com.eugenkiss.conexp2.gui.Util.createButton;
 
 public class MainToolbar extends JToolBar {
 
@@ -34,6 +28,7 @@ public class MainToolbar extends JToolBar {
     public MainToolbar(final JFrame mainFrame) {
         this.mainFrame = mainFrame;
         this.setFloatable(false);
+        this.setMargin(new Insets(getInsets().top + 2, getInsets().left + 3, getInsets().bottom - 3, getInsets().right + 4));
         if (OS.isMacOsX) {
             this.setMargin(new Insets(getInsets().top, getInsets().left + 2, getInsets().bottom, getInsets().right));
         }

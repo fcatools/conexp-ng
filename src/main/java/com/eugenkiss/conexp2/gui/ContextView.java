@@ -41,7 +41,7 @@ public class ContextView extends View {
         matrix = new ContextMatrix(matrixModel, panel.getBackground());
         JScrollPane scrollPane = ContextMatrix.createStripedJScrollPane(matrix, panel.getBackground());
         toolbar.setFloatable(false);
-        Border margin = new EmptyBorder(1, 1, 1, 4);
+        Border margin = new EmptyBorder(1, 3, 1, 4);
         Border border = BorderFactory.createMatteBorder(0, 0, 0, 1, Color.LIGHT_GRAY);
         Border border0 = BorderFactory.createMatteBorder(1, 1, 0, 0, new Color(220,220,220));
         scrollPane.setBorder(border0);
