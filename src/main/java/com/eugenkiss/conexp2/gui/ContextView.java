@@ -4,6 +4,8 @@ import com.eugenkiss.conexp2.ProgramState;
 import de.tudresden.inf.tcs.fcalib.FormalContext;
 
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.*;
 import java.awt.*;
@@ -39,7 +41,12 @@ public class ContextView extends View {
         matrix = new ContextMatrix(matrixModel, panel.getBackground());
         JScrollPane scrollPane = ContextMatrix.createStripedJScrollPane(matrix, panel.getBackground());
         toolbar.setFloatable(false);
-        toolbar.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 1, Color.LIGHT_GRAY));
+        Border margin = new EmptyBorder(1, 1, 1, 4);
+        Border border = BorderFactory.createMatteBorder(0, 0, 0, 1, Color.LIGHT_GRAY);
+        Border border0 = BorderFactory.createMatteBorder(1, 1, 0, 0, new Color(220,220,220));
+        scrollPane.setBorder(border0);
+//        toolbar.setBorder(new CompoundBorder(new CompoundBorder(margin, border), margin));
+        toolbar.setBorder(margin);
         panel.add(toolbar, BorderLayout.WEST);
         panel.add(scrollPane, BorderLayout.CENTER);
         setLayout(new BorderLayout());
@@ -260,14 +267,14 @@ class ContextMatrix extends JTable implements TableCellRenderer {
             int columnHeight = rowHeight * fTable.getColumnCount();
             g.setColor(TABLE_GRID_COLOR);
             int x = 0;
-            g.drawLine(x, g.getClipBounds().y, x, columnHeight);
+//            g.drawLine(x, g.getClipBounds().y, x, columnHeight);
             for (int i = 0; i < fTable.getColumnCount(); i++) {
                 TableColumn column = fTable.getColumnModel().getColumn(i);
                 x += column.getWidth();
                 g.drawLine(x - 1, g.getClipBounds().y, x - 1, columnHeight);
             }
             // x is now the table width
-            for (int j = 0; j < fTable.getRowCount() + 1; j++) {
+            for (int j = 1; j < fTable.getRowCount() + 1; j++) {
                 g.drawLine(0, j * rowHeight, x - 1, j * rowHeight);
             }
         }
