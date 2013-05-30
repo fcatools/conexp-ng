@@ -15,18 +15,34 @@ public class Edge {
         this.v = v;
     }
 
+    /**
+     * 
+     * @return
+     */
     public Node getU() {
         return u;
     }
 
+    /**
+     * 
+     * @param u
+     */
     public void setU(Node u) {
         this.u = u;
     }
 
+    /**
+     * 
+     * @return
+     */
     public Node getV() {
         return v;
     }
 
+    /**
+     * 
+     * @param v
+     */
     public void setV(Node v) {
         this.v = v;
     }

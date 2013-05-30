@@ -6,7 +6,7 @@ import java.util.Set;
 
 import de.tudresden.inf.tcs.fcalib.utils.ListSet;
 
-public class Node {
+public class Node{
 
     private List<String> objects;
     private List<String> attributes;
@@ -27,6 +27,9 @@ public class Node {
         this.y = y;
     }
 
+    /**
+     * 
+     */
     public Node(){
         this.objects = new ArrayList<>();
         this.attributes = new ArrayList<>();
@@ -34,26 +37,50 @@ public class Node {
         this.y = 0;
     }
 
+    /**
+     * 
+     * @return
+     */
     public int getX() {
         return x;
     }
 
+    /**
+     * 
+     * @param x
+     */
     public void setX(int x) {
         this.x = x;
     }
 
+    /**
+     * 
+     * @return
+     */
     public int getY() {
         return y;
     }
-
+    
+    /**
+     * 
+     * @param y
+     */
     public void setY(int y) {
         this.y = y;
     }
 
+    /**
+     * 
+     * @param s
+     */
     public void addObject(String s){
         objects.add(s);
     }
 
+    /**
+     * 
+     * @param s
+     */
     public void addAttribut(String s){
         attributes.add(s);
     }

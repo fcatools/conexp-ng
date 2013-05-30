@@ -1,15 +1,22 @@
 package com.eugenkiss.conexp2.draw;
 
-import java.util.Set;
+import com.eugenkiss.conexp2.model.FormalContext;
 
-import de.tudresden.inf.tcs.fcaapi.Concept;
-import de.tudresden.inf.tcs.fcalib.FormalContext;
-import de.tudresden.inf.tcs.fcalib.FullObject;
 
+/**
+ * 
+ * @author Jan
+ *
+ */
 public interface ILatticeAlgorithm {
 
 
-    public boolean init(FormalContext context);
+	/**
+	 * 
+	 * @param context
+	 * @return
+	 */
+    public LatticeGraph computeLatticeGraph(FormalContext context);
 
 
 }
