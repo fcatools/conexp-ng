@@ -16,7 +16,7 @@ import java.beans.PropertyChangeListener;
 
 import static com.eugenkiss.conexp2.gui.Util.createButton;
 
-public class ContextView extends View {
+public class ContextEditor extends View {
 
     private static final long serialVersionUID = 1660117627650529212L;
 
@@ -31,21 +31,19 @@ public class ContextView extends View {
     private final JButton reduceContextButton;
     private final JButton transposeContextButton;
 
-    public ContextView(final ProgramState state) {
+    public ContextEditor(final ProgramState state) {
         super(state);
 
+        // Initialize components
         panel = new JPanel();
         panel.setLayout(new BorderLayout());
-
         matrixModel = new ContextMatrixModel(state.context);
         matrix = new ContextMatrix(matrixModel, panel.getBackground());
-        JScrollPane scrollPane = ContextMatrix.createStripedJScrollPane(matrix, panel.getBackground());
-        toolbar.setFloatable(false);
         Border margin = new EmptyBorder(1, 3, 1, 4);
-        Border border = BorderFactory.createMatteBorder(0, 0, 0, 1, Color.LIGHT_GRAY);
-        Border border0 = BorderFactory.createMatteBorder(1, 1, 0, 0, new Color(220,220,220));
-        scrollPane.setBorder(border0);
-//        toolbar.setBorder(new CompoundBorder(new CompoundBorder(margin, border), margin));
+        Border border = BorderFactory.createMatteBorder(1, 1, 0, 0, new Color(220,220,220));
+        JScrollPane scrollPane = ContextMatrix.createStripedJScrollPane(matrix, panel.getBackground());
+        scrollPane.setBorder(border);
+        toolbar.setFloatable(false);
         toolbar.setBorder(margin);
         panel.add(toolbar, BorderLayout.WEST);
         panel.add(scrollPane, BorderLayout.CENTER);
@@ -86,8 +84,69 @@ public class ContextView extends View {
 
 }
 
-// inspired by http://explodingpixels.wordpress.com/2009/05/18/creating-a-better-jtable/
-class ContextMatrix extends JTable implements TableCellRenderer {
+
+/**
+ * ContextMatrixModel allows the separation between the data and its presentation in the JTable.
+ * Whenever the context is changed the changes are reflected (automatically) in the corresponding
+ * JTable. In particular, if the user changes the context through the context editor what really
+ * happens is that the context is changed (not the JTable per se) and the JTable is redrawn based
+ * on the updated context.
+ */
+class ContextMatrixModel extends AbstractTableModel {
+
+    private static final long serialVersionUID = -1509387655329719071L;
+
+    private final FormalContext<String,String> context;
+
+    ContextMatrixModel(FormalContext<String, String> context) {
+        this.context = context;
+    }
+
+    @Override
+    public int getRowCount() {
+        return context.getObjectCount() + 1;
+    }
+
+    @Override
+    public int getColumnCount() {
+        return context.getAttributeCount() + 1;
+    }
+
+    @Override
+    public Object getValueAt(int rowIndex, int columnIndex) {
+        if (columnIndex == 0 && rowIndex == 0) {
+            return "";
+        }
+        else if (columnIndex == 0) {
+            return String.format("<html><div style='margin:2px 4px'><b>%s</b></div></html>",
+                    context.getObjectAtIndex(rowIndex - 1).getIdentifier());
+        }
+        else if (rowIndex == 0) {
+            return String.format("<html><div style='margin:2px 4px'><b>%s</b></div></html>",
+                    context.getAttributeAtIndex(columnIndex - 1));
+        }
+        return context.objectHasAttribute(
+                context.getObjectAtIndex(rowIndex - 1),
+                context.getAttributeAtIndex(columnIndex - 1)) ? "X" : "";
+    }
+
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/**
+ * ContextMatrix is simply a customisation of JTable in order to make it look & behave more
+ * like a spreadsheet editor resp. ConExp's context editor. The code is intricate, a bit
+ * ugly and uses quite a few snippets from various sources from the internet (see below).
+ * That is just because of the way JTable is designed - it is not meant to be too flexible.
+ *
+ * Resources:
+ * http://explodingpixels.wordpress.com/2009/05/18/creating-a-better-jtable/
+ * http://stackoverflow.com/questions/14416188/jtable-how-to-get-selected-cells
+ * http://stackoverflow.com/questions/5044222/how-can-i-determine-which-cell-in-a-jtable-was-selected?rq=1
+*/
+class ContextMatrix extends JTable {
 
     private static final long serialVersionUID = -7474568014425724962L;
 
@@ -99,8 +158,8 @@ class ContextMatrix extends JTable implements TableCellRenderer {
 
     public ContextMatrix(TableModel dm, Color bg) {
         super(dm);
-        init();
         BACKGROUND_COLOR = bg;
+        init();
     }
 
     private void init() {
@@ -109,12 +168,23 @@ class ContextMatrix extends JTable implements TableCellRenderer {
         setOpaque(false);
         setGridColor(TABLE_GRID_COLOR);
         setIntercellSpacing(new Dimension(0, 0));
-        // turn off grid painting as we'll handle this manually in order to paint
-        // grid lines over the entire viewport.
+        setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        setCellSelectionEnabled(true);
         setShowGrid(false);
-        this.setDefaultRenderer(String.class, this);
-        this.getModel().addTableModelListener(this);
-        this.setRowSelectionAllowed(false);
+    }
+
+    private void alignCells() {
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
+        for (int i = 0; i < getColumnCount(); i++) {
+            getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+        }
+    }
+
+    // Disallow header cells to be selected
+    @Override
+    public boolean isCellSelected(int i, int j) {
+        return i != 0 && j != 0 && super.isCellSelected(i, j);
     }
 
     @Override
@@ -123,49 +193,30 @@ class ContextMatrix extends JTable implements TableCellRenderer {
         alignCells();
     }
 
-    private void alignCells() {
-        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
-        for (int i = 0; i < getColumnCount(); i++) {
-            getColumnModel().getColumn(i).setCellRenderer( centerRenderer );
-        }
-    }
-
-    public Component getTableCellRendererComponent(
-            JTable table, Object string,
-            boolean isSelected, boolean hasFocus,
-            int row, int column) {
-        Color newColor = new Color(200, 200, 255);
-        setBackground(newColor);
-        return this;
-    }
-
     @Override
     public Component prepareRenderer(TableCellRenderer renderer, int row,
                                      int column) {
         Component component = super.prepareRenderer(renderer, row, column);
-        // if the rendere is a JComponent and the given row isn't part of a
-        // selection, make the renderer non-opaque so that striped rows show
-        // through.
         if (component instanceof JComponent) {
-            ((JComponent)component).setOpaque(getSelectionModel().isSelectedIndex(row));
-            ((JComponent)component).setOpaque(false);
+            ((JComponent)component).setOpaque(isCellSelected(row, column));
         }
         return component;
     }
 
-    // Stripe painting Viewport. //////////////////////////////////////////////
+    public static JScrollPane createStripedJScrollPane(JTable table, Color bg) {
+        JScrollPane scrollPane =  new JScrollPane(table);
+        scrollPane.setViewport(new StripedViewport(table, bg));
+        scrollPane.getViewport().setView(table);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        return scrollPane;
+    }
 
-    /**
-     * Creates a JViewport that draws a striped backgroud corresponding to the
-     * row positions of the given JTable.
-     */
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     private static class StripedViewport extends JViewport {
 
         private static final long serialVersionUID = 171992496170114834L;
 
-        Color BACKGROUND_COLOR = Color.LIGHT_GRAY;
-
+        private final Color BACKGROUND_COLOR;
         private final JTable fTable;
 
         public StripedViewport(JTable table, Color bg) {
@@ -177,10 +228,6 @@ class ContextMatrix extends JTable implements TableCellRenderer {
         }
 
         private void initListeners() {
-            // install a listener to cause the whole table to repaint when
-            // a column is resized. we do this because the extended grid
-            // lines may need to be repainted. this could be cleaned up,
-            // but for now, it works fine.
             PropertyChangeListener listener = createTableColumnWidthListener();
             for (int i=0; i<fTable.getColumnModel().getColumnCount(); i++) {
                 fTable.getColumnModel().getColumn(i).addPropertyChangeListener(listener);
@@ -202,7 +249,6 @@ class ContextMatrix extends JTable implements TableCellRenderer {
             paintVerticalHeaderBackground(g);
             paintHorizontalHeaderBackground(g);
             paintGridLines(g);
-//            paintEmptyCorner(g);
             super.paintComponent(g);
         }
 
@@ -255,78 +301,22 @@ class ContextMatrix extends JTable implements TableCellRenderer {
             }
         }
 
-//        private void paintEmptyCorner(Graphics g) {
-//            int rowHeight = fTable.getRowHeight();
-//            int firstColumnWidth = fTable.getColumnModel().getColumn(0).getWidth();
-//            g.setColor(BACKGROUND_COLOR);
-//            g.fillRect(0, 1, firstColumnWidth - 1, rowHeight - 1);
-//        }
-
         private void paintGridLines(Graphics g) {
+            int tableWidth = fTable.getWidth();
             int rowHeight = fTable.getRowHeight();
             int columnHeight = rowHeight * fTable.getColumnCount();
             g.setColor(TABLE_GRID_COLOR);
             int x = 0;
-//            g.drawLine(x, g.getClipBounds().y, x, columnHeight);
             for (int i = 0; i < fTable.getColumnCount(); i++) {
                 TableColumn column = fTable.getColumnModel().getColumn(i);
                 x += column.getWidth();
                 g.drawLine(x - 1, g.getClipBounds().y, x - 1, columnHeight);
             }
-            // x is now the table width
             for (int j = 1; j < fTable.getRowCount() + 1; j++) {
-                g.drawLine(0, j * rowHeight, x - 1, j * rowHeight);
+                g.drawLine(0, j * rowHeight, tableWidth - 1, j * rowHeight);
             }
         }
 
-    }
-
-    public static JScrollPane createStripedJScrollPane(JTable table, Color bg) {
-        JScrollPane scrollPane =  new JScrollPane(table);
-        scrollPane.setViewport(new StripedViewport(table, bg));
-        scrollPane.getViewport().setView(table);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder());
-        return scrollPane;
-    }
-
-}
-
-class ContextMatrixModel extends AbstractTableModel {
-
-    private static final long serialVersionUID = -1509387655329719071L;
-
-    private final FormalContext<String,String> context;
-
-    ContextMatrixModel(FormalContext<String, String> context) {
-        this.context = context;
-    }
-
-    @Override
-    public int getRowCount() {
-        return context.getObjectCount() + 1;
-    }
-
-    @Override
-    public int getColumnCount() {
-        return context.getAttributeCount() + 1;
-    }
-
-    @Override
-    public Object getValueAt(int rowIndex, int columnIndex) {
-        if (columnIndex == 0 && rowIndex == 0) {
-            return "";
-        }
-        else if (columnIndex == 0) {
-            return String.format("<html><div style='margin:2px 4px'><b>%s</b></div></html>",
-                    context.getObjectAtIndex(rowIndex - 1).getIdentifier());
-        }
-        else if (rowIndex == 0) {
-            return String.format("<html><div style='margin:2px 4px'><b>%s</b></div></html>",
-                    context.getAttributeAtIndex(columnIndex - 1));
-        }
-        return context.objectHasAttribute(
-                context.getObjectAtIndex(rowIndex - 1),
-                context.getAttributeAtIndex(columnIndex - 1)) ? "X" : "";
     }
 
 }

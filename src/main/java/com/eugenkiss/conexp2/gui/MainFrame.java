@@ -32,7 +32,7 @@ public class MainFrame extends JFrame {
         tabPane.setBorder(new EmptyBorder(0,8,8,8));
         add(tabPane);
 
-        contextView = new ContextView(state);
+        contextView = new ContextEditor(state);
         latticeView = new LatticeView(state);
         associationView = new AssociationView(state);
         implicationView = new ImplicationView(state);
