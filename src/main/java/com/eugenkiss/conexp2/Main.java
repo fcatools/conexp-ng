@@ -7,6 +7,7 @@ import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
 import de.tudresden.inf.tcs.fcalib.FullObject;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -25,6 +26,9 @@ public class Main {
 
 
     public static void main(String... args) {
+        // Disable border around focused cells as it does not work with the context editor concept
+        UIManager.put("Table.focusCellHighlightBorder", new EmptyBorder(0,0,0,0));
+
         ProgramState testState = new ProgramState();
         testState.filePath = "../example.cex";
         testState.context = new FormalContext();
