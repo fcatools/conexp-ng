@@ -1,14 +1,18 @@
 package com.eugenkiss.conexp2.draw;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
-import de.tudresden.inf.tcs.fcalib.utils.ListSet;
+import javax.swing.JPanel;
 
-public class Node{
+public class Node extends JPanel{
 
-    private List<String> objects;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 4253192979583459657L;
+	private List<String> objects;
     private List<String> attributes;
     private int x;
     private int y;
@@ -25,6 +29,9 @@ public class Node{
         this.attributes = attributes;
         this.x = x;
         this.y = y;
+        this.setBounds(x, y, 10, 10);
+        this.setBackground(Color.RED);
+
     }
 
     /**
@@ -35,6 +42,8 @@ public class Node{
         this.attributes = new ArrayList<>();
         this.x = 0;
         this.y = 0;
+        this.setBounds(x, y, 10, 10);
+        this.setBackground(Color.RED);
     }
 
     /**
