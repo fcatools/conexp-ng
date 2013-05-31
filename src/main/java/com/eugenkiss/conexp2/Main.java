@@ -26,8 +26,10 @@ public class Main {
 
 
     public static void main(String... args) {
-        // Disable border around focused cells as it does not work with the context editor concept
+        // Disable border around focused cells as it does not fit into the context editor concept
         UIManager.put("Table.focusCellHighlightBorder", new EmptyBorder(0,0,0,0));
+        // Disable changing foreground color of cells as it does not fit into the context editor concept
+        UIManager.put("Table.focusCellForeground", Color.black);
 
         ProgramState testState = new ProgramState();
         testState.filePath = "../example.cex";
