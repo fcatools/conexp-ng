@@ -1,10 +1,9 @@
 package com.eugenkiss.conexp2.gui;
 
-import java.awt.Graphics;
-
 import org.apache.batik.swing.JSVGCanvas;
 
 import com.eugenkiss.conexp2.draw.LatticeGraph;
+import com.eugenkiss.conexp2.draw.LatticeGraphNodeMouseListener;
 import com.eugenkiss.conexp2.draw.Node;
 
 
@@ -18,18 +17,16 @@ public class LatticeGraphView extends JSVGCanvas{
 	private static final long serialVersionUID = -8623872314193862285L;
 	private LatticeGraph graph;
 	
-
 	public LatticeGraphView(LatticeGraph graph){
 		this.graph = graph;
 		for(Node n : graph.getNodes()){
 			this.add(n);
+			n.addMouseListener(new LatticeGraphNodeMouseListener(n));
 		}
-		
+
 	}
 	
-	@Override
-	public void paintComponents(Graphics g) {
-		// TODO Auto-generated method stub
-		super.paintComponents(g);
+	public void exportLatticeAsSVG(){
+		
 	}
 }

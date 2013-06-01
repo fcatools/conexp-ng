@@ -4,9 +4,9 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.JPanel;
+import org.apache.batik.swing.JSVGCanvas;
 
-public class Node extends JPanel{
+public class Node extends JSVGCanvas{
 
 	/**
 	 * 
@@ -93,5 +93,14 @@ public class Node extends JPanel{
     public void addAttribut(String s){
         attributes.add(s);
     }
+
+	public void update(int x, int y) {
+		int updateX = this.x - x;
+		int updateY = this.y - y;
+		this.setBounds(updateX, updateY, 10, 10);
+		this.x = updateX;
+		this.y = updateY;
+		
+	}
 
 }
