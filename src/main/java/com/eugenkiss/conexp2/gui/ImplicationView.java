@@ -18,7 +18,7 @@ public class ImplicationView extends View {
 
     private static final long serialVersionUID = -6377834669097012170L;
 
-    private JTextPane area = new JTextPane();
+    private JTextPane textpane = new JTextPane();
 
     private Set<FCAImplication<String>> implications;
 
@@ -42,7 +42,7 @@ public class ImplicationView extends View {
         attrs[ZERO_SUPPORT_STYLE] = new SimpleAttributeSet();
         StyleConstants.setForeground(attrs[ZERO_SUPPORT_STYLE], Color.red);
 
-        view = new JScrollPane(area);
+        view = new JScrollPane(textpane);
         setLayout(new BorderLayout());
         panel = new JPanel();
         panel.setLayout(new BorderLayout());
@@ -53,15 +53,12 @@ public class ImplicationView extends View {
         panel.add(view, BorderLayout.CENTER);
         add(panel);
 
-
         updateImplications();
-        writeImplications();
     }
 
     private void writeImplications() {
         int i = 1, support = 0;
         StringBuffer buf;
-        System.out.println(implications);
         for (FCAImplication<String> impl : implications) {
             support = state.context.supportCount(impl.getPremise());
             buf = new StringBuffer();
@@ -72,7 +69,7 @@ public class ImplicationView extends View {
             buf.append(EOL);
             i++;
             try {
-                area.getDocument().insertString(area.getDocument().getLength(),
+                textpane.getDocument().insertString(textpane.getDocument().getLength(),
                         buf.toString(), implicationStyle(support));
             } catch (BadLocationException e) {
                 // TODO Auto-generated catch block
@@ -88,8 +85,10 @@ public class ImplicationView extends View {
                 : attrs[NON_ZERO_SUPPORT_STYLE];
     }
 
-    private void updateImplications() {
+    public void updateImplications() {
+        textpane.setText("");
         implications = state.context.getStemBase();
+        writeImplications();
     }
 
 }

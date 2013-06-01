@@ -13,11 +13,6 @@ public class MainFrame extends JFrame {
 
     private static final long serialVersionUID = -3768163989667340886L;
 
-    // GUI state
-    // maybe move to ProgramState -> e.g. for the global action save
-    // or for what is that?
-    private boolean unsavedChanges = false;
-
     // Components
     private JTabbedPane tabPane;
     private View contextView;
@@ -29,7 +24,7 @@ public class MainFrame extends JFrame {
         tabPane = new JTabbedPane();
         tabPane.setTabPlacement(JTabbedPane.BOTTOM);
         tabPane.setOpaque(false);
-        tabPane.setBorder(new EmptyBorder(0,8,8,8));
+        tabPane.setBorder(new EmptyBorder(0, 8, 8, 8));
         add(tabPane);
 
         contextView = new ContextEditor(state);
@@ -52,17 +47,8 @@ public class MainFrame extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
-    public boolean isUnsavedChanges() {
-        return unsavedChanges;
-    }
-
-    public void setUnsavedChanges(boolean unsavedChanges) {
-        this.unsavedChanges = unsavedChanges;
-    }
-
-    // Why static?
-    private static void addTab(JTabbedPane t, View v, String title,
-            String toolTip, int i) {
+    private void addTab(JTabbedPane t, View v, String title, String toolTip,
+            int i) {
         t.insertTab("<html><body width='110' style='text-align:center'>"
                 + title + "</body></html>", null, v, toolTip, i);
         KeyStroke shortcut = null;
@@ -94,7 +80,7 @@ public class MainFrame extends JFrame {
     }
 
     @SuppressWarnings("serial")
-    private static class SwitchTab extends AbstractAction {
+    private class SwitchTab extends AbstractAction {
 
         private int tabnr;
         private JTabbedPane tabPane;

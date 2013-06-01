@@ -1,35 +1,46 @@
 package com.eugenkiss.conexp2.model;
 
-public abstract class AssociationRule {
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
-    private String premisse;
-    private String consequent;
+public class AssociationRule {
+
+    private SortedSet<String> premise;
+    private SortedSet<String> consequent;
     private double sup;
     private double conf;
 
-    public AssociationRule(String premisse, String consequent, double sup,
-            double conf) {
-        super();
-        this.premisse = premisse;
-        this.consequent = consequent;
+    public AssociationRule() {
+        premise = new TreeSet<>();
+        consequent = new TreeSet<>();
+    }
+
+    public AssociationRule(Set<String> premise, Set<String> consequent,
+            double sup, double conf) {
+        this();
+        this.premise.addAll(premise);
+        this.consequent.addAll(consequent);
         this.sup = sup;
         this.conf = conf;
     }
 
-    public String getPremisse() {
-        return premisse;
+    public Set<String> getPremise() {
+        return premise;
     }
 
-    public void setPremisse(String premisse) {
-        this.premisse = premisse;
+    public void setPremise(Set<String> premise) {
+        this.premise.clear();
+        this.premise.addAll(premise);
     }
 
-    public String getConsequent() {
+    public Set<String> getConsequent() {
         return consequent;
     }
 
-    public void setConsequent(String consequent) {
-        this.consequent = consequent;
+    public void setConsequent(Set<String> consequent) {
+        this.consequent.clear();
+        this.consequent.addAll(consequent);
     }
 
     public double getSup() {
@@ -46,6 +57,15 @@ public abstract class AssociationRule {
 
     public void setConf(double conf) {
         this.conf = conf;
+    }
+
+    public boolean equals(AssociationRule ass) {
+        return premise.equals(ass.getPremise())
+                && consequent.equals(ass.getConsequent());
+    }
+
+    public String toString() {
+        return premise + " -> " + consequent;
     }
 
 }
