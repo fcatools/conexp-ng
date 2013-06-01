@@ -181,7 +181,7 @@ public class ContextEditor extends View {
         // ------------------------
         addMenuItem(objectCellPopupMenu, "Rename", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                // TODO
+                matrix.editCellAt(lastClickedRow, lastClickedColumn);
             }
         });
         addMenuItem(objectCellPopupMenu, "Remove", new ActionListener() {
@@ -215,7 +215,7 @@ public class ContextEditor extends View {
         // ---------------------------
         addMenuItem(attributeCellPopupMenu, "Rename", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                // TODO
+                matrix.editCellAt(lastClickedRow, lastClickedColumn);
             }
         });
         addMenuItem(attributeCellPopupMenu, "Remove", new ActionListener() {
