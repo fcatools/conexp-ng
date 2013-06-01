@@ -19,24 +19,22 @@ import java.beans.PropertyChangeListener;
 
 import static com.eugenkiss.conexp2.gui.Util.createButton;
 
+/**
+ * The class responsible for displaying and interacting with ConExpNG's context editor.
+ * The main component of this view is a customised JTable, that is more akin to a spreadsheet
+ * editor, serving as our context editor. To this end, there are several additional classes
+ * in this file.
+ */
 public class ContextEditor extends View {
 
     private static final long serialVersionUID = 1660117627650529212L;
 
+    // Our JTable customisation and its respective data model
     private final ContextMatrix matrix;
     private final ContextMatrixModel matrixModel;
-    private final JButton addObjectButton;
-    private final JButton clarifyObjectsButton;
-    private final JButton reduceObjectsButton;
-    private final JButton addAttributeButton;
-    private final JButton clarifyAttributesButton;
-    private final JButton reduceAttributesButton;
-    private final JButton reduceContextButton;
-    private final JButton transposeContextButton;
-    private final JPopupMenu cellPopupMenu;
-    private final JPopupMenu objectCellPopupMenu;
-    private final JPopupMenu attributeCellPopupMenu;
 
+    // For remembering which header cell has been right-clicked
+    // Due to unfortunate implications of our JTable customisation we need to rely on this "hack"
     int lastClickedRow;
     int lastClickedColumn;
 
@@ -44,9 +42,6 @@ public class ContextEditor extends View {
         super(state);
 
         // Initialize various components
-        cellPopupMenu = new JPopupMenu();
-        objectCellPopupMenu = new JPopupMenu();
-        attributeCellPopupMenu = new JPopupMenu();
         panel = new JPanel();
         panel.setLayout(new BorderLayout());
         matrixModel = new ContextMatrixModel(state.context);
@@ -62,38 +57,192 @@ public class ContextEditor extends View {
         setLayout(new BorderLayout());
         add(panel);
 
+        // Add actions
+        createButtonActions();
+        createContextMenuActions();
+
+        // Force an update of the table to display it correctly
+        matrixModel.fireTableStructureChanged();
+    }
+
+    private void createButtonActions() {
         // Add buttons
-        addObjectButton = createButton("Add Object", "addObject", "conexp/addObj.gif");
+        JButton addObjectButton = createButton("Add Object", "addObject", "conexp/addObj.gif");
         toolbar.add(addObjectButton);
-        clarifyObjectsButton = createButton("Clarify Objects", "clarifyObjects", "conexp/clarifyObj.gif");
+        JButton clarifyObjectsButton = createButton("Clarify Objects", "clarifyObjects", "conexp/clarifyObj.gif");
         toolbar.add(clarifyObjectsButton);
-        reduceObjectsButton = createButton("Reduce Objects", "reduceObjects", "conexp/reduceObj.gif");
+        JButton reduceObjectsButton = createButton("Reduce Objects", "reduceObjects", "conexp/reduceObj.gif");
         toolbar.add(reduceObjectsButton);
         toolbar.addSeparator();
-        addAttributeButton = createButton("Add Attribute", "addAttribute", "conexp/addAttr.gif");
+        JButton addAttributeButton = createButton("Add Attribute", "addAttribute", "conexp/addAttr.gif");
         toolbar.add(addAttributeButton);
-        clarifyAttributesButton = createButton("Clarify Attributes", "clarifyAttributes", "conexp/clarifyAttr.gif");
+        JButton clarifyAttributesButton = createButton("Clarify Attributes", "clarifyAttributes", "conexp/clarifyAttr.gif");
         toolbar.add(clarifyAttributesButton);
-        reduceAttributesButton = createButton("Reduce Attributes", "reduceAttributes", "conexp/reduceAttr.gif");
+        JButton reduceAttributesButton = createButton("Reduce Attributes", "reduceAttributes", "conexp/reduceAttr.gif");
         toolbar.add(reduceAttributesButton);
         toolbar.addSeparator();
-        reduceContextButton = createButton("Reduce Context", "reduceContext", "conexp/reduceCxt.gif");
+        JButton reduceContextButton = createButton("Reduce Context", "reduceContext", "conexp/reduceCxt.gif");
         toolbar.add(reduceContextButton);
-        transposeContextButton = createButton("Transpose Context", "transposeContext", "conexp/transpose.gif");
+        JButton transposeContextButton = createButton("Transpose Context", "transposeContext", "conexp/transpose.gif");
         toolbar.add(transposeContextButton);
 
-
-        //// Add actions
-
-        // Button actions
+        // Add actions
         transposeContextButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 state.context.transpose();
                 matrixModel.fireTableDataChanged();
             }
         });
+    }
 
-        // Mouse actions
+    private void createContextMenuActions() {
+        final JPopupMenu cellPopupMenu = new JPopupMenu();
+        final JPopupMenu objectCellPopupMenu = new JPopupMenu();
+        final JPopupMenu attributeCellPopupMenu = new JPopupMenu();
+
+        // ------------------------
+        // Inner cells context menu
+        // ------------------------
+        addMenuItem(cellPopupMenu, "Cut", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // TODO
+            }
+        });
+        addMenuItem(cellPopupMenu, "Copy", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // TODO
+            }
+        });
+        addMenuItem(cellPopupMenu, "Paste", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // TODO
+            }
+        });
+        addMenuItem(cellPopupMenu, "Select all", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                matrix.selectAll();
+            }
+        });
+        //--------
+        cellPopupMenu.add(new JPopupMenu.Separator());
+        //--------
+        addMenuItem(cellPopupMenu, "Fill", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                int i1 = matrix.getSelectedRow() - 1;
+                int i2 = i1 + matrix.getSelectedRowCount();
+                int j1 = matrix.getSelectedColumn() - 1;
+                int j2 = j1 + matrix.getSelectedColumnCount();
+                matrix.saveSelectedInterval();
+                state.context.fill(i1, i2, j1, j2);
+                matrixModel.fireTableDataChanged();
+                matrix.restoreSelectedInterval();
+            }
+        });
+        addMenuItem(cellPopupMenu, "Clear", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                int i1 = matrix.getSelectedRow() - 1;
+                int i2 = i1 + matrix.getSelectedRowCount();
+                int j1 = matrix.getSelectedColumn() - 1;
+                int j2 = j1 + matrix.getSelectedColumnCount();
+                matrix.saveSelectedInterval();
+                state.context.clear(i1, i2, j1, j2);
+                matrixModel.fireTableDataChanged();
+                matrix.restoreSelectedInterval();
+            }
+        });
+        addMenuItem(cellPopupMenu, "Invert", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                int i1 = matrix.getSelectedRow() - 1;
+                int i2 = i1 + matrix.getSelectedRowCount();
+                int j1 = matrix.getSelectedColumn() - 1;
+                int j2 = j1 + matrix.getSelectedColumnCount();
+                matrix.saveSelectedInterval();
+                state.context.invert(i1, i2, j1, j2);
+                matrixModel.fireTableDataChanged();
+                matrix.restoreSelectedInterval();
+            }
+        });
+        //--------
+        cellPopupMenu.add(new JPopupMenu.Separator());
+        //--------
+        addMenuItem(cellPopupMenu, "Remove attribute(s)", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // TODO
+            }
+        });
+        addMenuItem(cellPopupMenu, "Remove object(s)", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // TODO
+            }
+        });
+
+        // ------------------------
+        // Object cell context menu
+        // ------------------------
+        addMenuItem(objectCellPopupMenu, "Rename", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // TODO
+            }
+        });
+        addMenuItem(objectCellPopupMenu, "Remove", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    state.context.removeObject(state.context.getObjectAtIndex(lastClickedRow-1).getIdentifier());
+                } catch (IllegalObjectException e1) {
+                    e1.printStackTrace();
+                }
+                matrixModel.fireTableStructureChanged();
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        matrix.updateUI();
+                    }
+                });
+            }
+        });
+        addMenuItem(objectCellPopupMenu, "Add above", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // TODO
+            }
+        });
+        addMenuItem(objectCellPopupMenu, "Add below", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // TODO
+            }
+        });
+
+        // ---------------------------
+        // Attribute cell context menu
+        // ---------------------------
+        addMenuItem(attributeCellPopupMenu, "Rename", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // TODO
+            }
+        });
+        addMenuItem(attributeCellPopupMenu, "Remove", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                state.context.removeAttribute(state.context.getAttributeAtIndex(lastClickedColumn-1));
+                matrixModel.fireTableStructureChanged();
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        matrix.updateUI();
+                    }
+                });
+            }
+        });
+        addMenuItem(attributeCellPopupMenu, "Add left", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // TODO
+            }
+        });
+        addMenuItem(attributeCellPopupMenu, "Add right", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // TODO
+            }
+        });
+
+        // ========================
+        // Add right-click behavior
+        // ========================
         matrix.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 int i = matrix.getSelectedRow();
@@ -136,196 +285,18 @@ public class ContextEditor extends View {
                 mousePressed(e);
             }
         });
+    }
 
-        //// Context menu actions
-        JMenuItem menuItem;
-
-        // Inner cells context menu
-        menuItem = new JMenuItem("Cut");
-        cellPopupMenu.add(menuItem);
-        menuItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // TODO
-            }
-        });
-        menuItem = new JMenuItem("Copy");
-        cellPopupMenu.add(menuItem);
-        menuItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // TODO
-            }
-        });
-        menuItem = new JMenuItem("Paste");
-        cellPopupMenu.add(menuItem);
-        menuItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // TODO
-            }
-        });
-        menuItem = new JMenuItem("Select all");
-        cellPopupMenu.add(menuItem);
-        menuItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                matrix.selectAll();
-            }
-        });
-        cellPopupMenu.add(new JPopupMenu.Separator()); //
-        menuItem = new JMenuItem("Fill");
-        cellPopupMenu.add(menuItem);
-        menuItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                int i1 = matrix.getSelectedRow() - 1;
-                int i2 = i1 + matrix.getSelectedRowCount();
-                int j1 = matrix.getSelectedColumn() - 1;
-                int j2 = j1 + matrix.getSelectedColumnCount();
-                matrix.saveSelectedInterval();
-                state.context.fill(i1, i2, j1, j2);
-                matrixModel.fireTableDataChanged();
-                matrix.restoreSelectedInterval();
-            }
-        });
-        menuItem = new JMenuItem("Clear");
-        cellPopupMenu.add(menuItem);
-        menuItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                int i1 = matrix.getSelectedRow() - 1;
-                int i2 = i1 + matrix.getSelectedRowCount();
-                int j1 = matrix.getSelectedColumn() - 1;
-                int j2 = j1 + matrix.getSelectedColumnCount();
-                matrix.saveSelectedInterval();
-                state.context.clear(i1, i2, j1, j2);
-                matrixModel.fireTableDataChanged();
-                matrix.restoreSelectedInterval();
-            }
-        });
-        menuItem = new JMenuItem("Invert");
-        cellPopupMenu.add(menuItem);
-        menuItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                int i1 = matrix.getSelectedRow() - 1;
-                int i2 = i1 + matrix.getSelectedRowCount();
-                int j1 = matrix.getSelectedColumn() - 1;
-                int j2 = j1 + matrix.getSelectedColumnCount();
-                matrix.saveSelectedInterval();
-                state.context.invert(i1, i2, j1, j2);
-                matrixModel.fireTableDataChanged();
-                matrix.restoreSelectedInterval();
-            }
-        });
-        cellPopupMenu.add(new JPopupMenu.Separator()); //
-        menuItem = new JMenuItem("Remove attribute(s)");
-        cellPopupMenu.add(menuItem);
-        menuItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-            }
-        });
-        menuItem = new JMenuItem("Remove object(s)");
-        cellPopupMenu.add(menuItem);
-        menuItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-            }
-        });
-
-        // Object cell context menu
-        menuItem = new JMenuItem("Rename");
-        objectCellPopupMenu.add(menuItem);
-        menuItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // TODO
-            }
-        });
-        menuItem = new JMenuItem("Remove");
-        objectCellPopupMenu.add(menuItem);
-        menuItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    state.context.removeObject(state.context.getObjectAtIndex(lastClickedRow-1).getIdentifier());
-                } catch (IllegalObjectException e1) {
-                    e1.printStackTrace();
-                }
-                matrixModel.fireTableStructureChanged();
-                SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        matrix.updateUI();
-                    }
-                });
-            }
-        });
-        menuItem = new JMenuItem("Add above");
-        objectCellPopupMenu.add(menuItem);
-        menuItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // TODO
-            }
-        });
-        menuItem = new JMenuItem("Add below");
-        objectCellPopupMenu.add(menuItem);
-        menuItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // TODO
-            }
-        });
-
-        // Attribute cell context menu
-        menuItem = new JMenuItem("Rename");
-        attributeCellPopupMenu.add(menuItem);
-        menuItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // TODO
-            }
-        });
-        menuItem = new JMenuItem("Remove");
-        attributeCellPopupMenu.add(menuItem);
-        menuItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                state.context.removeAttribute(state.context.getAttributeAtIndex(lastClickedColumn-1));
-                matrixModel.fireTableStructureChanged();
-                SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        matrix.updateUI();
-                    }
-                });
-            }
-        });
-        menuItem = new JMenuItem("Add left");
-        attributeCellPopupMenu.add(menuItem);
-        menuItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // TODO
-            }
-        });
-        menuItem = new JMenuItem("Add right");
-        attributeCellPopupMenu.add(menuItem);
-        menuItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // TODO
-            }
-        });
-
-        // Force an update of the table
-        matrixModel.fireTableStructureChanged();
-
+    private static void addMenuItem(JPopupMenu menu, String name, ActionListener action) {
+        JMenuItem item = new JMenuItem(name);
+        menu.add(item);
+        item.addActionListener(action);
     }
 
 }
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
  * ContextMatrixModel allows the separation between the data and its presentation in the JTable.
@@ -422,6 +393,7 @@ class ContextMatrixModel extends AbstractTableModel {
  * http://explodingpixels.wordpress.com/2009/05/18/creating-a-better-jtable/
  * http://stackoverflow.com/questions/14416188/jtable-how-to-get-selected-cells
  * http://stackoverflow.com/questions/5044222/how-can-i-determine-which-cell-in-a-jtable-was-selected?rq=1
+ * http://tonyobryan.com/index.php?article=57
 */
 class ContextMatrix extends JTable {
 
@@ -431,8 +403,13 @@ class ContextMatrix extends JTable {
     private static final Color EVEN_ROW_COLOR = new Color(252, 252, 252);
     private static final Color ODD_ROW_COLOR = new Color(255, 255, 255);
     private static final Color TABLE_GRID_COLOR = new Color(0xd9d9d9);
-    Color BACKGROUND_COLOR = Color.LIGHT_GRAY;
 
+    // Needed as otherwise there is a weird white area below the editor
+    // We just paint the editor background in the background color of the containing element
+    Color BACKGROUND_COLOR = Color.LIGHT_GRAY;
+    // For enabling renaming of objects/attributes
+    TableCellEditor editor;
+    // For preventing a selection to disappear after an operation like "invert"
     int lastSelectedRowsStartIndex;
     int lastSelectedRowsEndIndex;
     int lastSelectedColumnsStartIndex;
@@ -453,18 +430,9 @@ class ContextMatrix extends JTable {
         setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         setCellSelectionEnabled(true);
         setShowGrid(false);
-    }
 
-    private void alignCells() {
-        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
-        for (int i = 0; i < getColumnCount(); i++) {
-            getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
-        }
-    }
-
-    private void makeHeaderCellsEditable() {
-        TableCellEditor editor = new DefaultCellEditor(new JTextField()) {
+        // Create custom TableCellEditor
+        editor = new DefaultCellEditor(new JTextField()) {
             int lastRow = 0;
             int lastColumn = 0;
             String lastName;
@@ -487,11 +455,10 @@ class ContextMatrix extends JTable {
                 lastRow = row;
                 return f;
             }
+
             @Override
             public Object getCellEditorValue() {
                 String newName = super.getCellEditorValue().toString();
-                System.out.printf("cell editor value: %s%n", super.getCellEditorValue());
-                System.out.printf("lastname(%s) newname(%s)%n", lastName,newName);
                 if (lastColumn == 0) {
                     boolean success = model.renameObject(lastName, newName);
                     if (!success) {
@@ -506,11 +473,31 @@ class ContextMatrix extends JTable {
                 return super.getCellEditorValue();
             }
         };
+    }
+
+    // For centering text inside cells
+    private void alignCells() {
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
+        for (int i = 0; i < getColumnCount(); i++) {
+            getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+        }
+    }
+
+    // For renaming of objects/attributes
+    private void makeHeaderCellsEditable() {
         for (int i = 0; i < getColumnCount(); i++) {
             getColumnModel().getColumn(i).setCellEditor(editor);
         }
     }
 
+    // For allowing a programmatical cell selection (i.e. not only through mouse/keyboard events)
+    public void setSelectedCell(int row, int column) {
+        setRowSelectionInterval(row, row);
+        setColumnSelectionInterval(column, column);
+    }
+
+    // For preventing a selection to disappear after an operation like "invert"
     public void saveSelectedInterval() {
         lastSelectedRowsStartIndex = getSelectedRow();
         lastSelectedRowsEndIndex = getSelectedRowCount()-1 + lastSelectedRowsStartIndex;
@@ -518,28 +505,26 @@ class ContextMatrix extends JTable {
         lastSelectedColumnsEndIndex = getSelectedColumnCount()-1 + lastSelectedColumnsStartIndex;
     }
 
+    // For preventing a selection to disappear after an operation like "invert"
     public void restoreSelectedInterval() {
         setRowSelectionInterval(lastSelectedRowsStartIndex, lastSelectedRowsEndIndex);
         setColumnSelectionInterval(lastSelectedColumnsStartIndex, lastSelectedColumnsEndIndex);
     }
 
-    public void setSelectedCell(int row, int column) {
-        setRowSelectionInterval(row, row);
-        setColumnSelectionInterval(column, column);
-    }
-
+    // Overrided as header cells should *not* be selected when selecting all cells
     @Override
     public void selectAll() {
         setRowSelectionInterval(1, getRowCount()-1);
         setColumnSelectionInterval(1, getColumnCount()-1);
     }
 
-    // Disallow header cells to be selected
+    // Overrided as header cells should *not* be selectable through mouse clicks / keyboard events
     @Override
     public boolean isCellSelected(int i, int j) {
         return i != 0 && j != 0 && super.isCellSelected(i, j);
     }
 
+    // For correct rendering of table after data changes
     @Override
     public void tableChanged(TableModelEvent e) {
         super.tableChanged(e);
@@ -547,6 +532,7 @@ class ContextMatrix extends JTable {
         makeHeaderCellsEditable();
     }
 
+    // For correct painting of table when selecting something
     @Override
     public Component prepareRenderer(TableCellRenderer renderer, int row,
                                      int column) {
@@ -557,6 +543,7 @@ class ContextMatrix extends JTable {
         return component;
     }
 
+    // Create our custom viewport into which our custom JTable will be inserted
     public static JScrollPane createStripedJScrollPane(JTable table, Color bg) {
         JScrollPane scrollPane =  new JScrollPane(table);
         scrollPane.setViewport(new StripedViewport(table, bg));
@@ -566,10 +553,14 @@ class ContextMatrix extends JTable {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Custom viewport that makes the table look nice
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     private static class StripedViewport extends JViewport {
 
         private static final long serialVersionUID = 171992496170114834L;
 
+        // Needed as otherwise there is a weird white area below the editor
+        // We just paint the editor background in the background color of the containing element
         private final Color BACKGROUND_COLOR;
         private final JTable fTable;
 
