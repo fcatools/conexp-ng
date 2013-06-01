@@ -1,9 +1,7 @@
 package com.eugenkiss.conexp2.model;
 
-import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
-import java.util.Set;
-
 import de.tudresden.inf.tcs.fcaapi.FCAImplication;
+import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
 import de.tudresden.inf.tcs.fcaapi.utils.IndexedSet;
 import de.tudresden.inf.tcs.fcalib.FullObject;
 import de.tudresden.inf.tcs.fcalib.Implication;
@@ -11,6 +9,7 @@ import de.tudresden.inf.tcs.fcalib.ImplicationSet;
 import de.tudresden.inf.tcs.fcalib.utils.ListSet;
 
 import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A specialization of FormalContext<String,String> with the aim to remove the
@@ -288,4 +287,26 @@ public class FormalContext extends
         }
     }
 
+    public void addObjectAt(FullObject<String,String> object, int i) {
+        IndexedSet<FullObject<String, String>> newObjects = new ListSet<>();
+        for (int j = 0; j < getObjectCount(); j++) {
+            if (j == i) newObjects.add(object);
+            newObjects.add(getObjectAtIndex(j));
+        }
+        if (i == getObjectCount()) newObjects.add(object);
+        objects = newObjects;
+    }
+
+    public void addAttributeAt(String attribute, int i) {
+        IndexedSet<String> newAttributes = new ListSet<>();
+        for (int j = 0; j < getAttributeCount(); j++) {
+            if (j == i) newAttributes.add(attribute);
+            newAttributes.add(getAttributeAtIndex(j));
+        }
+        if (i == getAttributeCount()) newAttributes.add(attribute);
+        getAttributes().clear();
+        for (String attr : newAttributes) {
+            getAttributes().add(attr);
+        }
+    }
 }

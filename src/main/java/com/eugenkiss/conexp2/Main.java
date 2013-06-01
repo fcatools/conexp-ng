@@ -37,6 +37,7 @@ public class Main {
         testState.context.addAttribute("a");
         testState.context.addAttribute("b");
         testState.context.addAttribute("c");
+        testState.context.addAttribute("d");
         try {
             testState.context.addObject(new FullObject<>("x", Sets.newHashSet("a", "b")));
             testState.context.addObject(new FullObject<>("y", Sets.newHashSet("b", "c")));

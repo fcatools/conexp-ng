@@ -3,6 +3,7 @@ package com.eugenkiss.conexp2.gui;
 import com.eugenkiss.conexp2.ProgramState;
 import com.eugenkiss.conexp2.model.FormalContext;
 import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
+import de.tudresden.inf.tcs.fcalib.FullObject;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -87,6 +88,16 @@ public class ContextEditor extends View {
         toolbar.add(transposeContextButton);
 
         // Add actions
+        addObjectButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                addObjectAt(state.context.getObjectCount());
+            }
+        });
+        addAttributeButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                addAttributeAt(state.context.getAttributeCount());
+            }
+        });
         transposeContextButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 state.context.transpose();
@@ -181,7 +192,7 @@ public class ContextEditor extends View {
         // ------------------------
         addMenuItem(objectCellPopupMenu, "Rename", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                matrix.editCellAt(lastClickedRow, lastClickedColumn);
+                renameObject(lastClickedRow - 1);
             }
         });
         addMenuItem(objectCellPopupMenu, "Remove", new ActionListener() {
@@ -201,12 +212,12 @@ public class ContextEditor extends View {
         });
         addMenuItem(objectCellPopupMenu, "Add above", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                // TODO
+                addObjectAt(lastClickedRow - 1);
             }
         });
         addMenuItem(objectCellPopupMenu, "Add below", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                // TODO
+                addObjectAt(lastClickedRow);
             }
         });
 
@@ -215,7 +226,7 @@ public class ContextEditor extends View {
         // ---------------------------
         addMenuItem(attributeCellPopupMenu, "Rename", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                matrix.editCellAt(lastClickedRow, lastClickedColumn);
+                renameAttribute(lastClickedColumn - 1);
             }
         });
         addMenuItem(attributeCellPopupMenu, "Remove", new ActionListener() {
@@ -231,12 +242,12 @@ public class ContextEditor extends View {
         });
         addMenuItem(attributeCellPopupMenu, "Add left", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                // TODO
+                addAttributeAt(lastClickedColumn - 1);
             }
         });
         addMenuItem(attributeCellPopupMenu, "Add right", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                // TODO
+                addAttributeAt(lastClickedColumn);
             }
         });
 
@@ -293,6 +304,35 @@ public class ContextEditor extends View {
         item.addActionListener(action);
     }
 
+    private void addAttributeAt(int i) {
+        String newAttribute = "attr" + i;
+        state.context.addAttributeAt(newAttribute, i);
+        matrixModel.fireTableStructureChanged();
+        renameAttribute(i);
+    }
+
+    private void addObjectAt(int i) {
+        FullObject<String,String> newObject = new FullObject<String, String>("obj" + i);
+        state.context.addObjectAt(newObject, i);
+        matrixModel.fireTableStructureChanged();
+        renameObject(i);
+    }
+
+    private void renameAttribute(int i) {
+        matrix.editCellAt(0, i + 1);
+        matrix.requestFocus();
+        ContextMatrix.ContextCellEditor ed = (ContextMatrix.ContextCellEditor) matrix.editor;
+        ed.getTextField().requestFocus();
+        ed.getTextField().selectAll();
+    }
+
+    private void renameObject(int i) {
+        matrix.editCellAt(i + 1, 0);
+        matrix.requestFocus();
+        ContextMatrix.ContextCellEditor ed = (ContextMatrix.ContextCellEditor) matrix.editor;
+        ed.getTextField().requestFocus();
+        ed.getTextField().selectAll();
+    }
 }
 
 
@@ -432,47 +472,7 @@ class ContextMatrix extends JTable {
         setShowGrid(false);
 
         // Create custom TableCellEditor
-        editor = new DefaultCellEditor(new JTextField()) {
-            int lastRow = 0;
-            int lastColumn = 0;
-            String lastName;
-            ContextMatrixModel model = null;
-
-            @Override
-            public Component getTableCellEditorComponent(JTable table,
-                                                         Object value, boolean isSelected, int row, int column) {
-                JTextField f = (JTextField) super.getTableCellEditorComponent(table, value, isSelected, row, column);
-                model = (ContextMatrixModel) table.getModel();
-                String text;
-                if (column == 0) {
-                    text = model.getObjectNameAt(row-1);
-                } else {
-                    text = model.getAttributeNameAt(column-1);
-                }
-                f.setText(text);
-                lastName = text;
-                lastColumn = column;
-                lastRow = row;
-                return f;
-            }
-
-            @Override
-            public Object getCellEditorValue() {
-                String newName = super.getCellEditorValue().toString();
-                if (lastColumn == 0) {
-                    boolean success = model.renameObject(lastName, newName);
-                    if (!success) {
-                        // TODO: Show dialog that says name already taken
-                    }
-                } else {
-                    boolean success = model.renameAttribute(lastName, newName);
-                    if (!success) {
-                        // TODO: Show dialog that says name already taken
-                    }
-                }
-                return super.getCellEditorValue();
-            }
-        };
+        editor = new ContextCellEditor(new JTextField());
     }
 
     // For centering text inside cells
@@ -550,6 +550,62 @@ class ContextMatrix extends JTable {
         scrollPane.getViewport().setView(table);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         return scrollPane;
+    }
+
+    // Custom cell editor. Needed for renaming of objects/attributes
+    public static class ContextCellEditor extends DefaultCellEditor {
+
+        int lastRow = 0;
+        int lastColumn = 0;
+        String lastName;
+        ContextMatrixModel model = null;
+        JTextField textField = null;
+
+        public ContextCellEditor(JTextField textField) {
+            super(textField);
+            this.textField = textField;
+        }
+
+        @Override
+        public Component getTableCellEditorComponent(JTable table,
+                Object value, boolean isSelected, int row, int column) {
+            JTextField f = (JTextField) super.getTableCellEditorComponent(table, value, isSelected, row, column);
+            model = (ContextMatrixModel) table.getModel();
+            String text;
+            if (column == 0) {
+                text = model.getObjectNameAt(row-1);
+            } else {
+                text = model.getAttributeNameAt(column-1);
+            }
+            f.setText(text);
+            lastName = text;
+            lastColumn = column;
+            lastRow = row;
+            this.textField = f;
+            return f;
+        }
+
+        @Override
+        public Object getCellEditorValue() {
+            String newName = super.getCellEditorValue().toString();
+            if (lastColumn == 0) {
+                boolean success = model.renameObject(lastName, newName);
+                if (!success) {
+                    // TODO: Show dialog that says name already taken
+                }
+            } else {
+                boolean success = model.renameAttribute(lastName, newName);
+                if (!success) {
+                    // TODO: Show dialog that says name already taken
+                }
+            }
+            return super.getCellEditorValue();
+        }
+
+        public JTextField getTextField() {
+            return textField;
+        }
+
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
