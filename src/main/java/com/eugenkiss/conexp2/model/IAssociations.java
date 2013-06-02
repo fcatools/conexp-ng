@@ -2,13 +2,18 @@ package com.eugenkiss.conexp2.model;
 
 import java.util.Set;
 
-public abstract class IAssociations{
+public abstract class IAssociations {
 
     private double minsup;
     private double confidence;
     private Set<AssociationRule> rules;
+    protected FormalContext context;
 
-    public abstract boolean computeAssociationRules();
+    public abstract Set<AssociationRule> computeAssociationRules();
+
+    public IAssociations(FormalContext context) {
+        this.context = context;
+    }
 
     public Set<AssociationRule> getRules() {
         return rules;

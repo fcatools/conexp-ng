@@ -8,8 +8,15 @@ import de.tudresden.inf.tcs.fcalib.Implication;
 import de.tudresden.inf.tcs.fcalib.ImplicationSet;
 import de.tudresden.inf.tcs.fcalib.utils.ListSet;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
+import com.google.common.collect.Collections2;
 
 /**
  * A specialization of FormalContext<String,String> with the aim to remove the
@@ -65,6 +72,16 @@ public class FormalContext extends
         }
 
         return andNot(result);
+    }
+
+    @Override
+    public Set<FCAImplication<String>> getDuquenneGuiguesBase() {
+        return getStemBase();
+    }
+
+    public Set<AssociationRule> getAssociations(double minsup, double conf) {
+        return new AssociationMiner(this, minsup, conf)
+                .computeAssociationRules();
     }
 
     /**
@@ -287,23 +304,27 @@ public class FormalContext extends
         }
     }
 
-    public void addObjectAt(FullObject<String,String> object, int i) {
+    public void addObjectAt(FullObject<String, String> object, int i) {
         IndexedSet<FullObject<String, String>> newObjects = new ListSet<>();
         for (int j = 0; j < getObjectCount(); j++) {
-            if (j == i) newObjects.add(object);
+            if (j == i)
+                newObjects.add(object);
             newObjects.add(getObjectAtIndex(j));
         }
-        if (i == getObjectCount()) newObjects.add(object);
+        if (i == getObjectCount())
+            newObjects.add(object);
         objects = newObjects;
     }
 
     public void addAttributeAt(String attribute, int i) {
         IndexedSet<String> newAttributes = new ListSet<>();
         for (int j = 0; j < getAttributeCount(); j++) {
-            if (j == i) newAttributes.add(attribute);
+            if (j == i)
+                newAttributes.add(attribute);
             newAttributes.add(getAttributeAtIndex(j));
         }
-        if (i == getAttributeCount()) newAttributes.add(attribute);
+        if (i == getAttributeCount())
+            newAttributes.add(attribute);
         getAttributes().clear();
         for (String attr : newAttributes) {
             getAttributes().add(attr);

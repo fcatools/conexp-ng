@@ -66,7 +66,7 @@ public class AssociationRule implements Comparable<AssociationRule> {
     }
 
     public String toString() {
-        return premise + " -> " + consequent;
+        return "<" + sup + "> " + premise + " [" + conf + "]-> " + consequent;
     }
 
     @Override
