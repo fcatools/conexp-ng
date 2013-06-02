@@ -101,8 +101,7 @@ public class ContextEditor extends View {
         transposeContextButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 state.context.transpose();
-                matrixModel.fireTableDataChanged();
-                state.contextChanged();
+                matrixModel.fireTableStructureChanged();
             }
         });
     }
@@ -148,7 +147,6 @@ public class ContextEditor extends View {
                 state.context.fill(i1, i2, j1, j2);
                 matrixModel.fireTableDataChanged();
                 matrix.restoreSelectedInterval();
-                state.contextChanged();
             }
         });
         addMenuItem(cellPopupMenu, "Clear", new ActionListener() {
@@ -161,7 +159,6 @@ public class ContextEditor extends View {
                 state.context.clear(i1, i2, j1, j2);
                 matrixModel.fireTableDataChanged();
                 matrix.restoreSelectedInterval();
-                state.contextChanged();
             }
         });
         addMenuItem(cellPopupMenu, "Invert", new ActionListener() {
@@ -174,7 +171,6 @@ public class ContextEditor extends View {
                 state.context.invert(i1, i2, j1, j2);
                 matrixModel.fireTableDataChanged();
                 matrix.restoreSelectedInterval();
-                state.contextChanged();
             }
         });
         //--------
@@ -207,7 +203,6 @@ public class ContextEditor extends View {
                     e1.printStackTrace();
                 }
                 matrixModel.fireTableStructureChanged();
-                state.contextChanged();
                 SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
                         matrix.updateUI();
@@ -238,7 +233,6 @@ public class ContextEditor extends View {
             public void actionPerformed(ActionEvent e) {
                 state.context.removeAttribute(state.context.getAttributeAtIndex(lastClickedColumn-1));
                 matrixModel.fireTableStructureChanged();
-                state.contextChanged();
                 SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
                         matrix.updateUI();
@@ -273,7 +267,6 @@ public class ContextEditor extends View {
                         matrix.saveSelectedInterval();
                         matrixModel.fireTableDataChanged();
                         matrix.restoreSelectedInterval();
-                        state.contextChanged();
                     }
                 }
             }
@@ -289,7 +282,6 @@ public class ContextEditor extends View {
                     } else if (i > 0 && j > 0) {
                         if (matrix.getSelectedColumn() <= 0 || matrix.getSelectedRow() <= 0) {
                             matrix.setSelectedCell(i, j);
-                            state.contextChanged();
                         }
                         cellPopupMenu.show(e.getComponent(), e.getX(), e.getY());
                     } else if (j == 0) {
@@ -332,7 +324,6 @@ public class ContextEditor extends View {
         ContextMatrix.ContextCellEditor ed = (ContextMatrix.ContextCellEditor) matrix.editor;
         ed.getTextField().requestFocus();
         ed.getTextField().selectAll();
-        state.contextChanged();
     }
 
     private void renameObject(int i) {
@@ -341,13 +332,6 @@ public class ContextEditor extends View {
         ContextMatrix.ContextCellEditor ed = (ContextMatrix.ContextCellEditor) matrix.editor;
         ed.getTextField().requestFocus();
         ed.getTextField().selectAll();
-        state.contextChanged();
-    }
-
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        // TODO @Eugen look atProgrammState, maybe you can also use it for the
-        // communication with the contexteditorsettingspanel
     }
 }
 
