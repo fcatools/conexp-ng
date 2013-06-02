@@ -1,13 +1,8 @@
 package com.eugenkiss.conexp2.gui;
 
-import java.awt.Dimension;
-import java.awt.Point;
+import javax.swing.*;
+import java.awt.*;
 import java.net.URL;
-
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
 
 public class Util {
 
@@ -29,6 +24,20 @@ public class Util {
         int x = frameLocation.x + ((frameSize.width - dialogSize.width) / 2);
         int y = frameLocation.y + ((frameSize.height - dialogSize.height) / 2);
         dialog.setLocation(x, y);
+    }
+
+    public static final int clamp(int val, int min, int max) {
+        return val < min ? min : (val > max ? max : val);
+    }
+
+    // "Real" modulo that works "correctly" for negative numbers
+    public static int mod(int x, int y) {
+        int result = x % y;
+        if (result < 0)
+        {
+            result += y;
+        }
+        return result;
     }
 
 }

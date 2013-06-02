@@ -11,14 +11,12 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-import static com.eugenkiss.conexp2.gui.Util.createButton;
+import static com.eugenkiss.conexp2.gui.Util.*;
+import static javax.swing.KeyStroke.getKeyStroke;
 
 /**
  * The class responsible for displaying and interacting with ConExpNG's context editor.
@@ -30,14 +28,23 @@ public class ContextEditor extends View {
 
     private static final long serialVersionUID = 1660117627650529212L;
 
+    // Choose correct modifier key (STRG or CMD) based on platform
+    @SuppressWarnings("UnusedDeclaration")
+    private static final int MASK = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+
     // Our JTable customisation and its respective data model
     private final ContextMatrix matrix;
     private final ContextMatrixModel matrixModel;
+    // Context menus
+    final JPopupMenu cellPopupMenu;
+    final JPopupMenu objectCellPopupMenu;
+    final JPopupMenu attributeCellPopupMenu;
 
     // For remembering which header cell has been right-clicked
+    // For movement inside the matrix
     // Due to unfortunate implications of our JTable customisation we need to rely on this "hack"
-    int lastClickedRow;
-    int lastClickedColumn;
+    int lastActiveRowIndex;
+    int lastActiveColumnIndex;
 
     public ContextEditor(final ProgramState state) {
         super(state);
@@ -57,8 +64,14 @@ public class ContextEditor extends View {
         panel.add(scrollPane, BorderLayout.CENTER);
         setLayout(new BorderLayout());
         add(panel);
+        cellPopupMenu = new JPopupMenu();
+        objectCellPopupMenu = new JPopupMenu();
+        attributeCellPopupMenu = new JPopupMenu();
 
         // Add actions
+        registerActions();
+        createMouseActions();
+        createKeyActions();
         createButtonActions();
         createContextMenuActions();
 
@@ -66,208 +79,62 @@ public class ContextEditor extends View {
         matrixModel.fireTableStructureChanged();
     }
 
-    private void createButtonActions() {
-        // Add buttons
-        JButton addObjectButton = createButton("Add Object", "addObject", "conexp/addObj.gif");
-        toolbar.add(addObjectButton);
-        JButton clarifyObjectsButton = createButton("Clarify Objects", "clarifyObjects", "conexp/clarifyObj.gif");
-        toolbar.add(clarifyObjectsButton);
-        JButton reduceObjectsButton = createButton("Reduce Objects", "reduceObjects", "conexp/reduceObj.gif");
-        toolbar.add(reduceObjectsButton);
-        toolbar.addSeparator();
-        JButton addAttributeButton = createButton("Add Attribute", "addAttribute", "conexp/addAttr.gif");
-        toolbar.add(addAttributeButton);
-        JButton clarifyAttributesButton = createButton("Clarify Attributes", "clarifyAttributes", "conexp/clarifyAttr.gif");
-        toolbar.add(clarifyAttributesButton);
-        JButton reduceAttributesButton = createButton("Reduce Attributes", "reduceAttributes", "conexp/reduceAttr.gif");
-        toolbar.add(reduceAttributesButton);
-        toolbar.addSeparator();
-        JButton reduceContextButton = createButton("Reduce Context", "reduceContext", "conexp/reduceCxt.gif");
-        toolbar.add(reduceContextButton);
-        JButton transposeContextButton = createButton("Transpose Context", "transposeContext", "conexp/transpose.gif");
-        toolbar.add(transposeContextButton);
-
-        // Add actions
-        addObjectButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                addObjectAt(state.context.getObjectCount());
-            }
-        });
-        addAttributeButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                addAttributeAt(state.context.getAttributeCount());
-            }
-        });
-        transposeContextButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                state.context.transpose();
-                matrixModel.fireTableStructureChanged();
-                state.contextChanged();
-            }
-        });
+    // If context is not changed through the context editor (e.g. by exploration) be sure
+    // to reflect these changes inside the matrix
+    @Override
+    public void propertyChange(PropertyChangeEvent e) {
+        if (e.getPropertyName().equals("ContextChanged")) {
+            matrixModel.fireTableStructureChanged();
+        }
     }
 
-    private void createContextMenuActions() {
-        final JPopupMenu cellPopupMenu = new JPopupMenu();
-        final JPopupMenu objectCellPopupMenu = new JPopupMenu();
-        final JPopupMenu attributeCellPopupMenu = new JPopupMenu();
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Behaviour Initialization
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        // ------------------------
-        // Inner cells context menu
-        // ------------------------
-        addMenuItem(cellPopupMenu, "Cut", new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                // TODO
-            }
-        });
-        addMenuItem(cellPopupMenu, "Copy", new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                // TODO
-            }
-        });
-        addMenuItem(cellPopupMenu, "Paste", new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                // TODO
-            }
-        });
-        addMenuItem(cellPopupMenu, "Select all", new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                matrix.selectAll();
-            }
-        });
-        //--------
-        cellPopupMenu.add(new JPopupMenu.Separator());
-        //--------
-        addMenuItem(cellPopupMenu, "Fill", new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                int i1 = matrix.getSelectedRow() - 1;
-                int i2 = i1 + matrix.getSelectedRowCount();
-                int j1 = matrix.getSelectedColumn() - 1;
-                int j2 = j1 + matrix.getSelectedColumnCount();
-                matrix.saveSelectedInterval();
-                state.context.fill(i1, i2, j1, j2);
-                matrixModel.fireTableDataChanged();
-                matrix.restoreSelectedInterval();
-            }
-        });
-        addMenuItem(cellPopupMenu, "Clear", new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                int i1 = matrix.getSelectedRow() - 1;
-                int i2 = i1 + matrix.getSelectedRowCount();
-                int j1 = matrix.getSelectedColumn() - 1;
-                int j2 = j1 + matrix.getSelectedColumnCount();
-                matrix.saveSelectedInterval();
-                state.context.clear(i1, i2, j1, j2);
-                matrixModel.fireTableDataChanged();
-                matrix.restoreSelectedInterval();
-            }
-        });
-        addMenuItem(cellPopupMenu, "Invert", new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                int i1 = matrix.getSelectedRow() - 1;
-                int i2 = i1 + matrix.getSelectedRowCount();
-                int j1 = matrix.getSelectedColumn() - 1;
-                int j2 = j1 + matrix.getSelectedColumnCount();
-                matrix.saveSelectedInterval();
-                state.context.invert(i1, i2, j1, j2);
-                matrixModel.fireTableDataChanged();
-                matrix.restoreSelectedInterval();
-            }
-        });
-        //--------
-        cellPopupMenu.add(new JPopupMenu.Separator());
-        //--------
-        addMenuItem(cellPopupMenu, "Remove attribute(s)", new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                // TODO
-            }
-        });
-        addMenuItem(cellPopupMenu, "Remove object(s)", new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                // TODO
-            }
-        });
+    private void registerActions() {
+        ActionMap am = matrix.getActionMap();
+        am.put("up", new MoveAction(0, -1));
+        am.put("down", new MoveAction(0, +1));
+        am.put("left", new MoveAction(-1, 0));
+        am.put("right", new MoveAction(+1, 0));
+        am.put("upCarry", new MoveWithCarryAction(0, -1));
+        am.put("downCarry", new MoveWithCarryAction(0, +1));
+        am.put("leftCarry", new MoveWithCarryAction(-1, 0));
+        am.put("rightCarry", new MoveWithCarryAction(+1, 0));
+        am.put("toggle", new ToggleActiveAction());
+        am.put("removeObject", new RemoveActiveObjectAction());
+        am.put("removeAttribute", new RemoveActiveAttributeAction());
+    }
 
-        // ------------------------
-        // Object cell context menu
-        // ------------------------
-        addMenuItem(objectCellPopupMenu, "Rename", new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                renameObject(lastClickedRow - 1);
-            }
-        });
-        addMenuItem(objectCellPopupMenu, "Remove", new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    state.context.removeObject(state.context.getObjectAtIndex(lastClickedRow-1).getIdentifier());
-                } catch (IllegalObjectException e1) {
-                    e1.printStackTrace();
-                }
-                matrixModel.fireTableStructureChanged();
-                SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        matrix.updateUI();
-                    }
-                });
-            }
-        });
-        addMenuItem(objectCellPopupMenu, "Add above", new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                addObjectAt(lastClickedRow - 1);
-            }
-        });
-        addMenuItem(objectCellPopupMenu, "Add below", new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                addObjectAt(lastClickedRow);
-            }
-        });
+    private void createKeyActions() {
+        InputMap im = matrix.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        im.put(getKeyStroke(KeyEvent.VK_UP, 0), "up");
+        im.put(getKeyStroke(KeyEvent.VK_DOWN, 0), "down");
+        im.put(getKeyStroke(KeyEvent.VK_LEFT, 0), "left");
+        im.put(getKeyStroke(KeyEvent.VK_RIGHT, 0), "right");
+        im.put(getKeyStroke(KeyEvent.VK_K, 0), "upCarry");
+        im.put(getKeyStroke(KeyEvent.VK_J, 0), "downCarry");
+        im.put(getKeyStroke(KeyEvent.VK_H, 0), "leftCarry");
+        im.put(getKeyStroke(KeyEvent.VK_L, 0), "rightCarry");
+        im.put(getKeyStroke(KeyEvent.VK_ENTER, 0), "toggle");
+        im.put(getKeyStroke(KeyEvent.VK_R, 0), "removeObject");
+        im.put(getKeyStroke(KeyEvent.VK_R, KeyEvent.SHIFT_MASK), "removeAttribute");
+        im.put(getKeyStroke(KeyEvent.VK_O, 0), "addObjectBelow");
+        im.put(getKeyStroke(KeyEvent.VK_O, KeyEvent.SHIFT_MASK), "addObjectAbove");
+        im.put(getKeyStroke(KeyEvent.VK_A, 0), "addAttributeBelow");
+        im.put(getKeyStroke(KeyEvent.VK_A, KeyEvent.SHIFT_MASK), "addAttributeAbove");
+    }
 
-        // ---------------------------
-        // Attribute cell context menu
-        // ---------------------------
-        addMenuItem(attributeCellPopupMenu, "Rename", new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                renameAttribute(lastClickedColumn - 1);
-            }
-        });
-        addMenuItem(attributeCellPopupMenu, "Remove", new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                state.context.removeAttribute(state.context.getAttributeAtIndex(lastClickedColumn-1));
-                matrixModel.fireTableStructureChanged();
-                SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        matrix.updateUI();
-                    }
-                });
-            }
-        });
-        addMenuItem(attributeCellPopupMenu, "Add left", new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                addAttributeAt(lastClickedColumn - 1);
-            }
-        });
-        addMenuItem(attributeCellPopupMenu, "Add right", new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                addAttributeAt(lastClickedColumn);
-            }
-        });
-
-        // ========================
-        // Add right-click behavior
-        // ========================
+    private void createMouseActions() {
         matrix.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
-                int i = matrix.getSelectedRow();
-                int j = matrix.getSelectedColumn();
+                int i = matrix.rowAtPoint(e.getPoint());
+                int j = matrix.columnAtPoint(e.getPoint());
                 int clicks = e.getClickCount();
                 if (clicks >= 2 && clicks % 2 == 0 && !SwingUtilities.isRightMouseButton(e)) { // Double Click
                     if (i > 0 && j > 0) {
-                        state.context.toggleAttributeForObject(
-                                state.context.getAttributeAtIndex(j - 1),
-                                state.context.getObjectAtIndex(i - 1).getIdentifier());
-                        matrix.saveSelectedInterval();
-                        matrixModel.fireTableDataChanged();
-                        matrix.restoreSelectedInterval();
+                        invokeAction(new ToggleAction(i, j));
                     }
                 }
             }
@@ -275,8 +142,8 @@ public class ContextEditor extends View {
             public void mousePressed(MouseEvent e) {
                 int i = matrix.rowAtPoint(e.getPoint());
                 int j = matrix.columnAtPoint(e.getPoint());
-                lastClickedRow = i;
-                lastClickedColumn = j;
+                lastActiveRowIndex = i;
+                lastActiveColumnIndex = j;
                 if (e.isPopupTrigger()) {
                     if (i == 0 && j == 0) {
                         // Don't show a context menu in the matrix corner
@@ -299,10 +166,328 @@ public class ContextEditor extends View {
         });
     }
 
+    private void createButtonActions() {
+        addToolbarButton("addObject", "Add Object", "conexp/addObj.gif", new AddObjectAtEndAction());
+        addToolbarButton("clarifyObjects", "Clarify Objects", "conexp/clarifyObj.gif", null); // TODO
+        addToolbarButton("reduceObjects", "Reduce Objects", "conexp/reduceObj.gif", null); // TODO
+        toolbar.addSeparator();
+        addToolbarButton("addAttribute", "Add Attribute", "conexp/addAttr.gif", new AddAttributeAtEndAction());
+        addToolbarButton("clarifyAttributes", "Clarify Attributes", "conexp/clarifyAttr.gif", null); // TODO
+        addToolbarButton("reduceAttributes", "Reduce Attributes", "conexp/reduceAttr.gif", null); // TODO
+        toolbar.addSeparator();
+        addToolbarButton("reduceContext", "Reduce Context", "conexp/reduceCxt.gif", null); // TODO
+        addToolbarButton("transposeContext", "Transpose Context", "conexp/transpose.gif", new TransposeAction());
+    }
+
+    private void createContextMenuActions() {
+        // ------------------------
+        // Inner cells context menu
+        // ------------------------
+        addMenuItem(cellPopupMenu, "Cut", new CutAction());
+        addMenuItem(cellPopupMenu, "Copy", new CopyAction());
+        addMenuItem(cellPopupMenu, "Paste", new PasteAction());
+        addMenuItem(cellPopupMenu, "Select all", new SelectAllAction());
+        //--------
+        cellPopupMenu.add(new JPopupMenu.Separator());
+        //--------
+        addMenuItem(cellPopupMenu, "Fill", new FillAction());
+        addMenuItem(cellPopupMenu, "Clear", new ClearAction());
+        addMenuItem(cellPopupMenu, "Invert", new InvertAction());
+        //--------
+        cellPopupMenu.add(new JPopupMenu.Separator());
+        //--------
+        addMenuItem(cellPopupMenu, "Remove attribute(s)", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // TODO
+            }
+        });
+        addMenuItem(cellPopupMenu, "Remove object(s)", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // TODO
+            }
+        });
+
+        // ------------------------
+        // Object cell context menu
+        // ------------------------
+        addMenuItem(objectCellPopupMenu, "Rename", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                renameObject(lastActiveRowIndex - 1);
+            }
+        });
+        addMenuItem(objectCellPopupMenu, "Remove", new RemoveActiveObjectAction());
+        addMenuItem(objectCellPopupMenu, "Add above", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                addObjectAt(lastActiveRowIndex - 1);
+            }
+        });
+        addMenuItem(objectCellPopupMenu, "Add below", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                addObjectAt(lastActiveRowIndex);
+            }
+        });
+
+        // ---------------------------
+        // Attribute cell context menu
+        // ---------------------------
+        addMenuItem(attributeCellPopupMenu, "Rename", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                renameAttribute(lastActiveColumnIndex - 1);
+            }
+        });
+        addMenuItem(attributeCellPopupMenu, "Remove", new RemoveActiveAttributeAction());
+        addMenuItem(attributeCellPopupMenu, "Add horizontal", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                addAttributeAt(lastActiveColumnIndex - 1);
+            }
+        });
+        addMenuItem(attributeCellPopupMenu, "Add vertical", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                addAttributeAt(lastActiveColumnIndex);
+            }
+        });
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Actions
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    @SuppressWarnings("UnusedDeclaration")
+    class CombineActions extends AbstractAction {
+        Action first, second;
+        CombineActions(Action first, Action second) {
+            this.first = first;
+            this.second = second;
+        }
+        public void actionPerformed(ActionEvent e) {
+            invokeAction(first, e);
+            invokeAction(second, e);
+        }
+    }
+
+    class MoveAction extends AbstractAction {
+        int horizontal, vertical;
+        MoveAction(int horizontal, int vertical) {
+            this.horizontal = horizontal;
+            this.vertical = vertical;
+        }
+        public void actionPerformed(ActionEvent e) {
+            lastActiveRowIndex = clamp(lastActiveRowIndex + vertical, 1, state.context.getObjectCount());
+            lastActiveColumnIndex = clamp(lastActiveColumnIndex + horizontal, 1, state.context.getAttributeCount());
+            matrix.setSelectedCell(lastActiveRowIndex, lastActiveColumnIndex);
+        }
+    }
+
+    class MoveWithCarryAction extends AbstractAction {
+        int horizontal, vertical;
+        MoveWithCarryAction(int horizontal, int vertical) {
+            this.horizontal = horizontal;
+            this.vertical = vertical;
+        }
+        public void actionPerformed(ActionEvent e) {
+            if (state.context.getObjectCount() == 0 || state.context.getAttributeCount() == 0) return;
+            int i = lastActiveRowIndex + vertical - 1;
+            int j = lastActiveColumnIndex + horizontal - 1;
+            //noinspection LoopStatementThatDoesntLoop
+            while (true) {
+                if (i < 0) {
+                    j -= 1;
+                    i = state.context.getObjectCount() - 1;
+                    break;
+                }
+                if (j < 0) {
+                    i -= 1;
+                    j = state.context.getAttributeCount() - 1;
+                }
+                if (i >= state.context.getObjectCount()) {
+                    j += 1;
+                    i = 0;
+                    break;
+                }
+                if (j >= state.context.getAttributeCount()) {
+                    i += 1;
+                    j = 0;
+                }
+                break;
+            }
+            i = mod(i, state.context.getObjectCount());
+            j = mod(j, state.context.getAttributeCount());
+            lastActiveRowIndex = i + 1;
+            lastActiveColumnIndex = j + 1;
+            matrix.setSelectedCell(lastActiveRowIndex, lastActiveColumnIndex);
+        }
+    }
+    class ToggleAction extends AbstractAction {
+        int i, j;
+        ToggleAction(int i, int j) {
+            this.i = i;
+            this.j = j;
+        }
+        public void actionPerformed(ActionEvent e) {
+            if (i <= 0 || j <= 0) return;
+            int i = clamp(this.i, 1, state.context.getObjectCount()) - 1;
+            int j = clamp(this.j, 1, state.context.getAttributeCount()) - 1;
+            state.context.toggleAttributeForObject(
+                    state.context.getAttributeAtIndex(j),
+                    state.context.getObjectAtIndex(i).getIdentifier());
+            matrix.saveSelectedInterval();
+            matrixModel.fireTableDataChanged();
+            matrix.restoreSelectedInterval();
+        }
+    }
+
+    class ToggleActiveAction extends AbstractAction {
+        public void actionPerformed(ActionEvent e) {
+            invokeAction(new ToggleAction(lastActiveRowIndex, lastActiveColumnIndex));
+        }
+    }
+
+    class SelectAllAction extends AbstractAction {
+        public void actionPerformed(ActionEvent e) {
+            matrix.selectAll();
+        }
+    }
+
+    class CopyAction extends AbstractAction {
+        public void actionPerformed(ActionEvent e) {
+            // TODO
+        }
+    }
+
+    class CutAction extends AbstractAction {
+        public void actionPerformed(ActionEvent e) {
+            // TODO
+        }
+    }
+
+    class PasteAction extends AbstractAction {
+        public void actionPerformed(ActionEvent e) {
+            // TODO
+        }
+    }
+
+    abstract class AbstractFillClearInvertAction extends AbstractAction {
+        public void actionPerformed(ActionEvent e) {
+            int i1 = matrix.getSelectedRow() - 1;
+            int i2 = i1 + matrix.getSelectedRowCount();
+            int j1 = matrix.getSelectedColumn() - 1;
+            int j2 = j1 + matrix.getSelectedColumnCount();
+            matrix.saveSelectedInterval();
+            execute(i1, i2, j1, j2);
+            matrixModel.fireTableDataChanged();
+            matrix.restoreSelectedInterval();
+        }
+        abstract void execute(int i1, int i2, int j1, int j2);
+    }
+
+    class FillAction extends AbstractFillClearInvertAction {
+        void execute(int i1, int i2, int j1, int j2) {
+            state.context.fill(i1, i2, j1, j2);
+        }
+    }
+
+    class ClearAction extends AbstractFillClearInvertAction {
+        void execute(int i1, int i2, int j1, int j2) {
+            state.context.clear(i1, i2, j1, j2);
+        }
+    }
+
+    class InvertAction extends AbstractFillClearInvertAction {
+        void execute(int i1, int i2, int j1, int j2) {
+            state.context.invert(i1, i2, j1, j2);
+        }
+    }
+
+    class TransposeAction extends AbstractAction {
+        public void actionPerformed(ActionEvent e) {
+            state.context.transpose();
+            matrixModel.fireTableStructureChanged();
+            state.contextChanged();
+        }
+    }
+
+    class AddAttributeAtAction extends AbstractAction {
+        int index;
+        AddAttributeAtAction(int index) {
+            this.index = index;
+        }
+        public void actionPerformed(ActionEvent e) {
+            addAttributeAt(index);
+        }
+    }
+
+    class AddObjectAtAction extends AbstractAction {
+        int index;
+        AddObjectAtAction(int index) {
+            this.index = index;
+        }
+        public void actionPerformed(ActionEvent e) {
+            addObjectAt(index);
+        }
+    }
+
+    class AddAttributeAtEndAction extends AbstractAction {
+        public void actionPerformed(ActionEvent e) {
+            invokeAction(new AddAttributeAtAction(state.context.getAttributeCount()));
+        }
+    }
+
+    class AddObjectAtEndAction extends AbstractAction {
+        public void actionPerformed(ActionEvent e) {
+            invokeAction(new AddObjectAtAction(state.context.getObjectCount()));
+        }
+    }
+
+    class RemoveActiveObjectAction extends AbstractAction {
+        public void actionPerformed(ActionEvent e) {
+            if (state.context.getObjectCount() == 0) return;
+            matrix.saveSelectedInterval();
+            try {
+                state.context.removeObject(state.context.getObjectAtIndex(lastActiveRowIndex -1).getIdentifier());
+                if (lastActiveRowIndex - 1 >= state.context.getObjectCount()) lastActiveRowIndex--;
+            } catch (IllegalObjectException e1) {
+                e1.printStackTrace();
+            }
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    matrixModel.fireTableStructureChanged();
+                    matrix.updateUI();
+                    matrix.restoreSelectedInterval();
+                }
+            });
+        }
+    }
+
+    class RemoveActiveAttributeAction extends AbstractAction {
+        public void actionPerformed(ActionEvent e) {
+            if (state.context.getAttributeCount() == 0) return;
+            matrix.saveSelectedInterval();
+            state.context.removeAttribute(state.context.getAttributeAtIndex(lastActiveColumnIndex -1));
+            if (lastActiveColumnIndex - 1 >= state.context.getAttributeCount()) lastActiveColumnIndex--;
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    matrixModel.fireTableStructureChanged();
+                    matrix.updateUI();
+                    matrix.restoreSelectedInterval();
+                }
+            });
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Helper functions
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     private static void addMenuItem(JPopupMenu menu, String name, ActionListener action) {
         JMenuItem item = new JMenuItem(name);
         menu.add(item);
         item.addActionListener(action);
+    }
+
+    private void addToolbarButton(String name, String tooltip, String iconPath, Action action) {
+        JButton b = createButton(tooltip, name, iconPath);
+        toolbar.add(b);
+        b.addActionListener(action);
     }
 
     private void addAttributeAt(int i) {
@@ -344,9 +529,19 @@ public class ContextEditor extends View {
         ed.getTextField().selectAll();
     }
 
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
+    private void invokeAction(Action action, ActionEvent e) {
+        action.actionPerformed(e);
     }
+
+    private void invokeAction(Action action) {
+        invokeAction(action, new ActionEvent(this, 0, ""));
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    private void invokeAction(String name) {
+        matrix.getActionMap().get(name).actionPerformed(new ActionEvent(this, 0, ""));
+    }
+
 }
 
 
@@ -484,9 +679,32 @@ class ContextMatrix extends JTable {
         setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         setCellSelectionEnabled(true);
         setShowGrid(false);
+        clearKeyBindings();
 
         // Create custom TableCellEditor
         editor = new ContextCellEditor(new JTextField());
+    }
+
+    private void clearKeyBindings() {
+        // After testings thoroughly it seems to be impossible to simply clear all keybindings
+        // even if Swing's API suggests that it should be possible. So we need to rely on a hack
+        // for removing keybindings
+        int[] is = {JComponent.WHEN_IN_FOCUSED_WINDOW, JComponent.WHEN_FOCUSED, JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT};
+        InputMap im = getInputMap();
+        for (int i = 0; i <= is.length; i++) {
+            im.put(getKeyStroke(KeyEvent.VK_ENTER, 0), "none");
+            im.put(getKeyStroke(KeyEvent.VK_UP, 0), "none");
+            im.put(getKeyStroke(KeyEvent.VK_LEFT, 0), "none");
+            im.put(getKeyStroke(KeyEvent.VK_RIGHT, 0), "none");
+            im.put(getKeyStroke(KeyEvent.VK_DOWN, 0), "none");
+            im.put(getKeyStroke(KeyEvent.VK_UP, KeyEvent.SHIFT_MASK), "none");
+            im.put(getKeyStroke(KeyEvent.VK_LEFT, KeyEvent.SHIFT_MASK), "none");
+            im.put(getKeyStroke(KeyEvent.VK_RIGHT, KeyEvent.SHIFT_MASK), "none");
+            im.put(getKeyStroke(KeyEvent.VK_DOWN, KeyEvent.SHIFT_MASK), "none");
+            if (i == is.length) break;
+            //noinspection MagicConstant
+            im = getInputMap(is[i]);
+        }
     }
 
     // For centering text inside cells
@@ -521,6 +739,11 @@ class ContextMatrix extends JTable {
 
     // For preventing a selection to disappear after an operation like "invert"
     public void restoreSelectedInterval() {
+        if (getRowCount() <= 1 || getColumnCount() <= 1) return;
+        lastSelectedRowsStartIndex = clamp(lastSelectedRowsStartIndex, 1, getRowCount()-1);
+        lastSelectedRowsEndIndex = clamp(lastSelectedRowsEndIndex, 1, getRowCount()-1);
+        lastSelectedColumnsStartIndex = clamp(lastSelectedColumnsStartIndex, 1, getColumnCount()-1);
+        lastSelectedColumnsEndIndex = clamp(lastSelectedColumnsEndIndex, 1, getColumnCount()-1);
         setRowSelectionInterval(lastSelectedRowsStartIndex, lastSelectedRowsEndIndex);
         setColumnSelectionInterval(lastSelectedColumnsStartIndex, lastSelectedColumnsEndIndex);
     }
