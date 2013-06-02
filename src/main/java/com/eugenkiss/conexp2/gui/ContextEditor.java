@@ -118,6 +118,7 @@ public class ContextEditor extends View {
         im.put(getKeyStroke(KeyEvent.VK_H, 0), "leftCarry");
         im.put(getKeyStroke(KeyEvent.VK_L, 0), "rightCarry");
         im.put(getKeyStroke(KeyEvent.VK_ENTER, 0), "toggle");
+        im.put(getKeyStroke(KeyEvent.VK_T, 0), "toggle");
         im.put(getKeyStroke(KeyEvent.VK_R, 0), "removeObject");
         im.put(getKeyStroke(KeyEvent.VK_R, KeyEvent.SHIFT_MASK), "removeAttribute");
         im.put(getKeyStroke(KeyEvent.VK_O, 0), "addObjectBelow");
