@@ -305,14 +305,23 @@ public class ContextEditor extends View {
     }
 
     private void addAttributeAt(int i) {
-        String newAttribute = "attr" + i;
-        state.context.addAttributeAt(newAttribute, i);
+        String collisionFreeName = "attr" + i;
+        while (true) {
+            if (!state.context.existsAttributeAlready(collisionFreeName)) break;
+            collisionFreeName = collisionFreeName + "'";
+        }
+        state.context.addAttributeAt(collisionFreeName, i);
         matrixModel.fireTableStructureChanged();
         renameAttribute(i);
     }
 
     private void addObjectAt(int i) {
-        FullObject<String,String> newObject = new FullObject<String, String>("obj" + i);
+        String collisionFreeName = "obj" + i;
+        while (true) {
+            if (!state.context.existsObjectAlready(collisionFreeName)) break;
+            collisionFreeName = collisionFreeName + "'";
+        }
+        FullObject<String,String> newObject = new FullObject<String, String>(collisionFreeName);
         state.context.addObjectAt(newObject, i);
         matrixModel.fireTableStructureChanged();
         renameObject(i);
