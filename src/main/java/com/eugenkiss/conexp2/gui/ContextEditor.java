@@ -237,12 +237,12 @@ public class ContextEditor extends View {
             }
         });
         addMenuItem(attributeCellPopupMenu, "Remove", new RemoveActiveAttributeAction());
-        addMenuItem(attributeCellPopupMenu, "Add horizontal", new ActionListener() {
+        addMenuItem(attributeCellPopupMenu, "Add left", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 addAttributeAt(lastActiveColumnIndex - 1);
             }
         });
-        addMenuItem(attributeCellPopupMenu, "Add vertical", new ActionListener() {
+        addMenuItem(attributeCellPopupMenu, "Add right", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 addAttributeAt(lastActiveColumnIndex);
             }
