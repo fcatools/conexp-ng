@@ -321,7 +321,7 @@ public class ContextEditor extends View {
             if (!state.context.existsObjectAlready(collisionFreeName)) break;
             collisionFreeName = collisionFreeName + "'";
         }
-        FullObject<String,String> newObject = new FullObject<String, String>(collisionFreeName);
+        FullObject<String,String> newObject = new FullObject<>(collisionFreeName);
         state.context.addObjectAt(newObject, i);
         matrixModel.fireTableStructureChanged();
         renameObject(i);
@@ -653,6 +653,12 @@ class ContextMatrix extends JTable {
         }
 
         @Override
+        public void setViewPosition(Point p) {
+            super.setViewPosition(p);
+            repaint();
+        }
+
+        @Override
         protected void paintComponent(Graphics g) {
             paintBackground(g);
             paintStripedBackground(g);
@@ -671,9 +677,13 @@ class ContextMatrix extends JTable {
         private void paintStripedBackground(Graphics g) {
             int rowHeight = fTable.getRowHeight();
             int tableWidth = fTable.getWidth();
+            int offsetX = getViewPosition().x;
+            int offsetY = getViewPosition().y;
+            int x = -offsetX;
+            int y = -offsetY;
             for (int j = 0; j < fTable.getRowCount(); j++) {
                 g.setColor(j % 2 == 0 ? EVEN_ROW_COLOR : ODD_ROW_COLOR);
-                g.fillRect(0, j * rowHeight, tableWidth, rowHeight);
+                g.fillRect(x, y + j * rowHeight, tableWidth, rowHeight);
             }
         }
 
@@ -681,16 +691,20 @@ class ContextMatrix extends JTable {
             int tableHeight = fTable.getHeight();
             int firstColumnWidth = fTable.getColumnModel().getColumn(0).getWidth();
             int rowHeight = fTable.getRowHeight();
+            int offsetX = getViewPosition().x;
+            int offsetY = getViewPosition().y;
+            int x = -offsetX;
+            int y = -offsetY;
             g.setColor(HEADER_COLOR);
-            g.fillRect(0, 0, firstColumnWidth, tableHeight);
+            g.fillRect(x, y, firstColumnWidth, tableHeight);
 
             g.setColor(new Color(255,255,255));
-            g.drawLine(firstColumnWidth - 2, rowHeight, firstColumnWidth - 2, tableHeight);
+            g.drawLine(x + firstColumnWidth - 2, y + rowHeight, x + firstColumnWidth - 2, y + tableHeight);
             g.setColor(new Color(235,235,235));
-            g.drawLine(firstColumnWidth, rowHeight, firstColumnWidth, tableHeight);
+            g.drawLine(x + firstColumnWidth, y + rowHeight, x + firstColumnWidth, y + tableHeight);
             for (int j = 0; j < fTable.getRowCount() + 1; j++) {
                 g.setColor(new Color(255,255,255));
-                g.drawLine(0, j * rowHeight - 1, firstColumnWidth - 1, j * rowHeight - 1);
+                g.drawLine(x, y + j * rowHeight - 1, x + firstColumnWidth - 1, y + j * rowHeight - 1);
             }
         }
 
@@ -698,32 +712,38 @@ class ContextMatrix extends JTable {
             int tableWidth = fTable.getWidth();
             int firstRowHeight = fTable.getRowHeight();
             int columnWidth = fTable.getColumnModel().getColumn(0).getWidth();
+            int offsetX = getViewPosition().x;
+            int offsetY = getViewPosition().y;
+            int x = -offsetX;
+            int y = -offsetY;
             g.setColor(HEADER_COLOR);
-            g.fillRect(0, 0, tableWidth, firstRowHeight);
+            g.fillRect(x, y, tableWidth, firstRowHeight);
 
             g.setColor(new Color(255, 255, 255));
-            g.drawLine(columnWidth, firstRowHeight - 1, tableWidth, firstRowHeight - 1);
+            g.drawLine(x + columnWidth, y + firstRowHeight - 1, x + tableWidth, y + firstRowHeight - 1);
             g.setColor(new Color(235, 235, 235));
-            g.drawLine(columnWidth, firstRowHeight+1, tableWidth, firstRowHeight+1);
+            g.drawLine(x + columnWidth, y + firstRowHeight+1, x + tableWidth, y + firstRowHeight+1);
             for (int j = 1; j < fTable.getColumnCount() + 1; j++) {
                 g.setColor(new Color(255,255,255));
-                g.drawLine(j * columnWidth - 2, 0, j * columnWidth - 2, firstRowHeight - 1);
+                g.drawLine(x + j * columnWidth - 2, y, x + j * columnWidth - 2, y + firstRowHeight - 1);
             }
         }
 
         private void paintGridLines(Graphics g) {
-            int tableWidth = fTable.getWidth();
             int tableHeight = fTable.getHeight();
             int rowHeight = fTable.getRowHeight();
+            int offsetX = getViewPosition().x;
+            int offsetY = getViewPosition().y;
+            int x = -offsetX;
+            int y = -offsetY;
             g.setColor(TABLE_GRID_COLOR);
-            int x = 0;
             for (int i = 0; i < fTable.getColumnCount(); i++) {
                 TableColumn column = fTable.getColumnModel().getColumn(i);
                 x += column.getWidth();
-                g.drawLine(x - 1, 0, x - 1, tableHeight);
+                g.drawLine(x - 1, y, x - 1, y + tableHeight);
             }
             for (int j = 1; j < fTable.getRowCount() + 1; j++) {
-                g.drawLine(0, j * rowHeight, tableWidth - 1, j * rowHeight);
+                g.drawLine(-offsetX, y + j * rowHeight, x - 1, y + j * rowHeight);
             }
         }
 
