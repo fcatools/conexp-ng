@@ -34,14 +34,15 @@ public class Main {
         ProgramState testState = new ProgramState();
         testState.filePath = "../example.cex";
         testState.context = new FormalContext();
-        testState.context.addAttribute("a");
-        testState.context.addAttribute("b");
-        testState.context.addAttribute("c");
-        testState.context.addAttribute("d");
+        testState.context.addAttribute("female");
+        testState.context.addAttribute("juvenile");
+        testState.context.addAttribute("adult");
+        testState.context.addAttribute("male");
         try {
-            testState.context.addObject(new FullObject<>("x", Sets.newHashSet("a", "b")));
-            testState.context.addObject(new FullObject<>("y", Sets.newHashSet("b", "c")));
-            testState.context.addObject(new FullObject<String, String>("z"));
+            testState.context.addObject(new FullObject<>("girl", Sets.newHashSet("female", "juvenile")));
+            testState.context.addObject(new FullObject<>("woman", Sets.newHashSet("female", "adult")));
+            testState.context.addObject(new FullObject<>("boy", Sets.newHashSet("male", "juvenile")));
+            testState.context.addObject(new FullObject<>("man", Sets.newHashSet("male", "adult")));
         } catch (IllegalObjectException e1) {
             e1.printStackTrace();
         }
