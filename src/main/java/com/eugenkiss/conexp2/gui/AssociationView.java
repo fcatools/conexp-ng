@@ -1,5 +1,7 @@
 package com.eugenkiss.conexp2.gui;
 
+import java.beans.PropertyChangeEvent;
+
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
@@ -15,6 +17,13 @@ public class AssociationView extends View {
         view = new JScrollPane(new JTextArea());
         settings = new AssociationSettings();
         super.init();
+    }
+
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        // TODO Auto-generated method stub
+
     }
 
 }

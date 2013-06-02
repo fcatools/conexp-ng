@@ -2,6 +2,7 @@ package com.eugenkiss.conexp2.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.beans.PropertyChangeEvent;
 import java.util.Set;
 
 import javax.swing.JPanel;
@@ -59,6 +60,7 @@ public class ImplicationView extends View {
     private void writeImplications() {
         int i = 1, support = 0;
         StringBuffer buf;
+        textpane.setText("");
         for (FCAImplication<String> impl : implications) {
             support = state.context.supportCount(impl.getPremise());
             buf = new StringBuffer();
@@ -85,10 +87,14 @@ public class ImplicationView extends View {
                 : attrs[NON_ZERO_SUPPORT_STYLE];
     }
 
-    public void updateImplications() {
-        textpane.setText("");
+    private void updateImplications() {
         implications = state.context.getStemBase();
         writeImplications();
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        updateImplications();
     }
 
 }

@@ -1,5 +1,8 @@
 package com.eugenkiss.conexp2;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+
 import com.eugenkiss.conexp2.model.FormalContext;
 
 /**
@@ -17,5 +20,29 @@ public class ProgramState {
     public String filePath;
     public FormalContext context;
     public boolean unsavedChanges = false;
+
+    protected PropertyChangeSupport propertyChangeSupport;
+
+    public ProgramState() {
+        propertyChangeSupport = new PropertyChangeSupport(this);
+    }
+
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+        propertyChangeSupport.addPropertyChangeListener(listener);
+    }
+
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
+        propertyChangeSupport.removePropertyChangeListener(listener);
+    }
+
+    private void firePropertyChange(String propertyName, Object oldValue,
+            Object newValue) {
+        propertyChangeSupport.firePropertyChange(propertyName, oldValue,
+                newValue);
+    }
+
+    public void contextChanged() {
+        firePropertyChange("ContextChanged", null, context);
+    }
 
 }

@@ -1,19 +1,14 @@
 package com.eugenkiss.conexp2.model;
 
-import java.util.Observable;
-import java.util.Observer;
 import java.util.Set;
 
-public abstract class IAssociations extends Observable {
+public abstract class IAssociations{
 
     private double minsup;
     private double confidence;
     private Set<AssociationRule> rules;
 
     public abstract boolean computeAssociationRules();
-
-    @Override
-    public abstract void notifyObservers();
 
     public Set<AssociationRule> getRules() {
         return rules;

@@ -1,10 +1,11 @@
 package com.eugenkiss.conexp2.model;
 
+import java.util.Iterator;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-public class AssociationRule {
+public class AssociationRule implements Comparable<AssociationRule> {
 
     private SortedSet<String> premise;
     private SortedSet<String> consequent;
@@ -66,6 +67,37 @@ public class AssociationRule {
 
     public String toString() {
         return premise + " -> " + consequent;
+    }
+
+    @Override
+    public int compareTo(AssociationRule arg0) {
+        if (equals(arg0))
+            return 0;
+        if (!premise.first().equals(arg0.premise.first()))
+            return premise.first().compareTo(arg0.premise.first());
+        else {
+
+            if (premise.containsAll(arg0.premise))
+                return compare(consequent, arg0.consequent);
+            else
+                return compare(premise, arg0.premise);
+
+        }
+    }
+
+    private int compare(SortedSet<String> set, SortedSet<String> set2) {
+        Iterator<String> it = set.iterator();
+        Iterator<String> it2 = set2.iterator();
+        String s, s2;
+
+        while (it.hasNext() && it2.hasNext()) {
+            s = it.next();
+            s2 = it2.next();
+            if (!s.equals(s2))
+                return s.compareTo(s2);
+        }
+
+        return it.hasNext() ? 1 : -1;
     }
 
 }

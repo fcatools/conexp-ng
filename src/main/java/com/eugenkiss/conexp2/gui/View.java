@@ -1,6 +1,7 @@
 package com.eugenkiss.conexp2.gui;
 
 import java.awt.BorderLayout;
+import java.beans.PropertyChangeListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
@@ -11,8 +12,7 @@ import javax.swing.JToolBar;
 import com.eugenkiss.conexp2.OS;
 import com.eugenkiss.conexp2.ProgramState;
 
-
-public abstract class View extends JPanel {
+public abstract class View extends JPanel implements PropertyChangeListener {
 
     protected static final long serialVersionUID = -873702052790459127L;
 
@@ -28,6 +28,7 @@ public abstract class View extends JPanel {
 
     View(ProgramState state) {
         this.state = state;
+        state.addPropertyChangeListener(this);
     }
 
     protected void init() {

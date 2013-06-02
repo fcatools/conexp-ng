@@ -1,5 +1,6 @@
 package com.eugenkiss.conexp2.gui;
 
+import java.beans.PropertyChangeEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +15,7 @@ public class LatticeView extends View {
 
     public LatticeView(ProgramState state) {
         super(state);
-        
+
         settings = new JLabel("Lattice Settings");
         List<Node >nodes = new ArrayList<>();
         nodes.add(new Node(null, null, 0, 50));
@@ -24,5 +25,11 @@ public class LatticeView extends View {
         view = new LatticeGraphView(new LatticeGraph(nodes, null));
         super.init();
     }
-   
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        // TODO Auto-generated method stub
+
+    }
+
 }
