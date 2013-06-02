@@ -102,6 +102,7 @@ public class ContextEditor extends View {
             public void actionPerformed(ActionEvent e) {
                 state.context.transpose();
                 matrixModel.fireTableStructureChanged();
+                state.contextChanged();
             }
         });
     }
@@ -341,6 +342,10 @@ public class ContextEditor extends View {
         ContextMatrix.ContextCellEditor ed = (ContextMatrix.ContextCellEditor) matrix.editor;
         ed.getTextField().requestFocus();
         ed.getTextField().selectAll();
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
     }
 }
 
