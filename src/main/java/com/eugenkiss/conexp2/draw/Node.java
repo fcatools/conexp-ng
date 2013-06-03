@@ -1,18 +1,19 @@
 package com.eugenkiss.conexp2.draw;
 
 import java.awt.Color;
+import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.batik.swing.JSVGCanvas;
 
-public class Node extends JSVGCanvas{
+public class Node extends JSVGCanvas {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 4253192979583459657L;
-	private List<String> objects;
+    /**
+     *
+     */
+    private static final long serialVersionUID = 4253192979583459657L;
+    private List<String> objects;
     private List<String> attributes;
     private int x;
     private int y;
@@ -29,15 +30,15 @@ public class Node extends JSVGCanvas{
         this.attributes = attributes;
         this.x = x;
         this.y = y;
-        this.setBounds(x, y, 10, 10);
-        this.setBackground(Color.RED);
+        this.setBounds(x, y, 15, 15);
+        //this.setBackground(Color.GRAY);
 
     }
 
     /**
-     * 
+     *
      */
-    public Node(){
+    public Node() {
         this.objects = new ArrayList<>();
         this.attributes = new ArrayList<>();
         this.x = 0;
@@ -47,7 +48,7 @@ public class Node extends JSVGCanvas{
     }
 
     /**
-     * 
+     *
      * @return
      */
     public int getX() {
@@ -55,23 +56,24 @@ public class Node extends JSVGCanvas{
     }
 
     /**
-     * 
+     *
      * @param x
      */
     public void setX(int x) {
         this.x = x;
+
     }
 
     /**
-     * 
+     *
      * @return
      */
     public int getY() {
         return y;
     }
-    
+
     /**
-     * 
+     *
      * @param y
      */
     public void setY(int y) {
@@ -79,28 +81,28 @@ public class Node extends JSVGCanvas{
     }
 
     /**
-     * 
+     *
      * @param s
      */
-    public void addObject(String s){
+    public void addObject(String s) {
         objects.add(s);
     }
 
     /**
-     * 
+     *
      * @param s
      */
-    public void addAttribut(String s){
+    public void addAttribut(String s) {
         attributes.add(s);
     }
 
-	public void update(int x, int y) {
-		int updateX = this.x - x;
-		int updateY = this.y - y;
-		this.setBounds(updateX, updateY, 10, 10);
-		this.x = updateX;
-		this.y = updateY;
-		
-	}
+    public void update(int x, int y) {
+        int updateX = this.x - x;
+        int updateY = this.y - y;
+        this.setBounds(updateX, updateY, 10, 10);
+        this.x = updateX;
+        this.y = updateY;
+        getParent().repaint();
+    }
 
 }

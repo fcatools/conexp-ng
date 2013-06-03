@@ -16,7 +16,7 @@ public class Edge {
     }
 
     /**
-     * 
+     *
      * @return
      */
     public Node getU() {
@@ -24,7 +24,7 @@ public class Edge {
     }
 
     /**
-     * 
+     *
      * @param u
      */
     public void setU(Node u) {
@@ -32,7 +32,7 @@ public class Edge {
     }
 
     /**
-     * 
+     *
      * @return
      */
     public Node getV() {
@@ -40,7 +40,7 @@ public class Edge {
     }
 
     /**
-     * 
+     *
      * @param v
      */
     public void setV(Node v) {
