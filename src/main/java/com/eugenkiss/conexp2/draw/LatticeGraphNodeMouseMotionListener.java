@@ -3,11 +3,11 @@ package com.eugenkiss.conexp2.draw;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 
-public class LatticeGraphNodeMouseListener implements MouseMotionListener {
+public class LatticeGraphNodeMouseMotionListener implements MouseMotionListener {
 
     private Node n;
     
-    public LatticeGraphNodeMouseListener(Node n){
+    public LatticeGraphNodeMouseMotionListener(Node n){
     	this.n = n;
     }
     

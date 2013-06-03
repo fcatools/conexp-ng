@@ -17,6 +17,8 @@ public class Node extends JSVGCanvas {
     private List<String> attributes;
     private int x;
     private int y;
+	private List<Node> below;
+	private boolean moveSubgraph;
 
     /**
      *
@@ -31,6 +33,7 @@ public class Node extends JSVGCanvas {
         this.x = x;
         this.y = y;
         this.setBounds(x, y, 15, 15);
+        this.below = new ArrayList<>();
         //this.setBackground(Color.GRAY);
 
     }
@@ -96,12 +99,23 @@ public class Node extends JSVGCanvas {
         attributes.add(s);
     }
 
+    public void addBelowNode(Node n){
+    	below.add(n);
+    }
+    
     public void update(int x, int y) {
         int updateX = this.x + x;
         int updateY = this.y + y;
+        if(moveSubgraph){
+        	for(Node n : below){
+            	n.update(x, y);
+            }
+        }
+        
         this.setBounds(updateX, updateY, 10, 10);
         this.x = updateX;
         this.y = updateY;
+
         getParent().repaint();
     }
 

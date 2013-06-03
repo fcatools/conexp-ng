@@ -26,6 +26,7 @@ public class LatticeView extends View {
         nodes.add(new Node(null, null, 100, 50));
         nodes.add(new Node(null, null, 200, 50));
         nodes.add(new Node(null, null, 150, 150));
+        nodes.get(0).addBelowNode(nodes.get(1));
         List<Edge >edges = new ArrayList<>();
         edges.add(new Edge(nodes.get(0), nodes.get(1)));
         view = new LatticeGraphView(new LatticeGraph(nodes, edges));

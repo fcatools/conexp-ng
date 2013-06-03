@@ -2,11 +2,12 @@ package com.eugenkiss.conexp2.gui;
 
 import java.awt.Color;
 import java.awt.Graphics;
+
 import org.apache.batik.swing.JSVGCanvas;
 
 import com.eugenkiss.conexp2.draw.Edge;
 import com.eugenkiss.conexp2.draw.LatticeGraph;
-import com.eugenkiss.conexp2.draw.LatticeGraphNodeMouseListener;
+import com.eugenkiss.conexp2.draw.LatticeGraphNodeMouseMotionListener;
 import com.eugenkiss.conexp2.draw.Node;
 
 /*The JSVGCanvas provides a set of build-in interactors that
@@ -23,7 +24,7 @@ public class LatticeGraphView extends JSVGCanvas {
         this.graph = graph;
         for (Node n : graph.getNodes()) {
             this.add(n);
-            n.addMouseListener(new LatticeGraphNodeMouseListener(n));
+            n.addMouseMotionListener(new LatticeGraphNodeMouseMotionListener(n));
         }
 
     }
