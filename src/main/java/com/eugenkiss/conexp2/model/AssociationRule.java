@@ -73,6 +73,12 @@ public class AssociationRule implements Comparable<AssociationRule> {
     public int compareTo(AssociationRule arg0) {
         if (equals(arg0))
             return 0;
+        if(premise.isEmpty()&& arg0.premise.isEmpty())
+        	return compare(consequent, arg0.consequent);
+        if(premise.isEmpty()&&!arg0.premise.isEmpty())
+        	return -1;
+        if(!premise.isEmpty()&&arg0.premise.isEmpty())
+        	return 1;
         if (!premise.first().equals(arg0.premise.first()))
             return premise.first().compareTo(arg0.premise.first());
         else {

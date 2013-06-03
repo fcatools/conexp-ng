@@ -29,32 +29,41 @@ public class AssociationMiner extends IAssociations {
         Set<AssociationRule> result = new TreeSet<AssociationRule>();
         FC = new ListSet<>();
         apriori();
-        System.out.println(FC);
         Gen_LB(result);
         return result;
     }
 
+    /**
+     * from Stumme et al. 2001
+     *
+     * @param result
+     */
     private void Gen_LB(Set<AssociationRule> result) {
         List<Set<SortedSet<String>>> S = new ArrayList<>();
         int supL;
         for (int i = 1; i < FC.size(); i++) {
             double conf;
             for (SortedSet<String> L : FC.getElementAt(i)) {
+
                 S = new ArrayList<>();
 
                 supL = context.supportCount(L);
+
                 for (int j = 0; j < i; j++) {
-                    S.add(subset(FC.getElementAt(j), L));
+                    S.add(subsets(FC.getElementAt(j), L));
                 }
+
                 for (int j = i - 1; j >= 0; j--) {
                     for (SortedSet<String> L_prime : S.get(j)) {
                         conf = supL / (double) context.supportCount(L_prime);
-                        if (conf >= getConfidence())
+                        if (conf >= getConfidence()) {
                             result.add(new AssociationRule(L_prime, minus(L,
                                     L_prime), supL
                                     / (double) context.getObjectCount(), conf));
+                        }
                         for (int l = j; l >= 0; l--) {
-                            S.set(l, minus(S.get(l), subset(S.get(l), L_prime)));
+                            S.set(l,
+                                    minus(S.get(l), subsets(S.get(l), L_prime)));
                         }
                     }
                 }
@@ -66,61 +75,32 @@ public class AssociationMiner extends IAssociations {
             Set<SortedSet<String>> b) {
         Set<SortedSet<String>> result = new ListSet<>();
         Iterator<SortedSet<String>> ita = a.iterator();
-        Iterator<SortedSet<String>> itb = b.iterator();
         SortedSet<String> temp_a;
-        while (itb.hasNext()) {
+        while (ita.hasNext()) {
             temp_a = ita.next();
-            if (!temp_a.equals(itb.next())) {
+            if (!b.contains(temp_a)) {
                 result.add(temp_a);
             }
         }
-        while (ita.hasNext())
-            result.add(ita.next());
         return result;
     }
 
-    private Set<SortedSet<String>> subset(Set<SortedSet<String>> subset,
+    /**
+     *
+     * @param superset
+     * @param someElements
+     * @return all the elemts of someElements which are subsets of superset
+     */
+    private Set<SortedSet<String>> subsets(Set<SortedSet<String>> someElements,
             SortedSet<String> superset) {
-        Set<SortedSet<String>> result = new ListSet<>();
-        for (SortedSet<String> sub : subset) {
-            if (superset.containsAll(sub))
-                result.add(sub);
-        }
-        return result;
-    }
 
-    @SuppressWarnings("unused")
-    private void ap_genrules(SortedSet<String> fk,
-            IndexedSet<SortedSet<String>> Hm, Set<AssociationRule> result) {
-        double conf = 0;
-        SortedSet<String> fk_h;
-        int k = fk.size();
-        int m = Hm.isEmpty() ? 0 : Hm.getElementAt(0).size();
-        if (k > m + 1) {
-            if (m == 0) {
-                TreeSet<String> temp;
-                for (String i : fk) {
-                    temp = new TreeSet<>();
-                    temp.add(i);
-                    Hm.add(temp);
-                }
-            } else {
-                Hm = apriori_gen(Hm, m + 1);
-            }
-            for (int i = 0; i < Hm.size(); i++) {
-                fk_h = minus(fk, Hm.getElementAt(i));
-                conf = context.supportCount(fk)
-                        / (double) context.supportCount(fk_h);
-                if (conf >= getConfidence())
-                    result.add(new AssociationRule(fk_h, Hm.getElementAt(i),
-                            context.supportCount(fk)
-                                    / (double) context.getObjectCount(), conf));
-                else {
-                    Hm.remove(Hm.getElementAt(i));
-                    i--;
-                }
-            }
+        Set<SortedSet<String>> result = new ListSet<>();
+        for (SortedSet<String> elements : someElements) {
+            if (superset.containsAll(elements))
+                result.add(elements);
         }
+        System.out.println(someElements + " - " + superset + " = " + result);
+        return result;
     }
 
     private void apriori() {
@@ -138,10 +118,12 @@ public class AssociationMiner extends IAssociations {
         IndexedSet<SortedSet<String>> temp_k = new ListSet<>();
         IndexedSet<SortedSet<String>> temp_km1 = new ListSet<>();
         for (SortedSet<String> sortedSet : candidates) {
-            temp_km1.add(sortedSet);
+            temp_k.add(sortedSet);
         }
-
-        do {
+        // check if the empty set is closed
+        checkIfSetsK_1AreClosed(temp_km1, temp_k);
+        temp_km1 = temp_k;
+        while (!temp_k.isEmpty()) {
             k++;
             temp_k = new ListSet<>();
             candidates = apriori_gen(temp_km1, k);
@@ -152,9 +134,15 @@ public class AssociationMiner extends IAssociations {
             }
             checkIfSetsK_1AreClosed(temp_km1, temp_k);
             temp_km1 = temp_k;
-        } while (!temp_k.isEmpty());
+        }
     }
 
+    /**
+     *
+     * @param fk_1
+     * @param k
+     * @return canditates for a frequent itemset
+     */
     private IndexedSet<SortedSet<String>> apriori_gen(
             IndexedSet<SortedSet<String>> fk_1, int k) {
         IndexedSet<SortedSet<String>> result = new ListSet<>();
@@ -182,11 +170,32 @@ public class AssociationMiner extends IAssociations {
         return result;
     }
 
+    /**
+     * a set is closed if no superset has the same support
+     *
+     * @param levelKm1
+     * @param levelK
+     */
     private void checkIfSetsK_1AreClosed(Set<SortedSet<String>> levelKm1,
             Set<SortedSet<String>> levelK) {
-        Set<SortedSet<String>> temp = new ListSet<>();
+        Set<SortedSet<String>> closed = new ListSet<>();
+        boolean isClosed = true;
+        // is the empty set closed?
+        if (levelKm1.isEmpty()) {
+            SortedSet<String> emptySet = new TreeSet<>();
+            int supportcount = context.supportCount(emptySet);
+            for (SortedSet<String> k : levelK) {
+                if (supportcount == context.supportCount(k)) {
+                    isClosed = false;
+                    break;
+                }
+            }
+            if (isClosed) {
+                closed.add(emptySet);
+            }
+        }
         for (SortedSet<String> km1 : levelKm1) {
-            boolean isClosed = true;
+            isClosed = true;
             int supportcount = context.supportCount(km1);
             for (SortedSet<String> k : levelK) {
                 if (supportcount == context.supportCount(k)
@@ -196,10 +205,10 @@ public class AssociationMiner extends IAssociations {
                 }
             }
             if (isClosed) {
-                temp.add(km1);
+                closed.add(km1);
             }
         }
-        FC.add(temp);
+        FC.add(closed);
     }
 
     // Set-Operations
@@ -234,16 +243,56 @@ public class AssociationMiner extends IAssociations {
     private SortedSet<String> minus(SortedSet<String> a, SortedSet<String> b) {
         SortedSet<String> result = new TreeSet<>();
         Iterator<String> ita = a.iterator();
-        Iterator<String> itb = b.iterator();
         String temp_a;
-        while (itb.hasNext()) {
+        while (ita.hasNext()) {
             temp_a = ita.next();
-            if (!temp_a.equals(itb.next()))
+            if (!b.contains(temp_a))
                 result.add(temp_a);
         }
-        while (ita.hasNext())
-            result.add(ita.next());
+
         return result;
+    }
+
+    /**
+     * Data-Mining-algorithm, computes not a base of associations
+     *
+     * @param fk
+     * @param Hm
+     * @param result
+     */
+
+    @SuppressWarnings("unused")
+    private void ap_genrules(SortedSet<String> fk,
+            IndexedSet<SortedSet<String>> Hm, Set<AssociationRule> result) {
+        double conf = 0;
+        SortedSet<String> fk_h;
+        int k = fk.size();
+        int m = Hm.isEmpty() ? 0 : Hm.getElementAt(0).size();
+        if (k > m + 1) {
+            if (m == 0) {
+                TreeSet<String> temp;
+                for (String i : fk) {
+                    temp = new TreeSet<>();
+                    temp.add(i);
+                    Hm.add(temp);
+                }
+            } else {
+                Hm = apriori_gen(Hm, m + 1);
+            }
+            for (int i = 0; i < Hm.size(); i++) {
+                fk_h = minus(fk, Hm.getElementAt(i));
+                conf = context.supportCount(fk)
+                        / (double) context.supportCount(fk_h);
+                if (conf >= getConfidence())
+                    result.add(new AssociationRule(fk_h, Hm.getElementAt(i),
+                            context.supportCount(fk)
+                                    / (double) context.getObjectCount(), conf));
+                else {
+                    Hm.remove(Hm.getElementAt(i));
+                    i--;
+                }
+            }
+        }
     }
 
 }
