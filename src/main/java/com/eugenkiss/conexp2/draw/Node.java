@@ -97,8 +97,8 @@ public class Node extends JSVGCanvas {
     }
 
     public void update(int x, int y) {
-        int updateX = this.x - x;
-        int updateY = this.y - y;
+        int updateX = this.x + x;
+        int updateY = this.y + y;
         this.setBounds(updateX, updateY, 10, 10);
         this.x = updateX;
         this.y = updateY;
