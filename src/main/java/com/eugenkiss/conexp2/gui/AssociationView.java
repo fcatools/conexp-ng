@@ -5,7 +5,6 @@ import java.beans.PropertyChangeEvent;
 import java.util.Set;
 
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextPane;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.SimpleAttributeSet;
@@ -16,88 +15,98 @@ import com.eugenkiss.conexp2.model.AssociationRule;
 
 public class AssociationView extends View {
 
-	private static final long serialVersionUID = -6377834669097012170L;
+    private double minsup=0.1;
 
-	private JTextPane textpane = new JTextPane();
+    private double conf=0.5;
 
-	private Set<AssociationRule> implications;
+    private static final long serialVersionUID = -6377834669097012170L;
 
-	private SimpleAttributeSet[] attrs;
-	final int NON_ZERO_SUPPORT_EXACT_RULE = 0;
+    private JTextPane textpane = new JTextPane();
 
-	final int INEXACT_RULE = 1;
+    private Set<AssociationRule> associationbase;
 
-	final int ZERO_SUPPORT_EXACT_RULE = 2;
+    private SimpleAttributeSet[] attrs;
+    final int NON_ZERO_SUPPORT_EXACT_RULE = 0;
 
-	protected final String FOLLOW = " ==> ";
+    final int INEXACT_RULE = 1;
 
-	protected final String END_MARK = ";";
+    final int ZERO_SUPPORT_EXACT_RULE = 2;
 
-	private final String EOL = System.getProperty("line.separator");
+    protected final String FOLLOW = " ==> ";
 
-	public AssociationView(ProgramState state) {
-		super(state);
-		attrs = new SimpleAttributeSet[3];
-		attrs[NON_ZERO_SUPPORT_EXACT_RULE] = new SimpleAttributeSet();
-		StyleConstants.setForeground(attrs[NON_ZERO_SUPPORT_EXACT_RULE],
-				Color.blue);
+    protected final String END_MARK = ";";
 
-		attrs[ZERO_SUPPORT_EXACT_RULE] = new SimpleAttributeSet();
-		StyleConstants.setForeground(attrs[ZERO_SUPPORT_EXACT_RULE], Color.red);
+    private final String EOL = System.getProperty("line.separator");
 
-		attrs[INEXACT_RULE] = new SimpleAttributeSet();
-		StyleConstants.setForeground(attrs[INEXACT_RULE], new Color(0, 128, 0));
 
-		view = new JScrollPane(textpane);
-		settings = new AssociationSettings();
-		super.init();
-		updateImplications();
-	}
+    public AssociationView(ProgramState state) {
+        super(state);
+        attrs = new SimpleAttributeSet[3];
+        attrs[NON_ZERO_SUPPORT_EXACT_RULE] = new SimpleAttributeSet();
+        StyleConstants.setForeground(attrs[NON_ZERO_SUPPORT_EXACT_RULE],
+                Color.blue);
 
-	private void writeImplications() {
-		int i = 1;
-		StringBuffer buf;
-		textpane.setText("");
-		for (AssociationRule impl : implications) {
-			buf = new StringBuffer();
-			buf.append(i);
-			buf.append("< " + state.context.supportCount(impl.getPremise())
-					+ " > ");
-			buf.append(impl.getPremise() + " =[" + impl.getConf() + "]=> ");
-			buf.append("< " + state.context.supportCount(impl.getConsequent())
-					+ " > " + impl.getConsequent() + END_MARK);
-			buf.append(EOL);
-			i++;
-			try {
-				textpane.getDocument().insertString(
-						textpane.getDocument().getLength(), buf.toString(),
-						implicationStyle(impl.getSup(), impl.getConf()));
-			} catch (BadLocationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+        attrs[ZERO_SUPPORT_EXACT_RULE] = new SimpleAttributeSet();
+        StyleConstants.setForeground(attrs[ZERO_SUPPORT_EXACT_RULE], Color.red);
 
-		}
+        attrs[INEXACT_RULE] = new SimpleAttributeSet();
+        StyleConstants.setForeground(attrs[INEXACT_RULE], new Color(0, 128, 0));
 
-	}
+        view = new JScrollPane(textpane);
+        settings = new AssociationSettings();
+        settings.addPropertyChangeListener(this);
+        super.init();
+        updateAssociations();
+    }
 
-	public javax.swing.text.SimpleAttributeSet implicationStyle(double support,
-			double confidence) {
-		if (confidence == 1.0) {
-			return support > 0 ? attrs[NON_ZERO_SUPPORT_EXACT_RULE]
-					: attrs[ZERO_SUPPORT_EXACT_RULE];
-		}
-		return attrs[INEXACT_RULE];
-	}
+    private void writeImplications() {
+        int i = 1;
+        StringBuffer buf;
+        textpane.setText("");
+        for (AssociationRule impl : associationbase) {
+            buf = new StringBuffer();
+            buf.append(i);
+            buf.append("< " + state.context.supportCount(impl.getPremise())
+                    + " > ");
+            buf.append(impl.getPremise() + " =[" + impl.getConf() + "]=> ");
+            buf.append("< " + state.context.supportCount(impl.getConsequent())
+                    + " > " + impl.getConsequent() + END_MARK);
+            buf.append(EOL);
+            i++;
+            try {
+                textpane.getDocument().insertString(
+                        textpane.getDocument().getLength(), buf.toString(),
+                        implicationStyle(impl.getSup(), impl.getConf()));
+            } catch (BadLocationException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
 
-	private void updateImplications() {
-		implications = state.context.getAssociations(0.0, 0.0);
-		writeImplications();
-	}
+        }
 
-	@Override
-	public void propertyChange(PropertyChangeEvent evt) {
-		updateImplications();
-	}
+    }
+
+    public javax.swing.text.SimpleAttributeSet implicationStyle(double support,
+            double confidence) {
+        if (confidence == 1.0) {
+            return support > 0 ? attrs[NON_ZERO_SUPPORT_EXACT_RULE]
+                    : attrs[ZERO_SUPPORT_EXACT_RULE];
+        }
+        return attrs[INEXACT_RULE];
+    }
+
+    private void updateAssociations() {
+        associationbase = state.context.getAssociations(minsup, conf);
+        writeImplications();
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        if(evt.getPropertyName().equals("ConfidenceChanged"))
+        	conf=(double) evt.getNewValue();
+        if(evt.getPropertyName().equals("MinimalSupportChanged"))
+        	minsup=(double) evt.getNewValue();
+        updateAssociations();
+    }
 
 }

@@ -10,8 +10,17 @@ import java.util.TreeSet;
 import de.tudresden.inf.tcs.fcaapi.utils.IndexedSet;
 import de.tudresden.inf.tcs.fcalib.utils.ListSet;
 
-public class AssociationMiner extends IAssociations {
+/**
+ * Computes the Luxenburger base using first the apriori-algorithm to find
+ * frequent and closed itemsets. Then the base is calculated with Gen-LB from
+ * Stumme et al 2001
+ *
+ * @author David
+ *
+ */
+public class AssociationMiner extends AbstractAssociationMiner {
 
+    // frequent and closed itemsets
     private IndexedSet<Set<SortedSet<String>>> FC;
 
     public AssociationMiner(FormalContext context) {
@@ -54,13 +63,16 @@ public class AssociationMiner extends IAssociations {
                 }
 
                 for (int j = i - 1; j >= 0; j--) {
+
                     for (SortedSet<String> L_prime : S.get(j)) {
+
                         conf = supL / (double) context.supportCount(L_prime);
                         if (conf >= getConfidence()) {
                             result.add(new AssociationRule(L_prime, minus(L,
                                     L_prime), supL
                                     / (double) context.getObjectCount(), conf));
                         }
+
                         for (int l = j; l >= 0; l--) {
                             S.set(l,
                                     minus(S.get(l), subsets(S.get(l), L_prime)));
@@ -69,38 +81,6 @@ public class AssociationMiner extends IAssociations {
                 }
             }
         }
-    }
-
-    private Set<SortedSet<String>> minus(Set<SortedSet<String>> a,
-            Set<SortedSet<String>> b) {
-        Set<SortedSet<String>> result = new ListSet<>();
-        Iterator<SortedSet<String>> ita = a.iterator();
-        SortedSet<String> temp_a;
-        while (ita.hasNext()) {
-            temp_a = ita.next();
-            if (!b.contains(temp_a)) {
-                result.add(temp_a);
-            }
-        }
-        return result;
-    }
-
-    /**
-     *
-     * @param superset
-     * @param someElements
-     * @return all the elemts of someElements which are subsets of superset
-     */
-    private Set<SortedSet<String>> subsets(Set<SortedSet<String>> someElements,
-            SortedSet<String> superset) {
-
-        Set<SortedSet<String>> result = new ListSet<>();
-        for (SortedSet<String> elements : someElements) {
-            if (superset.containsAll(elements))
-                result.add(elements);
-        }
-        System.out.println(someElements + " - " + superset + " = " + result);
-        return result;
     }
 
     private void apriori() {
@@ -121,26 +101,71 @@ public class AssociationMiner extends IAssociations {
             temp_k.add(sortedSet);
         }
         // check if the empty set is closed
-        checkIfSetsK_1AreClosed(temp_km1, temp_k);
+        checkIfSetsKMinus1AreClosed(temp_km1, temp_k);
         temp_km1 = temp_k;
-        while (!temp_k.isEmpty()) {
+        while (!temp_km1.isEmpty()) {
             k++;
             temp_k = new ListSet<>();
             candidates = apriori_gen(temp_km1, k);
+            // check if the candidates have the given minimal support
             for (SortedSet<String> candidate : candidates) {
                 if (context.supportCount(candidate) >= getMinsup()
                         * context.getObjectCount())
                     temp_k.add(candidate);
             }
-            checkIfSetsK_1AreClosed(temp_km1, temp_k);
+            checkIfSetsKMinus1AreClosed(temp_km1, temp_k);
             temp_km1 = temp_k;
         }
     }
 
     /**
+     * a set is closed if no superset has the same support
+     *
+     * @param levelKm1
+     * @param levelK
+     */
+    private void checkIfSetsKMinus1AreClosed(Set<SortedSet<String>> levelKm1,
+            Set<SortedSet<String>> levelK) {
+        Set<SortedSet<String>> closed = new ListSet<>();
+        boolean isClosed = true;
+        // is the empty set closed?
+        if (levelKm1.isEmpty()) {
+            SortedSet<String> emptySet = new TreeSet<>();
+            int supportcount = context.supportCount(emptySet);
+            for (SortedSet<String> k : levelK) {
+                if (supportcount == context.supportCount(k)) {
+                    isClosed = false;
+                    break;
+                }
+            }
+            if (isClosed) {
+                closed.add(emptySet);
+            }
+        }
+        // check for every frequent itemset if a superset has the same support
+        for (SortedSet<String> km1 : levelKm1) {
+            isClosed = true;
+            int supportcount = context.supportCount(km1);
+            for (SortedSet<String> k : levelK) {
+                if (supportcount == context.supportCount(k)
+                        && k.containsAll(km1)) {
+                    isClosed = false;
+                    break;
+                }
+            }
+            if (isClosed) {
+                closed.add(km1);
+            }
+        }
+        FC.add(closed);
+    }
+
+    /**
      *
      * @param fk_1
+     *            frequent itemsets one step before (length k-1)
      * @param k
+     *            the length of itemsets which should computed
      * @return canditates for a frequent itemset
      */
     private IndexedSet<SortedSet<String>> apriori_gen(
@@ -148,6 +173,7 @@ public class AssociationMiner extends IAssociations {
         IndexedSet<SortedSet<String>> result = new ListSet<>();
         TreeSet<String> temp;
         if (k == 2) {
+            // just merge two sets with one element
             for (int i = 0; i < fk_1.size() - 1; i++) {
                 for (int j = i + 1; j < fk_1.size(); j++) {
                     temp = new TreeSet<>();
@@ -170,47 +196,6 @@ public class AssociationMiner extends IAssociations {
         return result;
     }
 
-    /**
-     * a set is closed if no superset has the same support
-     *
-     * @param levelKm1
-     * @param levelK
-     */
-    private void checkIfSetsK_1AreClosed(Set<SortedSet<String>> levelKm1,
-            Set<SortedSet<String>> levelK) {
-        Set<SortedSet<String>> closed = new ListSet<>();
-        boolean isClosed = true;
-        // is the empty set closed?
-        if (levelKm1.isEmpty()) {
-            SortedSet<String> emptySet = new TreeSet<>();
-            int supportcount = context.supportCount(emptySet);
-            for (SortedSet<String> k : levelK) {
-                if (supportcount == context.supportCount(k)) {
-                    isClosed = false;
-                    break;
-                }
-            }
-            if (isClosed) {
-                closed.add(emptySet);
-            }
-        }
-        for (SortedSet<String> km1 : levelKm1) {
-            isClosed = true;
-            int supportcount = context.supportCount(km1);
-            for (SortedSet<String> k : levelK) {
-                if (supportcount == context.supportCount(k)
-                        && k.containsAll(km1)) {
-                    isClosed = false;
-                    break;
-                }
-            }
-            if (isClosed) {
-                closed.add(km1);
-            }
-        }
-        FC.add(closed);
-    }
-
     // Set-Operations
 
     /***
@@ -218,8 +203,11 @@ public class AssociationMiner extends IAssociations {
      * Without Pruning, if the join is a superset of a non-frequent-itemset
      *
      * @param a
+     *            a set with k elements
      * @param b
-     * @return null, if a and b are not equal in their first k-1 elements
+     *            another with k elements
+     * @return {@code null}, if a and b are not equal in their first k-1
+     *         elements
      */
     private SortedSet<String> equijoin(SortedSet<String> a, SortedSet<String> b) {
         Iterator<String> ita = a.iterator();
@@ -240,16 +228,44 @@ public class AssociationMiner extends IAssociations {
         return result;
     }
 
-    private SortedSet<String> minus(SortedSet<String> a, SortedSet<String> b) {
-        SortedSet<String> result = new TreeSet<>();
-        Iterator<String> ita = a.iterator();
-        String temp_a;
+    @SuppressWarnings("unchecked")
+    private <K, T extends Set<K>> T minus(T a, T b) {
+        T result = null;
+        if (a.isEmpty())
+            return a;
+
+        if (a.iterator().next() instanceof Comparable<?>) {
+            result = (T) new TreeSet<>();
+        } else {
+            result = (T) new ListSet<>();
+        }
+        Iterator<K> ita = a.iterator();
+        K temp_a;
+
         while (ita.hasNext()) {
             temp_a = ita.next();
-            if (!b.contains(temp_a))
+            if (!b.contains(temp_a)) {
                 result.add(temp_a);
+            }
         }
+        return result;
+    }
 
+    /**
+     *
+     * @param superset
+     * @param someSets
+     * @return all the sets of someSets which are subsets of superset
+     */
+    private Set<SortedSet<String>> subsets(Set<SortedSet<String>> someSets,
+            SortedSet<String> superset) {
+
+        Set<SortedSet<String>> result = new ListSet<>();
+
+        for (SortedSet<String> elements : someSets) {
+            if (superset.containsAll(elements))
+                result.add(elements);
+        }
         return result;
     }
 

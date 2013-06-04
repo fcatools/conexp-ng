@@ -6,6 +6,9 @@ import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
@@ -13,6 +16,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 public class AssociationSettings extends JPanel {
+
+    private PropertyChangeSupport propertyChangeSupport;
 
     private static final long serialVersionUID = -3692280021161777005L;
 
@@ -30,7 +35,8 @@ public class AssociationSettings extends JPanel {
     PieChart piechart = new PieChart();
 
     public AssociationSettings() {
-        setLayout(new GridBagLayout());
+    	propertyChangeSupport = new PropertyChangeSupport(this);
+    	setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.anchor = GridBagConstraints.WEST;
         gbc.insets = new Insets(0, 0, 10, 0);
@@ -52,6 +58,24 @@ public class AssociationSettings extends JPanel {
         minSupSlider.addChangeListener(new SliderListener(true));
     }
 
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+        super.addPropertyChangeListener(listener);
+        propertyChangeSupport.addPropertyChangeListener(listener);
+    }
+
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
+        super.removePropertyChangeListener(listener);
+        propertyChangeSupport.removePropertyChangeListener(listener);
+    }
+
+    private void myFirePropertyChange(String propertyName, Object oldValue,
+            Object newValue) {
+        propertyChangeSupport.firePropertyChange(propertyName, oldValue,
+                newValue);
+    }
+
+    // ////////////////////////////////////////////////////////////////////////////////////////
+
     private class PieChart extends JPanel {
 
         private static final long serialVersionUID = -5226331499362209414L;
@@ -63,12 +87,12 @@ public class AssociationSettings extends JPanel {
 
             g.setColor(Color.BLUE);
             g.fillArc(25, 5, 140, 140, 0, 360);
-            g.drawString("#Association Rules = " +all, 10, 165);
+            g.drawString("#Association Rules = " + all, 10, 165);
 
             g.setColor(Color.RED);
             g.fillArc(25, 5, 140, 140, 90, degree);
 
-            g.drawString("#Assoc. Rules with minSup = " +current, 10, 180);
+            g.drawString("#Assoc. Rules with minSup = " + current, 10, 180);
 
         }
 
@@ -94,7 +118,15 @@ public class AssociationSettings extends JPanel {
             }
 
             if (!slider.getValueIsAdjusting()) {
-                current = 200-(minSupSlider.getValue() + confSlider.getValue());
+                if (minSup)
+                    AssociationSettings.this.myFirePropertyChange(
+                            "MinimalSupportChanged", 0, value);
+
+                else
+                    AssociationSettings.this.myFirePropertyChange(
+                            "ConfidenceChanged", 0, value);
+                current = 200 - (minSupSlider.getValue() + confSlider
+                        .getValue());
                 piechart.repaint();
             }
         }

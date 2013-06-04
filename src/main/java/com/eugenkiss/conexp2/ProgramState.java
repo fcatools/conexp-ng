@@ -21,7 +21,7 @@ public class ProgramState {
     public FormalContext context;
     public boolean unsavedChanges = false;
 
-    protected PropertyChangeSupport propertyChangeSupport;
+    private PropertyChangeSupport propertyChangeSupport;
 
     public ProgramState() {
         propertyChangeSupport = new PropertyChangeSupport(this);
@@ -45,4 +45,9 @@ public class ProgramState {
         firePropertyChange("ContextChanged", null, context);
     }
 
+    public void attributeNameChanged(String oldName, String newName) {
+        firePropertyChange("AttributeNameChanged", oldName, newName);
+    }
+
+    
 }
