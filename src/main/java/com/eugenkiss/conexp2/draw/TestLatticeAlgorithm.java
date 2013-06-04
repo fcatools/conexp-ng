@@ -22,8 +22,8 @@ public class TestLatticeAlgorithm implements ILatticeAlgorithm {
 		for(Set<String> extent : concepts.keySet()){
 			Node n = new Node();
 			Set<String> intent = concepts.get(extent);
-			n.setX(extent.size()*100);
-			n.setY(intent.size()*100);
+			n.setX((int) (extent.size()*100*Math.random()));
+			n.setY((int) (intent.size()*100*Math.random()));
 			n.addObject(extent);
 			n.addAttribut(intent);
 			graph.getNodes().add(n);
