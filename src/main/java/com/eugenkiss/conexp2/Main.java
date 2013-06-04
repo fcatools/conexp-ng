@@ -26,6 +26,20 @@ public class Main {
 
 
     public static void main(String... args) {
+        // Set System L&F
+        try {
+            UIManager.setLookAndFeel(
+                    UIManager.getSystemLookAndFeelClassName());
+        }
+        catch (UnsupportedLookAndFeelException e) {
+        }
+        catch (ClassNotFoundException e) {
+        }
+        catch (InstantiationException e) {
+        }
+        catch (IllegalAccessException e) {
+        }
+
         // Disable border around focused cells as it does not fit into the context editor concept
         UIManager.put("Table.focusCellHighlightBorder", new EmptyBorder(0,0,0,0));
         // Disable changing foreground color of cells as it does not fit into the context editor concept
