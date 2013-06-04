@@ -2,41 +2,40 @@ package com.eugenkiss.conexp2.gui;
 
 import java.beans.PropertyChangeEvent;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.JLabel;
 
 import com.eugenkiss.conexp2.ProgramState;
 import com.eugenkiss.conexp2.draw.Edge;
+import com.eugenkiss.conexp2.draw.ILatticeAlgorithm;
 import com.eugenkiss.conexp2.draw.LatticeGraph;
 import com.eugenkiss.conexp2.draw.Node;
+import com.eugenkiss.conexp2.draw.TestLatticeAlgorithm;
+import com.eugenkiss.conexp2.model.FormalContext;
+
 
 public class LatticeView extends View {
     private static final long serialVersionUID = 1660117627650529212L;
 
     public static int radius=7;
+    private ILatticeAlgorithm alg;
 
     public LatticeView(ProgramState state) {
         super(state);
-
-        settings = new JLabel("Lattice Settings");
-        List<Node >nodes = new ArrayList<>();
-
-        nodes.add(new Node(null, null, 0, 50));
-        nodes.add(new Node(null, null, 100, 50));
-        nodes.add(new Node(null, null, 200, 50));
-        nodes.add(new Node(null, null, 150, 150));
-        nodes.get(0).addBelowNode(nodes.get(1));
-        List<Edge >edges = new ArrayList<>();
-        edges.add(new Edge(nodes.get(0), nodes.get(1)));
-        view = new LatticeGraphView(new LatticeGraph(nodes, edges));
+        
+        alg = new TestLatticeAlgorithm();
+        view = new LatticeGraphView(alg.computeLatticeGraph(state.context));
+        settings = new JLabel("Lattice Settings");  
         super.init();
     }
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        // TODO Auto-generated method stub
-
+    	((LatticeGraphView) view).setLatticeGraph(alg.computeLatticeGraph(state.context));
+    	view.repaint();
     }
 
 }

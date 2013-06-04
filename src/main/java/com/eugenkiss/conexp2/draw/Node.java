@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.batik.swing.JSVGCanvas;
 
@@ -85,18 +86,18 @@ public class Node extends JSVGCanvas {
 
     /**
      *
-     * @param s
+     * @param extent
      */
-    public void addObject(String s) {
-        objects.add(s);
+    public void addObject(Set<String> extent) {
+        objects.addAll(extent);
     }
 
     /**
      *
-     * @param s
+     * @param set
      */
-    public void addAttribut(String s) {
-        attributes.add(s);
+    public void addAttribut(Set<String> set) {
+        attributes.addAll(set);
     }
 
     public void addBelowNode(Node n){

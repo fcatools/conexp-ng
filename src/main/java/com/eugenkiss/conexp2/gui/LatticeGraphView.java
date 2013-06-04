@@ -42,14 +42,18 @@ public class LatticeGraphView extends JSVGCanvas {
             for (Edge e : graph.getEdges()) {
                 g.drawLine(e.getU().getX()+radius, e.getU().getY()+radius, e.getV().getX()+radius, e.getV().getY()+radius);
             }
-            g.setColor(Color.RED);
-            for (Node n : graph.getNodes()) {
-                g.fillOval(n.getX(), n.getY(), radius*2, radius*2);
-            }
+        }
+        g.setColor(Color.RED);
+        for (Node n : graph.getNodes()) {
+            g.fillOval(n.getX(), n.getY(), radius*2, radius*2);
         }
     }
 
     public void exportLatticeAsSVG() {
 
+    }
+    
+    public void setLatticeGraph(LatticeGraph g){
+    	graph = g;
     }
 }
