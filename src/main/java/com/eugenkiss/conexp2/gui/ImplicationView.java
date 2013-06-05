@@ -43,6 +43,7 @@ public class ImplicationView extends View {
         attrs[ZERO_SUPPORT_STYLE] = new SimpleAttributeSet();
         StyleConstants.setForeground(attrs[ZERO_SUPPORT_STYLE], Color.red);
 
+        textpane.setEditable(false);
         view = new JScrollPane(textpane);
         setLayout(new BorderLayout());
         panel = new JPanel();

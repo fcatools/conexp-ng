@@ -2,7 +2,9 @@ package com.eugenkiss.conexp2;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.Set;
 
+import com.eugenkiss.conexp2.model.AssociationRule;
 import com.eugenkiss.conexp2.model.FormalContext;
 
 /**
@@ -19,6 +21,7 @@ public class ProgramState {
 
     public String filePath;
     public FormalContext context;
+    public Set<AssociationRule> associations;
     public boolean unsavedChanges = false;
 
     private PropertyChangeSupport propertyChangeSupport;
@@ -49,5 +52,5 @@ public class ProgramState {
         firePropertyChange("AttributeNameChanged", oldName, newName);
     }
 
-    
+
 }

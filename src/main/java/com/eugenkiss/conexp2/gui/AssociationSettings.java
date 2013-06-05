@@ -3,12 +3,13 @@ package com.eugenkiss.conexp2.gui;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.RenderingHints;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
@@ -27,16 +28,40 @@ public class AssociationSettings extends JPanel {
     JLabel confLabel = new JLabel("Confidence 0.5");
     JSlider confSlider = new JSlider(0, 100, 50);
 
-    double minSup = 0.1, conf = 0.5;
-
     // Only for testing
-    int current = 140, all = 200;
+    private int current = 0, all = 0;
 
-    PieChart piechart = new PieChart();
+    @SuppressWarnings("serial")
+    JPanel piechart = new JPanel() {
+
+        @Override
+        public void paint(Graphics g2) {
+
+            super.paint(g2);
+            Graphics2D g = (Graphics2D) g2;
+            g.addRenderingHints(new RenderingHints(
+                    RenderingHints.KEY_ANTIALIASING,
+                    RenderingHints.VALUE_ANTIALIAS_ON));
+            g.setRenderingHint(RenderingHints.KEY_RENDERING,
+                    RenderingHints.VALUE_RENDER_QUALITY);
+
+            int degree = (int) ((current * 360.0) / all);
+            g.setColor(getBackground());
+            g.fillRect(0, 0, getWidth(), getHeight());
+            g.setPaint(Color.BLUE);
+            g.fillArc(25, 5, 140, 140, 0, 360);
+            g.drawString("#Association Rules = " + all, 10, 165);
+
+            g.setColor(Color.RED);
+            g.fillArc(25, 5, 140, 140, 90, degree);
+            g.drawString("#Assoc. Rules with minSup = " + current, 10, 180);
+        }
+
+    };
 
     public AssociationSettings() {
-    	propertyChangeSupport = new PropertyChangeSupport(this);
-    	setLayout(new GridBagLayout());
+        propertyChangeSupport = new PropertyChangeSupport(this);
+        setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.anchor = GridBagConstraints.WEST;
         gbc.insets = new Insets(0, 0, 10, 0);
@@ -52,10 +77,45 @@ public class AssociationSettings extends JPanel {
         gbc.gridy = 4;
         gbc.gridheight = GridBagConstraints.REMAINDER;
         piechart.setPreferredSize(new Dimension(200, 200));
+
+        // Element redCircle = piechart.getSVGDocument().createElementNS(
+        // SVGDOMImplementation.SVG_NAMESPACE_URI,
+        // SVGConstants.SVG_CIRCLE_TAG);
+        // redCircle.setAttributeNS(null, SVGConstants.SVG_CX_ATTRIBUTE, "100");
+        // redCircle.setAttributeNS(null, SVGConstants.SVG_CY_ATTRIBUTE, "80");
+        // redCircle.setAttributeNS(null, "r", "70");
+        // redCircle.setAttributeNS(null, "fill", "red");
+        // piechart.getSVGDocument().getDocumentElement().appendChild(redCircle);
+        //
+        // Element blueCircle = piechart.getSVGDocument().createElementNS(
+        // SVGDOMImplementation.SVG_NAMESPACE_URI,
+        // SVGConstants.SVG_CIRCLE_TAG);
+        // blueCircle.setAttributeNS(null, SVGConstants.SVG_CX_ATTRIBUTE,
+        // "100");
+        // blueCircle.setAttributeNS(null, SVGConstants.SVG_CY_ATTRIBUTE, "80");
+        // blueCircle.setAttributeNS(null, "r", "36");
+        // blueCircle.setAttributeNS(null, "stroke", "blue");
+        // blueCircle.setAttributeNS(null, "stroke-width", "71");
+        // int degree = (int) ((current * 360.0) / all);
+        // blueCircle.setAttributeNS(null, "stroke-dasharray", degree * 0.70 +
+        // " "
+        // + ((360 - degree) * 0.70));
+        // blueCircle.setAttributeNS(null, "fill", "red");
+        //
+        // piechart.getSVGDocument().getDocumentElement().appendChild(blueCircle);
+
         add(piechart, gbc);
 
         confSlider.addChangeListener(new SliderListener(false));
         minSupSlider.addChangeListener(new SliderListener(true));
+
+    }
+
+    public void update(int numberOfCurrentAssocitaionrules,
+            int numberOfAllCurrentAssocitaionrules) {
+        current = numberOfCurrentAssocitaionrules;
+        all = numberOfAllCurrentAssocitaionrules;
+        piechart.repaint();
     }
 
     public void addPropertyChangeListener(PropertyChangeListener listener) {
@@ -76,28 +136,6 @@ public class AssociationSettings extends JPanel {
 
     // ////////////////////////////////////////////////////////////////////////////////////////
 
-    private class PieChart extends JPanel {
-
-        private static final long serialVersionUID = -5226331499362209414L;
-
-        @Override
-        public void paint(Graphics g) {
-            super.paint(g);
-            int degree = (int) ((current * 360.0) / all);
-
-            g.setColor(Color.BLUE);
-            g.fillArc(25, 5, 140, 140, 0, 360);
-            g.drawString("#Association Rules = " + all, 10, 165);
-
-            g.setColor(Color.RED);
-            g.fillArc(25, 5, 140, 140, 90, degree);
-
-            g.drawString("#Assoc. Rules with minSup = " + current, 10, 180);
-
-        }
-
-    }
-
     private class SliderListener implements ChangeListener {
 
         private boolean minSup;
@@ -111,23 +149,13 @@ public class AssociationSettings extends JPanel {
             double value = slider.getValue() / 100.0;
             if (minSup) {
                 minSupLabel.setText("Minimal Support " + value);
-                AssociationSettings.this.minSup = value;
+
+                AssociationSettings.this.myFirePropertyChange(
+                        "MinimalSupportChanged", 0, value);
             } else {
                 confLabel.setText("Confidence " + value);
-                AssociationSettings.this.conf = value;
-            }
-
-            if (!slider.getValueIsAdjusting()) {
-                if (minSup)
-                    AssociationSettings.this.myFirePropertyChange(
-                            "MinimalSupportChanged", 0, value);
-
-                else
-                    AssociationSettings.this.myFirePropertyChange(
-                            "ConfidenceChanged", 0, value);
-                current = 200 - (minSupSlider.getValue() + confSlider
-                        .getValue());
-                piechart.repaint();
+                AssociationSettings.this.myFirePropertyChange(
+                        "ConfidenceChanged", 0, value);
             }
         }
     }

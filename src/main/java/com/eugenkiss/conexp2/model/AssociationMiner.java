@@ -23,6 +23,8 @@ public class AssociationMiner extends AbstractAssociationMiner {
     // frequent and closed itemsets
     private IndexedSet<Set<SortedSet<String>>> FC;
 
+    Set<AssociationRule> result;
+
     public AssociationMiner(FormalContext context) {
         super(context);
     }
@@ -35,19 +37,17 @@ public class AssociationMiner extends AbstractAssociationMiner {
 
     @Override
     public Set<AssociationRule> computeAssociationRules() {
-        Set<AssociationRule> result = new TreeSet<AssociationRule>();
+        result = new TreeSet<AssociationRule>();
         FC = new ListSet<>();
         apriori();
-        Gen_LB(result);
+        Gen_LB();
         return result;
     }
 
     /**
      * from Stumme et al. 2001
-     *
-     * @param result
      */
-    private void Gen_LB(Set<AssociationRule> result) {
+    private void Gen_LB() {
         List<Set<SortedSet<String>>> S = new ArrayList<>();
         int supL;
         for (int i = 1; i < FC.size(); i++) {
@@ -230,15 +230,8 @@ public class AssociationMiner extends AbstractAssociationMiner {
 
     @SuppressWarnings("unchecked")
     private <K, T extends Set<K>> T minus(T a, T b) {
-        T result = null;
-        if (a.isEmpty())
-            return a;
-
-        if (a.iterator().next() instanceof Comparable<?>) {
-            result = (T) new TreeSet<>();
-        } else {
-            result = (T) new ListSet<>();
-        }
+        T result = (T) ((a instanceof SortedSet<?>) ? new TreeSet<>()
+                : new ListSet<>());
         Iterator<K> ita = a.iterator();
         K temp_a;
 

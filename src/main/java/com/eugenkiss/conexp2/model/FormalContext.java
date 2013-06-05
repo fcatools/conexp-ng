@@ -72,7 +72,7 @@ public class FormalContext extends
         return getStemBase();
     }
 
-    public Set<AssociationRule> getAssociations(double minsup, double conf) {
+    public Set<AssociationRule> getLuxenburgerBase(double minsup, double conf) {
         return new AssociationMiner(this, minsup, conf)
                 .computeAssociationRules();
     }
