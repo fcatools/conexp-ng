@@ -2,9 +2,14 @@ package com.eugenkiss.conexp2.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Set;
-
+import javax.swing.AbstractAction;
+import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
@@ -54,7 +59,10 @@ public class ImplicationView extends View {
         panel.add(toolbar, BorderLayout.WEST);
         panel.add(view, BorderLayout.CENTER);
         add(panel);
-
+        JButton b = Util.createButton("Sort by object count", "sort",
+                "conexp/sort.gif");
+        toolbar.add(b);
+        b.addActionListener(new Sort());
         updateImplications();
     }
 
@@ -72,8 +80,9 @@ public class ImplicationView extends View {
             buf.append(EOL);
             i++;
             try {
-                textpane.getDocument().insertString(textpane.getDocument().getLength(),
-                        buf.toString(), implicationStyle(support));
+                textpane.getDocument().insertString(
+                        textpane.getDocument().getLength(), buf.toString(),
+                        implicationStyle(support));
             } catch (BadLocationException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -96,6 +105,29 @@ public class ImplicationView extends View {
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         updateImplications();
+    }
+
+    @SuppressWarnings("serial")
+    class Sort extends AbstractAction {
+        public void actionPerformed(ActionEvent e) {
+            ArrayList<FCAImplication<String>> t = new ArrayList<>(implications);
+
+            Collections.sort(t, new Comparator<FCAImplication<String>>() {
+
+                @Override
+                public int compare(FCAImplication<String> o1,
+                        FCAImplication<String> o2) {
+                    return Integer.compare(
+                            state.context.supportCount(o1.getPremise()),
+                            state.context.supportCount(o1.getPremise()));
+                }
+            });
+            implications.clear();
+            for (FCAImplication<String> fcaImplication : t) {
+                implications.add(fcaImplication);
+            }
+            writeImplications();
+        }
     }
 
 }

@@ -1,17 +1,31 @@
 package com.eugenkiss.conexp2.gui;
 
 import java.awt.Color;
+import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Set;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
+import javax.swing.AbstractAction;
+import javax.swing.JButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
+import javax.swing.SwingUtilities;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 
 import com.eugenkiss.conexp2.ProgramState;
+import com.eugenkiss.conexp2.gui.ImplicationView.Sort;
 import com.eugenkiss.conexp2.model.AssociationRule;
+
+import de.tudresden.inf.tcs.fcaapi.FCAImplication;
+import de.tudresden.inf.tcs.fcalib.utils.ListSet;
 
 public class AssociationView extends View {
 
@@ -25,7 +39,11 @@ public class AssociationView extends View {
 
     private Set<AssociationRule> associationbase;
 
+    ThreadPoolExecutor pool = new ThreadPoolExecutor(1, 1, 0,
+            TimeUnit.NANOSECONDS, new SynchronousQueue<Runnable>());
+
     private SimpleAttributeSet[] attrs;
+
     final int NON_ZERO_SUPPORT_EXACT_RULE = 0;
 
     final int INEXACT_RULE = 1;
@@ -42,10 +60,17 @@ public class AssociationView extends View {
 
     private class CalculationThread extends Thread {
 
+        @Override
         public void run() {
             associationbase = state.context.getLuxenburgerBase(minsup, 0);
             state.associations = associationbase;
-            writeAssociations();
+            Runnable runnable = new Runnable() {
+                public void run() {
+                    writeAssociations();
+                }
+            };
+            SwingUtilities.invokeLater(runnable);
+
         };
     };
 
@@ -66,6 +91,10 @@ public class AssociationView extends View {
         view = new JScrollPane(textpane);
         settings = new AssociationSettings();
         settings.addPropertyChangeListener(this);
+        JButton b = Util.createButton("Sort by object count", "sort",
+                "conexp/sort.gif");
+        toolbar.add(b);
+        b.addActionListener(new Sort());
         super.init();
         updateAssociations();
         try {
@@ -81,7 +110,21 @@ public class AssociationView extends View {
         int i = 0;
         StringBuffer buf;
         textpane.setText("");
-        for (AssociationRule impl : associationbase) {
+        ArrayList<AssociationRule> t = new ArrayList<>(associationbase);
+
+        if (sortBySupport) {
+            Collections.sort(t, new Comparator<AssociationRule>() {
+
+                @Override
+                public int compare(AssociationRule o1, AssociationRule o2) {
+
+                    return Double.compare(o2.getSupport(), o1.getSupport());
+                }
+            });
+            sortBySupport = false;
+        }
+
+        for (AssociationRule impl : t) {
             buf = new StringBuffer();
             if (impl.getConfidence() >= conf) {
                 i++;
@@ -120,7 +163,13 @@ public class AssociationView extends View {
     }
 
     private void updateAssociations() {
-        calculation.run();
+        if (pool.getActiveCount() != 0) {
+            pool.remove(calculation);
+            pool.shutdownNow();
+            pool = new ThreadPoolExecutor(1, 1, 0, TimeUnit.NANOSECONDS,
+                    new SynchronousQueue<Runnable>());
+        }
+        pool.execute(calculation);
     }
 
     @Override
@@ -135,4 +184,14 @@ public class AssociationView extends View {
         }
     }
 
+    private boolean sortBySupport = false;
+
+    @SuppressWarnings("serial")
+    class Sort extends AbstractAction {
+
+        public void actionPerformed(ActionEvent e) {
+            sortBySupport = true;
+            writeAssociations();
+        }
+    }
 }
