@@ -19,15 +19,35 @@ public class TestLatticeAlgorithm implements ILatticeAlgorithm {
 		this.context = context;
 		this.computeConcepts();
 		System.out.println(concepts);
-		for(Set<String> extent : concepts.keySet()){
-			Node n = new Node();
+
+		for (Set<String> extent : concepts.keySet()) {
 			Set<String> intent = concepts.get(extent);
-			n.setX((int) (extent.size()*100*Math.random()));
-			n.setY((int) (intent.size()*100*Math.random()));
-			n.addObject(extent);
-			n.addAttribut(intent);
+
+			Node n = new Node();
+			n.addObjects(extent);
+			n.addAttributs(intent);
+
 			graph.getNodes().add(n);
 		}
+
+		for (Node u : graph.getNodes()) {
+			Set<String> uEx = u.getObjects();
+			int count = 0;
+
+			for (Node v : graph.getNodes()) {
+				Set<String> vEx = v.getObjects();
+				if (isSubconcept(uEx, vEx)) {
+					count++;
+				}
+				if (isLowerNeighbour(uEx, vEx)) {
+					v.addBelowNode(u);
+					graph.getEdges().add(new Edge(u, v));
+				}
+
+			}
+			u.update((int) (Math.random() * 500), count * 100);
+		}
+
 		return graph;
 	}
 
@@ -103,13 +123,14 @@ public class TestLatticeAlgorithm implements ILatticeAlgorithm {
 		 */
 		concepts = new HashMap<Set<String>, Set<String>>();
 		for (Set<String> e : extentPerAttr.values()) {
-			Set<String> intents = new TreeSet<String>();
+			TreeSet<String> intents = new TreeSet<String>();
 			int count = 0;
 			for (FullObject<String, String> i : context.getObjects()) {
 				if (e.isEmpty()) {
 					intents.addAll(i.getDescription().getAttributes());
 				} else if (e.contains(i.getIdentifier().toString())) {
-					Set<String> prev = i.getDescription().getAttributes();
+					TreeSet<String> prev = sort(i.getDescription()
+							.getAttributes());
 					if (count > 0) {
 						intents = intersection(prev, intents);
 					} else {
@@ -123,7 +144,6 @@ public class TestLatticeAlgorithm implements ILatticeAlgorithm {
 
 	}
 
-	
 	private TreeSet<String> intersection(Set<String> firstSet,
 			Set<String> secondSet) {
 		TreeSet<String> result = new TreeSet<String>();
@@ -138,12 +158,43 @@ public class TestLatticeAlgorithm implements ILatticeAlgorithm {
 	}
 
 	private TreeSet<String> sort(Set<String> sortable) {
-		TreeSet<String> result = new TreeSet<>();
+		TreeSet<String> result = new TreeSet<String>();
 		for (String s : sortable) {
 			result.add(s);
 		}
 		return result;
 	}
-	
+
+	private boolean isSubconcept(Set<String> subEx, Set<String> superEx) {
+		if (subEx == superEx) {
+			return false;
+		}
+		if (subEx.size() > superEx.size()) {
+			return false;
+		}
+		for (String s : subEx) {
+			if (!superEx.contains(s)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private boolean isLowerNeighbour(Set<String> subEx, Set<String> superEx) {
+		if (subEx == superEx) {
+			return false;
+		}
+		if (!isSubconcept(subEx, superEx)) {
+			return false;
+		}
+		for (Set<String> set : concepts.keySet()) {
+			if (subEx == set || set == superEx) {
+				if (isSubconcept(subEx, set) && isSubconcept(set, superEx)) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
 
 }

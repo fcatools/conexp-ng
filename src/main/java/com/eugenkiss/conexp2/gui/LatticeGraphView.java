@@ -21,7 +21,7 @@ public class LatticeGraphView extends JSVGCanvas {
     public LatticeGraphView(LatticeGraph graph) {
         this.graph = graph;
         for (Node n : graph.getNodes()) {
-            this.add(n);
+        	this.add(n);
             n.addMouseMotionListener(new LatticeGraphNodeMouseMotionListener(n));
         }
 
@@ -43,9 +43,10 @@ public class LatticeGraphView extends JSVGCanvas {
                 g.drawLine(e.getU().getX()+radius, e.getU().getY()+radius, e.getV().getX()+radius, e.getV().getY()+radius);
             }
         }
-        g.setColor(Color.RED);
+    	g.setColor(Color.RED);
         for (Node n : graph.getNodes()) {
             g.fillOval(n.getX(), n.getY(), radius*2, radius*2);
+            g.drawString(n.getObjects().toString(), n.getX() + radius*2, n.getY());
         }
     }
 
