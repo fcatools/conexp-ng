@@ -41,7 +41,7 @@ public class TestLatticeAlgorithm implements ILatticeAlgorithm {
 				}
 				if (isLowerNeighbour(uEx, vEx)) {
 					v.addBelowNode(u);
-					graph.getEdges().add(new Edge(u, v));
+					graph.getEdges().add(new Edge(v,u));
 				}
 
 			}
@@ -188,13 +188,16 @@ public class TestLatticeAlgorithm implements ILatticeAlgorithm {
 			return false;
 		}
 		for (Set<String> set : concepts.keySet()) {
-			if (subEx == set || set == superEx) {
-				if (isSubconcept(subEx, set) && isSubconcept(set, superEx)) {
-					return false;
+			if (!subEx.equals(set)) {
+				if(!superEx.equals(set)){
+					if(isSubconcept(subEx, set)){
+						if(isSubconcept(set, superEx)){
+							return false;
+						}
+					}
 				}
 			}
 		}
 		return true;
 	}
-
 }
