@@ -19,7 +19,10 @@ public class Node extends JPanel {
 	private int x;
 	private int y;
 	private List<Node> below;
+	private Set<String> visibleObjects;
+	private Set<String> visibleAttributes;
 	private boolean moveSubgraph;
+	private int level;
 
 	/**
 	 * 
@@ -44,6 +47,8 @@ public class Node extends JPanel {
 	public Node() {
 		this.objects = new TreeSet<>();
 		this.attributes = new TreeSet<>();
+		this.visibleObjects = new TreeSet<>();
+		this.visibleAttributes = new TreeSet<>();
 		this.x = 0;
 		this.y = 0;
 		this.setBounds(x, y, 10, 10);
@@ -138,6 +143,31 @@ public class Node extends JPanel {
 
 	public Set<String> getAttributes() {
 		return attributes;
+	}
+
+	public void setLevel(int level) {
+		this.level = level;
+		
+	}
+	
+	public int getLevel(){
+		return level;
+	}
+	
+	public void setVisibleObject(String object){
+		visibleObjects.add(object);
+	}
+	
+	public Set<String> getVisibleObjects(){
+		return this.visibleObjects;
+	}
+	
+	public void setVisibleAttribute(String attribute){
+		this.visibleAttributes.add(attribute);
+	}
+	
+	public Set<String> getVisibleAttributes(){
+		return this.visibleAttributes;
 	}
 
 }

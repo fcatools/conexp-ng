@@ -18,6 +18,7 @@ public class TestLatticeAlgorithm implements ILatticeAlgorithm {
 		LatticeGraph graph = new LatticeGraph();
 		this.context = context;
 		this.computeConcepts();
+		
 		System.out.println(concepts);
 
 		for (Set<String> extent : concepts.keySet()) {
@@ -36,15 +37,14 @@ public class TestLatticeAlgorithm implements ILatticeAlgorithm {
 
 			for (Node v : graph.getNodes()) {
 				Set<String> vEx = v.getObjects();
-				if (isSubconcept(uEx, vEx)) {
-					count++;
-				}
 				if (isLowerNeighbour(uEx, vEx)) {
 					v.addBelowNode(u);
 					graph.getEdges().add(new Edge(v,u));
+					count++;
 				}
 
 			}
+			u.setLevel(count);
 			u.update((int) (Math.random() * 500), count * 100);
 		}
 
