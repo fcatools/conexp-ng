@@ -1,5 +1,6 @@
 package com.eugenkiss.conexp2;
 
+import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.Set;
@@ -38,19 +39,39 @@ public class ProgramState {
         propertyChangeSupport.removePropertyChangeListener(listener);
     }
 
-    private void firePropertyChange(String propertyName, Object oldValue,
+    private void firePropertyChange(ContextChangeEvents cce, Object oldValue,
             Object newValue) {
-        propertyChangeSupport.firePropertyChange(propertyName, oldValue,
-                newValue);
+        propertyChangeSupport.firePropertyChange(new ContextChangeEvent(this,
+                cce, oldValue, newValue));
     }
 
     public void contextChanged() {
-        firePropertyChange("ContextChanged", null, context);
+        firePropertyChange(ContextChangeEvents.CONTEXTCHANGED, null, context);
     }
 
     public void attributeNameChanged(String oldName, String newName) {
-        firePropertyChange("AttributeNameChanged", oldName, newName);
+        firePropertyChange(ContextChangeEvents.ATTRIBUTENAMECHANGED, oldName,
+                newName);
     }
 
+    @SuppressWarnings("serial")
+    public class ContextChangeEvent extends PropertyChangeEvent {
 
+        private ContextChangeEvents cce;
+
+        public ContextChangeEvent(Object source, String propertyName,
+                Object oldValue, Object newValue) {
+            super(source, propertyName, oldValue, newValue);
+        }
+
+        public ContextChangeEvent(Object source, ContextChangeEvents cce,
+                Object oldValue, Object newValue) {
+            super(source, cce.toString(), oldValue, newValue);
+            this.cce = cce;
+        }
+
+        public ContextChangeEvents getName() {
+            return cce;
+        }
+    }
 }

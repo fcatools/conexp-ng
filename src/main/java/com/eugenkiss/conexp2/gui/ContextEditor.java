@@ -24,13 +24,14 @@ import static javax.swing.KeyStroke.getKeyStroke;
  * editor, serving as our context editor. To this end, there are several additional classes
  * in this file.
  */
+@SuppressWarnings("serial")
 public class ContextEditor extends View {
 
     private static final long serialVersionUID = 1660117627650529212L;
 
     // Choose correct modifier key (STRG or CMD) based on platform
-    @SuppressWarnings("UnusedDeclaration")
-    private static final int MASK = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+    @SuppressWarnings("unused")
+	private static final int MASK = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
 
     // Our JTable customisation and its respective data model
     private final ContextMatrix matrix;
@@ -253,7 +254,6 @@ public class ContextEditor extends View {
     // Actions
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    @SuppressWarnings("UnusedDeclaration")
     class CombineActions extends AbstractAction {
         Action first, second;
         CombineActions(Action first, Action second) {
@@ -279,7 +279,7 @@ public class ContextEditor extends View {
         }
     }
 
-    class MoveWithCarryAction extends AbstractAction {
+	class MoveWithCarryAction extends AbstractAction {
         int horizontal, vertical;
         MoveWithCarryAction(int horizontal, int vertical) {
             this.horizontal = horizontal;
@@ -538,7 +538,7 @@ public class ContextEditor extends View {
         invokeAction(action, new ActionEvent(this, 0, ""));
     }
 
-    @SuppressWarnings("UnusedDeclaration")
+    @SuppressWarnings("unused")
     private void invokeAction(String name) {
         matrix.getActionMap().get(name).actionPerformed(new ActionEvent(this, 0, ""));
     }
@@ -791,7 +791,8 @@ class ContextMatrix extends JTable {
     }
 
     // Custom cell editor. Needed for renaming of objects/attributes
-    public static class ContextCellEditor extends DefaultCellEditor {
+    @SuppressWarnings("serial")
+	public static class ContextCellEditor extends DefaultCellEditor {
 
         int lastRow = 0;
         int lastColumn = 0;

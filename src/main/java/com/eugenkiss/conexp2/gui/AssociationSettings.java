@@ -10,6 +10,8 @@ import java.awt.Insets;
 import java.awt.RenderingHints;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+
+import javax.swing.Box;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
@@ -54,7 +56,7 @@ public class AssociationSettings extends JPanel {
 
             g.setColor(Color.RED);
             g.fillArc(25, 5, 140, 140, 90, degree);
-            g.drawString("#Assoc. Rules with minSup = " + current, 10, 180);
+            g.drawString("#With minSup = " + current, 10, 180);
         }
 
     };
@@ -75,7 +77,6 @@ public class AssociationSettings extends JPanel {
         gbc.gridy = 3;
         add(confSlider, gbc);
         gbc.gridy = 4;
-        gbc.gridheight = GridBagConstraints.REMAINDER;
         piechart.setPreferredSize(new Dimension(200, 200));
 
         // Element redCircle = piechart.getSVGDocument().createElementNS(
@@ -105,7 +106,6 @@ public class AssociationSettings extends JPanel {
         // piechart.getSVGDocument().getDocumentElement().appendChild(blueCircle);
 
         add(piechart, gbc);
-
         confSlider.addChangeListener(new SliderListener(false));
         minSupSlider.addChangeListener(new SliderListener(true));
 
