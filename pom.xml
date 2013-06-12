@@ -2,12 +2,12 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.eugenkiss.conexp2</groupId>
-  <artifactId>conexp2</artifactId>
+  <groupId>fcatools.conexp-ng</groupId>
+  <artifactId>conexp-ng</artifactId>
   <packaging>jar</packaging>
   <version>0.1-SNAPSHOT</version>
-  <name>conexp2</name>
-  <url>http://maven.apache.org</url>
+  <name>ConExp-NG</name>
+  <url>https://github.com/fcatools/conexp-ng/wiki</url>
 
   <properties>
     <maven.compiler.source>1.7</maven.compiler.source>
@@ -208,15 +208,15 @@
           </execution>
         </executions>
         <configuration>
-          <mainClass>com.eugenkiss.conexp2.Main</mainClass>
+          <mainClass>fcatools.conexpng.Main</mainClass>
           <executable>java</executable>
           <arguments>
-            <argument>-Xdock:name=ConExp2</argument>
+            <argument>-Xdock:name=ConExp-NG</argument>
             <argument>-classpath</argument>
             <!-- automatically creates the classpath using all project dependencies,
                  also adding the project build directory -->
             <classpath/>
-            <argument>com.eugenkiss.conexp2.Main</argument>
+            <argument>fcatools.conexpng.Main</argument>
           </arguments>
         </configuration>
       </plugin>
@@ -228,7 +228,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>com.eugenkiss.conexp2.Main</mainClass>
+              <mainClass>fcatools.conexpng.Main</mainClass>
             </manifest>
           </archive>
         </configuration>
