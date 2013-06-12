@@ -185,9 +185,12 @@ public class ContextEditor extends View {
         // ------------------------
         // Inner cells context menu
         // ------------------------
+        // See issue #42
+        /*
         addMenuItem(cellPopupMenu, "Cut", new CutAction());
         addMenuItem(cellPopupMenu, "Copy", new CopyAction());
         addMenuItem(cellPopupMenu, "Paste", new PasteAction());
+        */
         addMenuItem(cellPopupMenu, "Select all", new SelectAllAction());
         //--------
         cellPopupMenu.add(new JPopupMenu.Separator());
@@ -198,16 +201,8 @@ public class ContextEditor extends View {
         //--------
         cellPopupMenu.add(new JPopupMenu.Separator());
         //--------
-        addMenuItem(cellPopupMenu, "Remove attribute(s)", new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                // TODO
-            }
-        });
-        addMenuItem(cellPopupMenu, "Remove object(s)", new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                // TODO
-            }
-        });
+        addMenuItem(cellPopupMenu, "Remove attribute(s)", new RemoveSelectedAttributesAction());
+        addMenuItem(cellPopupMenu, "Remove object(s)", new RemoveSelectedObjectsAction());
 
         // ------------------------
         // Object cell context menu
@@ -254,6 +249,7 @@ public class ContextEditor extends View {
     // Actions
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    @SuppressWarnings("UnusedDeclaration")
     class CombineActions extends AbstractAction {
         Action first, second;
         CombineActions(Action first, Action second) {
@@ -346,24 +342,6 @@ public class ContextEditor extends View {
     class SelectAllAction extends AbstractAction {
         public void actionPerformed(ActionEvent e) {
             matrix.selectAll();
-        }
-    }
-
-    class CopyAction extends AbstractAction {
-        public void actionPerformed(ActionEvent e) {
-            // TODO
-        }
-    }
-
-    class CutAction extends AbstractAction {
-        public void actionPerformed(ActionEvent e) {
-            // TODO
-        }
-    }
-
-    class PasteAction extends AbstractAction {
-        public void actionPerformed(ActionEvent e) {
-            // TODO
         }
     }
 
@@ -470,6 +448,46 @@ public class ContextEditor extends View {
                     matrixModel.fireTableStructureChanged();
                     matrix.updateUI();
                     matrix.restoreSelectedInterval();
+                }
+            });
+        }
+    }
+
+    class RemoveSelectedObjectsAction extends AbstractAction {
+        public void actionPerformed(ActionEvent e) {
+            if (state.context.getAttributeCount() == 0) return;
+            matrix.saveSelectedInterval();
+            int i = Math.min(matrix.lastSelectedRowsStartIndex, matrix.lastSelectedRowsEndIndex) - 1;
+            int d = Math.abs(matrix.lastSelectedRowsStartIndex - matrix.lastSelectedRowsEndIndex) + 1;
+            for (int unused = 0; unused < d; unused++) {
+                try {
+                    state.context.removeObject(state.context.getObjectAtIndex(i).getIdentifier());
+                } catch (IllegalObjectException e1) {
+                    e1.printStackTrace();
+                }
+            }
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    matrixModel.fireTableStructureChanged();
+                    matrix.updateUI();
+                }
+            });
+        }
+    }
+
+    class RemoveSelectedAttributesAction extends AbstractAction {
+        public void actionPerformed(ActionEvent e) {
+            if (state.context.getAttributeCount() == 0) return;
+            matrix.saveSelectedInterval();
+            int i = Math.min(matrix.lastSelectedColumnsStartIndex, matrix.lastSelectedColumnsEndIndex) - 1;
+            int d = Math.abs(matrix.lastSelectedColumnsStartIndex - matrix.lastSelectedColumnsEndIndex) + 1;
+            for (int unused = 0; unused < d; unused++) {
+                state.context.removeAttribute(state.context.getAttributeAtIndex(i));
+            }
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    matrixModel.fireTableStructureChanged();
+                    matrix.updateUI();
                 }
             });
         }
@@ -660,10 +678,10 @@ class ContextMatrix extends JTable {
     // For enabling renaming of objects/attributes
     TableCellEditor editor;
     // For preventing a selection to disappear after an operation like "invert"
-    int lastSelectedRowsStartIndex;
-    int lastSelectedRowsEndIndex;
-    int lastSelectedColumnsStartIndex;
-    int lastSelectedColumnsEndIndex;
+    public int lastSelectedRowsStartIndex;
+    public int lastSelectedRowsEndIndex;
+    public int lastSelectedColumnsStartIndex;
+    public int lastSelectedColumnsEndIndex;
 
     public ContextMatrix(TableModel dm, Color bg) {
         super(dm);
