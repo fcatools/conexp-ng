@@ -6,6 +6,8 @@ import fcatools.conexpng.model.FormalContext;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -24,6 +26,7 @@ public class ProgramState {
     public FormalContext context;
     public Set<AssociationRule> associations;
     public boolean unsavedChanges = false;
+    public Map<Integer,Integer> columnWidths = new HashMap<>();
 
     private PropertyChangeSupport propertyChangeSupport;
 

@@ -14,6 +14,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.Map;
 
 import static fcatools.conexpng.gui.Util.*;
 import static javax.swing.KeyStroke.getKeyStroke;
@@ -58,8 +59,8 @@ public class ContextEditor extends View {
         // Initialize various components
         panel = new JPanel();
         panel.setLayout(new BorderLayout());
-        matrixModel = new ContextMatrixModel(state.context);
-        matrix = new ContextMatrix(matrixModel, panel.getBackground());
+        matrixModel = new ContextMatrixModel(state);
+        matrix = new ContextMatrix(matrixModel, panel.getBackground(), state.columnWidths);
         Border margin = new EmptyBorder(1, 3, 1, 4);
         Border border = BorderFactory.createMatteBorder(1, 1, 0, 0, new Color(220,220,220));
         JScrollPane scrollPane = ContextMatrix.createStripedJScrollPane(matrix, panel.getBackground());
@@ -153,15 +154,16 @@ public class ContextEditor extends View {
                 int j = matrix.columnAtPoint(e.getPoint());
                 lastDraggedRowIndex = i;
                 lastDraggedColumnIndex = j;
-                if (SwingUtilities.isLeftMouseButton(e) && j == 0 && i > 0) {
-                    isDraggingRow = true;
-                    matrix.selectRow(i);
-                    matrix.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-                }
-                if (SwingUtilities.isLeftMouseButton(e) && i == 0 && j > 0) {
-                    isDraggingColumn = true;
-                    matrix.selectColumn(j);
-                    matrix.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                // A hacky way to check if the user is currently resizing a column
+                if (matrix.getCursor() != ContextMatrix.resizeCursor) {
+                    if (SwingUtilities.isLeftMouseButton(e) && j == 0 && i > 0) {
+                        isDraggingRow = true;
+                        matrix.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                    }
+                    if (SwingUtilities.isLeftMouseButton(e) && i == 0 && j > 0) {
+                        isDraggingColumn = true;
+                        matrix.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                    }
                 }
             }
 
@@ -170,26 +172,51 @@ public class ContextEditor extends View {
                 int j = matrix.columnAtPoint(e.getPoint());
                 if (i < 0 || j < 0) return;
                 if (isDraggingRow) matrix.selectRow(Math.max(i, 1));
-                if (isDraggingColumn) matrix.selectColumn(Math.max(j, 1));
+                if (isDraggingColumn) matrix.selectColumn(Math.max(lastDraggedColumnIndex, 1));
+                // A reorder of rows occured
                 if (isDraggingRow && i != lastDraggedRowIndex && i != 0) {
                     matrixModel.reorderRows(lastDraggedRowIndex, i);
                     matrixModel.fireTableDataChanged();
                     matrix.selectRow(i);
                     lastDraggedRowIndex = i;
                 }
+                // A reorder of columns occured
                 if (isDraggingColumn && j != lastDraggedColumnIndex && j != 0) {
-                    matrixModel.reorderColumns(lastDraggedColumnIndex, j);
-                    matrixModel.fireTableDataChanged();
-                    matrix.selectColumn(j);
-                    lastDraggedColumnIndex = j;
+                    // to prevent a bug when reordering columns of different widths
+                    Rectangle selected = matrix.getCellRect(0, lastDraggedColumnIndex, false);
+                    Rectangle r = matrix.getCellRect(0, j, false);
+                    Point p = r.getLocation();
+                    if ((j <= lastDraggedColumnIndex || e.getX() > p.x + r.width - selected.width) &&
+                        (j >  lastDraggedColumnIndex || e.getX() < p.x + selected.width)) {
+                        matrixModel.reorderColumns(lastDraggedColumnIndex, j);
+                        switchColumnWidths(lastDraggedColumnIndex, j);
+                        matrixModel.fireTableDataChanged();
+                        matrix.selectColumn(j);
+                        lastDraggedColumnIndex = j;
+                    }
                 }
             }
 
             public void mouseReleased(MouseEvent e) {
                 maybeShowPopup(e);
+
+                // For selecting entire row/column when clicking on a header
+                int i = matrix.rowAtPoint(e.getPoint());
+                int j = matrix.columnAtPoint(e.getPoint());
+                if (matrix.getCursor() != ContextMatrix.resizeCursor) {
+                    if (SwingUtilities.isLeftMouseButton(e) && j == 0 && i > 0) {
+                        matrix.selectRow(i);
+                    }
+                    if (SwingUtilities.isLeftMouseButton(e) && i == 0 && j > 0) {
+                        matrix.selectColumn(j);
+                    }
+                }
+
                 isDraggingRow = false;
                 isDraggingColumn = false;
-                matrix.setCursor(Cursor.getDefaultCursor());
+                if (matrix.getCursor() != ContextMatrix.resizeCursor) {
+                    matrix.setCursor(Cursor.getDefaultCursor());
+                }
             }
         };
         matrix.addMouseListener(mouseAdapter);
@@ -379,6 +406,7 @@ public class ContextEditor extends View {
             matrix.saveSelectedInterval();
             matrixModel.fireTableDataChanged();
             matrix.restoreSelectedInterval();
+            state.contextChanged();
         }
     }
 
@@ -404,6 +432,7 @@ public class ContextEditor extends View {
             execute(i1, i2, j1, j2);
             matrixModel.fireTableDataChanged();
             matrix.restoreSelectedInterval();
+            state.contextChanged();
         }
         abstract void execute(int i1, int i2, int j1, int j2);
     }
@@ -430,6 +459,8 @@ public class ContextEditor extends View {
         public void actionPerformed(ActionEvent e) {
             state.context.transpose();
             matrixModel.fireTableStructureChanged();
+            matrix.clearSelection();
+            matrix.saveSelectedInterval();
             state.contextChanged();
         }
     }
@@ -440,7 +471,10 @@ public class ContextEditor extends View {
             this.index = index;
         }
         public void actionPerformed(ActionEvent e) {
+            matrix.saveSelectedInterval();
             addAttributeAt(index);
+            matrix.restoreSelectedInterval();
+            state.contextChanged();
         }
     }
 
@@ -450,7 +484,10 @@ public class ContextEditor extends View {
             this.index = index;
         }
         public void actionPerformed(ActionEvent e) {
+            matrix.saveSelectedInterval();
             addObjectAt(index);
+            matrix.restoreSelectedInterval();
+            state.contextChanged();
         }
     }
 
@@ -476,13 +513,11 @@ public class ContextEditor extends View {
             } catch (IllegalObjectException e1) {
                 e1.printStackTrace();
             }
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    matrixModel.fireTableStructureChanged();
-                    matrix.updateUI();
-                    matrix.restoreSelectedInterval();
-                }
-            });
+            matrixModel.fireTableStructureChanged();
+            matrix.invalidate();
+            matrix.repaint();
+            matrix.restoreSelectedInterval();
+            state.contextChanged();
         }
     }
 
@@ -491,14 +526,13 @@ public class ContextEditor extends View {
             if (state.context.getAttributeCount() == 0) return;
             matrix.saveSelectedInterval();
             state.context.removeAttribute(state.context.getAttributeAtIndex(lastActiveColumnIndex -1));
+            updateColumnWidths(lastActiveColumnIndex);
             if (lastActiveColumnIndex - 1 >= state.context.getAttributeCount()) lastActiveColumnIndex--;
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    matrixModel.fireTableStructureChanged();
-                    matrix.updateUI();
-                    matrix.restoreSelectedInterval();
-                }
-            });
+            matrixModel.fireTableStructureChanged();
+            matrix.invalidate();
+            matrix.repaint();
+            matrix.restoreSelectedInterval();
+            state.contextChanged();
         }
     }
 
@@ -515,12 +549,10 @@ public class ContextEditor extends View {
                     e1.printStackTrace();
                 }
             }
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    matrixModel.fireTableStructureChanged();
-                    matrix.updateUI();
-                }
-            });
+            matrixModel.fireTableStructureChanged();
+            matrix.invalidate();
+            matrix.repaint();
+            state.contextChanged();
         }
     }
 
@@ -532,19 +564,43 @@ public class ContextEditor extends View {
             int d = Math.abs(matrix.lastSelectedColumnsStartIndex - matrix.lastSelectedColumnsEndIndex) + 1;
             for (int unused = 0; unused < d; unused++) {
                 state.context.removeAttribute(state.context.getAttributeAtIndex(i));
+                updateColumnWidths(i+1);
             }
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    matrixModel.fireTableStructureChanged();
-                    matrix.updateUI();
-                }
-            });
+            matrixModel.fireTableStructureChanged();
+            matrix.invalidate();
+            matrix.repaint();
+            state.contextChanged();
         }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Helper functions
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // This code ideally would not be here but it was the only way
+    // I could make column width restoring work properly
+    private void updateColumnWidths(int removedIndex) {
+        Integer res = matrix.columnWidths.remove(removedIndex);
+        System.out.println(removedIndex + " " + res);
+        for (int i = removedIndex + 1; i < matrix.getColumnCount(); i++) {
+            Integer oldWidth = matrix.columnWidths.remove(i);
+            if (oldWidth == null) continue;
+            if (i == 1) continue;
+            System.out.println("Moved " + i + " with " + oldWidth + " to " + (i-1));
+            matrix.columnWidths.put(i-1, oldWidth);
+        }
+    }
+
+    // This code ideally would not be here but it was the only way
+    // I could make column width restoring work properly
+    private void switchColumnWidths(int from, int to) {
+        Integer fromVal = matrix.columnWidths.get(from);
+        Integer toVal = matrix.columnWidths.get(to);
+        if (fromVal == null) fromVal = ContextMatrix.DEFAULT_COLUMN_WIDTH;
+        if (toVal == null) toVal = ContextMatrix.DEFAULT_COLUMN_WIDTH;
+        matrix.columnWidths.put(to, fromVal);
+        matrix.columnWidths.put(from, toVal);
+    }
 
     private static void addMenuItem(JPopupMenu menu, String name, ActionListener action) {
         JMenuItem item = new JMenuItem(name);
@@ -627,9 +683,12 @@ class ContextMatrixModel extends AbstractTableModel {
     private static final long serialVersionUID = -1509387655329719071L;
 
     private final FormalContext context;
+    // Only needed for 'contextChanged' method when renaming s.th.
+    private final ProgramState state;
 
-    ContextMatrixModel(FormalContext context) {
-        this.context = context;
+    ContextMatrixModel(ProgramState state) {
+        this.state = state;
+        this.context = state.context;
     }
 
     @Override
@@ -683,6 +742,7 @@ class ContextMatrixModel extends AbstractTableModel {
             return false;
         } else {
             context.renameAttribute(oldName, newName);
+            state.contextChanged();
             return true;
         }
     }
@@ -692,6 +752,7 @@ class ContextMatrixModel extends AbstractTableModel {
             return false;
         } else {
             context.renameObject(oldName, newName);
+            state.contextChanged();
             return true;
         }
     }
@@ -738,6 +799,7 @@ class ContextMatrixModel extends AbstractTableModel {
  * http://stackoverflow.com/questions/14416188/jtable-how-to-get-selected-cells
  * http://stackoverflow.com/questions/5044222/how-can-i-determine-which-cell-in-a-jtable-was-selected?rq=1
  * http://tonyobryan.com/index.php?article=57
+ * http://www.jroller.com/santhosh/entry/make_jtable_resiable_better_than
 */
 class ContextMatrix extends JTable {
 
@@ -759,13 +821,10 @@ class ContextMatrix extends JTable {
     public int lastSelectedColumnsStartIndex;
     public int lastSelectedColumnsEndIndex;
 
-    public ContextMatrix(TableModel dm, Color bg) {
+    public ContextMatrix(TableModel dm, Color bg, Map<Integer, Integer> columnWidths) {
         super(dm);
         BACKGROUND_COLOR = bg;
-        init();
-    }
-
-    private void init() {
+        this.columnWidths = columnWidths;
         setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         setTableHeader(null);
         setOpaque(false);
@@ -775,10 +834,135 @@ class ContextMatrix extends JTable {
         setCellSelectionEnabled(true);
         setShowGrid(false);
         clearKeyBindings();
-
         // Create custom TableCellEditor
         editor = new ContextCellEditor(new JTextField());
+        // For column resizing
+        addMouseListener(columnResizeMouseAdapter);
+        addMouseMotionListener(columnResizeMouseAdapter);
     }
+
+    // START column resizing
+    // Very unelegant code and it even leaks to the class ContextEditor through `columnWidths`, `resizeCursor` and
+    // `DEFAULT_COLUMN_WIDTH` but I just could not find another solution.
+    public static final int DEFAULT_COLUMN_WIDTH = 80;
+    public static Cursor resizeCursor = Cursor.getPredefinedCursor(Cursor.E_RESIZE_CURSOR);
+    public Map<Integer,Integer> columnWidths;
+    private int mouseXOffset;
+    private Cursor otherCursor = resizeCursor;
+    private TableColumn resizingColumn;
+
+    public void restoreColumnWidths() {
+        if (columnWidths == null) return;
+        for (int i = 0; i < getColumnCount(); i++) {
+            Integer w = columnWidths.get(i);
+            TableColumn t = getColumnModel().getColumn(i);
+            if (w == null) {
+                t.setPreferredWidth(DEFAULT_COLUMN_WIDTH);
+            } else {
+                t.setPreferredWidth(w);
+            }
+        }
+    }
+
+    @SuppressWarnings("FieldCanBeLocal")
+    private MouseAdapter columnResizeMouseAdapter = new MouseAdapter() {
+
+        public void mousePressed(MouseEvent e){
+            ContextMatrix matrix = ContextMatrix.this;
+            Point p = e.getPoint();
+            // First find which header cell was hit
+            int index = matrix.columnAtPoint(p);
+            if(index == -1) return;
+            // The last 3 pixels + 3 pixels of next column are for resizing
+            TableColumn resizingColumn = getResizingColumn(p, index);
+            if(resizingColumn == null) return;
+            matrix.resizingColumn = resizingColumn;
+            mouseXOffset = p.x - resizingColumn.getWidth();
+            matrix.restoreSelectedInterval();
+        }
+
+        public void mouseMoved(MouseEvent e){
+            ContextMatrix matrix = ContextMatrix.this;
+            if((getResizingColumn(e.getPoint()) == null) == (matrix.getCursor() == resizeCursor)){
+                swapCursor();
+            }
+        }
+
+        public void mouseDragged(MouseEvent e){
+            ContextMatrix matrix = ContextMatrix.this;
+            int mouseX = e.getX();
+            TableColumn resizingColumn = matrix.resizingColumn;
+            if(resizingColumn != null){
+                matrix.restoreSelectedInterval();
+                int oldWidth = resizingColumn.getWidth();
+                int newWidth = Math.max(mouseX - mouseXOffset, 20);
+                resizingColumn.setWidth(newWidth);
+                resizingColumn.setPreferredWidth(newWidth);
+                columnWidths.put(resizingColumn.getModelIndex(), newWidth);
+
+                Container container;
+                if((matrix.getParent() == null)
+                        || ((container = matrix.getParent().getParent()) == null)
+                        || !(container instanceof JScrollPane)){
+                    return;
+                }
+
+                JViewport viewport = ((JScrollPane)container).getViewport();
+                int viewportWidth = viewport.getWidth();
+                int diff = newWidth - oldWidth;
+                int newHeaderWidth = matrix.getWidth() + diff;
+
+                // Resize a table
+                Dimension tableSize = matrix.getSize();
+                tableSize.width += diff;
+                matrix.setSize(tableSize);
+
+                // If this table is in AUTO_RESIZE_OFF mode and has a horizontal
+                // scrollbar, we need to update a view's position.
+                if((newHeaderWidth >= viewportWidth)
+                        && (matrix.getAutoResizeMode() == JTable.AUTO_RESIZE_OFF)){
+                    Point p = viewport.getViewPosition();
+                    p.x =
+                            Math.max(0, Math.min(newHeaderWidth - viewportWidth, p.x + diff));
+                    viewport.setViewPosition(p);
+
+                    // Update the original X offset value.
+                    mouseXOffset += diff;
+                }
+            }
+        }
+
+        public void mouseReleased(MouseEvent e){
+            ContextMatrix matrix = ContextMatrix.this;
+            matrix.resizingColumn = null;
+            matrix.saveSelectedInterval();
+        }
+
+        private void swapCursor(){
+            Cursor tmp = getCursor();
+            setCursor(otherCursor);
+            otherCursor = tmp;
+        }
+
+        private TableColumn getResizingColumn(Point p) {
+            return getResizingColumn(p, columnAtPoint(p));
+        }
+
+        private TableColumn getResizingColumn(Point p, int column) {
+            if (column == -1) return null;
+            int row = rowAtPoint(p);
+            if (row != 0) return null;
+            Rectangle r = getCellRect(row, column, true);
+            r.grow(-3, 0);
+            if (r.contains(p)) return null;
+            int midPoint = r.x + r.width / 2;
+            int columnIndex = (p.x < midPoint) ? column - 1 : column;
+            if(columnIndex == -1) return null;
+            return getColumnModel().getColumn(columnIndex);
+        }
+
+    };
+    // END column resizing
 
     private void clearKeyBindings() {
         // After testings thoroughly it seems to be impossible to simply clear all keybindings
@@ -823,10 +1007,12 @@ class ContextMatrix extends JTable {
         setRowSelectionInterval(row, row);
         setColumnSelectionInterval(column, column);
     }
+
     public void selectRow(int row) {
         setRowSelectionInterval(row, row);
         setColumnSelectionInterval(1, this.getColumnCount()-1);
     }
+
     public void selectColumn(int column) {
         setColumnSelectionInterval(column, column);
         setRowSelectionInterval(1, this.getRowCount() - 1);
@@ -843,22 +1029,24 @@ class ContextMatrix extends JTable {
     // For preventing a selection to disappear after an operation like "invert"
     public void restoreSelectedInterval() {
         if (getRowCount() <= 1 || getColumnCount() <= 1) return;
+        if (  (lastSelectedColumnsEndIndex == 0 && lastSelectedColumnsStartIndex == 0)
+           || (lastSelectedRowsEndIndex    == 0 && lastSelectedRowsStartIndex    == 0)) return;
         lastSelectedRowsStartIndex = clamp(lastSelectedRowsStartIndex, 1, getRowCount()-1);
         lastSelectedRowsEndIndex = clamp(lastSelectedRowsEndIndex, 1, getRowCount()-1);
-        lastSelectedColumnsStartIndex = clamp(lastSelectedColumnsStartIndex, 1, getColumnCount()-1);
+        lastSelectedColumnsStartIndex = clamp(lastSelectedColumnsStartIndex, 1, getColumnCount() - 1);
         lastSelectedColumnsEndIndex = clamp(lastSelectedColumnsEndIndex, 1, getColumnCount()-1);
         setRowSelectionInterval(lastSelectedRowsStartIndex, lastSelectedRowsEndIndex);
         setColumnSelectionInterval(lastSelectedColumnsStartIndex, lastSelectedColumnsEndIndex);
     }
 
-    // Overrided as header cells should *not* be selected when selecting all cells
+    // Overridden as header cells should *not* be selected when selecting all cells
     @Override
     public void selectAll() {
         setRowSelectionInterval(1, getRowCount()-1);
         setColumnSelectionInterval(1, getColumnCount()-1);
     }
 
-    // Overrided as header cells should *not* be selectable through mouse clicks / keyboard events
+    // Overridden as header cells should *not* be selectable through mouse clicks / keyboard events
     @Override
     public boolean isCellSelected(int i, int j) {
         return i != 0 && j != 0 && super.isCellSelected(i, j);
@@ -870,12 +1058,12 @@ class ContextMatrix extends JTable {
         super.tableChanged(e);
         alignCells();
         makeHeaderCellsEditable();
+        restoreColumnWidths();
     }
 
     // For correct painting of table when selecting something
     @Override
-    public Component prepareRenderer(TableCellRenderer renderer, int row,
-                                     int column) {
+    public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
         Component component = super.prepareRenderer(renderer, row, column);
         if (component instanceof JComponent) {
             ((JComponent)component).setOpaque(isCellSelected(row, column));
@@ -1034,8 +1222,8 @@ class ContextMatrix extends JTable {
             g.drawLine(x + firstColumnWidth - 2, y + rowHeight, x + firstColumnWidth - 2, y + tableHeight);
             g.setColor(new Color(235,235,235));
             g.drawLine(x + firstColumnWidth, y + rowHeight, x + firstColumnWidth, y + tableHeight);
+            g.setColor(new Color(255, 255, 255));
             for (int j = 0; j < fTable.getRowCount() + 1; j++) {
-                g.setColor(new Color(255,255,255));
                 g.drawLine(x, y + j * rowHeight - 1, x + firstColumnWidth - 1, y + j * rowHeight - 1);
             }
         }
@@ -1043,7 +1231,7 @@ class ContextMatrix extends JTable {
         private void paintHorizontalHeaderBackground(Graphics g) {
             int tableWidth = fTable.getWidth();
             int firstRowHeight = fTable.getRowHeight();
-            int columnWidth = fTable.getColumnModel().getColumn(0).getWidth();
+            int firstColumnWidth = fTable.getColumnModel().getColumn(0).getWidth();
             int offsetX = getViewPosition().x;
             int offsetY = getViewPosition().y;
             int x = -offsetX;
@@ -1052,12 +1240,14 @@ class ContextMatrix extends JTable {
             g.fillRect(x, y, tableWidth, firstRowHeight);
 
             g.setColor(new Color(255, 255, 255));
-            g.drawLine(x + columnWidth, y + firstRowHeight - 1, x + tableWidth, y + firstRowHeight - 1);
+            g.drawLine(x + firstColumnWidth, y + firstRowHeight - 1, x + tableWidth, y + firstRowHeight - 1);
             g.setColor(new Color(235, 235, 235));
-            g.drawLine(x + columnWidth, y + firstRowHeight+1, x + tableWidth, y + firstRowHeight+1);
+            g.drawLine(x + firstColumnWidth, y + firstRowHeight + 1, x + tableWidth, y + firstRowHeight + 1);
+            g.setColor(new Color(255, 255, 255));
+            int columnWidth = 0;
             for (int j = 1; j < fTable.getColumnCount() + 1; j++) {
-                g.setColor(new Color(255,255,255));
-                g.drawLine(x + j * columnWidth - 2, y, x + j * columnWidth - 2, y + firstRowHeight - 1);
+                columnWidth += fTable.getColumnModel().getColumn(j-1).getWidth();
+                g.drawLine(x + columnWidth - 2, y, x + columnWidth - 2, y + firstRowHeight - 1);
             }
         }
 
