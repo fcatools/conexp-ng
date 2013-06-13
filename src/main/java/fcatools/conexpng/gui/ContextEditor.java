@@ -46,6 +46,11 @@ public class ContextEditor extends View {
     // Due to unfortunate implications of our JTable customisation we need to rely on this "hack"
     int lastActiveRowIndex;
     int lastActiveColumnIndex;
+    // For dragging logic
+    boolean isDraggingRow = false;
+    boolean isDraggingColumn = false;
+    int lastDraggedRowIndex;
+    int lastDraggedColumnIndex;
 
     public ContextEditor(final ProgramState state) {
         super(state);
@@ -129,12 +134,12 @@ public class ContextEditor extends View {
     }
 
     private void createMouseActions() {
-        matrix.addMouseListener(new MouseAdapter() {
+        MouseAdapter mouseAdapter = new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 int i = matrix.rowAtPoint(e.getPoint());
                 int j = matrix.columnAtPoint(e.getPoint());
                 int clicks = e.getClickCount();
-                if (clicks >= 2 && clicks % 2 == 0 && !SwingUtilities.isRightMouseButton(e)) { // Double Click
+                if (clicks >= 2 && clicks % 2 == 0 && SwingUtilities.isLeftMouseButton(e)) { // Double Click
                     if (i > 0 && j > 0) {
                         invokeAction(new ToggleAction(i, j));
                     }
@@ -142,30 +147,74 @@ public class ContextEditor extends View {
             }
 
             public void mousePressed(MouseEvent e) {
+                maybeShowPopup(e);
+
                 int i = matrix.rowAtPoint(e.getPoint());
                 int j = matrix.columnAtPoint(e.getPoint());
-                lastActiveRowIndex = i;
-                lastActiveColumnIndex = j;
-                if (e.isPopupTrigger()) {
-                    if (i == 0 && j == 0) {
-                        // Don't show a context menu in the matrix corner
-                    } else if (i > 0 && j > 0) {
-                        if (matrix.getSelectedColumn() <= 0 || matrix.getSelectedRow() <= 0) {
-                            matrix.setSelectedCell(i, j);
-                        }
-                        cellPopupMenu.show(e.getComponent(), e.getX(), e.getY());
-                    } else if (j == 0) {
-                        objectCellPopupMenu.show(e.getComponent(), e.getX(), e.getY());
-                    } else {
-                        attributeCellPopupMenu.show(e.getComponent(), e.getX(), e.getY());
-                    }
+                lastDraggedRowIndex = i;
+                lastDraggedColumnIndex = j;
+                if (SwingUtilities.isLeftMouseButton(e) && j == 0 && i > 0) {
+                    isDraggingRow = true;
+                    matrix.selectRow(i);
+                    matrix.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                }
+                if (SwingUtilities.isLeftMouseButton(e) && i == 0 && j > 0) {
+                    isDraggingColumn = true;
+                    matrix.selectColumn(j);
+                    matrix.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                }
+            }
+
+            public void mouseDragged(MouseEvent e) {
+                int i = matrix.rowAtPoint(e.getPoint());
+                int j = matrix.columnAtPoint(e.getPoint());
+                if (i < 0 || j < 0) return;
+                if (isDraggingRow) matrix.selectRow(Math.max(i, 1));
+                if (isDraggingColumn) matrix.selectColumn(Math.max(j, 1));
+                if (isDraggingRow && i != lastDraggedRowIndex && i != 0) {
+                    matrixModel.reorderRows(lastDraggedRowIndex, i);
+                    matrixModel.fireTableDataChanged();
+                    matrix.selectRow(i);
+                    lastDraggedRowIndex = i;
+                }
+                if (isDraggingColumn && j != lastDraggedColumnIndex && j != 0) {
+                    matrixModel.reorderColumns(lastDraggedColumnIndex, j);
+                    matrixModel.fireTableDataChanged();
+                    matrix.selectColumn(j);
+                    lastDraggedColumnIndex = j;
                 }
             }
 
             public void mouseReleased(MouseEvent e) {
-                mousePressed(e);
+                maybeShowPopup(e);
+                isDraggingRow = false;
+                isDraggingColumn = false;
+                matrix.setCursor(Cursor.getDefaultCursor());
             }
-        });
+        };
+        matrix.addMouseListener(mouseAdapter);
+        matrix.addMouseMotionListener(mouseAdapter);
+    }
+
+    private void maybeShowPopup(MouseEvent e) {
+        int i = matrix.rowAtPoint(e.getPoint());
+        int j = matrix.columnAtPoint(e.getPoint());
+        lastActiveRowIndex = i;
+        lastActiveColumnIndex = j;
+        if (e.isPopupTrigger()) {
+            if (i == 0 && j == 0) {
+                // Don't show a context menu in the matrix corner
+            } else if (i > 0 && j > 0) {
+                if (matrix.getSelectedColumn() <= 0 || matrix.getSelectedRow() <= 0) {
+                    matrix.selectCell(i, j);
+                }
+                cellPopupMenu.show(e.getComponent(), e.getX(), e.getY());
+            } else if (j == 0) {
+                objectCellPopupMenu.show(e.getComponent(), e.getX(), e.getY());
+            } else {
+                attributeCellPopupMenu.show(e.getComponent(), e.getX(), e.getY());
+            }
+        }
     }
 
     private void createButtonActions() {
@@ -271,7 +320,7 @@ public class ContextEditor extends View {
         public void actionPerformed(ActionEvent e) {
             lastActiveRowIndex = clamp(lastActiveRowIndex + vertical, 1, state.context.getObjectCount());
             lastActiveColumnIndex = clamp(lastActiveColumnIndex + horizontal, 1, state.context.getAttributeCount());
-            matrix.setSelectedCell(lastActiveRowIndex, lastActiveColumnIndex);
+            matrix.selectCell(lastActiveRowIndex, lastActiveColumnIndex);
         }
     }
 
@@ -311,7 +360,7 @@ public class ContextEditor extends View {
             j = mod(j, state.context.getAttributeCount());
             lastActiveRowIndex = i + 1;
             lastActiveColumnIndex = j + 1;
-            matrix.setSelectedCell(lastActiveRowIndex, lastActiveColumnIndex);
+            matrix.selectCell(lastActiveRowIndex, lastActiveColumnIndex);
         }
     }
     class ToggleAction extends AbstractAction {
@@ -646,6 +695,33 @@ class ContextMatrixModel extends AbstractTableModel {
             return true;
         }
     }
+
+    public void reorderRows(int from, int to) {
+        if (context.getObjectCount() < 2) return;
+        if (from < 1 || to < 1) return;
+        from -= 1; to -= 1;
+        from = clamp(from, 0, context.getObjectCount() - 1);
+        to = clamp(to, 0, context.getObjectCount() - 1);
+        FullObject<String, String> o = context.getObjectAtIndex(from);
+        try {
+            context.removeObject(o.getIdentifier());
+        } catch (IllegalObjectException e) {
+            e.printStackTrace();
+        }
+        context.addObjectAt(o, to);
+    }
+
+    public void reorderColumns(int from, int to) {
+        if (context.getAttributeCount() < 2) return;
+        if (from < 1 || to < 1) return;
+        from -= 1; to -= 1;
+        from = clamp(from, 0, context.getAttributeCount() - 1);
+        to = clamp(to, 0, context.getAttributeCount() - 1);
+        String a = context.getAttributeAtIndex(from);
+        context.removeAttributeInternal(a);
+        context.addAttributeAt(a, to);
+    }
+
 }
 
 
@@ -743,9 +819,17 @@ class ContextMatrix extends JTable {
     }
 
     // For allowing a programmatical cell selection (i.e. not only through mouse/keyboard events)
-    public void setSelectedCell(int row, int column) {
+    public void selectCell(int row, int column) {
         setRowSelectionInterval(row, row);
         setColumnSelectionInterval(column, column);
+    }
+    public void selectRow(int row) {
+        setRowSelectionInterval(row, row);
+        setColumnSelectionInterval(1, this.getColumnCount()-1);
+    }
+    public void selectColumn(int column) {
+        setColumnSelectionInterval(column, column);
+        setRowSelectionInterval(1, this.getRowCount() - 1);
     }
 
     // For preventing a selection to disappear after an operation like "invert"

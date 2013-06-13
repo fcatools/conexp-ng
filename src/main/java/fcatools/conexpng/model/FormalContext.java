@@ -297,6 +297,21 @@ public class FormalContext extends
         }
     }
 
+    // Should not be used outside the context editor
+    public void removeAttributeInternal(String attribute) {
+        IndexedSet<String> newAttributes = new ListSet<>();
+        for (String attr : getAttributes()) {
+            if (attr.equals(attribute)) {
+            } else {
+                newAttributes.add(attr);
+            }
+        }
+        getAttributes().clear();
+        for (String attr : newAttributes) {
+            getAttributes().add(attr);
+        }
+    }
+
     public void addObjectAt(FullObject<String, String> object, int i) {
         IndexedSet<FullObject<String, String>> newObjects = new ListSet<>();
         for (int j = 0; j < getObjectCount(); j++) {
