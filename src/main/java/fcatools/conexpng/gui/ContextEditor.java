@@ -187,19 +187,19 @@ public class ContextEditor extends View {
     }
 
     private void createButtonActions() {
-        addToolbarButton("addObject", "Add Object", "conexp/addObj.gif", new AddObjectAtEndAction());
-        addToolbarButton("clarifyObjects", "Clarify Objects", "conexp/clarifyObj.gif", null); // TODO
-        addToolbarButton("reduceObjects", "Reduce Objects", "conexp/reduceObj.gif", null); // TODO
+        addToolbarButton(toolbar, "addObject", "Add Object", "conexp/addObj.gif", new AddObjectAtEndAction());
+        addToolbarButton(toolbar, "clarifyObjects", "Clarify Objects", "conexp/clarifyObj.gif", null); // TODO
+        addToolbarButton(toolbar, "reduceObjects", "Reduce Objects", "conexp/reduceObj.gif", null); // TODO
         toolbar.addSeparator();
-        addToolbarButton("addAttribute", "Add Attribute", "conexp/addAttr.gif", new AddAttributeAtEndAction());
-        addToolbarButton("clarifyAttributes", "Clarify Attributes", "conexp/clarifyAttr.gif", null); // TODO
-        addToolbarButton("reduceAttributes", "Reduce Attributes", "conexp/reduceAttr.gif", null); // TODO
+        addToolbarButton(toolbar, "addAttribute", "Add Attribute", "conexp/addAttr.gif", new AddAttributeAtEndAction());
+        addToolbarButton(toolbar, "clarifyAttributes", "Clarify Attributes", "conexp/clarifyAttr.gif", null); // TODO
+        addToolbarButton(toolbar, "reduceAttributes", "Reduce Attributes", "conexp/reduceAttr.gif", null); // TODO
         toolbar.addSeparator();
-        addToolbarButton("reduceContext", "Reduce Context", "conexp/reduceCxt.gif", null); // TODO
-        addToolbarButton("transposeContext", "Transpose Context", "conexp/transpose.gif", new TransposeAction());
+        addToolbarButton(toolbar, "reduceContext", "Reduce Context", "conexp/reduceCxt.gif", null); // TODO
+        addToolbarButton(toolbar, "transposeContext", "Transpose Context", "conexp/transpose.gif", new TransposeAction());
         toolbar.addSeparator();
-        addToolbarToggleButton("compactMatrix", "Compact Matrix", "conexp/alignToGrid.gif", new CompactAction()); // TODO
-        addToolbarToggleButton("showArrowRelations", "Show Arrow Relations", "conexp/associationRule.gif", null); // TODO
+        addToolbarToggleButton(toolbar, "compactMatrix", "Compact Matrix", "conexp/alignToGrid.gif", new CompactAction()); // TODO
+        addToolbarToggleButton(toolbar, "showArrowRelations", "Show Arrow Relations", "conexp/associationRule.gif", null); // TODO
     }
 
     private void createContextMenuActions() {
@@ -534,24 +534,6 @@ public class ContextEditor extends View {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Helper functions
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    private static void addMenuItem(JPopupMenu menu, String name, ActionListener action) {
-        JMenuItem item = new JMenuItem(name);
-        menu.add(item);
-        item.addActionListener(action);
-    }
-
-    private void addToolbarButton(String name, String tooltip, String iconPath, Action action) {
-        JButton b = createButton(tooltip, name, iconPath);
-        toolbar.add(b);
-        b.addActionListener(action);
-    }
-
-    private void addToolbarToggleButton(String name, String tooltip, String iconPath, ItemListener itemListener) {
-        JToggleButton b = createToggleButton(tooltip, name, iconPath);
-        toolbar.add(b);
-        b.addItemListener(itemListener);
-    }
 
     private void addAttributeAt(final int i) {
         String collisionFreeName = "attr" + i;

@@ -3,6 +3,8 @@ package fcatools.conexpng.gui;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemListener;
 import java.net.URL;
 
 public class Util {
@@ -25,6 +27,24 @@ public class Util {
         ImageIcon icon = new ImageIcon(url);
         b.setIcon(icon);
         return b;
+    }
+
+    public static void addMenuItem(JPopupMenu menu, String name, ActionListener action) {
+        JMenuItem item = new JMenuItem(name);
+        menu.add(item);
+        item.addActionListener(action);
+    }
+
+    public static void addToolbarButton(JToolBar toolbar, String name, String tooltip, String iconPath, Action action) {
+        JButton b = createButton(tooltip, name, iconPath);
+        toolbar.add(b);
+        b.addActionListener(action);
+    }
+
+    public static void addToolbarToggleButton(JToolBar toolbar, String name, String tooltip, String iconPath, ItemListener itemListener) {
+        JToggleButton b = createToggleButton(tooltip, name, iconPath);
+        toolbar.add(b);
+        b.addItemListener(itemListener);
     }
 
     // Needed as 'setLocationRelativeTo' doesn't work properly in a multi-monitor setup
