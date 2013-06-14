@@ -255,6 +255,9 @@ public class ContextEditor extends View {
         toolbar.addSeparator();
         addToolbarButton("reduceContext", "Reduce Context", "conexp/reduceCxt.gif", null); // TODO
         addToolbarButton("transposeContext", "Transpose Context", "conexp/transpose.gif", new TransposeAction());
+        toolbar.addSeparator();
+        addToolbarButton("reduceContext", "Reduce Context", "conexp/reduceCxt.gif", null); // TODO
+        addToolbarButton("showArrowRelations", "Show Arrow Relations", "conexp/transpose.gif", new TransposeAction());
     }
 
     private void createContextMenuActions() {
