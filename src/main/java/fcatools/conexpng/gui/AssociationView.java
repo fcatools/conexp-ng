@@ -22,169 +22,158 @@ import java.util.concurrent.TimeUnit;
 
 public class AssociationView extends View {
 
-	private double minsup = 0.1;
+    private double minsup = 0.1;
 
-	private double conf = 0.5;
+    private double conf = 0.5;
 
-	private static final long serialVersionUID = -6377834669097012170L;
+    private static final long serialVersionUID = -6377834669097012170L;
 
-	private JTextPane textpane = new JTextPane();
+    private JTextPane textpane = new JTextPane();
 
-	private Set<AssociationRule> associationbase;
+    private Set<AssociationRule> associationbase;
 
-	ThreadPoolExecutor pool = new ThreadPoolExecutor(1, 1, 0,
-			TimeUnit.NANOSECONDS, new SynchronousQueue<Runnable>());
+    ThreadPoolExecutor pool = new ThreadPoolExecutor(1, 1, 0,
+            TimeUnit.NANOSECONDS, new SynchronousQueue<Runnable>());
 
-	private SimpleAttributeSet[] attrs;
+    private SimpleAttributeSet[] attrs;
 
-	final int NON_ZERO_SUPPORT_EXACT_RULE = 0;
+    final int NON_ZERO_SUPPORT_EXACT_RULE = 0;
 
-	final int INEXACT_RULE = 1;
+    final int INEXACT_RULE = 1;
 
-	final int ZERO_SUPPORT_EXACT_RULE = 2;
+    final int ZERO_SUPPORT_EXACT_RULE = 2;
 
-	protected final String FOLLOW = " ==> ";
+    protected final String FOLLOW = " ==> ";
 
-	protected final String END_MARK = ";";
+    protected final String END_MARK = ";";
 
-	private final String EOL = System.getProperty("line.separator");
+    private final String EOL = System.getProperty("line.separator");
 
-	private CalculationThread calculation = new CalculationThread();
+    private boolean sortBySupport = true;
 
-	private class CalculationThread extends Thread {
+    private CalculationThread calculation = new CalculationThread();
 
-		@Override
-		public void run() {
-			associationbase = state.context.getLuxenburgerBase(minsup, 0);
-			state.associations = associationbase;
-			Runnable runnable = new Runnable() {
-				public void run() {
-					writeAssociations();
-				}
-			};
-			SwingUtilities.invokeLater(runnable);
+    private class CalculationThread extends Thread {
 
-		};
-	};
+        @Override
+        public void run() {
+            associationbase = state.context.getLuxenburgerBase(minsup, 0);
+            state.associations = associationbase;
+            Runnable runnable = new Runnable() {
+                public void run() {
+                    writeAssociations();
+                }
+            };
+            SwingUtilities.invokeLater(runnable);
 
-	public AssociationView(ProgramState state) {
-		super(state);
-		attrs = new SimpleAttributeSet[3];
-		attrs[NON_ZERO_SUPPORT_EXACT_RULE] = new SimpleAttributeSet();
-		StyleConstants.setForeground(attrs[NON_ZERO_SUPPORT_EXACT_RULE],
-				Color.blue);
+        };
+    };
 
-		attrs[ZERO_SUPPORT_EXACT_RULE] = new SimpleAttributeSet();
-		StyleConstants.setForeground(attrs[ZERO_SUPPORT_EXACT_RULE], Color.red);
+    public AssociationView(ProgramState state) {
+        super(state);
+        attrs = new SimpleAttributeSet[3];
+        attrs[NON_ZERO_SUPPORT_EXACT_RULE] = new SimpleAttributeSet();
+        StyleConstants.setForeground(attrs[NON_ZERO_SUPPORT_EXACT_RULE],
+                Color.blue);
 
-		attrs[INEXACT_RULE] = new SimpleAttributeSet();
-		StyleConstants.setForeground(attrs[INEXACT_RULE], new Color(0, 128, 0));
+        attrs[ZERO_SUPPORT_EXACT_RULE] = new SimpleAttributeSet();
+        StyleConstants.setForeground(attrs[ZERO_SUPPORT_EXACT_RULE], Color.red);
 
-		textpane.setEditable(false);
-		view = new JScrollPane(textpane);
-		settings = new JPanel(new BorderLayout());
-		settings.add(new AssociationSettings(), BorderLayout.NORTH);
-		settings.getComponent(0).addPropertyChangeListener(this);
-		JButton b = Util.createButton("Sort by object count", "sort",
-				"conexp/sort.gif");
-		toolbar.add(b);
-		b.addActionListener(new Sort());
-		super.init();
-		updateAssociations();
-	}
+        attrs[INEXACT_RULE] = new SimpleAttributeSet();
+        StyleConstants.setForeground(attrs[INEXACT_RULE], new Color(0, 128, 0));
 
-	private void writeAssociations() {
-		int i = 0;
-		StringBuffer buf;
-		textpane.setText("");
-		ArrayList<AssociationRule> t = new ArrayList<>(associationbase);
+        textpane.setEditable(false);
+        view = new JScrollPane(textpane);
+        settings = new JPanel(new BorderLayout());
+        settings.add(new AssociationSettings(), BorderLayout.NORTH);
+        settings.getComponent(0).addPropertyChangeListener(this);
+        super.init();
+        updateAssociations();
+    }
 
-		if (sortBySupport) {
-			Collections.sort(t, new Comparator<AssociationRule>() {
+    private void writeAssociations() {
+        int i = 0;
+        StringBuffer buf;
+        textpane.setText("");
+        ArrayList<AssociationRule> t = new ArrayList<>(associationbase);
 
-				@Override
-				public int compare(AssociationRule o1, AssociationRule o2) {
+        if (sortBySupport) {
+            Collections.sort(t, new Comparator<AssociationRule>() {
 
-					return Double.compare(o2.getSupport(), o1.getSupport());
-				}
-			});
-			sortBySupport = false;
-		}
+                @Override
+                public int compare(AssociationRule o1, AssociationRule o2) {
 
-		for (AssociationRule impl : t) {
-			buf = new StringBuffer();
-			if (impl.getConfidence() >= conf) {
-				i++;
-				buf.append(i);
-				buf.append("< " + state.context.supportCount(impl.getPremise())
-						+ " > ");
-				buf.append(impl.getPremise() + " =[" + impl.getConfidence()
-						+ "]=> ");
-				buf.append("< "
-						+ state.context.supportCount(impl.getConsequent())
-						+ " > " + impl.getConsequent() + END_MARK);
-				buf.append(EOL);
+                    return Double.compare(o2.getSupport(), o1.getSupport());
+                }
+            });
+        }
 
-				try {
-					textpane.getDocument().insertString(
-							textpane.getDocument().getLength(),
-							buf.toString(),
-							implicationStyle(impl.getSupport(),
-									impl.getConfidence()));
-				} catch (BadLocationException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		}
-		((AssociationSettings) settings.getComponent(0)).update(i,
-				associationbase.size());
-	}
+        for (AssociationRule impl : t) {
+            buf = new StringBuffer();
+            if (impl.getConfidence() >= conf) {
+                i++;
+                buf.append(i);
+                buf.append("< " + state.context.supportCount(impl.getPremise())
+                        + " > ");
+                buf.append(impl.getPremise() + " =[" + impl.getConfidence()
+                        + "]=> ");
+                buf.append("< "
+                        + state.context.supportCount(impl.getConsequent())
+                        + " > " + impl.getConsequent() + END_MARK);
+                buf.append(EOL);
 
-	public SimpleAttributeSet implicationStyle(double support, double confidence) {
-		if (confidence == 1.0) {
-			return support > 0 ? attrs[NON_ZERO_SUPPORT_EXACT_RULE]
-					: attrs[ZERO_SUPPORT_EXACT_RULE];
-		}
-		return attrs[INEXACT_RULE];
-	}
+                try {
+                    textpane.getDocument().insertString(
+                            textpane.getDocument().getLength(),
+                            buf.toString(),
+                            implicationStyle(impl.getSupport(),
+                                    impl.getConfidence()));
+                } catch (BadLocationException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+        }
+        ((AssociationSettings) settings.getComponent(0)).update(i,
+                associationbase.size());
+    }
 
-	private void updateAssociations() {
-		if (pool.getActiveCount() != 0) {
-			pool.remove(calculation);
-			pool.shutdownNow();
-			pool = new ThreadPoolExecutor(1, 1, 0, TimeUnit.NANOSECONDS,
-					new SynchronousQueue<Runnable>());
-		}
-		pool.execute(calculation);
-	}
+    public SimpleAttributeSet implicationStyle(double support, double confidence) {
+        if (confidence == 1.0) {
+            return support > 0 ? attrs[NON_ZERO_SUPPORT_EXACT_RULE]
+                    : attrs[ZERO_SUPPORT_EXACT_RULE];
+        }
+        return attrs[INEXACT_RULE];
+    }
 
-	@Override
-	public void propertyChange(PropertyChangeEvent evt) {
-		if (evt instanceof ContextChangeEvent) {
-			ContextChangeEvent cce = (ContextChangeEvent) evt;
-			if (cce.getName() == ContextChangeEvents.CONTEXTCHANGED) {
-				updateAssociations();
-			}
-		}
-		if (evt.getPropertyName().equals("ConfidenceChanged")) {
-			conf = (double) evt.getNewValue();
-			writeAssociations();
-		}
-		if (evt.getPropertyName().equals("MinimalSupportChanged")) {
-			minsup = (double) evt.getNewValue();
-			updateAssociations();
-		}
-	}
+    private void updateAssociations() {
+        if (pool.getActiveCount() != 0) {
+            pool.remove(calculation);
+            pool.shutdownNow();
+            pool = new ThreadPoolExecutor(1, 1, 0, TimeUnit.NANOSECONDS,
+                    new SynchronousQueue<Runnable>());
+        }
+        pool.execute(calculation);
+    }
 
-	private boolean sortBySupport = false;
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        if (evt instanceof ContextChangeEvent) {
+            ContextChangeEvent cce = (ContextChangeEvent) evt;
+            if (cce.getName() == ContextChangeEvents.CONTEXTCHANGED) {
+                updateAssociations();
+            }
+        }
+        if (evt.getPropertyName().equals("ConfidenceChanged")) {
+            conf = (double) evt.getNewValue();
+            writeAssociations();
+        } else if (evt.getPropertyName().equals("MinimalSupportChanged")) {
+            minsup = (double) evt.getNewValue();
+            updateAssociations();
+        } else {
+            sortBySupport = !sortBySupport;
+            writeAssociations();
+        }
+    }
 
-	@SuppressWarnings("serial")
-	class Sort extends AbstractAction {
-
-		public void actionPerformed(ActionEvent e) {
-			sortBySupport = true;
-			writeAssociations();
-		}
-	}
 }

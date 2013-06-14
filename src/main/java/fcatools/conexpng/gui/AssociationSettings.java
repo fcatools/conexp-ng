@@ -4,6 +4,9 @@ import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.awt.geom.Ellipse2D;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
@@ -40,12 +43,17 @@ public class AssociationSettings extends JPanel {
             g.setColor(getBackground());
             g.fillRect(0, 0, getWidth(), getHeight());
             g.setPaint(Color.BLUE);
-            g.fillArc(25, 5, 140, 140, 0, 360);
-            g.drawString("#Association Rules = " + all, 10, 165);
+            g.fillArc(0, 5, 140, 140, 0, 360);
+            g.drawString("#Association Rules = " + all, 0, 165);
 
             g.setColor(Color.RED);
-            g.fillArc(25, 5, 140, 140, 90, degree);
-            g.drawString("#With minSup = " + current, 10, 180);
+            g.fillArc(0, 5, 140, 140, 90, degree);
+            g.drawString("#With minSup = " + current, 0, 180);
+
+            g.setColor(Color.BLACK);
+            Shape circ = new Ellipse2D.Double(0, 5, 140, 140);
+            g.draw(circ);
+
         }
 
     };
@@ -54,8 +62,10 @@ public class AssociationSettings extends JPanel {
         propertyChangeSupport = new PropertyChangeSupport(this);
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
+        minSupSlider.setPreferredSize(new Dimension(150, 25));
+        confSlider.setPreferredSize(new Dimension(150, 25));
         gbc.anchor = GridBagConstraints.WEST;
-        gbc.insets = new Insets(0, 0, 10, 0);
+        gbc.insets = new Insets(10, 5, 0, 0);
         gbc.gridx = 0;
         gbc.gridy = 0;
         add(minSupLabel, gbc);
@@ -66,7 +76,7 @@ public class AssociationSettings extends JPanel {
         gbc.gridy = 3;
         add(confSlider, gbc);
         gbc.gridy = 4;
-        piechart.setPreferredSize(new Dimension(200, 200));
+        piechart.setPreferredSize(new Dimension(150, 200));
 
         // Element redCircle = piechart.getSVGDocument().createElementNS(
         // SVGDOMImplementation.SVG_NAMESPACE_URI,
@@ -95,9 +105,35 @@ public class AssociationSettings extends JPanel {
         // piechart.getSVGDocument().getDocumentElement().appendChild(blueCircle);
 
         add(piechart, gbc);
+        gbc.gridy = 5;
+        add(new JLabel("Sorting by:"), gbc);
+        Action sortAction = new SortAction();
+        JRadioButton lexical = new JRadioButton();
+        lexical.setSelected(true);
+        lexical.setAction(sortAction);
+        lexical.setText("Lexical order");
+        lexical.setMnemonic(KeyEvent.VK_L);
+        lexical.setActionCommand("LexicalOrder");
+
+        
+        
+        JRadioButton support = new JRadioButton();
+        support.setAction(sortAction);
+        support.setText("Support");
+        support.setMnemonic(KeyEvent.VK_S);
+        support.setActionCommand("Support");
+
+        // Group the radio buttons.
+        ButtonGroup group = new ButtonGroup();
+        group.add(lexical);
+        group.add(support);
+        gbc.gridy = 6;
+        add(lexical, gbc);
+        gbc.gridy = 7;
+        add(support, gbc);
+
         confSlider.addChangeListener(new SliderListener(false));
         minSupSlider.addChangeListener(new SliderListener(true));
-
     }
 
     public void update(int numberOfCurrentAssocitaionrules,
@@ -124,6 +160,31 @@ public class AssociationSettings extends JPanel {
     }
 
     // ////////////////////////////////////////////////////////////////////////////////////////
+
+    private class SortAction extends AbstractAction {
+
+        boolean lex = true;
+
+        @Override
+        public void actionPerformed(ActionEvent arg0) {
+            if (arg0.getActionCommand().equals("LexicalOrder")) {
+                if (lex)
+                    return;
+                else {
+                    lex = true;
+                    myFirePropertyChange("SortByLexicalOrder", null, null);
+                }
+            } else {
+                if (!lex)
+                    return;
+                else {
+                    lex = false;
+                    myFirePropertyChange("SortBySupport", null, null);
+                }
+            }
+        }
+
+    }
 
     private class SliderListener implements ChangeListener {
 
