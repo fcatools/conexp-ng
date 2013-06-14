@@ -692,12 +692,12 @@ class ContextMatrix extends JTable {
             g.setColor(HEADER_COLOR);
             g.fillRect(x, y, tableWidth, firstRowHeight);
 
-            int columnWidth0 = 0;
-            int columnWidth1 = fTable.getColumnModel().getColumn(lastDraggedColumnIndex).getWidth();
-            for (int j = 1; j < lastDraggedColumnIndex + 1; j++) {
-                columnWidth0 += fTable.getColumnModel().getColumn(j-1).getWidth();
-            }
             if (isDraggingColumn) {
+                int columnWidth0 = 0;
+                int columnWidth1 = fTable.getColumnModel().getColumn(lastDraggedColumnIndex).getWidth();
+                for (int j = 1; j < lastDraggedColumnIndex + 1; j++) {
+                    columnWidth0 += fTable.getColumnModel().getColumn(j-1).getWidth();
+                }
                 g.setColor(new Color(230,230,230));
                 g.fillRect(x + columnWidth0 - 2, y, columnWidth1, firstRowHeight - 1);
             }
