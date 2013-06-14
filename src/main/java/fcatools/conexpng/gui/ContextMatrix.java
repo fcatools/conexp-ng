@@ -145,14 +145,22 @@ class ContextMatrix extends JTable {
     /* For preventing a selection to disappear after an operation like "invert" */
     public void restoreSelectedInterval() {
         if (getRowCount() <= 1 || getColumnCount() <= 1) return;
-        if (  (lastSelectedColumnsEndIndex == 0 && lastSelectedColumnsStartIndex == 0)
-                || (lastSelectedRowsEndIndex    == 0 && lastSelectedRowsStartIndex    == 0)) return;
+        if (  (lastSelectedColumnsEndIndex <= 0 && lastSelectedColumnsStartIndex <= 0)
+                || (lastSelectedRowsEndIndex    <= 0 && lastSelectedRowsStartIndex    <= 0)) return;
         lastSelectedRowsStartIndex = clamp(lastSelectedRowsStartIndex, 1, getRowCount()-1);
         lastSelectedRowsEndIndex = clamp(lastSelectedRowsEndIndex, 1, getRowCount()-1);
         lastSelectedColumnsStartIndex = clamp(lastSelectedColumnsStartIndex, 1, getColumnCount() - 1);
         lastSelectedColumnsEndIndex = clamp(lastSelectedColumnsEndIndex, 1, getColumnCount()-1);
         setRowSelectionInterval(lastSelectedRowsStartIndex, lastSelectedRowsEndIndex);
         setColumnSelectionInterval(lastSelectedColumnsStartIndex, lastSelectedColumnsEndIndex);
+    }
+
+    public boolean wasColumnSelected(int j) {
+        return (lastSelectedColumnsEndIndex == j && lastSelectedColumnsStartIndex == j);
+    }
+
+    public boolean wasRowSelected(int i) {
+        return (lastSelectedRowsEndIndex == i && lastSelectedRowsStartIndex == i);
     }
 
     /* Overridden as header cells should *not* be selected when selecting all cells */
@@ -238,6 +246,8 @@ class ContextMatrix extends JTable {
         public ContextCellEditor(JTextField textField) {
             super(textField);
             this.textField = textField;
+            // Prevent double clicking from initiating edit operation
+            this.clickCountToStart = Integer.MAX_VALUE;
         }
 
         @Override
@@ -321,6 +331,7 @@ class ContextMatrix extends JTable {
                 int i = rowAtPoint(e.getPoint());
                 int j = columnAtPoint(e.getPoint());
                 if (i < 0 || j < 0) return;
+                if (isDraggingRow || isDraggingColumn) clearSelection();
                 // A reorder of rows occured
                 if (isDraggingRow && i != lastDraggedRowIndex && i != 0) {
                     model.reorderRows(lastDraggedRowIndex, i);
@@ -351,10 +362,12 @@ class ContextMatrix extends JTable {
                 int j = columnAtPoint(e.getPoint());
                 if (getCursor() != ContextMatrix.resizeCursor && !didReorderOccur) {
                     if (SwingUtilities.isLeftMouseButton(e) && j == 0 && i > 0) {
-                        selectRow(i);
+                        if (!wasRowSelected(i)) selectRow(i);
+                        else clearSelection();
                     }
                     if (SwingUtilities.isLeftMouseButton(e) && i == 0 && j > 0) {
-                        selectColumn(j);
+                        if (!wasColumnSelected(j)) selectColumn(j);
+                        else clearSelection();
                     }
                 }
 
@@ -364,9 +377,9 @@ class ContextMatrix extends JTable {
                 if (getCursor() != ContextMatrix.resizeCursor) {
                     setCursor(Cursor.getDefaultCursor());
                 }
+                saveSelectedInterval();
                 invalidate();
                 repaint();
-                saveSelectedInterval();
             }
         };
         addMouseListener(mouseAdapter);
@@ -540,7 +553,7 @@ class ContextMatrix extends JTable {
             public void mouseReleased(MouseEvent e){
                 ContextMatrix matrix = ContextMatrix.this;
                 matrix.resizingColumn = null;
-                matrix.saveSelectedInterval();
+//                matrix.saveSelectedInterval();
             }
 
             private void swapCursor(){
