@@ -841,129 +841,6 @@ class ContextMatrix extends JTable {
         addMouseMotionListener(columnResizeMouseAdapter);
     }
 
-    // START column resizing
-    // Very unelegant code and it even leaks to the class ContextEditor through `columnWidths`, `resizeCursor` and
-    // `DEFAULT_COLUMN_WIDTH` but I just could not find another solution.
-    public static final int DEFAULT_COLUMN_WIDTH = 80;
-    public static Cursor resizeCursor = Cursor.getPredefinedCursor(Cursor.E_RESIZE_CURSOR);
-    public Map<Integer,Integer> columnWidths;
-    private int mouseXOffset;
-    private Cursor otherCursor = resizeCursor;
-    private TableColumn resizingColumn;
-
-    public void restoreColumnWidths() {
-        if (columnWidths == null) return;
-        for (int i = 0; i < getColumnCount(); i++) {
-            Integer w = columnWidths.get(i);
-            TableColumn t = getColumnModel().getColumn(i);
-            if (w == null) {
-                t.setPreferredWidth(DEFAULT_COLUMN_WIDTH);
-            } else {
-                t.setPreferredWidth(w);
-            }
-        }
-    }
-
-    @SuppressWarnings("FieldCanBeLocal")
-    private MouseAdapter columnResizeMouseAdapter = new MouseAdapter() {
-
-        public void mousePressed(MouseEvent e){
-            ContextMatrix matrix = ContextMatrix.this;
-            Point p = e.getPoint();
-            // First find which header cell was hit
-            int index = matrix.columnAtPoint(p);
-            if(index == -1) return;
-            // The last 3 pixels + 3 pixels of next column are for resizing
-            TableColumn resizingColumn = getResizingColumn(p, index);
-            if(resizingColumn == null) return;
-            matrix.resizingColumn = resizingColumn;
-            mouseXOffset = p.x - resizingColumn.getWidth();
-            matrix.restoreSelectedInterval();
-        }
-
-        public void mouseMoved(MouseEvent e){
-            ContextMatrix matrix = ContextMatrix.this;
-            if((getResizingColumn(e.getPoint()) == null) == (matrix.getCursor() == resizeCursor)){
-                swapCursor();
-            }
-        }
-
-        public void mouseDragged(MouseEvent e){
-            ContextMatrix matrix = ContextMatrix.this;
-            int mouseX = e.getX();
-            TableColumn resizingColumn = matrix.resizingColumn;
-            if(resizingColumn != null){
-                matrix.restoreSelectedInterval();
-                int oldWidth = resizingColumn.getWidth();
-                int newWidth = Math.max(mouseX - mouseXOffset, 20);
-                resizingColumn.setWidth(newWidth);
-                resizingColumn.setPreferredWidth(newWidth);
-                columnWidths.put(resizingColumn.getModelIndex(), newWidth);
-
-                Container container;
-                if((matrix.getParent() == null)
-                        || ((container = matrix.getParent().getParent()) == null)
-                        || !(container instanceof JScrollPane)){
-                    return;
-                }
-
-                JViewport viewport = ((JScrollPane)container).getViewport();
-                int viewportWidth = viewport.getWidth();
-                int diff = newWidth - oldWidth;
-                int newHeaderWidth = matrix.getWidth() + diff;
-
-                // Resize a table
-                Dimension tableSize = matrix.getSize();
-                tableSize.width += diff;
-                matrix.setSize(tableSize);
-
-                // If this table is in AUTO_RESIZE_OFF mode and has a horizontal
-                // scrollbar, we need to update a view's position.
-                if((newHeaderWidth >= viewportWidth)
-                        && (matrix.getAutoResizeMode() == JTable.AUTO_RESIZE_OFF)){
-                    Point p = viewport.getViewPosition();
-                    p.x =
-                            Math.max(0, Math.min(newHeaderWidth - viewportWidth, p.x + diff));
-                    viewport.setViewPosition(p);
-
-                    // Update the original X offset value.
-                    mouseXOffset += diff;
-                }
-            }
-        }
-
-        public void mouseReleased(MouseEvent e){
-            ContextMatrix matrix = ContextMatrix.this;
-            matrix.resizingColumn = null;
-            matrix.saveSelectedInterval();
-        }
-
-        private void swapCursor(){
-            Cursor tmp = getCursor();
-            setCursor(otherCursor);
-            otherCursor = tmp;
-        }
-
-        private TableColumn getResizingColumn(Point p) {
-            return getResizingColumn(p, columnAtPoint(p));
-        }
-
-        private TableColumn getResizingColumn(Point p, int column) {
-            if (column == -1) return null;
-            int row = rowAtPoint(p);
-            if (row != 0) return null;
-            Rectangle r = getCellRect(row, column, true);
-            r.grow(-3, 0);
-            if (r.contains(p)) return null;
-            int midPoint = r.x + r.width / 2;
-            int columnIndex = (p.x < midPoint) ? column - 1 : column;
-            if(columnIndex == -1) return null;
-            return getColumnModel().getColumn(columnIndex);
-        }
-
-    };
-    // END column resizing
-
     private void clearKeyBindings() {
         // After testings thoroughly it seems to be impossible to simply clear all keybindings
         // even if Swing's API suggests that it should be possible. So we need to rely on a hack
@@ -1136,6 +1013,133 @@ class ContextMatrix extends JTable {
         }
 
     }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Code pertaining to column resizing
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // Very unelegant code and it even leaks to the class ContextEditor through `columnWidths`, `resizeCursor` and
+    // `DEFAULT_COLUMN_WIDTH` but I just could not find another solution.
+    public static final int DEFAULT_COLUMN_WIDTH = 80;
+    public static Cursor resizeCursor = Cursor.getPredefinedCursor(Cursor.E_RESIZE_CURSOR);
+    public Map<Integer,Integer> columnWidths;
+    private int mouseXOffset;
+    private Cursor otherCursor = resizeCursor;
+    private TableColumn resizingColumn;
+
+    public void restoreColumnWidths() {
+        if (columnWidths == null) return;
+        for (int i = 0; i < getColumnCount(); i++) {
+            Integer w = columnWidths.get(i);
+            TableColumn t = getColumnModel().getColumn(i);
+            if (w == null) {
+                t.setPreferredWidth(DEFAULT_COLUMN_WIDTH);
+            } else {
+                t.setPreferredWidth(w);
+            }
+        }
+    }
+
+    @SuppressWarnings("FieldCanBeLocal")
+    private MouseAdapter columnResizeMouseAdapter = new MouseAdapter() {
+
+        public void mousePressed(MouseEvent e){
+            ContextMatrix matrix = ContextMatrix.this;
+            Point p = e.getPoint();
+            // First find which header cell was hit
+            int index = matrix.columnAtPoint(p);
+            if(index == -1) return;
+            // The last 3 pixels + 3 pixels of next column are for resizing
+            TableColumn resizingColumn = getResizingColumn(p, index);
+            if(resizingColumn == null) return;
+            matrix.resizingColumn = resizingColumn;
+            mouseXOffset = p.x - resizingColumn.getWidth();
+            matrix.restoreSelectedInterval();
+        }
+
+        public void mouseMoved(MouseEvent e){
+            ContextMatrix matrix = ContextMatrix.this;
+            if((getResizingColumn(e.getPoint()) == null) == (matrix.getCursor() == resizeCursor)){
+                swapCursor();
+            }
+        }
+
+        public void mouseDragged(MouseEvent e){
+            ContextMatrix matrix = ContextMatrix.this;
+            int mouseX = e.getX();
+            TableColumn resizingColumn = matrix.resizingColumn;
+            if(resizingColumn != null){
+                matrix.restoreSelectedInterval();
+                int oldWidth = resizingColumn.getWidth();
+                int newWidth = Math.max(mouseX - mouseXOffset, 20);
+                resizingColumn.setWidth(newWidth);
+                resizingColumn.setPreferredWidth(newWidth);
+                columnWidths.put(resizingColumn.getModelIndex(), newWidth);
+
+                Container container;
+                if((matrix.getParent() == null)
+                        || ((container = matrix.getParent().getParent()) == null)
+                        || !(container instanceof JScrollPane)){
+                    return;
+                }
+
+                JViewport viewport = ((JScrollPane)container).getViewport();
+                int viewportWidth = viewport.getWidth();
+                int diff = newWidth - oldWidth;
+                int newHeaderWidth = matrix.getWidth() + diff;
+
+                // Resize a table
+                Dimension tableSize = matrix.getSize();
+                tableSize.width += diff;
+                matrix.setSize(tableSize);
+
+                // If this table is in AUTO_RESIZE_OFF mode and has a horizontal
+                // scrollbar, we need to update a view's position.
+                if((newHeaderWidth >= viewportWidth)
+                        && (matrix.getAutoResizeMode() == JTable.AUTO_RESIZE_OFF)){
+                    Point p = viewport.getViewPosition();
+                    p.x =
+                            Math.max(0, Math.min(newHeaderWidth - viewportWidth, p.x + diff));
+                    viewport.setViewPosition(p);
+
+                    // Update the original X offset value.
+                    mouseXOffset += diff;
+                }
+            }
+        }
+
+        public void mouseReleased(MouseEvent e){
+            ContextMatrix matrix = ContextMatrix.this;
+            matrix.resizingColumn = null;
+            matrix.saveSelectedInterval();
+        }
+
+        private void swapCursor(){
+            Cursor tmp = getCursor();
+            setCursor(otherCursor);
+            otherCursor = tmp;
+        }
+
+        private TableColumn getResizingColumn(Point p) {
+            return getResizingColumn(p, columnAtPoint(p));
+        }
+
+        private TableColumn getResizingColumn(Point p, int column) {
+            if (column == -1) return null;
+            int row = rowAtPoint(p);
+            if (row != 0) return null;
+            Rectangle r = getCellRect(row, column, true);
+            r.grow(-3, 0);
+            if (r.contains(p)) return null;
+            int midPoint = r.x + r.width / 2;
+            int columnIndex = (p.x < midPoint) ? column - 1 : column;
+            if(columnIndex == -1) return null;
+            return getColumnModel().getColumn(columnIndex);
+        }
+
+    };
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Custom viewport that makes the table look nice
