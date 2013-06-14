@@ -1,16 +1,21 @@
 package fcatools.conexpng.gui;
 
 import fcatools.conexpng.OS;
+import fcatools.conexpng.ProgramState;
 
 import javax.swing.*;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 
 import static fcatools.conexpng.gui.Util.centerDialogInsideMainFrame;
 import static fcatools.conexpng.gui.Util.createButton;
 
 public class MainToolbar extends JToolBar {
+
+    private ProgramState state;
 
     private static final long serialVersionUID = -3495670613141172867L;
 
@@ -25,22 +30,28 @@ public class MainToolbar extends JToolBar {
     private final JButton exploreButton;
     private final JButton helpButton;
 
-    public MainToolbar(final JFrame mainFrame) {
+    public MainToolbar(final JFrame mainFrame, final ProgramState state) {
         this.mainFrame = mainFrame;
+        this.state = state;
         this.setFloatable(false);
-        this.setMargin(new Insets(getInsets().top + 2, getInsets().left + 3, getInsets().bottom - 3, getInsets().right + 4));
+        this.setMargin(new Insets(getInsets().top + 2, getInsets().left + 3,
+                getInsets().bottom - 3, getInsets().right + 4));
         if (OS.isMacOsX) {
-            this.setMargin(new Insets(getInsets().top, getInsets().left + 2, getInsets().bottom, getInsets().right));
+            this.setMargin(new Insets(getInsets().top, getInsets().left + 2,
+                    getInsets().bottom, getInsets().right));
         }
 
         // Add buttons
         newButton = createButton("New Context", "newContext", "conexp/new.gif");
         add(newButton);
-        openButton = createButton("Open Context", "openContext", "conexp/open.gif");
+        openButton = createButton("Open Context", "openContext",
+                "conexp/open.gif");
         add(openButton);
-        saveButton = createButton("Save Contex", "saveContext", "conexp/save.gif");
+        saveButton = createButton("Save Contex", "saveContext",
+                "conexp/save.gif");
         add(saveButton);
-        saveAsButton = createButton("Save as another Context", "saveAsContext", "conexp/save.gif");
+        saveAsButton = createButton("Save as another Context", "saveAsContext",
+                "conexp/save.gif");
         add(saveAsButton);
         addSeparator();
         undoButton = createButton("Undo", "undo", "conexp/Undo.gif");
@@ -48,9 +59,11 @@ public class MainToolbar extends JToolBar {
         redoButton = createButton("Redo", "redo", "conexp/Redo.gif");
         add(redoButton);
         addSeparator();
-        countButton = createButton("Count Concepts", "countConcepts", "conexp/numConcepts.gif");
+        countButton = createButton("Count Concepts", "countConcepts",
+                "conexp/numConcepts.gif");
         add(countButton);
-        exploreButton = createButton("Explore Attributes", "exploreAttributes", "conexp/attrExploration.gif");
+        exploreButton = createButton("Explore Attributes", "exploreAttributes",
+                "conexp/attrExploration.gif");
         add(exploreButton);
         addSeparator();
         helpButton = createButton("Help", "help", "conexp/question.gif");
@@ -58,11 +71,23 @@ public class MainToolbar extends JToolBar {
         add(helpButton);
 
         // Add actions
-        // TODO: Maybe create an (public) Action since we want to also save from the exit prompt
-        //       when there are unsaved changes.
-        saveButton.addActionListener(new ActionListener() {
+        openButton.addActionListener(new ActionListener() {
+
             public void actionPerformed(ActionEvent arg0) {
-                JOptionPane.showMessageDialog(MainToolbar.this, "Save");
+                new OpenAction().actionPerformed(arg0);
+            }
+        });
+        saveButton.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent arg0) {
+                new SaveAction().actionPerformed(arg0);
+            }
+        });
+        saveAsButton.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent arg0) {
+                state.filePath = "";
+                new SaveAction().actionPerformed(arg0);
             }
         });
         countButton.addActionListener(new ActionListener() {
@@ -72,23 +97,10 @@ public class MainToolbar extends JToolBar {
             }
         });
         exploreButton.addActionListener(new ActionListener() {
-            // Maybe it is an own class worth
             public void actionPerformed(ActionEvent arg0) {
 
                 // TODO: Placeholder
                 showMessageDialog("10 Concepts");
-                /*
-                Object[] options = { "Yes", "No", "WTF" };
-                int choice;
-                do {
-                    choice = JOptionPane.showOptionDialog(MainToolbar.this,
-                            "Wenn das Objekt das und das hat...",
-                            "A Silly Question",
-                            JOptionPane.YES_NO_CANCEL_OPTION,
-                            JOptionPane.QUESTION_MESSAGE, null, options,
-                            options[2]);
-                } while (choice != 2);
-                */
             }
         });
     }
@@ -124,6 +136,65 @@ public class MainToolbar extends JToolBar {
         dialog.pack();
         centerDialogInsideMainFrame(mainFrame, dialog);
         dialog.setVisible(true);
+    }
+
+    // ////////////////////////////////////////////////////////////////////////
+
+    @SuppressWarnings("serial")
+    class SaveAction extends AbstractAction {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (state.filePath.isEmpty()) {
+                final JFileChooser fc = new JFileChooser();
+                final JDialog dialog = new JDialog(mainFrame, "Save file as",
+                        true);
+
+                dialog.setContentPane(fc);
+                fc.setDialogType(JFileChooser.SAVE_DIALOG);
+                fc.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        String state = (String) e.getActionCommand();
+                        if ((state.equals(JFileChooser.APPROVE_SELECTION) && fc
+                                .getSelectedFile() != null)
+                                || state.equals(JFileChooser.CANCEL_SELECTION)) {
+                            dialog.setVisible(false);
+                        }
+                    }
+                });
+                dialog.pack();
+                Util.centerDialogInsideMainFrame(mainFrame, dialog);
+                dialog.setVisible(true);
+
+                if (fc.getSelectedFile() != null) {
+                    File file = fc.getSelectedFile();
+                    state.filePath = file.getAbsolutePath();
+                    mainFrame
+                            .setTitle("ConExp-NG - \"" + state.filePath + "\"");
+                }
+            }
+            // TODO: save document
+        }
+    }
+
+    @SuppressWarnings("serial")
+    class OpenAction extends AbstractAction {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (state.filePath.isEmpty()) {
+                final JFileChooser fc = new JFileChooser();
+                int returnVal = fc.showOpenDialog(mainFrame);
+
+                if (returnVal == JFileChooser.APPROVE_OPTION) {
+                    File file = fc.getSelectedFile();
+                    state.filePath = file.getAbsolutePath();
+                    mainFrame
+                            .setTitle("ConExp-NG - \"" + state.filePath + "\"");
+                }
+            }
+            // TODO: open document
+        }
     }
 
 }

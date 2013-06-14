@@ -115,8 +115,8 @@ public class AssociationSettings extends JPanel {
         lexical.setMnemonic(KeyEvent.VK_L);
         lexical.setActionCommand("LexicalOrder");
 
-        
-        
+
+
         JRadioButton support = new JRadioButton();
         support.setAction(sortAction);
         support.setText("Support");
@@ -161,6 +161,7 @@ public class AssociationSettings extends JPanel {
 
     // ////////////////////////////////////////////////////////////////////////////////////////
 
+    @SuppressWarnings("serial")
     private class SortAction extends AbstractAction {
 
         boolean lex = true;

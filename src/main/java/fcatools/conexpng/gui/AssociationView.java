@@ -10,7 +10,6 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -163,8 +162,7 @@ public class AssociationView extends View {
             if (cce.getName() == ContextChangeEvents.CONTEXTCHANGED) {
                 updateAssociations();
             }
-        }
-        if (evt.getPropertyName().equals("ConfidenceChanged")) {
+        } else if (evt.getPropertyName().equals("ConfidenceChanged")) {
             conf = (double) evt.getNewValue();
             writeAssociations();
         } else if (evt.getPropertyName().equals("MinimalSupportChanged")) {
