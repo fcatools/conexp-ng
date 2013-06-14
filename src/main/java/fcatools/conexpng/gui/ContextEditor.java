@@ -64,11 +64,6 @@ public class ContextEditor extends View {
     // Due to unfortunate implications of our JTable customisation we need to rely on this "hack"
     int lastActiveRowIndex;
     int lastActiveColumnIndex;
-    // For dragging logic
-    boolean isDraggingRow = false;
-    boolean isDraggingColumn = false;
-    int lastDraggedRowIndex;
-    int lastDraggedColumnIndex;
 
     public ContextEditor(final ProgramState state) {
         super(state);
@@ -163,78 +158,8 @@ public class ContextEditor extends View {
                     }
                 }
             }
-
-            public void mousePressed(MouseEvent e) {
-                maybeShowPopup(e);
-
-                int i = matrix.rowAtPoint(e.getPoint());
-                int j = matrix.columnAtPoint(e.getPoint());
-                lastDraggedRowIndex = i;
-                lastDraggedColumnIndex = j;
-                // A hacky way to check if the user is currently resizing a column
-                if (matrix.getCursor() != ContextMatrix.resizeCursor) {
-                    if (SwingUtilities.isLeftMouseButton(e) && j == 0 && i > 0) {
-                        isDraggingRow = true;
-                        matrix.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-                    }
-                    if (SwingUtilities.isLeftMouseButton(e) && i == 0 && j > 0) {
-                        isDraggingColumn = true;
-                        matrix.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-                    }
-                }
-            }
-
-            public void mouseDragged(MouseEvent e) {
-                int i = matrix.rowAtPoint(e.getPoint());
-                int j = matrix.columnAtPoint(e.getPoint());
-                if (i < 0 || j < 0) return;
-                if (isDraggingRow) matrix.selectRow(Math.max(i, 1));
-                if (isDraggingColumn) matrix.selectColumn(Math.max(lastDraggedColumnIndex, 1));
-                // A reorder of rows occured
-                if (isDraggingRow && i != lastDraggedRowIndex && i != 0) {
-                    matrixModel.reorderRows(lastDraggedRowIndex, i);
-                    matrixModel.fireTableDataChanged();
-                    matrix.selectRow(i);
-                    lastDraggedRowIndex = i;
-                }
-                // A reorder of columns occured
-                if (isDraggingColumn && j != lastDraggedColumnIndex && j != 0) {
-                    // to prevent a bug when reordering columns of different widths
-                    Rectangle selected = matrix.getCellRect(0, lastDraggedColumnIndex, false);
-                    Rectangle r = matrix.getCellRect(0, j, false);
-                    Point p = r.getLocation();
-                    if ((j <= lastDraggedColumnIndex || e.getX() > p.x + r.width - selected.width) &&
-                        (j >  lastDraggedColumnIndex || e.getX() < p.x + selected.width)) {
-                        matrixModel.reorderColumns(lastDraggedColumnIndex, j);
-                        matrix.switchColumnWidths(lastDraggedColumnIndex, j);
-                        matrixModel.fireTableDataChanged();
-                        matrix.selectColumn(j);
-                        lastDraggedColumnIndex = j;
-                    }
-                }
-            }
-
-            public void mouseReleased(MouseEvent e) {
-                maybeShowPopup(e);
-
-                // For selecting entire row/column when clicking on a header
-                int i = matrix.rowAtPoint(e.getPoint());
-                int j = matrix.columnAtPoint(e.getPoint());
-                if (matrix.getCursor() != ContextMatrix.resizeCursor) {
-                    if (SwingUtilities.isLeftMouseButton(e) && j == 0 && i > 0) {
-                        matrix.selectRow(i);
-                    }
-                    if (SwingUtilities.isLeftMouseButton(e) && i == 0 && j > 0) {
-                        matrix.selectColumn(j);
-                    }
-                }
-
-                isDraggingRow = false;
-                isDraggingColumn = false;
-                if (matrix.getCursor() != ContextMatrix.resizeCursor) {
-                    matrix.setCursor(Cursor.getDefaultCursor());
-                }
-            }
+            public void mousePressed(MouseEvent e) { maybeShowPopup(e); }
+            public void mouseReleased(MouseEvent e) { maybeShowPopup(e); }
         };
         matrix.addMouseListener(mouseAdapter);
         matrix.addMouseMotionListener(mouseAdapter);
@@ -585,7 +510,7 @@ public class ContextEditor extends View {
             int d = Math.abs(matrix.lastSelectedColumnsStartIndex - matrix.lastSelectedColumnsEndIndex) + 1;
             for (int unused = 0; unused < d; unused++) {
                 state.context.removeAttribute(state.context.getAttributeAtIndex(i));
-                matrix.updateColumnWidths(i+1);
+                matrix.updateColumnWidths(i + 1);
             }
             matrixModel.fireTableStructureChanged();
             matrix.invalidate();
@@ -692,7 +617,7 @@ public class ContextEditor extends View {
  * happens is that the context is changed (not the JTable per se) and the JTable is redrawn based
  * on the updated context.
  */
-class ContextMatrixModel extends AbstractTableModel {
+class ContextMatrixModel extends AbstractTableModel implements Reorderable {
 
     private static final long serialVersionUID = -1509387655329719071L;
 
@@ -808,6 +733,8 @@ class ContextMatrixModel extends AbstractTableModel {
  * ugly and uses quite a few snippets from various sources from the internet (see below).
  * That is just because of the way JTable is designed - it is not meant to be too flexible.
  *
+ * PRECONDITION: Expects a model that extends 'AbstractTableModel' and implements 'Reordarable'! TODO: Overwrite setTableModel to assert for that
+ *
  * Resources:
  * http://explodingpixels.wordpress.com/2009/05/18/creating-a-better-jtable/
  * http://stackoverflow.com/questions/14416188/jtable-how-to-get-selected-cells
@@ -853,6 +780,7 @@ class ContextMatrix extends JTable {
         // For column resizing
         addMouseListener(columnResizeMouseAdapter);
         addMouseMotionListener(columnResizeMouseAdapter);
+        createDraggingActions();
     }
 
     private void clearKeyBindings() {
@@ -1028,9 +956,96 @@ class ContextMatrix extends JTable {
 
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Dragging
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    // For dragging logic
+    boolean isDraggingRow = false;
+    boolean isDraggingColumn = false;
+    int lastDraggedRowIndex;
+    int lastDraggedColumnIndex;
+
+    private void createDraggingActions() {
+        MouseAdapter mouseAdapter = new MouseAdapter() {
+
+            public void mousePressed(MouseEvent e) {
+                int i = rowAtPoint(e.getPoint());
+                int j = columnAtPoint(e.getPoint());
+                lastDraggedRowIndex = i;
+                lastDraggedColumnIndex = j;
+                // A hacky way to check if the user is currently resizing a column
+                if (getCursor() != ContextMatrix.resizeCursor) {
+                    if (SwingUtilities.isLeftMouseButton(e) && j == 0 && i > 0) {
+                        isDraggingRow = true;
+                        setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                    }
+                    if (SwingUtilities.isLeftMouseButton(e) && i == 0 && j > 0) {
+                        isDraggingColumn = true;
+                        setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                    }
+                }
+            }
+
+            public void mouseDragged(MouseEvent e) {
+                Reorderable model = (Reorderable) getModel();
+                int i = rowAtPoint(e.getPoint());
+                int j = columnAtPoint(e.getPoint());
+                if (i < 0 || j < 0) return;
+                if (isDraggingRow) selectRow(Math.max(i, 1));
+                if (isDraggingColumn) selectColumn(Math.max(lastDraggedColumnIndex, 1));
+                // A reorder of rows occured
+                if (isDraggingRow && i != lastDraggedRowIndex && i != 0) {
+                    model.reorderRows(lastDraggedRowIndex, i);
+                    ((AbstractTableModel)getModel()).fireTableDataChanged();
+                    selectRow(i);
+                    lastDraggedRowIndex = i;
+                }
+                // A reorder of columns occured
+                if (isDraggingColumn && j != lastDraggedColumnIndex && j != 0) {
+                    // to prevent a bug when reordering columns of different widths
+                    Rectangle selected = getCellRect(0, lastDraggedColumnIndex, false);
+                    Rectangle r = getCellRect(0, j, false);
+                    Point p = r.getLocation();
+                    if ((j <= lastDraggedColumnIndex || e.getX() > p.x + r.width - selected.width) &&
+                            (j >  lastDraggedColumnIndex || e.getX() < p.x + selected.width)) {
+                        model.reorderColumns(lastDraggedColumnIndex, j);
+                        switchColumnWidths(lastDraggedColumnIndex, j);
+                        ((AbstractTableModel) model).fireTableDataChanged();
+                        selectColumn(j);
+                        lastDraggedColumnIndex = j;
+                    }
+                }
+            }
+
+            public void mouseReleased(MouseEvent e) {
+                // TODO: this should to select code
+                // For selecting entire row/column when clicking on a header
+                int i = rowAtPoint(e.getPoint());
+                int j = columnAtPoint(e.getPoint());
+                if (getCursor() != ContextMatrix.resizeCursor) {
+                    if (SwingUtilities.isLeftMouseButton(e) && j == 0 && i > 0) {
+                        selectRow(i);
+                    }
+                    if (SwingUtilities.isLeftMouseButton(e) && i == 0 && j > 0) {
+                        selectColumn(j);
+                    }
+                }
+
+                isDraggingRow = false;
+                isDraggingColumn = false;
+                if (getCursor() != ContextMatrix.resizeCursor) {
+                    setCursor(Cursor.getDefaultCursor());
+                }
+            }
+        };
+        addMouseListener(mouseAdapter);
+        addMouseMotionListener(mouseAdapter);
+    }
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // Code pertaining to column resizing
+    // Resizing
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Beware! Unelegant code ahead!
@@ -1225,7 +1240,7 @@ class ContextMatrix extends JTable {
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // Custom viewport that makes the table look nice
+    // Drawing
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     private static class StripedViewport extends JViewport {
