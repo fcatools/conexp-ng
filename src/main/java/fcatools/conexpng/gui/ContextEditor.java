@@ -230,7 +230,7 @@ public class ContextEditor extends View {
         // ------------------------
         addMenuItem(objectCellPopupMenu, "Rename", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                renameObject(lastActiveRowIndex - 1);
+                matrix.renameRowHeader(lastActiveRowIndex);
             }
         });
         addMenuItem(objectCellPopupMenu, "Remove", new RemoveActiveObjectAction());
@@ -250,7 +250,7 @@ public class ContextEditor extends View {
         // ---------------------------
         addMenuItem(attributeCellPopupMenu, "Rename", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                renameAttribute(lastActiveColumnIndex - 1);
+                matrix.renameColumnHeader(lastActiveColumnIndex);
             }
         });
         addMenuItem(attributeCellPopupMenu, "Remove", new RemoveActiveAttributeAction());
@@ -553,7 +553,7 @@ public class ContextEditor extends View {
         b.addItemListener(itemListener);
     }
 
-    private void addAttributeAt(int i) {
+    private void addAttributeAt(final int i) {
         String collisionFreeName = "attr" + i;
         while (true) {
             if (!state.context.existsAttributeAlready(collisionFreeName)) break;
@@ -561,10 +561,14 @@ public class ContextEditor extends View {
         }
         state.context.addAttributeAt(collisionFreeName, i);
         matrixModel.fireTableStructureChanged();
-        renameAttribute(i);
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                matrix.renameColumnHeader(i + 1);
+            }
+        });
     }
 
-    private void addObjectAt(int i) {
+    private void addObjectAt(final int i) {
         String collisionFreeName = "obj" + i;
         while (true) {
             if (!state.context.existsObjectAlready(collisionFreeName)) break;
@@ -573,23 +577,11 @@ public class ContextEditor extends View {
         FullObject<String,String> newObject = new FullObject<>(collisionFreeName);
         state.context.addObjectAt(newObject, i);
         matrixModel.fireTableStructureChanged();
-        renameObject(i);
-    }
-
-    private void renameAttribute(int i) {
-        matrix.editCellAt(0, i + 1);
-        matrix.requestFocus();
-        ContextMatrix.ContextCellEditor ed = (ContextMatrix.ContextCellEditor) matrix.editor;
-        ed.getTextField().requestFocus();
-        ed.getTextField().selectAll();
-    }
-
-    private void renameObject(int i) {
-        matrix.editCellAt(i + 1, 0);
-        matrix.requestFocus();
-        ContextMatrix.ContextCellEditor ed = (ContextMatrix.ContextCellEditor) matrix.editor;
-        ed.getTextField().requestFocus();
-        ed.getTextField().selectAll();
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                matrix.renameRowHeader(i + 1);
+            }
+        });
     }
 
     private void invokeAction(Action action, ActionEvent e) {
@@ -876,8 +868,8 @@ class ContextMatrix extends JTable {
     public void tableChanged(TableModelEvent e) {
         super.tableChanged(e);
         alignCells();
-        makeHeaderCellsEditable();
         restoreColumnWidths();
+        makeHeaderCellsEditable();
     }
 
     // For correct painting of table when selecting something
@@ -955,6 +947,24 @@ class ContextMatrix extends JTable {
         }
 
     }
+
+
+    public void renameColumnHeader(int i) {
+        editCellAt(0, i);
+        requestFocus();
+        ContextCellEditor ed = (ContextCellEditor) editor;
+        ed.getTextField().requestFocus();
+        ed.getTextField().selectAll();
+    }
+
+    public void renameRowHeader(int i) {
+        editCellAt(i, 0);
+        requestFocus();
+        ContextCellEditor ed = (ContextCellEditor) editor;
+        ed.getTextField().requestFocus();
+        ed.getTextField().selectAll();
+    }
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Dragging
