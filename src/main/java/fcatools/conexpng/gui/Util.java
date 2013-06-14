@@ -2,6 +2,7 @@ package fcatools.conexpng.gui;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.net.URL;
 
 public class Util {
@@ -34,6 +35,14 @@ public class Util {
         int x = frameLocation.x + ((frameSize.width - dialogSize.width) / 2);
         int y = frameLocation.y + ((frameSize.height - dialogSize.height) / 2);
         dialog.setLocation(x, y);
+    }
+
+    public static void invokeAction(ActionEvent e, Action action) {
+        action.actionPerformed(e);
+    }
+
+    public static void invokeAction(JComponent source, Action action) {
+        invokeAction(new ActionEvent(source, 0, ""), action);
     }
 
     public static final int clamp(int val, int min, int max) {

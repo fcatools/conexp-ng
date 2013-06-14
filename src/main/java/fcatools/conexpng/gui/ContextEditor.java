@@ -154,7 +154,7 @@ public class ContextEditor extends View {
                 int clicks = e.getClickCount();
                 if (clicks >= 2 && clicks % 2 == 0 && SwingUtilities.isLeftMouseButton(e)) { // Double Click
                     if (i > 0 && j > 0) {
-                        invokeAction(new ToggleAction(i, j));
+                        invokeAction(ContextEditor.this, new ToggleAction(i, j));
                     }
                 }
             }
@@ -279,8 +279,8 @@ public class ContextEditor extends View {
             this.second = second;
         }
         public void actionPerformed(ActionEvent e) {
-            invokeAction(first, e);
-            invokeAction(second, e);
+            invokeAction(e, first);
+            invokeAction(e, second);
         }
     }
 
@@ -358,7 +358,7 @@ public class ContextEditor extends View {
 
     class ToggleActiveAction extends AbstractAction {
         public void actionPerformed(ActionEvent e) {
-            invokeAction(new ToggleAction(lastActiveRowIndex, lastActiveColumnIndex));
+            invokeAction(ContextEditor.this, new ToggleAction(lastActiveRowIndex, lastActiveColumnIndex));
         }
     }
 
@@ -439,13 +439,13 @@ public class ContextEditor extends View {
 
     class AddAttributeAtEndAction extends AbstractAction {
         public void actionPerformed(ActionEvent e) {
-            invokeAction(new AddAttributeAtAction(state.context.getAttributeCount()));
+            invokeAction(ContextEditor.this, new AddAttributeAtAction(state.context.getAttributeCount()));
         }
     }
 
     class AddObjectAtEndAction extends AbstractAction {
         public void actionPerformed(ActionEvent e) {
-            invokeAction(new AddObjectAtAction(state.context.getObjectCount()));
+            invokeAction(ContextEditor.this, new AddObjectAtAction(state.context.getObjectCount()));
         }
     }
 
@@ -582,19 +582,6 @@ public class ContextEditor extends View {
                 matrix.renameRowHeader(i + 1);
             }
         });
-    }
-
-    private void invokeAction(Action action, ActionEvent e) {
-        action.actionPerformed(e);
-    }
-
-    private void invokeAction(Action action) {
-        invokeAction(action, new ActionEvent(this, 0, ""));
-    }
-
-    @SuppressWarnings("unused")
-    private void invokeAction(String name) {
-        matrix.getActionMap().get(name).actionPerformed(new ActionEvent(this, 0, ""));
     }
 
 }
