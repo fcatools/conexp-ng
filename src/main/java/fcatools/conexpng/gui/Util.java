@@ -16,6 +16,16 @@ public class Util {
         return b;
     }
 
+    public static JToggleButton createToggleButton(String title, String name, String iconPath) {
+        JToggleButton b = new JToggleButton();
+        b.setToolTipText(title);
+        b.setName(name);
+        URL url = Util.class.getClassLoader().getResource(iconPath);
+        ImageIcon icon = new ImageIcon(url);
+        b.setIcon(icon);
+        return b;
+    }
+
     // Needed as 'setLocationRelativeTo' doesn't work properly in a multi-monitor setup
     public static void centerDialogInsideMainFrame(JFrame parent, JDialog dialog) {
         Dimension dialogSize = dialog.getSize();

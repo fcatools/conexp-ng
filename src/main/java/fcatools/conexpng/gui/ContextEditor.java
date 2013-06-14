@@ -14,6 +14,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.HashMap;
 import java.util.Map;
 
 import static fcatools.conexpng.gui.Util.*;
@@ -24,6 +25,22 @@ import static javax.swing.KeyStroke.getKeyStroke;
  * The main component of this view is a customised JTable, that is more akin to a spreadsheet
  * editor, serving as our context editor. To this end, there are several additional classes
  * in this file.
+ *
+ * Notes:
+ *
+ * Generally, the code between ContextEditor and ContextMatrix is divided as per the following guidelines:
+ *
+ * - More general code is in ContextMatrix.
+ * - Code that also pertains to other parts of the context editor
+ *   (e.g. toolbar) other than the matrix is in ContextEditor.
+ * - Code that needs to know about the MatrixModel specifically and not only
+ *   about AbstractTableModel is in ContextEditor as ContextMatrix should not
+ *   be coupled with a concrete model in order to have a seperation between
+ *   model and view.
+ *
+ * E.g. PopupMenu code is in ContextEditor (and not in ContextMatrix) as for
+ * a different Model one would probably use different PopupMenus, that means
+ * the PopupMenus are coupled with MatrixModel.
  */
 @SuppressWarnings("serial")
 public class ContextEditor extends View {
@@ -189,7 +206,7 @@ public class ContextEditor extends View {
                     if ((j <= lastDraggedColumnIndex || e.getX() > p.x + r.width - selected.width) &&
                         (j >  lastDraggedColumnIndex || e.getX() < p.x + selected.width)) {
                         matrixModel.reorderColumns(lastDraggedColumnIndex, j);
-                        switchColumnWidths(lastDraggedColumnIndex, j);
+                        matrix.switchColumnWidths(lastDraggedColumnIndex, j);
                         matrixModel.fireTableDataChanged();
                         matrix.selectColumn(j);
                         lastDraggedColumnIndex = j;
@@ -256,8 +273,8 @@ public class ContextEditor extends View {
         addToolbarButton("reduceContext", "Reduce Context", "conexp/reduceCxt.gif", null); // TODO
         addToolbarButton("transposeContext", "Transpose Context", "conexp/transpose.gif", new TransposeAction());
         toolbar.addSeparator();
-        addToolbarButton("reduceContext", "Reduce Context", "conexp/reduceCxt.gif", null); // TODO
-        addToolbarButton("showArrowRelations", "Show Arrow Relations", "conexp/transpose.gif", new TransposeAction());
+        addToolbarToggleButton("compactMatrix", "Compact Matrix", "conexp/alignToGrid.gif", new CompactAction()); // TODO
+        addToolbarToggleButton("showArrowRelations", "Show Arrow Relations", "conexp/associationRule.gif", null); // TODO
     }
 
     private void createContextMenuActions() {
@@ -323,6 +340,7 @@ public class ContextEditor extends View {
             }
         });
     }
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Actions
@@ -529,7 +547,7 @@ public class ContextEditor extends View {
             if (state.context.getAttributeCount() == 0) return;
             matrix.saveSelectedInterval();
             state.context.removeAttribute(state.context.getAttributeAtIndex(lastActiveColumnIndex -1));
-            updateColumnWidths(lastActiveColumnIndex);
+            matrix.updateColumnWidths(lastActiveColumnIndex);
             if (lastActiveColumnIndex - 1 >= state.context.getAttributeCount()) lastActiveColumnIndex--;
             matrixModel.fireTableStructureChanged();
             matrix.invalidate();
@@ -567,7 +585,7 @@ public class ContextEditor extends View {
             int d = Math.abs(matrix.lastSelectedColumnsStartIndex - matrix.lastSelectedColumnsEndIndex) + 1;
             for (int unused = 0; unused < d; unused++) {
                 state.context.removeAttribute(state.context.getAttributeAtIndex(i));
-                updateColumnWidths(i+1);
+                matrix.updateColumnWidths(i+1);
             }
             matrixModel.fireTableStructureChanged();
             matrix.invalidate();
@@ -576,34 +594,21 @@ public class ContextEditor extends View {
         }
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // Helper functions
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    // This code ideally would not be here but it was the only way
-    // I could make column width restoring work properly
-    private void updateColumnWidths(int removedIndex) {
-        Integer res = matrix.columnWidths.remove(removedIndex);
-        System.out.println(removedIndex + " " + res);
-        for (int i = removedIndex + 1; i < matrix.getColumnCount(); i++) {
-            Integer oldWidth = matrix.columnWidths.remove(i);
-            if (oldWidth == null) continue;
-            if (i == 1) continue;
-            System.out.println("Moved " + i + " with " + oldWidth + " to " + (i-1));
-            matrix.columnWidths.put(i-1, oldWidth);
+    class CompactAction implements ItemListener {
+        public void itemStateChanged(ItemEvent e) {
+            if(e.getStateChange() == ItemEvent.SELECTED) {
+                matrix.compact();
+            }
+            else {
+                matrix.uncompact();
+            }
         }
     }
 
-    // This code ideally would not be here but it was the only way
-    // I could make column width restoring work properly
-    private void switchColumnWidths(int from, int to) {
-        Integer fromVal = matrix.columnWidths.get(from);
-        Integer toVal = matrix.columnWidths.get(to);
-        if (fromVal == null) fromVal = ContextMatrix.DEFAULT_COLUMN_WIDTH;
-        if (toVal == null) toVal = ContextMatrix.DEFAULT_COLUMN_WIDTH;
-        matrix.columnWidths.put(to, fromVal);
-        matrix.columnWidths.put(from, toVal);
-    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Helper functions
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     private static void addMenuItem(JPopupMenu menu, String name, ActionListener action) {
         JMenuItem item = new JMenuItem(name);
@@ -615,6 +620,12 @@ public class ContextEditor extends View {
         JButton b = createButton(tooltip, name, iconPath);
         toolbar.add(b);
         b.addActionListener(action);
+    }
+
+    private void addToolbarToggleButton(String name, String tooltip, String iconPath, ItemListener itemListener) {
+        JToggleButton b = createToggleButton(tooltip, name, iconPath);
+        toolbar.add(b);
+        b.addItemListener(itemListener);
     }
 
     private void addAttributeAt(int i) {
@@ -890,7 +901,7 @@ class ContextMatrix extends JTable {
 
     public void selectRow(int row) {
         setRowSelectionInterval(row, row);
-        setColumnSelectionInterval(1, this.getColumnCount()-1);
+        setColumnSelectionInterval(1, this.getColumnCount() - 1);
     }
 
     public void selectColumn(int column) {
@@ -1022,26 +1033,91 @@ class ContextMatrix extends JTable {
     // Code pertaining to column resizing
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    // Very unelegant code and it even leaks to the class ContextEditor through `columnWidths`, `resizeCursor` and
-    // `DEFAULT_COLUMN_WIDTH` but I just could not find another solution.
+    // Beware! Unelegant code ahead!
     public static final int DEFAULT_COLUMN_WIDTH = 80;
+    public static final int COMPACTED_COLUMN_WIDTH = 15;
     public static Cursor resizeCursor = Cursor.getPredefinedCursor(Cursor.E_RESIZE_CURSOR);
     public Map<Integer,Integer> columnWidths;
+    public Map<Integer,Integer> compactedColumnWidths = new HashMap<>();
     private int mouseXOffset;
     private Cursor otherCursor = resizeCursor;
     private TableColumn resizingColumn;
+    private boolean isCompacted = false;
+
+    public void compact() {
+        isCompacted = true;
+        for (int i = 1; i < getColumnModel().getColumnCount(); i++) {
+            getColumnModel().getColumn(i).setPreferredWidth(COMPACTED_COLUMN_WIDTH);
+        }
+        compactedColumnWidths.clear();
+    }
+
+    public void uncompact() {
+        isCompacted = false;
+        restoreColumnWidths();
+    }
 
     public void restoreColumnWidths() {
         if (columnWidths == null) return;
-        for (int i = 0; i < getColumnCount(); i++) {
-            Integer w = columnWidths.get(i);
-            TableColumn t = getColumnModel().getColumn(i);
-            if (w == null) {
-                t.setPreferredWidth(DEFAULT_COLUMN_WIDTH);
-            } else {
-                t.setPreferredWidth(w);
+        if (!isCompacted) {
+            for (int i = 0; i < getColumnCount(); i++) {
+                Integer w = columnWidths.get(i);
+                TableColumn t = getColumnModel().getColumn(i);
+                if (w == null) {
+                    t.setPreferredWidth(DEFAULT_COLUMN_WIDTH);
+                } else {
+                    t.setPreferredWidth(w);
+                }
+            }
+        } else {
+            for (int i = 1; i < getColumnCount(); i++) {
+                Integer w = compactedColumnWidths.get(i);
+                TableColumn t = getColumnModel().getColumn(i);
+                if (w == null) {
+                    t.setPreferredWidth(COMPACTED_COLUMN_WIDTH);
+                } else {
+                    t.setPreferredWidth(w);
+                }
             }
         }
+    }
+
+    public void updateColumnWidths(int removedIndex) {
+        if (!isCompacted) {
+            columnWidths.remove(removedIndex);
+            for (int i = removedIndex + 1; i < getColumnCount(); i++) {
+                Integer oldWidth = columnWidths.remove(i);
+                if (oldWidth == null) continue;
+                if (i == 1) continue;
+                columnWidths.put(i-1, oldWidth);
+            }
+        } else {
+            compactedColumnWidths.remove(removedIndex);
+            for (int i = removedIndex + 1; i < getColumnCount(); i++) {
+                Integer oldWidth = compactedColumnWidths.remove(i);
+                if (oldWidth == null) continue;
+                if (i == 1) continue;
+                compactedColumnWidths.put(i-1, oldWidth);
+            }
+        }
+    }
+
+    public void switchColumnWidths(int from, int to) {
+        Integer fromVal, toVal;
+
+        fromVal = columnWidths.get(from);
+        toVal = columnWidths.get(to);
+        if (fromVal == null) fromVal = ContextMatrix.DEFAULT_COLUMN_WIDTH;
+        if (toVal == null) toVal = ContextMatrix.DEFAULT_COLUMN_WIDTH;
+        columnWidths.put(to, fromVal);
+        columnWidths.put(from, toVal);
+
+        fromVal = compactedColumnWidths.get(from);
+        toVal = compactedColumnWidths.get(to);
+        if (fromVal == null) fromVal = ContextMatrix.COMPACTED_COLUMN_WIDTH;
+        if (toVal == null) toVal = ContextMatrix.COMPACTED_COLUMN_WIDTH;
+        compactedColumnWidths.put(to, fromVal);
+        compactedColumnWidths.put(from, toVal);
     }
 
     @SuppressWarnings("FieldCanBeLocal")
@@ -1078,7 +1154,11 @@ class ContextMatrix extends JTable {
                 int newWidth = Math.max(mouseX - mouseXOffset, 20);
                 resizingColumn.setWidth(newWidth);
                 resizingColumn.setPreferredWidth(newWidth);
-                columnWidths.put(resizingColumn.getModelIndex(), newWidth);
+                if (!isCompacted) {
+                    columnWidths.put(resizingColumn.getModelIndex(), newWidth);
+                } else {
+                    compactedColumnWidths.put(resizingColumn.getModelIndex(), newWidth);
+                }
 
                 Container container;
                 if((matrix.getParent() == null)
@@ -1147,6 +1227,7 @@ class ContextMatrix extends JTable {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Custom viewport that makes the table look nice
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     private static class StripedViewport extends JViewport {
 
         private static final long serialVersionUID = 171992496170114834L;
