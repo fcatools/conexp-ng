@@ -5,6 +5,9 @@ import fcatools.conexpng.ProgramState;
 
 import javax.swing.*;
 
+import de.tudresden.inf.tcs.fcalib.FullObject;
+import de.tudresden.inf.tcs.fcalib.action.StartExplorationAction;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -65,7 +68,6 @@ public class MainToolbar extends JToolBar {
         exploreButton = createButton("Explore Attributes", "exploreAttributes",
                 "conexp/attrExploration.gif");
         add(exploreButton);
-        addSeparator();
         helpButton = createButton("Help", "help", "conexp/question.gif");
         add(Box.createGlue());
         add(helpButton);
@@ -98,9 +100,14 @@ public class MainToolbar extends JToolBar {
         });
         exploreButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent arg0) {
-
-                // TODO: Placeholder
-                showMessageDialog("10 Concepts");
+                MyExpert expert = new MyExpert(mainFrame, state.context);
+                state.context.setExpert(expert);
+                expert.addExpertActionListener(state.context);
+                // Create an expert action for starting attribute exploration
+                StartExplorationAction<String, String, FullObject<String, String>> action = new StartExplorationAction<String, String, FullObject<String, String>>();
+                action.setContext(state.context);
+                // Fire the action, exploration starts...
+                expert.fireExpertAction(action);
             }
         });
     }

@@ -1,15 +1,18 @@
 package fcatools.conexpng.model;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import de.tudresden.inf.tcs.fcaapi.Expert;
 import de.tudresden.inf.tcs.fcaapi.FCAImplication;
+import de.tudresden.inf.tcs.fcaapi.exception.IllegalExpertException;
 import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
+import de.tudresden.inf.tcs.fcaapi.obsolete.ExpertAction;
 import de.tudresden.inf.tcs.fcaapi.utils.IndexedSet;
 import de.tudresden.inf.tcs.fcalib.FullObject;
 import de.tudresden.inf.tcs.fcalib.Implication;
 import de.tudresden.inf.tcs.fcalib.ImplicationSet;
 import de.tudresden.inf.tcs.fcalib.utils.ListSet;
-
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * A specialization of FormalContext<String,String> with the aim to remove the
@@ -41,6 +44,8 @@ public class FormalContext extends
         return count;
 
     }
+
+
 
     @Override
     public Set<FCAImplication<String>> getStemBase() {
