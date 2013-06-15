@@ -3,11 +3,13 @@ package fcatools.conexpng.draw;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 
+import javax.swing.JPanel;
+
 public class LatticeGraphNodeMouseMotionListener implements MouseMotionListener {
 
-	private Node n;
+	private LatticeGraphElement n;
 
-	public LatticeGraphNodeMouseMotionListener(Node n) {
+	public LatticeGraphNodeMouseMotionListener(LatticeGraphElement n) {
 		this.n = n;
 	}
 

@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class Node extends JPanel {
+public class Node extends JPanel implements LatticeGraphElement {
 
 	/**
      *
@@ -18,8 +18,8 @@ public class Node extends JPanel {
 	private int x;
 	private int y;
 	private List<Node> below;
-	private Set<String> visibleObjects;
-	private Set<String> visibleAttributes;
+	private Label visibleObjects;
+	private Label visibleAttributes;
 	private boolean moveSubgraph;
 	private int level;
 
@@ -46,13 +46,17 @@ public class Node extends JPanel {
 	public Node() {
 		this.objects = new TreeSet<>();
 		this.attributes = new TreeSet<>();
-		this.visibleObjects = new TreeSet<>();
-		this.visibleAttributes = new TreeSet<>();
+		this.visibleObjects = new Label(new TreeSet<String>());
+		this.visibleAttributes = new Label(new TreeSet<String>());
 		this.x = 0;
 		this.y = 0;
-		this.setBounds(x, y, 10, 10);
-		this.setBackground(Color.RED);
+		this.setBounds(x, y, 15, 15);
+		this.setBackground(Color.white);
 		this.below = new ArrayList<>();
+	}
+	
+	@Override
+	public void paint(Graphics g) {
 	}
 
 	/**
@@ -109,8 +113,15 @@ public class Node extends JPanel {
 	}
 
 	public void update(int x, int y) {
-		int updateX = this.x + x;
-		int updateY = this.y + y;
+		int updateX;
+		int updateY;
+		if(this.x + x >= 0) updateX = this.x + x;
+		else updateX = 0;
+		if(this.y + y >= 0) updateY = this.y + y;
+		else updateY = 0;
+		
+		visibleAttributes.update(x, y);
+		visibleObjects.update(x, y);
 		if (moveSubgraph) {
 			for (Node n : below) {
 				n.update(x, y);
@@ -154,19 +165,31 @@ public class Node extends JPanel {
 	}
 	
 	public void setVisibleObject(String object){
-		visibleObjects.add(object);
+		visibleObjects.getSet().add(object);
 	}
 	
 	public Set<String> getVisibleObjects(){
-		return this.visibleObjects;
+		return this.visibleObjects.getSet();
 	}
 	
 	public void setVisibleAttribute(String attribute){
-		this.visibleAttributes.add(attribute);
+		this.visibleAttributes.getSet().add(attribute);
 	}
 	
 	public Set<String> getVisibleAttributes(){
+		return this.visibleAttributes.getSet();
+		
+	}
+	
+	public Label getObjectsLabel(){
+		return this.visibleObjects;
+	}
+	
+	public Label getAttributesLabel(){
 		return this.visibleAttributes;
 	}
+	
+	
+	
 
 }
