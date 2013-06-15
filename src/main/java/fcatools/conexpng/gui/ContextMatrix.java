@@ -443,7 +443,7 @@ class ContextMatrix extends JTable {
     public void updateColumnWidths(int removedIndex) {
         if (!isCompacted) {
             columnWidths.remove(removedIndex);
-            for (int i = removedIndex + 1; i < getColumnCount(); i++) {
+            for (int i = removedIndex + 1; i < getColumnCount() + 20; i++) {
                 Integer oldWidth = columnWidths.remove(i);
                 if (oldWidth == null) continue;
                 if (i == 1) continue;
@@ -451,7 +451,7 @@ class ContextMatrix extends JTable {
             }
         } else {
             compactedColumnWidths.remove(removedIndex);
-            for (int i = removedIndex + 1; i < getColumnCount(); i++) {
+            for (int i = removedIndex + 1; i < getColumnCount() + 20; i++) {
                 Integer oldWidth = compactedColumnWidths.remove(i);
                 if (oldWidth == null) continue;
                 if (i == 1) continue;
