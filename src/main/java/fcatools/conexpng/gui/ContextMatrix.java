@@ -135,7 +135,7 @@ class ContextMatrix extends JTable {
     }
 
     /* For preventing a selection to disappear after an operation like "invert" */
-    public void saveSelectedInterval() {
+    public void saveSelection() {
         lastSelectedRowsStartIndex = getSelectedRow();
         lastSelectedRowsEndIndex = getSelectedRowCount()-1 + lastSelectedRowsStartIndex;
         lastSelectedColumnsStartIndex = getSelectedColumn();
@@ -143,7 +143,7 @@ class ContextMatrix extends JTable {
     }
 
     /* For preventing a selection to disappear after an operation like "invert" */
-    public void restoreSelectedInterval() {
+    public void restoreSelection() {
         if (getRowCount() <= 1 || getColumnCount() <= 1) return;
         if (  (lastSelectedColumnsEndIndex <= 0 && lastSelectedColumnsStartIndex <= 0)
                 || (lastSelectedRowsEndIndex    <= 0 && lastSelectedRowsStartIndex    <= 0)) return;
@@ -156,11 +156,15 @@ class ContextMatrix extends JTable {
     }
 
     public boolean wasColumnSelected(int j) {
-        return (lastSelectedColumnsEndIndex == j && lastSelectedColumnsStartIndex == j);
+        return (lastSelectedColumnsEndIndex == j && lastSelectedColumnsStartIndex == j &&
+                Math.min(lastSelectedRowsStartIndex, lastSelectedRowsEndIndex) == 1    &&
+                Math.max(lastSelectedRowsStartIndex, lastSelectedRowsEndIndex) == getRowCount()-1);
     }
 
     public boolean wasRowSelected(int i) {
-        return (lastSelectedRowsEndIndex == i && lastSelectedRowsStartIndex == i);
+        return (lastSelectedRowsEndIndex == i && lastSelectedRowsStartIndex == i &&
+                Math.min(lastSelectedColumnsStartIndex, lastSelectedColumnsEndIndex) == 1    &&
+                Math.max(lastSelectedColumnsStartIndex, lastSelectedColumnsEndIndex) == getColumnCount()-1);
     }
 
     /* Overridden as header cells should *not* be selected when selecting all cells */
@@ -299,6 +303,7 @@ class ContextMatrix extends JTable {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // For dragging logic
+    private static Cursor dragCursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
     boolean isDraggingRow = false;
     boolean isDraggingColumn = false;
     boolean didReorderOccur = false;
@@ -313,15 +318,14 @@ class ContextMatrix extends JTable {
                 int j = columnAtPoint(e.getPoint());
                 lastDraggedRowIndex = i;
                 lastDraggedColumnIndex = j;
-                // A hacky way to check if the user is currently resizing a column
-                if (getCursor() != ContextMatrix.resizeCursor) {
+                if (!isResizing) {
                     if (SwingUtilities.isLeftMouseButton(e) && j == 0 && i > 0) {
                         isDraggingRow = true;
-                        setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                        setCursor(dragCursor);
                     }
                     if (SwingUtilities.isLeftMouseButton(e) && i == 0 && j > 0) {
                         isDraggingColumn = true;
-                        setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                        setCursor(dragCursor);
                     }
                 }
             }
@@ -360,7 +364,7 @@ class ContextMatrix extends JTable {
                 // For selecting entire row/column when clicking on a header
                 int i = rowAtPoint(e.getPoint());
                 int j = columnAtPoint(e.getPoint());
-                if (getCursor() != ContextMatrix.resizeCursor && !didReorderOccur) {
+                if (!isResizing && !didReorderOccur) {
                     if (SwingUtilities.isLeftMouseButton(e) && j == 0 && i > 0) {
                         if (!wasRowSelected(i)) selectRow(i);
                         else clearSelection();
@@ -371,13 +375,14 @@ class ContextMatrix extends JTable {
                     }
                 }
 
+                if ((isDraggingRow || isDraggingColumn) && getCursor().equals(dragCursor)) setCursor(Cursor.getDefaultCursor());
                 isDraggingRow = false;
                 isDraggingColumn = false;
                 didReorderOccur = false;
-                if (getCursor() != ContextMatrix.resizeCursor) {
-                    setCursor(Cursor.getDefaultCursor());
-                }
-                saveSelectedInterval();
+                // It is a bit unfortunate but due to temporal dependencies between the mouseReleased methods
+                // isResizing must be reset here instead of the better related mouseReleased method
+                isResizing = false;
+                saveSelection();
                 invalidate();
                 repaint();
             }
@@ -394,13 +399,14 @@ class ContextMatrix extends JTable {
     // Beware! Unelegant code ahead!
     public static final int DEFAULT_COLUMN_WIDTH = 80;
     public static final int COMPACTED_COLUMN_WIDTH = 15;
-    public static Cursor resizeCursor = Cursor.getPredefinedCursor(Cursor.E_RESIZE_CURSOR);
+    private static Cursor resizeCursor = Cursor.getPredefinedCursor(Cursor.E_RESIZE_CURSOR);
     public Map<Integer,Integer> columnWidths;
     public Map<Integer,Integer> compactedColumnWidths = new HashMap<>();
     private int mouseXOffset;
     private Cursor otherCursor = resizeCursor;
     private TableColumn resizingColumn;
     private boolean isCompacted = false;
+    private boolean isResizing = false;
 
     public void compact() {
         isCompacted = true;
@@ -480,9 +486,9 @@ class ContextMatrix extends JTable {
 
     private void createResizingInteractions() {
         MouseAdapter columnResizeMouseAdapter = new MouseAdapter() {
+            ContextMatrix matrix = ContextMatrix.this;
 
             public void mousePressed(MouseEvent e){
-                ContextMatrix matrix = ContextMatrix.this;
                 Point p = e.getPoint();
                 // First find which header cell was hit
                 int index = matrix.columnAtPoint(p);
@@ -492,22 +498,23 @@ class ContextMatrix extends JTable {
                 if(resizingColumn == null) return;
                 matrix.resizingColumn = resizingColumn;
                 mouseXOffset = p.x - resizingColumn.getWidth();
-                matrix.restoreSelectedInterval();
+                matrix.restoreSelection();
+                isResizing = true;
             }
 
             public void mouseMoved(MouseEvent e){
-                ContextMatrix matrix = ContextMatrix.this;
-                if((getResizingColumn(e.getPoint()) == null) == (matrix.getCursor() == resizeCursor)){
-                    swapCursor();
+                if(getResizingColumn(e.getPoint()) != null) {
+                    setCursor(resizeCursor);
+                } else {
+                    setCursor(Cursor.getDefaultCursor());
                 }
             }
 
             public void mouseDragged(MouseEvent e){
-                ContextMatrix matrix = ContextMatrix.this;
                 int mouseX = e.getX();
                 TableColumn resizingColumn = matrix.resizingColumn;
                 if(resizingColumn != null){
-                    matrix.restoreSelectedInterval();
+                    matrix.restoreSelection();
                     int oldWidth = resizingColumn.getWidth();
                     int newWidth = Math.max(mouseX - mouseXOffset, 20);
                     resizingColumn.setWidth(newWidth);
@@ -517,6 +524,7 @@ class ContextMatrix extends JTable {
                     } else {
                         compactedColumnWidths.put(resizingColumn.getModelIndex(), newWidth);
                     }
+                    restoreSelection();
 
                     Container container;
                     if((matrix.getParent() == null)
@@ -551,9 +559,8 @@ class ContextMatrix extends JTable {
             }
 
             public void mouseReleased(MouseEvent e){
-                ContextMatrix matrix = ContextMatrix.this;
                 matrix.resizingColumn = null;
-//                matrix.saveSelectedInterval();
+                if (isResizing && getCursor().equals(resizeCursor)) setCursor(Cursor.getDefaultCursor());
             }
 
             private void swapCursor(){
