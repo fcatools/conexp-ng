@@ -1,6 +1,6 @@
-package fcatools.conexpng.draw;
+package fcatools.conexpng.model;
 
-import fcatools.conexpng.model.FormalContext;
+import fcatools.conexpng.gui.lattice.LatticeGraph;
 
 
 /**

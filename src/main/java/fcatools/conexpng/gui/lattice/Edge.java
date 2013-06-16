@@ -1,4 +1,4 @@
-package fcatools.conexpng.draw;
+package fcatools.conexpng.gui.lattice;
 
 public class Edge {
 

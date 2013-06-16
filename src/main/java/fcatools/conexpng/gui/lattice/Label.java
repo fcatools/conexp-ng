@@ -1,4 +1,4 @@
-package fcatools.conexpng.draw;
+package fcatools.conexpng.gui.lattice;
 
 import java.awt.Graphics;
 import java.util.Set;

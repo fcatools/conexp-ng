@@ -3,6 +3,7 @@ package fcatools.conexpng.gui;
 import fcatools.conexpng.ProgramState;
 import fcatools.conexpng.Util;
 import fcatools.conexpng.gui.contexteditor.ContextEditor;
+import fcatools.conexpng.gui.lattice.LatticeView;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;

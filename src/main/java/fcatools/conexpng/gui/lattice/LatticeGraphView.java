@@ -1,4 +1,4 @@
-package fcatools.conexpng.gui;
+package fcatools.conexpng.gui.lattice;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -35,11 +35,6 @@ import org.apache.xmlgraphics.java2d.GraphicContext;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 
-import fcatools.conexpng.draw.Edge;
-import fcatools.conexpng.draw.Label;
-import fcatools.conexpng.draw.LatticeGraph;
-import fcatools.conexpng.draw.LatticeGraphNodeMouseMotionListener;
-import fcatools.conexpng.draw.Node;
 
 /*The JSVGCanvas provides a set of build-in interactors that
  * let the users manipulate the displayed document, including ones for zooming,

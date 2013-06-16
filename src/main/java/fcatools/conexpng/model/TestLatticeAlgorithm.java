@@ -1,7 +1,9 @@
-package fcatools.conexpng.draw;
+package fcatools.conexpng.model;
 
 import de.tudresden.inf.tcs.fcalib.FullObject;
-import fcatools.conexpng.model.FormalContext;
+import fcatools.conexpng.gui.lattice.Edge;
+import fcatools.conexpng.gui.lattice.LatticeGraph;
+import fcatools.conexpng.gui.lattice.Node;
 
 import java.util.HashMap;
 import java.util.Set;

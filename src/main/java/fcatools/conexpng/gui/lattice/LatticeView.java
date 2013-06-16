@@ -1,9 +1,10 @@
-package fcatools.conexpng.gui;
+package fcatools.conexpng.gui.lattice;
 
 import fcatools.conexpng.ProgramState;
 import fcatools.conexpng.Util;
-import fcatools.conexpng.draw.ILatticeAlgorithm;
-import fcatools.conexpng.draw.TestLatticeAlgorithm;
+import fcatools.conexpng.gui.View;
+import fcatools.conexpng.model.ILatticeAlgorithm;
+import fcatools.conexpng.model.TestLatticeAlgorithm;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
