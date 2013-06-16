@@ -1,2 +1,61 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ConceptualSystem><Version MajorNumber="1" MinorNumber="0" /><Contexts><Context Identifier="0" Type="Binary"><Attributes><Attribute Identifier="0"><Name>EU</Name></Attribute><Attribute Identifier="1"><Name>Euro</Name></Attribute><Attribute Identifier="2"><Name>Schengen</Name></Attribute><Attribute Identifier="3"><Name>NATO</Name></Attribute><Attribute Identifier="4"><Name>Monarchie</Name></Attribute><Attribute Identifier="5"><Name>Binnenland</Name></Attribute><Attribute Identifier="6"><Name>&gt;10Mill Einwohner</Name></Attribute></Attributes><Objects><Object><Name>Irland</Name><Intent><HasAttribute AttributeIdentifier="0" /><HasAttribute AttributeIdentifier="1" /></Intent></Object><Object><Name>Italien</Name><Intent><HasAttribute AttributeIdentifier="0" /><HasAttribute AttributeIdentifier="1" /><HasAttribute AttributeIdentifier="2" /><HasAttribute AttributeIdentifier="3" /><HasAttribute AttributeIdentifier="6" /></Intent></Object><Object><Name>UK</Name><Intent><HasAttribute AttributeIdentifier="0" /><HasAttribute AttributeIdentifier="3" /><HasAttribute AttributeIdentifier="4" /><HasAttribute AttributeIdentifier="6" /></Intent></Object></Objects></Context></Contexts><RecalculationPolicy Value="Clear" /><Lattices /></ConceptualSystem>
+<ConceptualSystem>
+    <Version MajorNumber="1" MinorNumber="0"/>
+    <Contexts>
+        <Context Identifier="0" Type="Binary">
+            <Attributes>
+                <Attribute Identifier="0">
+                    <Name>EU</Name>
+                </Attribute>
+                <Attribute Identifier="1">
+                    <Name>Euro</Name>
+                </Attribute>
+                <Attribute Identifier="2">
+                    <Name>Schengen</Name>
+                </Attribute>
+                <Attribute Identifier="3">
+                    <Name>NATO</Name>
+                </Attribute>
+                <Attribute Identifier="4">
+                    <Name>Monarchie</Name>
+                </Attribute>
+                <Attribute Identifier="5">
+                    <Name>Binnenland</Name>
+                </Attribute>
+                <Attribute Identifier="6">
+                    <Name>&gt;10Mill Einwohner</Name>
+                </Attribute>
+            </Attributes>
+            <Objects>
+                <Object>
+                    <Name>Irland</Name>
+                    <Intent>
+                        <HasAttribute AttributeIdentifier="0"/>
+                        <HasAttribute AttributeIdentifier="1"/>
+                    </Intent>
+                </Object>
+                <Object>
+                    <Name>Italien</Name>
+                    <Intent>
+                        <HasAttribute AttributeIdentifier="0"/>
+                        <HasAttribute AttributeIdentifier="1"/>
+                        <HasAttribute AttributeIdentifier="2"/>
+                        <HasAttribute AttributeIdentifier="3"/>
+                        <HasAttribute AttributeIdentifier="6"/>
+                    </Intent>
+                </Object>
+                <Object>
+                    <Name>UK</Name>
+                    <Intent>
+                        <HasAttribute AttributeIdentifier="0"/>
+                        <HasAttribute AttributeIdentifier="3"/>
+                        <HasAttribute AttributeIdentifier="4"/>
+                        <HasAttribute AttributeIdentifier="6"/>
+                    </Intent>
+                </Object>
+            </Objects>
+        </Context>
+    </Contexts>
+    <RecalculationPolicy Value="Clear"/>
+    <Lattices/>
+</ConceptualSystem>
