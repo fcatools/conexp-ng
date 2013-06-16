@@ -22,7 +22,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.svg.SVGDocument;
 
-
 /*The JSVGCanvas provides a set of build-in interactors that
  * let the users manipulate the displayed document, including ones for zooming,
  * panning and rotating. Interactors catch user input to the JSVGCanvas component
@@ -49,7 +48,7 @@ public class LatticeGraphView extends JSVGCanvas {
 				q.add(n);
 			}
 			for (int i = 0; i < q.size(); i++) {
-				if (q.get(i).getLevel() >= n.getLevel()) {
+				if (q.get(i).getLevel() > n.getLevel()) {
 					q.add(i, n);
 					break;
 				}
@@ -79,25 +78,22 @@ public class LatticeGraphView extends JSVGCanvas {
 		}
 
 	}
-	
+
 	@Override
 	public void paint(Graphics g0) {
-		
-		super.paint(g0);
-		
-		DOMImplementation impl = SVGDOMImplementation.getDOMImplementation();
-        String svgNS = SVGDOMImplementation.SVG_NAMESPACE_URI;
-        SVGDocument doc = (SVGDocument) impl.createDocument(svgNS, "svg", null);
 
-        SVGGraphics2D g = new SVGGraphics2D(doc);
-        
-        
-		g.setRenderingHint(
-			    RenderingHints.KEY_ANTIALIASING,
-			    RenderingHints.VALUE_ANTIALIAS_ON);
-			g.setRenderingHint(
-			    RenderingHints.KEY_TEXT_ANTIALIASING,
-			    RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+		super.paint(g0);
+
+		DOMImplementation impl = SVGDOMImplementation.getDOMImplementation();
+		String svgNS = SVGDOMImplementation.SVG_NAMESPACE_URI;
+		SVGDocument doc = (SVGDocument) impl.createDocument(svgNS, "svg", null);
+
+		SVGGraphics2D g = new SVGGraphics2D(doc);
+
+		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+				RenderingHints.VALUE_ANTIALIAS_ON);
+		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+				RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
 		g.setColor(Color.BLACK);
 		int radius = LatticeView.radius;
@@ -110,42 +106,43 @@ public class LatticeGraphView extends JSVGCanvas {
 		for (Node n : graph.getNodes()) {
 			g.setColor(Color.BLACK);
 			g.fillOval(n.getX(), n.getY(), radius * 2, radius * 2);
-			
+
 			Set<String> s = n.getVisibleObjects();
-			if(!s.isEmpty()){
-				//beneath the node			
+			if (!s.isEmpty()) {
+				// beneath the node
 				this.calcDrawPosition(g, s, true, n);
 			}
 			s = n.getVisibleAttributes();
-			if(!s.isEmpty()){
-				//upon the node
+			if (!s.isEmpty()) {
+				// upon the node
 				this.calcDrawPosition(g, s, false, n);
 			}
 		}
-		
-		Element root = doc.getDocumentElement();
-        g.getRoot(root);
 
-        this.setSVGDocument(doc);
+		Element root = doc.getDocumentElement();
+		g.getRoot(root);
+
+		this.setSVGDocument(doc);
 	}
-	
-	private void calcDrawPosition(Graphics2D g, Set<String> elements, boolean areObjects, Node node){
+
+	private void calcDrawPosition(Graphics2D g, Set<String> elements,
+			boolean areObjects, Node node) {
 		int x = node.getX();
 		int y = node.getY();
-		if(areObjects){
+		if (areObjects) {
 			y += 4 * LatticeView.radius;
-			for(String s : elements){
+			for (String s : elements) {
 				g.setColor(getBackground());
-				g.fillRect(x, y - 10, s.length()*7, 10);
+				g.fillRect(x, y - 10, s.length() * 7, 10);
 				g.setColor(Color.MAGENTA);
 				g.drawString(s, x, y);
 				y += 15;
 			}
-		}else{
+		} else {
 			y -= LatticeView.radius;
-			for(String s : elements){
+			for (String s : elements) {
 				g.setColor(getBackground());
-				g.fillRect(x, y - 10, s.length()*7, 10);
+				g.fillRect(x, y - 10, s.length() * 7, 10);
 				g.setColor(Color.GREEN);
 				g.drawString(s, x, y);
 				y -= 15;
@@ -160,57 +157,56 @@ public class LatticeGraphView extends JSVGCanvas {
 		String svgNS = SVGDOMImplementation.SVG_NAMESPACE_URI;
 		Document document = domImpl.createDocument(svgNS, "svg", null);
 
-		
 		SVGGraphics2D svgGenerator = new SVGGraphics2D(document);
 		this.paint(svgGenerator);
 
 		Writer out;
-		try { 
-           out=new FileWriter(new File("test_batik.svg")); 
-           svgGenerator.stream(out, true);
+		try {
+			out = new FileWriter(new File("test_batik.svg"));
+			svgGenerator.stream(out, true);
 		} catch (IOException ioEx) {
 			ioEx.printStackTrace();
 		}
-		
 
-//		File outputFile = new File("D:/out.pdf");
-//		OutputStream out = null;
-//        try {
-//        	out = new java.io.FileOutputStream(outputFile);
-//            out = new java.io.BufferedOutputStream(out);
-//            PDFDocumentGraphics2D g2d = new PDFDocumentGraphics2D();
-//            g2d.setDeviceDPI(PDFDocumentGraphics2D.NORMAL_PDF_RESOLUTION);
-//            g2d.setGraphicContext(new GraphicContext());
-//            Dimension pageSize = new Dimension(595, 842); //A4
-//            g2d.setupDocument(out, pageSize.width, pageSize.height);
-//
-//
-//            //Works:
-//            //g2d.addLink(targetRect, tx, "http://www.apache.org",PDFLink.EXTERNAL);
-//            //Doesn't work
-//            //g2d.addLink(targetRect, tx, "[/XYZ 0 0 null]", PDFLink.INTERNAL);
-//            //Works:
-//            g2d.finish();
-//        } catch (FileNotFoundException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} finally {
-//            IOUtils.closeQuietly(out);
-//        }
+		// File outputFile = new File("D:/out.pdf");
+		// OutputStream out = null;
+		// try {
+		// out = new java.io.FileOutputStream(outputFile);
+		// out = new java.io.BufferedOutputStream(out);
+		// PDFDocumentGraphics2D g2d = new PDFDocumentGraphics2D();
+		// g2d.setDeviceDPI(PDFDocumentGraphics2D.NORMAL_PDF_RESOLUTION);
+		// g2d.setGraphicContext(new GraphicContext());
+		// Dimension pageSize = new Dimension(595, 842); //A4
+		// g2d.setupDocument(out, pageSize.width, pageSize.height);
+		//
+		//
+		// //Works:
+		// //g2d.addLink(targetRect, tx,
+		// "http://www.apache.org",PDFLink.EXTERNAL);
+		// //Doesn't work
+		// //g2d.addLink(targetRect, tx, "[/XYZ 0 0 null]", PDFLink.INTERNAL);
+		// //Works:
+		// g2d.finish();
+		// } catch (FileNotFoundException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// } catch (IOException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// } finally {
+		// IOUtils.closeQuietly(out);
+		// }
 	}
 
 	public void setLatticeGraph(LatticeGraph g) {
 		graph = g;
 		init();
 	}
-	
-	public void setMove(boolean change){
-		for(Node n: graph.getNodes()){
+
+	public void setMove(boolean change) {
+		for (Node n : graph.getNodes()) {
 			n.moveSubgraph(change);
 		}
 	}
-	
+
 }

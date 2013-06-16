@@ -7,6 +7,10 @@ import fcatools.conexpng.model.ILatticeAlgorithm;
 import fcatools.conexpng.model.TestLatticeAlgorithm;
 
 import javax.swing.*;
+
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -24,7 +28,7 @@ public class LatticeView extends View {
         
         alg = new TestLatticeAlgorithm();
         view = new LatticeGraphView(alg.computeLatticeGraph(state.context));
-        settings = new JLabel("Lattice Settings");
+        settings = new AccordionMenue();
         
         JButton export = Util.createButton("Export as .PDF", "export",
                 "conexp/cameraFlash.gif");
@@ -52,6 +56,7 @@ public class LatticeView extends View {
         toolbar.add(move);
         
         super.init();
+        
     }
 
     @Override
