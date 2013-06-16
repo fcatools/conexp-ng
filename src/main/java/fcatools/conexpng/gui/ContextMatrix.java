@@ -30,7 +30,7 @@ import static javax.swing.KeyStroke.getKeyStroke;
  * http://tonyobryan.com/index.php?article=57
  * http://www.jroller.com/santhosh/entry/make_jtable_resiable_better_than
  */
-class ContextMatrix extends JTable {
+public class ContextMatrix extends JTable {
 
     private static final long serialVersionUID = -7474568014425724962L;
 

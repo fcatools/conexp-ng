@@ -16,7 +16,7 @@ import static fcatools.conexpng.gui.Util.clamp;
  * happens is that the context is changed (not the JTable per se) and the JTable is redrawn based
  * on the updated context.
  */
-class ContextMatrixModel extends AbstractTableModel implements Reorderable {
+public class ContextMatrixModel extends AbstractTableModel implements Reorderable {
 
     private static final long serialVersionUID = -1509387655329719071L;
 
