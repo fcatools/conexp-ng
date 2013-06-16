@@ -12,7 +12,7 @@ import java.beans.PropertyChangeListener;
 import java.util.HashMap;
 import java.util.Map;
 
-import static fcatools.conexpng.gui.Util.clamp;
+import static fcatools.conexpng.Util.clamp;
 import static javax.swing.KeyStroke.getKeyStroke;
 
 /**

@@ -1,4 +1,4 @@
-package fcatools.conexpng.gui;
+package fcatools.conexpng;
 
 import javax.swing.*;
 import java.awt.*;

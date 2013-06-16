@@ -12,7 +12,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
 
-import static fcatools.conexpng.gui.Util.*;
+import static fcatools.conexpng.Util.*;
 import static javax.swing.KeyStroke.getKeyStroke;
 
 /**

@@ -1,12 +1,11 @@
 package fcatools.conexpng.gui;
 
 import fcatools.conexpng.ProgramState;
+import fcatools.conexpng.Util;
 import fcatools.conexpng.draw.ILatticeAlgorithm;
 import fcatools.conexpng.draw.TestLatticeAlgorithm;
 
 import javax.swing.*;
-
-import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;

@@ -7,7 +7,7 @@ import fcatools.conexpng.model.FormalContext;
 
 import javax.swing.table.AbstractTableModel;
 
-import static fcatools.conexpng.gui.Util.clamp;
+import static fcatools.conexpng.Util.clamp;
 
 /**
  * ContextMatrixModel allows the separation between the data and its presentation in the JTable.

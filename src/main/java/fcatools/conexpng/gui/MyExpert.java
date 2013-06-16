@@ -7,6 +7,7 @@ import de.tudresden.inf.tcs.fcalib.FullObject;
 import de.tudresden.inf.tcs.fcalib.action.CounterExampleProvidedAction;
 import de.tudresden.inf.tcs.fcalib.action.QuestionConfirmedAction;
 import fcatools.conexpng.ProgramState;
+import fcatools.conexpng.Util;
 import fcatools.conexpng.gui.contexteditor.ContextMatrix;
 import fcatools.conexpng.gui.contexteditor.ContextMatrixModel;
 import fcatools.conexpng.model.FormalContext;
@@ -19,7 +20,7 @@ import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-import static fcatools.conexpng.gui.Util.*;
+import static fcatools.conexpng.Util.*;
 
 public class MyExpert extends
         AbstractExpert<String, String, FullObject<String, String>> {

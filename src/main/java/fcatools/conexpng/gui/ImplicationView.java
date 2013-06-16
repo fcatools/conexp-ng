@@ -2,6 +2,7 @@ package fcatools.conexpng.gui;
 
 import de.tudresden.inf.tcs.fcaapi.FCAImplication;
 import fcatools.conexpng.ProgramState;
+import fcatools.conexpng.Util;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;

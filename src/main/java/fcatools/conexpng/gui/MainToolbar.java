@@ -1,20 +1,19 @@
 package fcatools.conexpng.gui;
 
-import fcatools.conexpng.OS;
-import fcatools.conexpng.ProgramState;
-
-import javax.swing.*;
-
 import de.tudresden.inf.tcs.fcalib.FullObject;
 import de.tudresden.inf.tcs.fcalib.action.StartExplorationAction;
+import fcatools.conexpng.OS;
+import fcatools.conexpng.ProgramState;
+import fcatools.conexpng.Util;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 
-import static fcatools.conexpng.gui.Util.centerDialogInsideMainFrame;
-import static fcatools.conexpng.gui.Util.createButton;
+import static fcatools.conexpng.Util.centerDialogInsideMainFrame;
+import static fcatools.conexpng.Util.createButton;
 
 public class MainToolbar extends JToolBar {
 
