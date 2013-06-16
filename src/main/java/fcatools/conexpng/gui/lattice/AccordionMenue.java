@@ -1,4 +1,4 @@
-package fcatools.conexpng.gui;
+package fcatools.conexpng.gui.lattice;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
