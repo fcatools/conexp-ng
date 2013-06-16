@@ -1,20 +1,13 @@
 package fcatools.conexpng.gui.lattice;
 
 import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
 import java.awt.RenderingHints;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Set;
@@ -24,16 +17,10 @@ import org.apache.batik.dom.GenericDOMImplementation;
 import org.apache.batik.dom.svg.SVGDOMImplementation;
 import org.apache.batik.svggen.SVGGraphics2D;
 import org.apache.batik.swing.JSVGCanvas;
-import org.apache.batik.transcoder.TranscoderInput;
-import org.apache.batik.transcoder.TranscoderOutput;
-import org.apache.batik.transcoder.image.JPEGTranscoder;
-import org.apache.commons.io.IOUtils;
-import org.apache.fop.pdf.PDFLink;
-import org.apache.fop.svg.PDFDocumentGraphics2D;
-import org.apache.fop.svg.PDFGraphics2D;
-import org.apache.xmlgraphics.java2d.GraphicContext;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.svg.SVGDocument;
 
 
 /*The JSVGCanvas provides a set of build-in interactors that
@@ -92,11 +79,20 @@ public class LatticeGraphView extends JSVGCanvas {
 		}
 
 	}
-
+	
 	@Override
 	public void paint(Graphics g0) {
-		Graphics2D g = (Graphics2D) g0;
-		super.paint(g);
+		
+		super.paint(g0);
+		
+		DOMImplementation impl = SVGDOMImplementation.getDOMImplementation();
+        String svgNS = SVGDOMImplementation.SVG_NAMESPACE_URI;
+        SVGDocument doc = (SVGDocument) impl.createDocument(svgNS, "svg", null);
+
+        // Create a converter for this document.
+        SVGGraphics2D g = new SVGGraphics2D(doc);
+        
+  
 		g.setRenderingHint(
 			    RenderingHints.KEY_ANTIALIASING,
 			    RenderingHints.VALUE_ANTIALIAS_ON);
@@ -127,6 +123,11 @@ public class LatticeGraphView extends JSVGCanvas {
 				this.calcDrawPosition(g, s, false, n);
 			}
 		}
+		
+		Element root = doc.getDocumentElement();
+        g.getRoot(root);
+
+        this.setSVGDocument(doc);
 	}
 	
 	private void calcDrawPosition(Graphics2D g, Set<String> elements, boolean areObjects, Node node){
