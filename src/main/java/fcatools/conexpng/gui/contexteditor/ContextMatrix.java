@@ -1,4 +1,4 @@
-package fcatools.conexpng.gui;
+package fcatools.conexpng.gui.contexteditor;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;

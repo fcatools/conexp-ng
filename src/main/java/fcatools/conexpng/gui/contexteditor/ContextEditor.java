@@ -1,8 +1,9 @@
-package fcatools.conexpng.gui;
+package fcatools.conexpng.gui.contexteditor;
 
 import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
 import de.tudresden.inf.tcs.fcalib.FullObject;
 import fcatools.conexpng.ProgramState;
+import fcatools.conexpng.gui.View;
 
 import javax.swing.*;
 import javax.swing.border.Border;

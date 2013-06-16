@@ -1,6 +1,7 @@
 package fcatools.conexpng.gui;
 
 import fcatools.conexpng.ProgramState;
+import fcatools.conexpng.gui.contexteditor.ContextEditor;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
