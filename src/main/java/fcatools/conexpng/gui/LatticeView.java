@@ -5,11 +5,10 @@ import fcatools.conexpng.draw.ILatticeAlgorithm;
 import fcatools.conexpng.draw.TestLatticeAlgorithm;
 
 import javax.swing.*;
-
-import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
+
 
 
 public class LatticeView extends View {
@@ -36,6 +35,19 @@ public class LatticeView extends View {
 			}
 		});
         toolbar.add(export);
+        
+        JToggleButton  move = Util.createToggleButton("Move subgraph", "move",
+                "conexp/moveMode.gif");
+        move.addActionListener(new ActionListener() {
+			boolean last = false;
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				last = !last;
+				((LatticeGraphView) view).setMove(last);
+				
+			}
+		});
+        toolbar.add(move);
         
         super.init();
     }

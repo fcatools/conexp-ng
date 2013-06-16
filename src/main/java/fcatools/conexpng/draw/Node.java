@@ -189,7 +189,9 @@ public class Node extends JPanel implements LatticeGraphElement {
 		return this.visibleAttributes;
 	}
 	
-	
+	public void moveSubgraph(boolean b){
+		this.moveSubgraph = b;
+	}
 	
 
 }

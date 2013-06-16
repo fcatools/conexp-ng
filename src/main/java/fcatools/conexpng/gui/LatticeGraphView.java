@@ -11,6 +11,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -23,6 +24,9 @@ import org.apache.batik.dom.GenericDOMImplementation;
 import org.apache.batik.dom.svg.SVGDOMImplementation;
 import org.apache.batik.svggen.SVGGraphics2D;
 import org.apache.batik.swing.JSVGCanvas;
+import org.apache.batik.transcoder.TranscoderInput;
+import org.apache.batik.transcoder.TranscoderOutput;
+import org.apache.batik.transcoder.image.JPEGTranscoder;
 import org.apache.commons.io.IOUtils;
 import org.apache.fop.pdf.PDFLink;
 import org.apache.fop.svg.PDFDocumentGraphics2D;
@@ -172,6 +176,7 @@ public class LatticeGraphView extends JSVGCanvas {
 		} catch (IOException ioEx) {
 			ioEx.printStackTrace();
 		}
+		
 
 //		File outputFile = new File("D:/out.pdf");
 //		OutputStream out = null;
@@ -205,6 +210,12 @@ public class LatticeGraphView extends JSVGCanvas {
 	public void setLatticeGraph(LatticeGraph g) {
 		graph = g;
 		init();
+	}
+	
+	public void setMove(boolean change){
+		for(Node n: graph.getNodes()){
+			n.moveSubgraph(change);
+		}
 	}
 	
 }
