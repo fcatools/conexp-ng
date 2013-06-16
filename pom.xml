@@ -38,7 +38,7 @@
     <!-- Guava -->
     <dependency>
       <groupId>com.google.guava</groupId>
-      <artifactId>guava-gwt</artifactId>
+      <artifactId>guava</artifactId>
       <version>14.0.1</version>
     </dependency>
     <!-- log4j -->
@@ -46,12 +46,6 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
       <version>1.7.5</version>
-    </dependency>
-    <!-- Conexp -->
-    <dependency>
-      <groupId>conexp</groupId>
-      <artifactId>conexp</artifactId>
-      <version>1.3</version>
     </dependency>
     <!-- FCAlib -->
     <dependency>

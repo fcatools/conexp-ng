@@ -1,2 +1,54 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ConceptualSystem><Version MajorNumber="1" MinorNumber="0" /><Contexts><Context Identifier="0" Type="Binary"><Attributes><Attribute Identifier="0"><Name>female</Name></Attribute><Attribute Identifier="1"><Name>juvenile</Name></Attribute><Attribute Identifier="2"><Name>adult</Name></Attribute><Attribute Identifier="3"><Name>male</Name></Attribute></Attributes><Objects><Object><Name>girl</Name><Intent><HasAttribute AttributeIdentifier="0" /><HasAttribute AttributeIdentifier="1" /></Intent></Object><Object><Name>woman</Name><Intent><HasAttribute AttributeIdentifier="0" /><HasAttribute AttributeIdentifier="2" /></Intent></Object><Object><Name>boy</Name><Intent><HasAttribute AttributeIdentifier="1" /><HasAttribute AttributeIdentifier="3" /></Intent></Object><Object><Name>man</Name><Intent><HasAttribute AttributeIdentifier="2" /><HasAttribute AttributeIdentifier="3" /></Intent></Object></Objects></Context></Contexts><RecalculationPolicy Value="Clear" /><Lattices /></ConceptualSystem>
+<ConceptualSystem>
+    <Version MajorNumber="1" MinorNumber="0"/>
+    <Contexts>
+        <Context Identifier="0" Type="Binary">
+            <Attributes>
+                <Attribute Identifier="0">
+                    <Name>female</Name>
+                </Attribute>
+                <Attribute Identifier="1">
+                    <Name>juvenile</Name>
+                </Attribute>
+                <Attribute Identifier="2">
+                    <Name>adult</Name>
+                </Attribute>
+                <Attribute Identifier="3">
+                    <Name>male</Name>
+                </Attribute>
+            </Attributes>
+            <Objects>
+                <Object>
+                    <Name>girl</Name>
+                    <Intent>
+                        <HasAttribute AttributeIdentifier="0"/>
+                        <HasAttribute AttributeIdentifier="1"/>
+                    </Intent>
+                </Object>
+                <Object>
+                    <Name>woman</Name>
+                    <Intent>
+                        <HasAttribute AttributeIdentifier="0"/>
+                        <HasAttribute AttributeIdentifier="2"/>
+                    </Intent>
+                </Object>
+                <Object>
+                    <Name>boy</Name>
+                    <Intent>
+                        <HasAttribute AttributeIdentifier="1"/>
+                        <HasAttribute AttributeIdentifier="3"/>
+                    </Intent>
+                </Object>
+                <Object>
+                    <Name>man</Name>
+                    <Intent>
+                        <HasAttribute AttributeIdentifier="2"/>
+                        <HasAttribute AttributeIdentifier="3"/>
+                    </Intent>
+                </Object>
+            </Objects>
+        </Context>
+    </Contexts>
+    <RecalculationPolicy Value="Clear"/>
+    <Lattices/>
+</ConceptualSystem>
