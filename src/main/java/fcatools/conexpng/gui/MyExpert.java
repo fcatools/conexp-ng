@@ -1,23 +1,5 @@
 package fcatools.conexpng.gui;
 
-import static fcatools.conexpng.gui.Util.centerDialogInsideMainFrame;
-import static fcatools.conexpng.gui.Util.clamp;
-import static fcatools.conexpng.gui.Util.invokeAction;
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import javax.swing.AbstractAction;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.SwingUtilities;
 import de.tudresden.inf.tcs.fcaapi.FCAImplication;
 import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
 import de.tudresden.inf.tcs.fcalib.AbstractExpert;
@@ -25,7 +7,20 @@ import de.tudresden.inf.tcs.fcalib.FullObject;
 import de.tudresden.inf.tcs.fcalib.action.CounterExampleProvidedAction;
 import de.tudresden.inf.tcs.fcalib.action.QuestionConfirmedAction;
 import fcatools.conexpng.ProgramState;
+import fcatools.conexpng.Util;
+import fcatools.conexpng.gui.contexteditor.ContextMatrix;
+import fcatools.conexpng.gui.contexteditor.ContextMatrixModel;
 import fcatools.conexpng.model.FormalContext;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
+import static fcatools.conexpng.Util.*;
 
 public class MyExpert extends
         AbstractExpert<String, String, FullObject<String, String>> {

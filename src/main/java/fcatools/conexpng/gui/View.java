@@ -21,7 +21,7 @@ public abstract class View extends JPanel implements PropertyChangeListener {
 
     protected JSplitPane splitPane;
 
-    View(ProgramState state) {
+    public View(ProgramState state) {
         this.state = state;
         state.addPropertyChangeListener(this);
     }

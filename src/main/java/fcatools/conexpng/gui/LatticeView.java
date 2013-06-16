@@ -1,6 +1,7 @@
 package fcatools.conexpng.gui;
 
 import fcatools.conexpng.ProgramState;
+import fcatools.conexpng.Util;
 import fcatools.conexpng.draw.ILatticeAlgorithm;
 import fcatools.conexpng.draw.TestLatticeAlgorithm;
 

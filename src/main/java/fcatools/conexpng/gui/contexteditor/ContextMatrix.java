@@ -1,4 +1,4 @@
-package fcatools.conexpng.gui;
+package fcatools.conexpng.gui.contexteditor;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
@@ -12,7 +12,7 @@ import java.beans.PropertyChangeListener;
 import java.util.HashMap;
 import java.util.Map;
 
-import static fcatools.conexpng.gui.Util.clamp;
+import static fcatools.conexpng.Util.clamp;
 import static javax.swing.KeyStroke.getKeyStroke;
 
 /**
@@ -30,7 +30,7 @@ import static javax.swing.KeyStroke.getKeyStroke;
  * http://tonyobryan.com/index.php?article=57
  * http://www.jroller.com/santhosh/entry/make_jtable_resiable_better_than
  */
-class ContextMatrix extends JTable {
+public class ContextMatrix extends JTable {
 
     private static final long serialVersionUID = -7474568014425724962L;
 

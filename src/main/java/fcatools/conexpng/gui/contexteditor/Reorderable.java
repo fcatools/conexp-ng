@@ -1,4 +1,4 @@
-package fcatools.conexpng.gui;
+package fcatools.conexpng.gui.contexteditor;
 
 /**
  * Needed for reordering objects/attributes when dragging and why this interface? -> reduce coupling of MatrixModel
