@@ -49,7 +49,7 @@ public class LatticeGraphView extends JSVGCanvas {
 				q.add(n);
 			}
 			for (int i = 0; i < q.size(); i++) {
-				if (q.get(i).getLevel() > n.getLevel()) {
+				if (q.get(i).getLevel() >= n.getLevel()) {
 					q.add(i, n);
 					break;
 				}
@@ -89,10 +89,9 @@ public class LatticeGraphView extends JSVGCanvas {
         String svgNS = SVGDOMImplementation.SVG_NAMESPACE_URI;
         SVGDocument doc = (SVGDocument) impl.createDocument(svgNS, "svg", null);
 
-        // Create a converter for this document.
         SVGGraphics2D g = new SVGGraphics2D(doc);
         
-  
+        
 		g.setRenderingHint(
 			    RenderingHints.KEY_ANTIALIASING,
 			    RenderingHints.VALUE_ANTIALIAS_ON);
