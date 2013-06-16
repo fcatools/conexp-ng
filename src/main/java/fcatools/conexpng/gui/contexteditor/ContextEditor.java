@@ -99,6 +99,8 @@ public class ContextEditor extends View {
     public void propertyChange(PropertyChangeEvent e) {
         if (e.getPropertyName().equals("ContextChanged")) {
             matrixModel.fireTableStructureChanged();
+            matrix.invalidate();
+            matrix.repaint();
         }
     }
 
