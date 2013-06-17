@@ -2,6 +2,7 @@ package fcatools.conexpng.gui;
 
 import de.tudresden.inf.tcs.fcaapi.FCAImplication;
 import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
+import de.tudresden.inf.tcs.fcalib.AbstractContext;
 import de.tudresden.inf.tcs.fcalib.AbstractExpert;
 import de.tudresden.inf.tcs.fcalib.FullObject;
 import de.tudresden.inf.tcs.fcalib.action.CounterExampleProvidedAction;
@@ -19,6 +20,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.Set;
 
 import static fcatools.conexpng.Util.*;
 
@@ -26,34 +28,61 @@ public class MyExpert extends
         AbstractExpert<String, String, FullObject<String, String>> {
 
     private JFrame frame;
+    private ProgramState state;
     private FormalContext context;
 
-    public MyExpert(JFrame mainFrame, FormalContext context) {
-        this.context = context;
+    public MyExpert(JFrame mainFrame, ProgramState state) {
+        this.state = state;
+        this.context = state.context;
         this.frame = mainFrame;
     }
 
-    /**
-     * Called to notify the expert that the exploration finished (either the
-     * expert wanted it or the exploration algorithm terminated). An
-     * implementation of this method can for instance inform the expert by
-     * writing a message, popping up a window etc.
-     */
+    @Override
     public void explorationFinished() {
         showFinishDialog("Attribute Exploration is finished");
     }
 
-    /**
-     * Checks whether a given implication question holds. If yes, fires an
-     * expert action of type {@link #CONFIRMED_QUESTION}, if no an expert action
-     * of type {@link #REJECTED_QUESTION} and notifies listeners.
-     *
-     * @param question
-     *            the given implication question
-     */
+    @Override
     public void askQuestion(FCAImplication<String> question) {
-        String questionstring = question.getPremise() + " ->"
-                + question.getConclusion() + "?";
+        showQuestionDialog(question);
+    }
+
+    @Override
+    public void counterExampleInvalid(
+            FullObject<String, String> counterexample, int reason) {
+        if (reason == COUNTEREXAMPLE_INVALID) {
+            showErrorDialog(counterexample.getIdentifier()
+                    + " doesn't respect the implication.");
+        }
+        if (reason == COUNTEREXAMPLE_EXISTS) {
+            showErrorDialog(counterexample.getIdentifier() + " already exists.");
+        }
+
+    }
+
+    @Override
+    public void requestCounterExample(FCAImplication<String> implication) {
+        showCounterExampleDialog(implication);
+    }
+
+    @Override
+    public void forceToCounterExample(FCAImplication<String> implication) {
+        // nothing todo
+    }
+
+    @Override
+    public void implicationFollowsFromBackgroundKnowledge(
+            FCAImplication<String> arg0) {
+        // nothing todo
+    }
+
+    private void showQuestionDialog(FCAImplication<String> question) {
+        String questionstring = question.getPremise().isEmpty() ? "Is it true, that all objects have the attribute(s) "
+                + getElements(question.getConclusion()) + "?"
+                : "Is it true, that when an object has attribute(s) "
+                        + getElements(question.getPremise())
+                        + ", that it also has attribute(s) "
+                        + getElements(question.getConclusion()) + "?";
         Object[] options = { "Yes", "No", "Stop Attribute Exploration" };
         final JOptionPane optionPane = new JOptionPane(questionstring,
                 JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_CANCEL_OPTION);
@@ -87,6 +116,65 @@ public class MyExpert extends
             explorationFinished();
         }
     }
+
+    private String getElements(Set<String> set) {
+        String result = "";
+        for (String string : set) {
+            result += string + ", ";
+        }
+        result = result.substring(0, result.lastIndexOf(","));
+        return result;
+    }
+
+    private void showCounterExampleDialog(FCAImplication<String> question) {
+        MiniContextEditor mce = new MiniContextEditor(question);
+        JOptionPane pane = new JOptionPane(mce,
+                JOptionPane.YES_NO_CANCEL_OPTION);
+        pane.setMessageType(JOptionPane.PLAIN_MESSAGE);
+        JDialog dialog = pane.createDialog(frame, "Provide a counterexample");
+        Object[] options = { "Provide counterexample", "Accept implication",
+                "Stop" };
+        pane.setOptions(options);
+        dialog.pack();
+        Util.centerDialogInsideMainFrame(frame, dialog);
+        dialog.setVisible(true);
+        String n = (String) pane.getValue();
+        if (n != null)
+            if (n.equals("Provide counterexample")) {
+                // TODO: Change CounterExampleProvidedAction, so it can
+                // propagate a ContextChangedEvent
+                MyCounterExampleProvidedAction action = new MyCounterExampleProvidedAction(
+                        context, question, mce.getCounterexample());
+                fireExpertAction(action);
+            } else if (n.equals("Accept implication")) {
+                QuestionConfirmedAction<String, String, FullObject<String, String>> action = new QuestionConfirmedAction<>();
+                action.setQuestion(question);
+                action.setContext(context);
+                fireExpertAction(action);
+            } else {
+                explorationFinished();
+            }
+    }
+
+    private void showFinishDialog(String message) {
+        JOptionPane pane = new JOptionPane();
+        JDialog dialog = pane.createDialog(frame, "Information");
+        pane.setMessageType(JOptionPane.INFORMATION_MESSAGE);
+        pane.setMessage(new JLabel(message));
+        dialog.pack();
+        Util.centerDialogInsideMainFrame(frame, dialog);
+        dialog.setVisible(true);
+    }
+
+    private void showErrorDialog(String message) {
+        JOptionPane pane = new JOptionPane(message, JOptionPane.ERROR_MESSAGE);
+        JDialog dialog = pane.createDialog(frame, "Error");
+        dialog.pack();
+        centerDialogInsideMainFrame(frame, dialog);
+        dialog.setVisible(true);
+    }
+
+    // ////////////////////////////////////////////////////////////////////////////
 
     @SuppressWarnings("serial")
     private class MiniContextEditor extends JPanel {
@@ -175,98 +263,22 @@ public class MyExpert extends
         }
     }
 
-    private void showCounterExampleDialog(FCAImplication<String> question) {
-        MiniContextEditor mce = new MiniContextEditor(question);
-        JOptionPane pane = new JOptionPane(mce,
-                JOptionPane.YES_NO_CANCEL_OPTION);
-        pane.setMessageType(JOptionPane.PLAIN_MESSAGE);
-        JDialog dialog = pane.createDialog(frame, "Provide a counterexample");
-        Object[] options = { "Provide counterexample", "Accept implication",
-                "Stop" };
-        pane.setOptions(options);
-        dialog.pack();
-        Util.centerDialogInsideMainFrame(frame, dialog);
-        dialog.setVisible(true);
-        String n = (String) pane.getValue();
-        if (n != null)
-            if (n.equals("Provide counterexample")) {
-                // TODO: Change CounterExampleProvidedAction, so it can
-                // propagate a ContextChangedEvent
-                CounterExampleProvidedAction<String, String, FullObject<String, String>> action = new CounterExampleProvidedAction<>(
-                        context, question, mce.getCounterexample());
-                fireExpertAction(action);
-            } else if (n.equals("Accept implication")) {
-                QuestionConfirmedAction<String, String, FullObject<String, String>> action = new QuestionConfirmedAction<>();
-                action.setQuestion(question);
-                action.setContext(context);
-                fireExpertAction(action);
-            } else {
-                explorationFinished();
-            }
-    }
+    @SuppressWarnings("serial")
+    class MyCounterExampleProvidedAction
+            extends
+            CounterExampleProvidedAction<String, String, FullObject<String, String>> {
 
-    /**
-     * Called to notify the expert that the specified counterexample is invalid
-     * due to the given reason. The reason is one of
-     * {@link #COUNTEREXAMPLE_EXISTS} or {@link #COUNTEREXAMPLE_INVALID}. An
-     * implementation of this method should then perform the necessary actions.
-     * For instance, if it is a human expert, it should display an error message
-     * with the reason.
-     *
-     * @param counterExample
-     *            the counterexample given by the expert
-     * @param reason
-     *            the reason why the counterexample is not valid
-     */
-    public void counterExampleInvalid(
-            FullObject<String, String> counterexample, int reason) {
-        if (reason == COUNTEREXAMPLE_INVALID) {
-            showErrorDialog(counterexample.getIdentifier()
-                    + " doesn't respect the implication.");
+        public MyCounterExampleProvidedAction(
+                AbstractContext<String, String, FullObject<String, String>> c,
+                FCAImplication<String> q, FullObject<String, String> ce) {
+            super(c, q, ce);
         }
-        if (reason == COUNTEREXAMPLE_EXISTS) {
-            showErrorDialog(counterexample.getIdentifier() + " already exists.");
+
+        @Override
+        public void actionPerformed(ActionEvent arg0) {
+            super.actionPerformed(arg0);
+            state.contextChanged();
         }
 
     }
-
-    private void showErrorDialog(String message) {
-        JOptionPane pane = new JOptionPane(message, JOptionPane.ERROR_MESSAGE);
-        JDialog dialog = pane.createDialog(frame, "Error");
-        dialog.pack();
-        centerDialogInsideMainFrame(frame, dialog);
-        dialog.setVisible(true);
-    }
-
-    public void forceToCounterExample(FCAImplication<String> implication) {
-        // nothing todo
-    }
-
-    /**
-     * Gets a counterexample, fires an expert action of type
-     * {@link #PROVIDED_COUNTEREXAMPLE}
-     *
-     * @param question
-     *            the given implication question
-     */
-    public void requestCounterExample(FCAImplication<String> implication) {
-        showCounterExampleDialog(implication);
-    }
-
-    private void showFinishDialog(String message) {
-        JOptionPane pane = new JOptionPane();
-        JDialog dialog = pane.createDialog(frame, "Information");
-        pane.setMessageType(JOptionPane.INFORMATION_MESSAGE);
-        pane.setMessage(new JLabel(message));
-        dialog.pack();
-        Util.centerDialogInsideMainFrame(frame, dialog);
-        dialog.setVisible(true);
-    }
-
-    @Override
-    public void implicationFollowsFromBackgroundKnowledge(
-            FCAImplication<String> arg0) {
-        // nothing todo
-    }
-
 }

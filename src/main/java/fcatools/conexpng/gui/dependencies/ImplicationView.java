@@ -1,8 +1,9 @@
-package fcatools.conexpng.gui;
+package fcatools.conexpng.gui.dependencies;
 
 import de.tudresden.inf.tcs.fcaapi.FCAImplication;
 import fcatools.conexpng.ProgramState;
 import fcatools.conexpng.Util;
+import fcatools.conexpng.gui.View;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;

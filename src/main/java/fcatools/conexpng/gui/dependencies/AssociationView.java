@@ -1,8 +1,9 @@
-package fcatools.conexpng.gui;
+package fcatools.conexpng.gui.dependencies;
 
 import fcatools.conexpng.ContextChangeEvents;
 import fcatools.conexpng.ProgramState;
 import fcatools.conexpng.ProgramState.ContextChangeEvent;
+import fcatools.conexpng.gui.View;
 import fcatools.conexpng.model.AssociationRule;
 
 import javax.swing.*;

@@ -99,7 +99,7 @@ public class MainToolbar extends JToolBar {
         });
         exploreButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent arg0) {
-                MyExpert expert = new MyExpert(mainFrame, state.context);
+                MyExpert expert = new MyExpert(mainFrame, state);
                 state.context.setExpert(expert);
                 expert.addExpertActionListener(state.context);
                 // Create an expert action for starting attribute exploration
