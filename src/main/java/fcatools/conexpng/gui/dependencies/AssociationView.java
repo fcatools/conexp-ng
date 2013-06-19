@@ -160,9 +160,11 @@ public class AssociationView extends View {
     public void propertyChange(PropertyChangeEvent evt) {
         if (evt instanceof ContextChangeEvent) {
             ContextChangeEvent cce = (ContextChangeEvent) evt;
-            if (cce.getName() == ContextChangeEvents.CONTEXTCHANGED) {
+            if (cce.getName() == ContextChangeEvents.CONTEXTCHANGED
+                    || cce.getName() == ContextChangeEvents.NEWCONTEXT) {
                 updateAssociations();
             }
+
         } else if (evt.getPropertyName().equals("ConfidenceChanged")) {
             conf = (double) evt.getNewValue();
             writeAssociations();

@@ -2,7 +2,6 @@ package fcatools.conexpng.gui;
 
 import de.tudresden.inf.tcs.fcaapi.FCAImplication;
 import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
-import de.tudresden.inf.tcs.fcalib.AbstractContext;
 import de.tudresden.inf.tcs.fcalib.AbstractExpert;
 import de.tudresden.inf.tcs.fcalib.FullObject;
 import de.tudresden.inf.tcs.fcalib.action.CounterExampleProvidedAction;
@@ -14,6 +13,7 @@ import fcatools.conexpng.gui.contexteditor.ContextMatrixModel;
 import fcatools.conexpng.model.FormalContext;
 
 import javax.swing.*;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
@@ -43,8 +43,22 @@ public class MyExpert extends
     }
 
     @Override
-    public void askQuestion(FCAImplication<String> question) {
-        showQuestionDialog(question);
+    public void askQuestion(final FCAImplication<String> question) {
+        new SwingWorker<Object, Object>() {
+            // to make sure, that the context was changed
+            int objCount = state.context.getObjectCount();
+
+            @Override
+            protected Object doInBackground() throws Exception {
+                showQuestionDialog(question);
+                return null;
+            }
+
+            protected void done() {
+                if (objCount != state.context.getObjectCount())
+                    state.contextChanged();
+            };
+        }.execute();
     }
 
     @Override
@@ -76,7 +90,8 @@ public class MyExpert extends
         // nothing todo
     }
 
-    private void showQuestionDialog(FCAImplication<String> question) {
+    private void showQuestionDialog(final FCAImplication<String> question) {
+
         String questionstring = question.getPremise().isEmpty() ? "Is it true, that all objects have the attribute(s) "
                 + getElements(question.getConclusion()) + "?"
                 : "Is it true, that when an object has attribute(s) "
@@ -141,9 +156,7 @@ public class MyExpert extends
         String n = (String) pane.getValue();
         if (n != null)
             if (n.equals("Provide counterexample")) {
-                // TODO: Change CounterExampleProvidedAction, so it can
-                // propagate a ContextChangedEvent
-                MyCounterExampleProvidedAction action = new MyCounterExampleProvidedAction(
+                CounterExampleProvidedAction<String, String, FullObject<String, String>> action = new CounterExampleProvidedAction<>(
                         context, question, mce.getCounterexample());
                 fireExpertAction(action);
             } else if (n.equals("Accept implication")) {
@@ -215,7 +228,7 @@ public class MyExpert extends
                             invokeAction(MiniContextEditor.this,
                                     new ToggleAction(i, j));
                         }
-                        // TODO: enable this in the real contexteditor?
+                        // TODO: maybe enable this in the real contexteditor?
                         else if (i == 1 && j == 0)
                             matrix.renameRowHeader(i);
                     }
@@ -263,22 +276,4 @@ public class MyExpert extends
         }
     }
 
-    @SuppressWarnings("serial")
-    class MyCounterExampleProvidedAction
-            extends
-            CounterExampleProvidedAction<String, String, FullObject<String, String>> {
-
-        public MyCounterExampleProvidedAction(
-                AbstractContext<String, String, FullObject<String, String>> c,
-                FCAImplication<String> q, FullObject<String, String> ce) {
-            super(c, q, ce);
-        }
-
-        @Override
-        public void actionPerformed(ActionEvent arg0) {
-            super.actionPerformed(arg0);
-            state.contextChanged();
-        }
-
-    }
 }

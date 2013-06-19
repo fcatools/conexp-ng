@@ -26,7 +26,7 @@ public class ProgramState {
     public FormalContext context;
     public Set<AssociationRule> associations;
     public boolean unsavedChanges = false;
-    public Map<Integer,Integer> columnWidths = new HashMap<>();
+    public Map<Integer, Integer> columnWidths = new HashMap<>();
 
     private PropertyChangeSupport propertyChangeSupport;
 
@@ -50,6 +50,11 @@ public class ProgramState {
 
     public void contextChanged() {
         firePropertyChange(ContextChangeEvents.CONTEXTCHANGED, null, context);
+    }
+
+    public void newContext(FormalContext context) {
+        this.context = context;
+        firePropertyChange(ContextChangeEvents.NEWCONTEXT, null, context);
     }
 
     public void attributeNameChanged(String oldName, String newName) {

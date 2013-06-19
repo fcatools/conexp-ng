@@ -54,7 +54,6 @@ public class Main {
 
         // Create main window and take care of correctly saving and restoring the last window location
         final JFrame f = new MainFrame(testState);
-        f.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         f.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent we) {
                 try {

@@ -1,7 +1,9 @@
 package fcatools.conexpng.gui.dependencies;
 
 import de.tudresden.inf.tcs.fcaapi.FCAImplication;
+import fcatools.conexpng.ContextChangeEvents;
 import fcatools.conexpng.ProgramState;
+import fcatools.conexpng.ProgramState.ContextChangeEvent;
 import fcatools.conexpng.Util;
 import fcatools.conexpng.gui.View;
 
@@ -101,7 +103,10 @@ public class ImplicationView extends View {
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        updateImplications();
+        ContextChangeEvent e = (ContextChangeEvent) evt;
+        if (e.getName() == ContextChangeEvents.NEWCONTEXT
+                || e.getName() == ContextChangeEvents.CONTEXTCHANGED)
+            updateImplications();
     }
 
     @SuppressWarnings("serial")

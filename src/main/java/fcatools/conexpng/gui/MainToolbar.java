@@ -5,6 +5,7 @@ import de.tudresden.inf.tcs.fcalib.action.StartExplorationAction;
 import fcatools.conexpng.OS;
 import fcatools.conexpng.ProgramState;
 import fcatools.conexpng.Util;
+import fcatools.conexpng.io.CEXReader;
 
 import javax.swing.*;
 import java.awt.*;
@@ -188,18 +189,33 @@ public class MainToolbar extends JToolBar {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            if (state.filePath.isEmpty()) {
-                final JFileChooser fc = new JFileChooser();
-                int returnVal = fc.showOpenDialog(mainFrame);
 
-                if (returnVal == JFileChooser.APPROVE_OPTION) {
-                    File file = fc.getSelectedFile();
-                    state.filePath = file.getAbsolutePath();
-                    mainFrame
-                            .setTitle("ConExp-NG - \"" + state.filePath + "\"");
+            final JFileChooser fc = new JFileChooser();
+            final JDialog dialog = new JDialog(mainFrame, "Save file as", true);
+
+            dialog.setContentPane(fc);
+            fc.setDialogType(JFileChooser.OPEN_DIALOG);
+            fc.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    String state = (String) e.getActionCommand();
+                    if ((state.equals(JFileChooser.APPROVE_SELECTION) && fc
+                            .getSelectedFile() != null)
+                            || state.equals(JFileChooser.CANCEL_SELECTION)) {
+                        dialog.setVisible(false);
+                    }
                 }
+            });
+            dialog.pack();
+            Util.centerDialogInsideMainFrame(mainFrame, dialog);
+            dialog.setVisible(true);
+
+            if (fc.getSelectedFile() != null) {
+                File file = fc.getSelectedFile();
+                state.filePath = file.getAbsolutePath();
+                mainFrame.setTitle("ConExp-NG - \"" + state.filePath + "\"");
+                new CEXReader(state);
             }
-            // TODO: open document
+
         }
     }
 
