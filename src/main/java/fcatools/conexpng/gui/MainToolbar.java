@@ -6,6 +6,7 @@ import fcatools.conexpng.OS;
 import fcatools.conexpng.ProgramState;
 import fcatools.conexpng.Util;
 import fcatools.conexpng.io.BurmeisterReader;
+import fcatools.conexpng.io.BurmeisterWriter;
 import fcatools.conexpng.io.CEXReader;
 import fcatools.conexpng.io.CEXWriter;
 
@@ -90,7 +91,7 @@ public class MainToolbar extends JToolBar {
         saveAsButton.addActionListener(new ActionListener() {
 
             public void actionPerformed(ActionEvent arg0) {
-                // only for testing state.filePath = "";
+                state.filePath = "";
                 new SaveAction().actionPerformed(arg0);
             }
         });
@@ -184,7 +185,10 @@ public class MainToolbar extends JToolBar {
                     mainFrame.setTitle("ConExp-NG - \"" + path + "\"");
                 }
             }
-            new CEXWriter(state);
+            if (state.filePath.endsWith(".cex"))
+                new CEXWriter(state);
+            else
+                new BurmeisterWriter(state);
         }
     }
 

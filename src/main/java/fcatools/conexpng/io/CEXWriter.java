@@ -40,7 +40,8 @@ public class CEXWriter {
             writer.add(eventFactory.createStartElement("", "",
                     "ConceptualSystem"));
             writer.add(eventFactory.createStartElement("", "", "Version"));
-            writer.add(eventFactory.createAttribute("Majornumber", "1"));
+            // to show that this is our cex-format (2.0)
+            writer.add(eventFactory.createAttribute("Majornumber", "2"));
             writer.add(eventFactory.createAttribute("Minornumber", "0"));
             writer.add(eventFactory.createEndElement("", "", "Version"));
             addContext(writer);
