@@ -43,13 +43,18 @@ public class LatticeGraphView extends JSVGCanvas {
             // topological order
             if (q.size() == 0) {
                 q.add(n);
-            }
-            for (int i = 0; i < q.size(); i++) {
-                if (q.get(i).getLevel() > n.getLevel()) {
-                    q.add(i, n);
-                    break;
+            }else{
+            	for (int i = 0; i < q.size(); i++) {
+                    if (q.get(i).getLevel() > n.getLevel()) {
+                        q.add(i, n);
+                        break;
+                    }
+                    if(i + 1 == q.size()){
+                    	q.add(i+1, n);
+                    	break;
+                    }
                 }
-            }
+            }     
         }
 
         // calc which obj/attr has to be shown
