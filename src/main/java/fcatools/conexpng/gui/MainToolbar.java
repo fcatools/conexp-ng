@@ -5,6 +5,7 @@ import de.tudresden.inf.tcs.fcalib.action.StartExplorationAction;
 import fcatools.conexpng.OS;
 import fcatools.conexpng.ProgramState;
 import fcatools.conexpng.Util;
+import fcatools.conexpng.io.BurmeisterReader;
 import fcatools.conexpng.io.CEXReader;
 import fcatools.conexpng.io.CEXWriter;
 
@@ -154,7 +155,7 @@ public class MainToolbar extends JToolBar {
         @Override
         public void actionPerformed(ActionEvent e) {
             if (state.filePath.isEmpty()) {
-                final JFileChooser fc = new JFileChooser();
+                final JFileChooser fc = new JFileChooser(state.lastOpened);
                 final JDialog dialog = new JDialog(mainFrame, "Save file as",
                         true);
 
@@ -176,9 +177,11 @@ public class MainToolbar extends JToolBar {
 
                 if (fc.getSelectedFile() != null) {
                     File file = fc.getSelectedFile();
-                    state.filePath = file.getAbsolutePath();
-                    mainFrame
-                            .setTitle("ConExp-NG - \"" + state.filePath + "\"");
+                    String path = file.getAbsolutePath();
+                    state.lastOpened = path
+                            .substring(0, path.lastIndexOf("\\"));
+                    state.filePath = path;
+                    mainFrame.setTitle("ConExp-NG - \"" + path + "\"");
                 }
             }
             new CEXWriter(state);
@@ -191,8 +194,8 @@ public class MainToolbar extends JToolBar {
         @Override
         public void actionPerformed(ActionEvent e) {
 
-            final JFileChooser fc = new JFileChooser();
-            final JDialog dialog = new JDialog(mainFrame, "Save file as", true);
+            final JFileChooser fc = new JFileChooser(state.lastOpened);
+            final JDialog dialog = new JDialog(mainFrame, "Open file", true);
 
             dialog.setContentPane(fc);
             fc.setDialogType(JFileChooser.OPEN_DIALOG);
@@ -212,9 +215,14 @@ public class MainToolbar extends JToolBar {
 
             if (fc.getSelectedFile() != null) {
                 File file = fc.getSelectedFile();
-                state.filePath = file.getAbsolutePath();
-                mainFrame.setTitle("ConExp-NG - \"" + state.filePath + "\"");
-                new CEXReader(state);
+                String path = file.getAbsolutePath();
+                state.lastOpened = path.substring(0, path.lastIndexOf("\\"));
+                state.filePath = path;
+                mainFrame.setTitle("ConExp-NG - \"" + path + "\"");
+                if (path.endsWith(".cex"))
+                    new CEXReader(state);
+                else
+                    new BurmeisterReader(state);
             }
 
         }

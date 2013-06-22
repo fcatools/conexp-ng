@@ -16,49 +16,61 @@ import java.util.Properties;
 
 /**
  *
- * The code for (re)storing the window location is from:
- * <href a="http://stackoverflow.com/a/7778332/283607">What is the best practice for setting JFrame locations in Java?</a>
+ * The code for (re)storing the window location is from: <href
+ * a="http://stackoverflow.com/a/7778332/283607">What is the best practice for
+ * setting JFrame locations in Java?</a>
  *
  */
 public class Main {
 
     public static final String settingsDirName = ".conexp-ng";
-    public static final String optionsFileName = new File(getSettingsDirectory(), "options.prop").getPath();
-
-
+    public static final String optionsFileName = new File(
+            getSettingsDirectory(), "options.prop").getPath();
 
     public static void main(String... args) {
         // Set System L&F
-        try { UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName()); } catch (Exception _) {}
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception _) {
+        }
 
-        // Disable border around focused cells as it does not fit into the context editor concept
-        UIManager.put("Table.focusCellHighlightBorder", new EmptyBorder(0,0,0,0));
-        // Disable changing foreground color of cells as it does not fit into the context editor concept
+        // Disable border around focused cells as it does not fit into the
+        // context editor concept
+        UIManager.put("Table.focusCellHighlightBorder", new EmptyBorder(0, 0,
+                0, 0));
+        // Disable changing foreground color of cells as it does not fit into
+        // the context editor concept
         UIManager.put("Table.focusCellForeground", Color.black);
 
         ProgramState testState = new ProgramState();
         testState.filePath = "example.cex";
+        testState.lastOpened = "";
         testState.context = new FormalContext();
         testState.context.addAttribute("female");
         testState.context.addAttribute("juvenile");
         testState.context.addAttribute("adult");
         testState.context.addAttribute("male");
         try {
-            testState.context.addObject(new FullObject<>("girl", Sets.newHashSet("female", "juvenile")));
-            testState.context.addObject(new FullObject<>("woman", Sets.newHashSet("female", "adult")));
-            testState.context.addObject(new FullObject<>("boy", Sets.newHashSet("male", "juvenile")));
-            testState.context.addObject(new FullObject<>("man", Sets.newHashSet("male", "adult")));
+            testState.context.addObject(new FullObject<>("girl", Sets
+                    .newHashSet("female", "juvenile")));
+            testState.context.addObject(new FullObject<>("woman", Sets
+                    .newHashSet("female", "adult")));
+            testState.context.addObject(new FullObject<>("boy", Sets
+                    .newHashSet("male", "juvenile")));
+            testState.context.addObject(new FullObject<>("man", Sets
+                    .newHashSet("male", "adult")));
         } catch (IllegalObjectException e1) {
             e1.printStackTrace();
         }
 
-        // Create main window and take care of correctly saving and restoring the last window location
+        // Create main window and take care of correctly saving and restoring
+        // the last window location
         final JFrame f = new MainFrame(testState);
         f.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent we) {
                 try {
                     storeOptions(f);
-                } catch(Exception e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
                 System.exit(0);
@@ -69,7 +81,7 @@ public class Main {
         if (optionsFile.exists()) {
             try {
                 restoreOptions(f);
-            } catch(IOException ioe) {
+            } catch (IOException ioe) {
                 ioe.printStackTrace();
             }
         } else {
@@ -78,7 +90,6 @@ public class Main {
         f.setVisible(true);
     }
 
-
     // Store location & size of UI
     private static void storeOptions(Frame f) throws Exception {
         File file = new File(optionsFileName);
@@ -86,10 +97,10 @@ public class Main {
         // restore the frame from 'full screen' first!
         f.setExtendedState(Frame.NORMAL);
         Rectangle r = f.getBounds();
-        int x = (int)r.getX();
-        int y = (int)r.getY();
-        int w = (int)r.getWidth();
-        int h = (int)r.getHeight();
+        int x = (int) r.getX();
+        int y = (int) r.getY();
+        int w = (int) r.getWidth();
+        int h = (int) r.getHeight();
 
         p.setProperty("x", "" + x);
         p.setProperty("y", "" + y);
@@ -112,7 +123,7 @@ public class Main {
         int w = Integer.parseInt(p.getProperty("w"));
         int h = Integer.parseInt(p.getProperty("h"));
 
-        Rectangle r = new Rectangle(x,y,w,h);
+        Rectangle r = new Rectangle(x, y, w, h);
 
         f.setBounds(r);
     }
@@ -120,13 +131,13 @@ public class Main {
     // http://stackoverflow.com/a/193987/283607
     private static File getSettingsDirectory() {
         String userHome = System.getProperty("user.home");
-        if(userHome == null) {
+        if (userHome == null) {
             throw new IllegalStateException("user.home==null");
         }
         File home = new File(userHome);
         File settingsDirectory = new File(home, settingsDirName);
-        if(!settingsDirectory.exists()) {
-            if(!settingsDirectory.mkdir()) {
+        if (!settingsDirectory.exists()) {
+            if (!settingsDirectory.mkdir()) {
                 throw new IllegalStateException(settingsDirectory.toString());
             }
         }

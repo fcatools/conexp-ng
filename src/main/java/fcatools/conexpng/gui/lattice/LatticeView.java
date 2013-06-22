@@ -63,12 +63,10 @@ public class LatticeView extends View {
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         ContextChangeEvent cce = (ContextChangeEvent) evt;
-        if (cce.getName() == ContextChangeEvents.CONTEXTCHANGED) {
+        if (cce.getName() == ContextChangeEvents.CONTEXTCHANGED
+                || cce.getName() == ContextChangeEvents.NEWCONTEXT) {
             ((LatticeGraphView) view).setLatticeGraph(alg
                     .computeLatticeGraph(state.context));
-        }
-        else if(cce.getName() == ContextChangeEvents.NEWCONTEXT){
-            ((LatticeGraphView) view).setLatticeGraph(state.lattice);
         }
         view.repaint();
     }

@@ -63,12 +63,12 @@ public class CEXReader {
             case XMLStreamConstants.START_ELEMENT:
                 StartElement element = event.asStartElement();
                 try {
-                    if (name(element, "attributes"))
+                    if (name(element, "Attributes"))
                         addAttributes(parser);
-                    if (name(element,"Objects"))
+                    if (name(element, "Objects"))
                         addObjects(parser);
-                    if(name(element,"Lattice"))
-                    	addLatice(parser);
+                    if (name(element, "Lattice"))
+                        addLatice(parser);
                 } catch (XMLStreamException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
@@ -84,27 +84,26 @@ public class CEXReader {
     }
 
     private void addLatice(XMLEventReader parser) throws XMLStreamException {
-	LatticeGraph lg=new LatticeGraph();
+
         while (parser.hasNext()) {
             XMLEvent event = parser.nextEvent();
             switch (event.getEventType()) {
             case XMLStreamConstants.START_ELEMENT:
                 StartElement element = event.asStartElement();
-                    
-                
+
                 break;
             case XMLStreamConstants.END_ELEMENT:
                 if (event.asEndElement().getName().toString().equals("Lattice"))
                     return;
             }
         }
-		
-	}
 
-	private boolean name(StartElement element, String string){
-    	return element.getName().toString().equals(string);
     }
-    
+
+    private boolean name(StartElement element, String string) {
+        return element.getName().toString().equals(string);
+    }
+
     private void addObjects(XMLEventReader parser) throws XMLStreamException {
         while (parser.hasNext()) {
             XMLEvent event = parser.nextEvent();

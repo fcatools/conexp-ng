@@ -24,6 +24,7 @@ import java.util.Set;
 public class ProgramState {
 
     public String filePath;
+    public String lastOpened;
     public FormalContext context;
     public Set<AssociationRule> associations;
     public boolean unsavedChanges = false;
