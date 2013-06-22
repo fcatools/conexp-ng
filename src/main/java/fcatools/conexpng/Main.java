@@ -37,7 +37,7 @@ public class Main {
         UIManager.put("Table.focusCellForeground", Color.black);
 
         ProgramState testState = new ProgramState();
-        testState.filePath = "../example.cex";
+        testState.filePath = "example.cex";
         testState.context = new FormalContext();
         testState.context.addAttribute("female");
         testState.context.addAttribute("juvenile");

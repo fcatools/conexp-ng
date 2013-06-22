@@ -10,6 +10,8 @@ import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
+
+import de.tudresden.inf.tcs.fcaapi.FCAImplication;
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.util.ArrayList;
@@ -31,21 +33,24 @@ public class AssociationView extends View {
     private JTextPane textpane = new JTextPane();
 
     private Set<AssociationRule> associationbase;
+    private Set<FCAImplication<String>> implications;
 
     ThreadPoolExecutor pool = new ThreadPoolExecutor(1, 1, 0,
             TimeUnit.NANOSECONDS, new SynchronousQueue<Runnable>());
 
     private SimpleAttributeSet[] attrs;
 
-    final int NON_ZERO_SUPPORT_EXACT_RULE = 0;
+    private SimpleAttributeSet header;
 
-    final int INEXACT_RULE = 1;
+    private final int NON_ZERO_SUPPORT_EXACT_RULE = 0;
 
-    final int ZERO_SUPPORT_EXACT_RULE = 2;
+    private final int INEXACT_RULE = 1;
 
-    protected final String FOLLOW = " ==> ";
+    private final int ZERO_SUPPORT_EXACT_RULE = 2;
 
-    protected final String END_MARK = ";";
+    private final String FOLLOW = " ==> ";
+
+    private final String END_MARK = ";";
 
     private final String EOL = System.getProperty("line.separator");
 
@@ -58,6 +63,7 @@ public class AssociationView extends View {
         @Override
         public void run() {
             associationbase = state.context.getLuxenburgerBase(minsup, 0);
+            implications = state.context.getDuquenneGuiguesBase();
             state.associations = associationbase;
             Runnable runnable = new Runnable() {
                 public void run() {
@@ -65,7 +71,6 @@ public class AssociationView extends View {
                 }
             };
             SwingUtilities.invokeLater(runnable);
-
         };
     };
 
@@ -82,6 +87,9 @@ public class AssociationView extends View {
         attrs[INEXACT_RULE] = new SimpleAttributeSet();
         StyleConstants.setForeground(attrs[INEXACT_RULE], new Color(0, 128, 0));
 
+        header = new SimpleAttributeSet();
+        StyleConstants.setFontSize(header, 12);
+
         textpane.setEditable(false);
         view = new JScrollPane(textpane);
         settings = new JPanel(new BorderLayout());
@@ -94,48 +102,87 @@ public class AssociationView extends View {
     private void writeAssociations() {
         int i = 0;
         StringBuffer buf;
-        textpane.setText("");
-        ArrayList<AssociationRule> t = new ArrayList<>(associationbase);
+        int support = 0;
+        try {
+            textpane.setText("");
+            ArrayList<FCAImplication<String>> z = new ArrayList<>(implications);
+            if (sortBySupport) {
+                Collections.sort(z, new Comparator<FCAImplication<String>>() {
 
-        if (sortBySupport) {
-            Collections.sort(t, new Comparator<AssociationRule>() {
+                    @Override
+                    public int compare(FCAImplication<String> o1,
+                            FCAImplication<String> o2) {
 
-                @Override
-                public int compare(AssociationRule o1, AssociationRule o2) {
+                        return Integer.compare(
+                                state.context.supportCount(o2.getPremise()),
+                                state.context.supportCount(o1.getPremise()));
+                    }
+                });
+            }
+            textpane.getDocument().insertString(
+                    textpane.getDocument().getLength(),
+                    "Duquenne-Guigues Base\n", header);
 
-                    return Double.compare(o2.getSupport(), o1.getSupport());
-                }
-            });
-        }
-
-        for (AssociationRule impl : t) {
-            buf = new StringBuffer();
-            if (impl.getConfidence() >= conf) {
-                i++;
+            for (FCAImplication<String> impl : z) {
+                support = state.context.supportCount(impl.getPremise());
+                buf = new StringBuffer();
                 buf.append(i);
-                buf.append("< " + state.context.supportCount(impl.getPremise())
-                        + " > ");
-                buf.append(impl.getPremise() + " =[" + impl.getConfidence()
-                        + "]=> ");
-                buf.append("< "
-                        + state.context.supportCount(impl.getConsequent())
-                        + " > " + impl.getConsequent() + END_MARK);
+                buf.append("< " + support + " > ");
+                buf.append(impl.getPremise() + FOLLOW + impl.getConclusion()
+                        + END_MARK);
                 buf.append(EOL);
+                i++;
 
-                try {
+                textpane.getDocument().insertString(
+                        textpane.getDocument().getLength(), buf.toString(),
+                        implicationStyle(support, 1));
+            }
+
+            ArrayList<AssociationRule> t = new ArrayList<>(associationbase);
+
+            if (sortBySupport) {
+                Collections.sort(t, new Comparator<AssociationRule>() {
+
+                    @Override
+                    public int compare(AssociationRule o1, AssociationRule o2) {
+
+                        return Double.compare(o2.getSupport(), o1.getSupport());
+                    }
+                });
+            }
+            textpane.getDocument().insertString(
+                    textpane.getDocument().getLength(),
+                    "------------------------------------\nLuxenburger Base\n",
+                    header);
+            i = 0;
+            for (AssociationRule impl : t) {
+                buf = new StringBuffer();
+                if (impl.getConfidence() >= conf) {
+                    i++;
+                    buf.append(i);
+                    buf.append("< "
+                            + state.context.supportCount(impl.getPremise())
+                            + " > ");
+                    buf.append(impl.getPremise() + " =[" + impl.getConfidence()
+                            + "]=> ");
+                    buf.append("< "
+                            + state.context.supportCount(impl.getConsequent())
+                            + " > " + impl.getConsequent() + END_MARK);
+                    buf.append(EOL);
+
                     textpane.getDocument().insertString(
                             textpane.getDocument().getLength(),
                             buf.toString(),
                             implicationStyle(impl.getSupport(),
                                     impl.getConfidence()));
-                } catch (BadLocationException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
                 }
             }
+            ((AssociationSettings) settings.getComponent(0)).update(i,
+                    associationbase.size());
+        } catch (BadLocationException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
-        ((AssociationSettings) settings.getComponent(0)).update(i,
-                associationbase.size());
     }
 
     public SimpleAttributeSet implicationStyle(double support, double confidence) {
@@ -158,6 +205,7 @@ public class AssociationView extends View {
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
+
         if (evt instanceof ContextChangeEvent) {
             ContextChangeEvent cce = (ContextChangeEvent) evt;
             if (cce.getName() == ContextChangeEvents.CONTEXTCHANGED
@@ -167,7 +215,9 @@ public class AssociationView extends View {
 
         } else if (evt.getPropertyName().equals("ConfidenceChanged")) {
             conf = (double) evt.getNewValue();
+
             writeAssociations();
+
         } else if (evt.getPropertyName().equals("MinimalSupportChanged")) {
             minsup = (double) evt.getNewValue();
             updateAssociations();
@@ -175,6 +225,7 @@ public class AssociationView extends View {
             sortBySupport = !sortBySupport;
             writeAssociations();
         }
+
     }
 
 }

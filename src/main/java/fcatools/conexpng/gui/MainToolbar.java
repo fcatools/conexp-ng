@@ -6,6 +6,7 @@ import fcatools.conexpng.OS;
 import fcatools.conexpng.ProgramState;
 import fcatools.conexpng.Util;
 import fcatools.conexpng.io.CEXReader;
+import fcatools.conexpng.io.CEXWriter;
 
 import javax.swing.*;
 import java.awt.*;
@@ -88,7 +89,7 @@ public class MainToolbar extends JToolBar {
         saveAsButton.addActionListener(new ActionListener() {
 
             public void actionPerformed(ActionEvent arg0) {
-                state.filePath = "";
+                // only for testing state.filePath = "";
                 new SaveAction().actionPerformed(arg0);
             }
         });
@@ -180,7 +181,7 @@ public class MainToolbar extends JToolBar {
                             .setTitle("ConExp-NG - \"" + state.filePath + "\"");
                 }
             }
-            // TODO: save document
+            new CEXWriter(state);
         }
     }
 

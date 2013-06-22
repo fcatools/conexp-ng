@@ -1,5 +1,6 @@
 package fcatools.conexpng;
 
+import fcatools.conexpng.gui.lattice.LatticeGraph;
 import fcatools.conexpng.model.AssociationRule;
 import fcatools.conexpng.model.FormalContext;
 
@@ -27,6 +28,7 @@ public class ProgramState {
     public Set<AssociationRule> associations;
     public boolean unsavedChanges = false;
     public Map<Integer, Integer> columnWidths = new HashMap<>();
+    public LatticeGraph lattice;
 
     private PropertyChangeSupport propertyChangeSupport;
 
