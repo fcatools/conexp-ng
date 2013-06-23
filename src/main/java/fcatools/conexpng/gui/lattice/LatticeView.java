@@ -27,8 +27,9 @@ public class LatticeView extends View {
         super(state);
 
         alg = new TestLatticeAlgorithm();
-        view = new LatticeGraphView(alg.computeLatticeGraph(state.context));
-        settings = new AccordionMenue();
+        LatticeGraph graph = alg.computeLatticeGraph(state.context);
+        view = new LatticeGraphView(graph, state);
+        settings = new AccordionMenue(state);
 
         JButton export = Util.createButton("Export as .PDF", "export",
                 "conexp/cameraFlash.gif");
@@ -67,6 +68,7 @@ public class LatticeView extends View {
                 || cce.getName() == ContextChangeEvents.NEWCONTEXT) {
             ((LatticeGraphView) view).setLatticeGraph(alg
                     .computeLatticeGraph(state.context));
+            ((AccordionMenue) settings).update();
         }
         view.repaint();
     }

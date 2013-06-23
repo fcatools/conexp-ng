@@ -30,6 +30,8 @@ public class ProgramState {
     public boolean unsavedChanges = false;
     public Map<Integer, Integer> columnWidths = new HashMap<>();
     public LatticeGraph lattice;
+    public boolean showObjectLabel = false;
+    public boolean showAttributLabel = false;
 
     private PropertyChangeSupport propertyChangeSupport;
 
@@ -43,7 +45,7 @@ public class ProgramState {
 
     public void removePropertyChangeListener(PropertyChangeListener listener) {
         propertyChangeSupport.removePropertyChangeListener(listener);
-    }
+    } 
 
     private void firePropertyChange(ContextChangeEvents cce, Object oldValue,
             Object newValue) {
@@ -63,6 +65,10 @@ public class ProgramState {
     public void attributeNameChanged(String oldName, String newName) {
         firePropertyChange(ContextChangeEvents.ATTRIBUTENAMECHANGED, oldName,
                 newName);
+    }
+    
+    public void showLabelsChanged(){
+    	firePropertyChange(ContextChangeEvents.LABELSCHANGED, null, null);
     }
 
     @SuppressWarnings("serial")

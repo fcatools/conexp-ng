@@ -19,6 +19,8 @@ import org.apache.batik.swing.JSVGCanvas;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 
+import fcatools.conexpng.ProgramState;
+
 /*The JSVGCanvas provides a set of build-in interactors that
  * let the users manipulate the displayed document, including ones for zooming,
  * panning and rotating. Interactors catch user input to the JSVGCanvas component
@@ -28,9 +30,11 @@ public class LatticeGraphView extends JSVGCanvas {
 
     private static final long serialVersionUID = -8623872314193862285L;
     private LatticeGraph graph;
+    private ProgramState state;
 
-    public LatticeGraphView(LatticeGraph graph) {
+    public LatticeGraphView(LatticeGraph graph, ProgramState state) {
         this.graph = graph;
+        this.state = state;
         this.init();
     }
 
@@ -113,12 +117,12 @@ public class LatticeGraphView extends JSVGCanvas {
             g.fillOval(n.getX(), n.getY(), radius * 2, radius * 2);
 
             Set<String> s = n.getVisibleObjects();
-            if (!s.isEmpty()) {
+            if ((!s.isEmpty()) && state.showObjectLabel) {
                 // beneath the node
                 this.calcDrawPosition(g, s, true, n);
             }
             s = n.getVisibleAttributes();
-            if (!s.isEmpty()) {
+            if ((!s.isEmpty()) && state.showAttributLabel) {
                 // upon the node
                 this.calcDrawPosition(g, s, false, n);
             }

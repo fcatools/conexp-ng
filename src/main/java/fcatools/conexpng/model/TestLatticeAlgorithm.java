@@ -1,5 +1,8 @@
 package fcatools.conexpng.model;
 
+import java.util.Iterator;
+import java.util.Set;
+
 import de.tudresden.inf.tcs.fcaapi.Concept;
 import de.tudresden.inf.tcs.fcalib.FullObject;
 import de.tudresden.inf.tcs.fcalib.utils.ListSet;
@@ -7,22 +10,14 @@ import fcatools.conexpng.gui.lattice.Edge;
 import fcatools.conexpng.gui.lattice.LatticeGraph;
 import fcatools.conexpng.gui.lattice.Node;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.TreeSet;
-
 public class TestLatticeAlgorithm implements ILatticeAlgorithm {
 
-	private FormalContext context;
-	private HashMap<Set<String>, Set<String>> concepts;
 	private Set<Concept<String, FullObject<String, String>>> lattConcepts;
 	private LatticeGraph graph;
 
 	@Override
 	public LatticeGraph computeLatticeGraph(FormalContext context) {
 		graph = new LatticeGraph();
-		this.context = context;
 		this.lattConcepts = context.getConcepts();
 		
 		Iterator<Concept<String, FullObject<String, String>>> iter = lattConcepts.iterator();
