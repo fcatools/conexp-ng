@@ -32,8 +32,10 @@ public class ProgramState {
     public LatticeGraph lattice;
     public boolean showObjectLabel = false;
     public boolean showAttributLabel = false;
-
+    public boolean showEdges = true;
+    
     private PropertyChangeSupport propertyChangeSupport;
+	
 
     public ProgramState() {
         propertyChangeSupport = new PropertyChangeSupport(this);

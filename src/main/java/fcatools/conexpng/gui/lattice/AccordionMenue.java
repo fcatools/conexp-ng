@@ -436,13 +436,13 @@ public class AccordionMenue extends JPanel implements ActionListener {
 		gbc.gridy = 0;
 		
 		
-		JPanel panelO = new JPanel(new BorderLayout());
-		panelO.setLayout(new GridBagLayout());
+		JPanel panelObjects = new JPanel(new BorderLayout());
+		panelObjects.setLayout(new GridBagLayout());
 		GridBagConstraints gbo = new GridBagConstraints();
 		gbo.anchor = GridBagConstraints.WEST;
 		gbo.gridx = 0;
 		gbo.gridy = 1;
-		panelO.add(new JLabel("Objects:"), gbo);
+		panelObjects.add(new JLabel("Objects:"), gbo);
 		gbo.gridy = 2;
 		final JRadioButton noneObjects = new JRadioButton();
 		noneObjects.setText("none");
@@ -470,21 +470,21 @@ public class AccordionMenue extends JPanel implements ActionListener {
 				state.showLabelsChanged();
 			}
 		});
-		panelO.add(noneObjects, gbo);
+		panelObjects.add(noneObjects, gbo);
 		gbo.gridy = 3;
-		panelO.add(labelsObjects, gbo);
+		panelObjects.add(labelsObjects, gbo);
 		
 		
-		panel.add(panelO, gbc);
+		panel.add(panelObjects, gbc);
 		
 		gbc.gridx = 1;
-		JPanel panelA = new JPanel(new BorderLayout());
-		panelA.setLayout(new GridBagLayout());
+		JPanel panelAttributes = new JPanel(new BorderLayout());
+		panelAttributes.setLayout(new GridBagLayout());
 		GridBagConstraints gba = new GridBagConstraints();
 		gba.anchor = GridBagConstraints.WEST;
 		gba.gridx = 0;
 		gba.gridy = 1;
-		panelA.add(new JLabel("Attributes:"), gba);
+		panelAttributes.add(new JLabel("Attributes:"), gba);
 		gba.gridy = 2;
 		final JRadioButton noneAttributes = new JRadioButton();
 		noneAttributes.setText("none");
@@ -511,11 +511,43 @@ public class AccordionMenue extends JPanel implements ActionListener {
 				state.showLabelsChanged();
 			}
 		});
-		panelA.add(noneAttributes, gba);
+		panelAttributes.add(noneAttributes, gba);
 		gba.gridy = 3;	
-		panelA.add(labelsAttributes, gba);
+		panelAttributes.add(labelsAttributes, gba);
 		
-		panel.add(panelA, gbc);
+		panel.add(panelAttributes, gbc);
+		
+		gbc.gridx = 0;
+		gbc.gridy++;
+		panel.add(new JLabel("Edges:"), gbc);
+		final JRadioButton noneEdges = new JRadioButton("none");
+		gbc.gridy++;
+		final JRadioButton showEdges = new JRadioButton("show");
+		showEdges.setSelected(true);
+		noneEdges.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				state.showEdges = false;
+				noneEdges.setSelected(true);
+				showEdges.setSelected(false);
+				state.showLabelsChanged();
+			}
+		});		
+		showEdges.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				state.showEdges = true;
+				showEdges.setSelected(true);
+				noneEdges.setSelected(false);
+				state.showLabelsChanged();
+			}
+		});
+		
+		panel.add(noneEdges, gbc);
+		gbc.gridx = 1;
+		panel.add(showEdges, gbc);
 		
 		
 		return panel;

@@ -106,7 +106,7 @@ public class LatticeGraphView extends JSVGCanvas {
 
         g.setColor(Color.BLACK);
         int radius = LatticeView.radius;
-        if (graph.getEdges() != null) {
+        if (graph.getEdges() != null && state.showEdges) {
             for (Edge e : graph.getEdges()) {
                 g.drawLine(e.getU().getX() + radius, e.getU().getY() + radius,
                         e.getV().getX() + radius, e.getV().getY() + radius);
