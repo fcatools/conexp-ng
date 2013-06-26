@@ -35,7 +35,7 @@ public class MainFrame extends JFrame {
     public MainFrame(ProgramState state) {
         this.state = state;
         tabPane = new JTabbedPane();
-        tabPane.setTabPlacement(JTabbedPane.BOTTOM);
+        tabPane.setTabPlacement(JTabbedPane.TOP);
         tabPane.setOpaque(false);
         tabPane.setBorder(new EmptyBorder(0, 8, 8, 8));
         add(tabPane);

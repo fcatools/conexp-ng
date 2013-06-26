@@ -23,12 +23,21 @@ public class BurmeisterReader {
             }
             FormalContext context = new FormalContext();
             if (line.equals("B")) {
-                while ((line = br.readLine()).trim().equals("")) {
+                // if there is a free line
+                if ((line = br.readLine()).trim().equals("")) {
+                    line = br.readLine();
                 }
-                int objCount = Integer.parseInt(line);
+                int objCount = 0;
+                try {
+                    objCount = Integer.parseInt(line);
+                } catch (NumberFormatException ex) {
+                    line = br.readLine();
+                    objCount = Integer.parseInt(line);
+                }
                 int attrCount = Integer.parseInt(br.readLine());
 
-                while ((line = br.readLine()).trim().equals("")) {
+                if ((line = br.readLine()).trim().equals("")) {
+                    line = br.readLine();
                 }
                 for (int i = 0; i < objCount; i++) {
                     try {

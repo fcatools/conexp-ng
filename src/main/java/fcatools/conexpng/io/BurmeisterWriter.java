@@ -21,6 +21,7 @@ public class BurmeisterWriter {
             fos = new FileOutputStream(state.filePath);
             bw = new BufferedWriter(new OutputStreamWriter(fos));
             bw.append("B" + EOL);
+            bw.append("no name" + EOL); // the name of the context
             bw.append(state.context.getObjectCount() + EOL);
             bw.append(state.context.getAttributeCount() + EOL);
             for (FullObject<String, String> obj : state.context.getObjects()) {
