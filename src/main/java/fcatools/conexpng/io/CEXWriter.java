@@ -20,39 +20,25 @@ public class CEXWriter {
 
     private HashMap<String, String> ids = new HashMap<>();
 
-    public CEXWriter(ProgramState state) {
+    public CEXWriter(ProgramState state) throws XMLStreamException,
+            FileNotFoundException {
         this.state = state;
         XMLEventWriter writer = null;
         XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
-        try {
-            writer = outputFactory.createXMLEventWriter(new FileOutputStream(
-                    state.filePath));
-        } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (XMLStreamException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
 
-        try {
-            writer.add(eventFactory.createStartDocument());
-            writer.add(eventFactory.createStartElement("", "",
-                    "ConceptualSystem"));
-            writer.add(eventFactory.createStartElement("", "", "Version"));
-            // to show that this is our cex-format (2.0)
-            writer.add(eventFactory.createAttribute("Majornumber", "2"));
-            writer.add(eventFactory.createAttribute("Minornumber", "0"));
-            writer.add(eventFactory.createEndElement("", "", "Version"));
-            addContext(writer);
-            writer.add(eventFactory
-                    .createEndElement("", "", "ConceptualSystem"));
-            writer.add(eventFactory.createEndDocument());
+        writer = outputFactory.createXMLEventWriter(new FileOutputStream(
+                state.filePath));
 
-        } catch (XMLStreamException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        writer.add(eventFactory.createStartDocument());
+        writer.add(eventFactory.createStartElement("", "", "ConceptualSystem"));
+        writer.add(eventFactory.createStartElement("", "", "Version"));
+        // to show that this is our cex-format (2.0)
+        writer.add(eventFactory.createAttribute("Majornumber", "2"));
+        writer.add(eventFactory.createAttribute("Minornumber", "0"));
+        writer.add(eventFactory.createEndElement("", "", "Version"));
+        addContext(writer);
+        writer.add(eventFactory.createEndElement("", "", "ConceptualSystem"));
+        writer.add(eventFactory.createEndDocument());
     }
 
     private void addContext(XMLEventWriter writer) throws XMLStreamException {

@@ -61,8 +61,8 @@ public class CEXReader {
             default:
                 break;
             }
-            state.newContext(context);
         }
+        state.newContext(context);
     }
 
     private void addLatice(XMLEventReader parser) throws XMLStreamException {

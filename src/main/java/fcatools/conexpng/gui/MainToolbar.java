@@ -192,11 +192,25 @@ public class MainToolbar extends JToolBar {
 					mainFrame.setTitle("ConExp-NG - \"" + path + "\"");
 				}
 			}
+			try {
 			if (state.filePath.endsWith(".cex"))
-				new CEXWriter(state);
+				
+					new CEXWriter(state);
+				
 			else
 				new BurmeisterWriter(state);
-		}
+				} catch (FileNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (XMLStreamException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				}
+			
 	}
 
 	@SuppressWarnings("serial")

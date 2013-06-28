@@ -3,9 +3,12 @@ package fcatools.conexpng.gui.dependencies;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.text.JTextComponent;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.geom.Ellipse2D;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -16,10 +19,12 @@ public class AssociationSettings extends JPanel {
 
     private static final long serialVersionUID = -3692280021161777005L;
 
-    JLabel minSupLabel = new JLabel("Minimal Support 0.1");
+    JLabel minSupLabel = new JLabel("Minimal Support");
+    JTextField supField = new JTextField("0.1");
     JSlider minSupSlider = new JSlider(0, 100, 10);
 
-    JLabel confLabel = new JLabel("Confidence 0.5");
+    JLabel confLabel = new JLabel("Confidence");
+    JTextField confField = new JTextField("0.5");
     JSlider confSlider = new JSlider(0, 100, 50);
 
     // Only for testing
@@ -69,41 +74,26 @@ public class AssociationSettings extends JPanel {
         gbc.gridx = 0;
         gbc.gridy = 0;
         add(minSupLabel, gbc);
+        gbc.gridx = 1;
+        // TODO: @mac os user: size okay?
+        supField.setPreferredSize(new Dimension(30, 20));
+        add(supField, gbc);
+        gbc.gridx = 0;
         gbc.gridy = 1;
+        gbc.gridwidth = 2;
         add(minSupSlider, gbc);
+        gbc.gridwidth = 1;
         gbc.gridy = 2;
         add(confLabel, gbc);
+        gbc.gridx = 1;
+        confField.setPreferredSize(new Dimension(30, 20));
+        add(confField, gbc);
+        gbc.gridx = 0;
         gbc.gridy = 3;
+        gbc.gridwidth = 2;
         add(confSlider, gbc);
         gbc.gridy = 4;
         piechart.setPreferredSize(new Dimension(150, 200));
-
-        // Element redCircle = piechart.getSVGDocument().createElementNS(
-        // SVGDOMImplementation.SVG_NAMESPACE_URI,
-        // SVGConstants.SVG_CIRCLE_TAG);
-        // redCircle.setAttributeNS(null, SVGConstants.SVG_CX_ATTRIBUTE, "100");
-        // redCircle.setAttributeNS(null, SVGConstants.SVG_CY_ATTRIBUTE, "80");
-        // redCircle.setAttributeNS(null, "r", "70");
-        // redCircle.setAttributeNS(null, "fill", "red");
-        // piechart.getSVGDocument().getDocumentElement().appendChild(redCircle);
-        //
-        // Element blueCircle = piechart.getSVGDocument().createElementNS(
-        // SVGDOMImplementation.SVG_NAMESPACE_URI,
-        // SVGConstants.SVG_CIRCLE_TAG);
-        // blueCircle.setAttributeNS(null, SVGConstants.SVG_CX_ATTRIBUTE,
-        // "100");
-        // blueCircle.setAttributeNS(null, SVGConstants.SVG_CY_ATTRIBUTE, "80");
-        // blueCircle.setAttributeNS(null, "r", "36");
-        // blueCircle.setAttributeNS(null, "stroke", "blue");
-        // blueCircle.setAttributeNS(null, "stroke-width", "71");
-        // int degree = (int) ((current * 360.0) / all);
-        // blueCircle.setAttributeNS(null, "stroke-dasharray", degree * 0.70 +
-        // " "
-        // + ((360 - degree) * 0.70));
-        // blueCircle.setAttributeNS(null, "fill", "red");
-        //
-        // piechart.getSVGDocument().getDocumentElement().appendChild(blueCircle);
-
         add(piechart, gbc);
         gbc.gridy = 5;
         add(new JLabel("Sorting by:"), gbc);
@@ -114,8 +104,6 @@ public class AssociationSettings extends JPanel {
         lexical.setText("Lexical order");
         lexical.setMnemonic(KeyEvent.VK_L);
         lexical.setActionCommand("LexicalOrder");
-
-
 
         JRadioButton support = new JRadioButton();
         support.setAction(sortAction);
@@ -134,6 +122,8 @@ public class AssociationSettings extends JPanel {
 
         confSlider.addChangeListener(new SliderListener(false));
         minSupSlider.addChangeListener(new SliderListener(true));
+        confField.addKeyListener(new TextFieldAction(false));
+        supField.addKeyListener(new TextFieldAction(true));
     }
 
     public void update(int numberOfCurrentAssocitaionrules,
@@ -187,6 +177,46 @@ public class AssociationSettings extends JPanel {
 
     }
 
+    private class TextFieldAction implements KeyListener {
+
+        private boolean minSup;
+
+        public TextFieldAction(boolean minSup) {
+            this.minSup = minSup;
+        }
+
+        @Override
+        public void keyPressed(KeyEvent e) {
+            // nothing todo
+
+        }
+
+        @Override
+        public void keyReleased(KeyEvent e) {
+            // nothing todo
+
+        }
+
+        @Override
+        public void keyTyped(KeyEvent e) {
+
+            if (e.getKeyChar() == KeyEvent.VK_ENTER) {
+                if (minSup) {
+                    double value = Double.parseDouble(supField.getText());
+                    minSupSlider.setValue((int) (value * 100));
+                } else {
+                    double value = Double.parseDouble(confField.getText());
+                    confSlider.setValue((int) (value * 100));
+                }
+            } else if (!(e.getKeyChar() == '.' && ((JTextComponent) e
+                    .getSource()).getText().indexOf('.') < 0)
+                    && !(e.getKeyChar() >= '0' && e.getKeyChar() <= '9')) {
+                e.consume();
+            }
+
+        }
+    }
+
     private class SliderListener implements ChangeListener {
 
         private boolean minSup;
@@ -199,12 +229,11 @@ public class AssociationSettings extends JPanel {
             JSlider slider = (JSlider) e.getSource();
             double value = slider.getValue() / 100.0;
             if (minSup) {
-                minSupLabel.setText("Minimal Support " + value);
-
+                supField.setText("" + value);
                 AssociationSettings.this.myFirePropertyChange(
                         "MinimalSupportChanged", 0, value);
             } else {
-                confLabel.setText("Confidence " + value);
+                confField.setText("" + value);
                 AssociationSettings.this.myFirePropertyChange(
                         "ConfidenceChanged", 0, value);
             }
