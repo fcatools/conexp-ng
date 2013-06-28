@@ -2,6 +2,7 @@ package fcatools.conexpng.io;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
@@ -16,70 +17,51 @@ import de.tudresden.inf.tcs.fcalib.FullObject;
 import de.tudresden.inf.tcs.fcalib.utils.ListSet;
 
 import fcatools.conexpng.ProgramState;
-import fcatools.conexpng.gui.lattice.LatticeGraph;
 import fcatools.conexpng.model.FormalContext;
 
 public class CEXReader {
 
     private FormalContext context;
 
-    public CEXReader(ProgramState state) {
+    public CEXReader(ProgramState state) throws XMLStreamException, IllegalObjectException, IOException {
         InputStream in = null;
-        try {
-            in = new FileInputStream(state.filePath);
-        } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
-        }
+
+        in = new FileInputStream(state.filePath);
+
         XMLInputFactory factory = XMLInputFactory.newInstance();
         XMLEventReader parser = null;
-        try {
-            parser = factory.createXMLEventReader(in);
-        } catch (XMLStreamException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+
+        parser = factory.createXMLEventReader(in);
 
         while (parser.hasNext()) {
             XMLEvent event = null;
-            try {
-                event = parser.nextEvent();
-            } catch (XMLStreamException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+
+            event = parser.nextEvent();
 
             switch (event.getEventType()) {
             case XMLStreamConstants.START_DOCUMENT:
                 context = new FormalContext();
                 break;
             case XMLStreamConstants.END_DOCUMENT:
-                try {
-                    parser.close();
-                } catch (XMLStreamException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
+
+                parser.close();
+
                 break;
             case XMLStreamConstants.START_ELEMENT:
                 StartElement element = event.asStartElement();
-                try {
-                    if (name(element, "Attributes"))
-                        addAttributes(parser);
-                    if (name(element, "Objects"))
-                        addObjects(parser);
-                    if (name(element, "Lattice"))
-                        addLatice(parser);
-                } catch (XMLStreamException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-                break;
-            case XMLStreamConstants.END_ELEMENT:
-                state.newContext(context);
+
+                if (name(element, "Attributes"))
+                    addAttributes(parser);
+                if (name(element, "Objects"))
+                    addObjects(parser);
+                if (name(element, "Lattice"))
+                    addLatice(parser);
+
                 break;
             default:
                 break;
             }
+            state.newContext(context);
         }
     }
 
@@ -104,7 +86,8 @@ public class CEXReader {
         return element.getName().toString().equals(string);
     }
 
-    private void addObjects(XMLEventReader parser) throws XMLStreamException {
+    private void addObjects(XMLEventReader parser) throws XMLStreamException,
+            IllegalObjectException, IOException {
         while (parser.hasNext()) {
             XMLEvent event = parser.nextEvent();
             switch (event.getEventType()) {
@@ -127,16 +110,16 @@ public class CEXReader {
                                     .getAttributeByName(
                                             new QName("AttributeIdentifier"))
                                     .getValue());
+                            try{
                             attrs.add(context.getAttributeAtIndex(i));
+                            } catch (java.lang.IndexOutOfBoundsException e){
+                                throw new IOException("There are not enough attributes");
+                            }
                         }
                     }
-                    try {
-                        context.addObject(new FullObject<String, String>(
-                                objName, attrs));
-                    } catch (IllegalObjectException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
+
+                    context.addObject(new FullObject<String, String>(objName,
+                            attrs));
                 }
                 break;
             case XMLStreamConstants.END_ELEMENT:
