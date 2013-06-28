@@ -10,9 +10,6 @@ import fcatools.conexpng.model.TestLatticeAlgorithm;
 
 import javax.swing.*;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -22,6 +19,8 @@ public class LatticeView extends View {
 
     public static int radius = 7;
     private ILatticeAlgorithm alg;
+
+    private boolean updateLater;
 
     public LatticeView(ProgramState state) {
         super(state);
@@ -63,14 +62,34 @@ public class LatticeView extends View {
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        ContextChangeEvent cce = (ContextChangeEvent) evt;
-        if (cce.getName() == ContextChangeEvents.CONTEXTCHANGED
-                || cce.getName() == ContextChangeEvents.NEWCONTEXT) {
-            ((LatticeGraphView) view).setLatticeGraph(alg
-                    .computeLatticeGraph(state.context));
+        // TODO: I would not use ContextChangeEvents for communicating between
+        // the Latticeview and the AccordionMenue
+		if (evt instanceof ContextChangeEvent
+				&& (((ContextChangeEvent) evt).getName() == ContextChangeEvents.CONTEXTCHANGED
+				|| ((ContextChangeEvent) evt).getName() == ContextChangeEvents.NEWCONTEXT)) {
+			updateLater = true;
+            return;
+        }
+        if (isVisible() && updateLater) {
+        	updateLater=false;
+            state.startCalculation("Calculating the Dependencies");
+            new SwingWorker<Object, Object>() {
+
+                @Override
+                protected Object doInBackground() throws Exception {
+                    ((LatticeGraphView) view).setLatticeGraph(alg
+                            .computeLatticeGraph(state.context));
+                    return null;
+                }
+
+                protected void done() {
+                    state.endCalculation();
+                };
+            }.execute();
+
             ((AccordionMenue) settings).update();
+            
         }
         view.repaint();
     }
-
 }

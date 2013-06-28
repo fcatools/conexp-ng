@@ -33,9 +33,9 @@ public class ProgramState {
     public boolean showObjectLabel = false;
     public boolean showAttributLabel = false;
     public boolean showEdges = true;
-    
+
     private PropertyChangeSupport propertyChangeSupport;
-	
+
 
     public ProgramState() {
         propertyChangeSupport = new PropertyChangeSupport(this);
@@ -47,7 +47,7 @@ public class ProgramState {
 
     public void removePropertyChangeListener(PropertyChangeListener listener) {
         propertyChangeSupport.removePropertyChangeListener(listener);
-    } 
+    }
 
     private void firePropertyChange(ContextChangeEvents cce, Object oldValue,
             Object newValue) {
@@ -68,9 +68,17 @@ public class ProgramState {
         firePropertyChange(ContextChangeEvents.ATTRIBUTENAMECHANGED, oldName,
                 newName);
     }
-    
+
     public void showLabelsChanged(){
-    	firePropertyChange(ContextChangeEvents.LABELSCHANGED, null, null);
+        firePropertyChange(ContextChangeEvents.LABELSCHANGED, null, null);
+    }
+
+    public void startCalculation(String source){
+        firePropertyChange(ContextChangeEvents.STARTCALCULATION, null, source);
+    }
+
+    public void endCalculation(){
+        firePropertyChange(ContextChangeEvents.ENDCALCULATION, null, null);
     }
 
     @SuppressWarnings("serial")

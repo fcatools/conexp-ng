@@ -163,14 +163,14 @@ public class AssociationSettings extends JPanel {
                     return;
                 else {
                     lex = true;
-                    myFirePropertyChange("SortByLexicalOrder", null, null);
+                    myFirePropertyChange("ToggleSortingOrder", null, null);
                 }
             } else {
                 if (!lex)
                     return;
                 else {
                     lex = false;
-                    myFirePropertyChange("SortBySupport", null, null);
+                    myFirePropertyChange("ToggleSortingOrder", null, null);
                 }
             }
         }
