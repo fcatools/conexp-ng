@@ -135,6 +135,8 @@ public class LatticeGraphView extends JSVGCanvas {
                 this.calcDrawPosition(g, s, false, n);
             }
         }
+        resetHighlighting();
+        lastIdeal.clear();
 
         // Element root = doc.getDocumentElement();
         // g.getRoot(root);
@@ -218,6 +220,12 @@ public class LatticeGraphView extends JSVGCanvas {
     public void setLatticeGraph(LatticeGraph g) {
         graph = g;
         init();
+    }
+    
+    private void resetHighlighting(){
+    	for(Node n : lastIdeal){
+    		n.setPartOfAnIdeal(false);
+    	}
     }
 
     public void setMove(boolean change) {

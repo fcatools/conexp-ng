@@ -90,6 +90,10 @@ public class LatticeView extends View {
             ((AccordionMenue) settings).update();
             
         }
+        if(evt instanceof ContextChangeEvent && (((ContextChangeEvent) evt).getName() == ContextChangeEvents.TEMPORARYCONTEXTCHANGED)){
+        	((LatticeGraphView) view).setLatticeGraph(alg
+                    .computeLatticeGraph(state.tempContext));
+        }
         view.repaint();
     }
 }
