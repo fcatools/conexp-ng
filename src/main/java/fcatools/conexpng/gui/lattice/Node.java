@@ -1,6 +1,9 @@
 package fcatools.conexpng.gui.lattice;
 
 import javax.swing.*;
+
+import de.tudresden.inf.tcs.fcalib.utils.ListSet;
+
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +21,8 @@ public class Node extends JPanel implements LatticeGraphElement {
 	private int x;
 	private int y;
 	private List<Node> below;
+	private ListSet<Node> ideal;
+	private boolean isIdealVisibile;
 	private Label visibleObjects;
 	private Label visibleAttributes;
 	private boolean moveSubgraph;
@@ -111,8 +116,10 @@ public class Node extends JPanel implements LatticeGraphElement {
 	public void addBelowNode(Node n) {
 		below.add(n);
 	}
+	
+	
 
-	public void update(int x, int y) {
+	public void update(int x, int y, boolean first) {
 		int updateX;
 		int updateY;
 		if(this.x + x >= 0) updateX = this.x + x;
@@ -120,11 +127,11 @@ public class Node extends JPanel implements LatticeGraphElement {
 		if(this.y + y >= 0) updateY = this.y + y;
 		else updateY = 0;
 		
-		visibleAttributes.update(x, y);
-		visibleObjects.update(x, y);
-		if (moveSubgraph) {
-			for (Node n : below) {
-				n.update(x, y);
+//		visibleAttributes.update(x, y);
+//		visibleObjects.update(x, y);
+		if (moveSubgraph && first) {
+			for(Node n : ideal){
+				n.update(x, y, false);
 			}
 		}
 
@@ -135,6 +142,23 @@ public class Node extends JPanel implements LatticeGraphElement {
 		if (getParent() != null) {
 			getParent().repaint();
 		}
+	}
+	
+	public void computeIdeal(){
+		ideal = this.getAllBelow();
+	}
+	
+	private ListSet<Node> getAllBelow(){
+		ListSet<Node> temp = new ListSet<>();
+		if(below == null){
+			return temp;
+		}else{
+			for(Node n : below){
+				temp.add(n);
+				temp.addAll(n.getAllBelow());
+			}
+		}	
+		return temp;
 	}
 
 	public void addObjects(Set<String> extent) {
@@ -192,6 +216,25 @@ public class Node extends JPanel implements LatticeGraphElement {
 	public void moveSubgraph(boolean b){
 		this.moveSubgraph = b;
 	}
+
+	public void toggleIdealVisibility(){
+		this.isIdealVisibile = !this.isIdealVisibile;
+		for(Node n : ideal){
+			n.setPartOfAnIdeal(isIdealVisibile);
+		}
+		if (getParent() != null) {
+			getParent().repaint();
+		}
+	}
+	
+	public boolean isPartOfAnIdeal(){
+		return this.isIdealVisibile;
+	}
+	
+	public void setPartOfAnIdeal(boolean b){
+		this.isIdealVisibile = b;
+	}
+	
 	
 
 }

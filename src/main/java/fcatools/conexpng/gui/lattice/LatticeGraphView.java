@@ -31,10 +31,12 @@ public class LatticeGraphView extends JSVGCanvas {
     private static final long serialVersionUID = -8623872314193862285L;
     private LatticeGraph graph;
     private ProgramState state;
+	private ArrayList<Node> lastIdeal;
 
     public LatticeGraphView(LatticeGraph graph, ProgramState state) {
         this.graph = graph;
         this.state = state;
+        this.lastIdeal = new ArrayList<Node>();
         this.init();
     }
 
@@ -44,6 +46,7 @@ public class LatticeGraphView extends JSVGCanvas {
         for (Node n : graph.getNodes()) {
             this.add(n);
             n.addMouseMotionListener(new LatticeGraphNodeMouseMotionListener(n));
+            n.addMouseListener(new NodeMouseClickListener(n));
             // topological order
             if (q.size() == 0) {
                 q.add(n);
@@ -113,8 +116,13 @@ public class LatticeGraphView extends JSVGCanvas {
             }
         }
         for (Node n : graph.getNodes()) {
-            g.setColor(Color.BLACK);
+        	g.setColor(Color.LIGHT_GRAY);
             g.fillOval(n.getX(), n.getY(), radius * 2, radius * 2);
+            if(n.isPartOfAnIdeal()){
+            	lastIdeal.add(n);
+        		g.setColor(Color.BLUE);
+        		g.drawOval(n.getX(), n.getY(), radius * 2, radius * 2);
+            }
 
             Set<String> s = n.getVisibleObjects();
             if ((!s.isEmpty()) && state.showObjectLabel) {

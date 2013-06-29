@@ -17,7 +17,7 @@ public class LatticeGraphNodeMouseMotionListener implements MouseMotionListener 
 	public void mouseDragged(MouseEvent e) {
 		int newX = e.getX();
 		int newY = e.getY();
-		n.update(newX, newY);
+		n.update(newX, newY, true);
 	}
 
 	@Override

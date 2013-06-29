@@ -1,32 +1,28 @@
 package fcatools.conexpng.gui.lattice;
 
-import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
-import de.tudresden.inf.tcs.fcalib.FullObject;
-
-import fcatools.conexpng.ProgramState;
-import fcatools.conexpng.model.FormalContext;
-
 import java.awt.BorderLayout;
-import java.awt.Container;
-import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
-import java.awt.Insets;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+
+import javax.swing.Icon;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+
+import de.tudresden.inf.tcs.fcalib.FullObject;
+import fcatools.conexpng.ProgramState;
+import fcatools.conexpng.model.FormalContext;
 
 @SuppressWarnings("serial")
 public class AccordionMenue extends JPanel implements ActionListener {
@@ -436,6 +432,54 @@ public class AccordionMenue extends JPanel implements ActionListener {
 		gbc.gridy = 0;
 		
 		
+		
+		panel.add(getLatticeObjectPanel(), gbc);
+		
+		gbc.gridx = 1;
+	
+		
+		panel.add(getLatticeAttrPanel(), gbc);
+		
+		gbc.gridx = 0;
+		gbc.gridy++;
+		panel.add(new JLabel("Edges:"), gbc);
+		final JRadioButton noneEdges = new JRadioButton("none");
+		gbc.gridy++;
+		final JRadioButton showEdges = new JRadioButton("show");
+		showEdges.setSelected(true);
+		noneEdges.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				state.showEdges = false;
+				noneEdges.setSelected(true);
+				showEdges.setSelected(false);
+				state.showLabelsChanged();
+			}
+		});		
+		showEdges.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				state.showEdges = true;
+				showEdges.setSelected(true);
+				noneEdges.setSelected(false);
+				state.showLabelsChanged();
+			}
+		});
+		
+		panel.add(noneEdges, gbc);
+		gbc.gridx = 1;
+		panel.add(showEdges, gbc);
+
+		
+		
+		
+		
+		return panel;
+	}
+	
+	private static JPanel getLatticeObjectPanel(){
 		JPanel panelObjects = new JPanel(new BorderLayout());
 		panelObjects.setLayout(new GridBagLayout());
 		GridBagConstraints gbo = new GridBagConstraints();
@@ -473,11 +517,11 @@ public class AccordionMenue extends JPanel implements ActionListener {
 		panelObjects.add(noneObjects, gbo);
 		gbo.gridy = 3;
 		panelObjects.add(labelsObjects, gbo);
-		
-		
-		panel.add(panelObjects, gbc);
-		
-		gbc.gridx = 1;
+		return panelObjects;
+	}
+	
+	
+	private static JPanel getLatticeAttrPanel(){
 		JPanel panelAttributes = new JPanel(new BorderLayout());
 		panelAttributes.setLayout(new GridBagLayout());
 		GridBagConstraints gba = new GridBagConstraints();
@@ -514,43 +558,7 @@ public class AccordionMenue extends JPanel implements ActionListener {
 		panelAttributes.add(noneAttributes, gba);
 		gba.gridy = 3;	
 		panelAttributes.add(labelsAttributes, gba);
-		
-		panel.add(panelAttributes, gbc);
-		
-		gbc.gridx = 0;
-		gbc.gridy++;
-		panel.add(new JLabel("Edges:"), gbc);
-		final JRadioButton noneEdges = new JRadioButton("none");
-		gbc.gridy++;
-		final JRadioButton showEdges = new JRadioButton("show");
-		showEdges.setSelected(true);
-		noneEdges.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				state.showEdges = false;
-				noneEdges.setSelected(true);
-				showEdges.setSelected(false);
-				state.showLabelsChanged();
-			}
-		});		
-		showEdges.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				state.showEdges = true;
-				showEdges.setSelected(true);
-				noneEdges.setSelected(false);
-				state.showLabelsChanged();
-			}
-		});
-		
-		panel.add(noneEdges, gbc);
-		gbc.gridx = 1;
-		panel.add(showEdges, gbc);
-		
-		
-		return panel;
+		return panelAttributes;
 	}
 	
 	public void update(){

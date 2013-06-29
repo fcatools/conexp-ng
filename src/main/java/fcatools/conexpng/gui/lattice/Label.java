@@ -23,7 +23,7 @@ public class Label extends JPanel implements LatticeGraphElement{
 	public void paint(Graphics g) {
 	}
 
-	public void update(int x, int y) {
+	public void update(int x, int y, boolean first) {
 		int updateX = this.x + x;
 		int updateY = this.y + y;
 

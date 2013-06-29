@@ -10,10 +10,9 @@ import fcatools.conexpng.gui.lattice.Edge;
 import fcatools.conexpng.gui.lattice.LatticeGraph;
 import fcatools.conexpng.gui.lattice.Node;
 
-public class TestLatticeAlgorithm implements ILatticeAlgorithm {
+public class TestLatticeAlgorithm extends ILatticeAlgorithm {
 
 	private Set<Concept<String, FullObject<String, String>>> lattConcepts;
-	private LatticeGraph graph;
 
 	@Override
 	public LatticeGraph computeLatticeGraph(FormalContext context) {
@@ -49,47 +48,11 @@ public class TestLatticeAlgorithm implements ILatticeAlgorithm {
 
 			}
 			u.setLevel(count);
-			u.update((int) (Math.random() * 500), count * 100);
+			u.update((int) (Math.random() * 500), count * 100, true);
 		}
 		
-
+		
+		computeAllIdeals();
 		return graph;
-	}
-
-	private boolean isSubconcept(Set<String> subEx, Set<String> superEx) {
-		if (subEx == superEx) {
-			return false;
-		}
-		if (subEx.size() > superEx.size()) {
-			return false;
-		}
-		for (String s : subEx) {
-			if (!superEx.contains(s)) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	private boolean isLowerNeighbour(Set<String> subEx, Set<String> superEx) {
-		if (subEx == superEx) {
-			return false;
-		}
-		if (!isSubconcept(subEx, superEx)) {
-			return false;
-		}
-		for (Node n : graph.getNodes()) {
-			Set<String> set = n.getObjects();
-			if (!subEx.equals(set)) {
-				if(!superEx.equals(set)){
-					if(isSubconcept(subEx, set)){
-						if(isSubconcept(set, superEx)){
-							return false;
-						}
-					}
-				}
-			}
-		}
-		return true;
 	}
 }
