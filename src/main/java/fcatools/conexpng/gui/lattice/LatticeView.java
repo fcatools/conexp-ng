@@ -45,7 +45,7 @@ public class LatticeView extends View {
         JToggleButton move = Util.createToggleButton("Move subgraph", "move",
                 "conexp/moveMode.gif");
         move.addActionListener(new ActionListener() {
-            boolean last = false;
+            private boolean last = false;
 
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -55,6 +55,21 @@ public class LatticeView extends View {
             }
         });
         toolbar.add(move);
+        
+        JToggleButton showIdeal = Util.createToggleButton("Show Ideale", "ideal",
+                "conexp/contextIcon.gif");
+        showIdeal.addActionListener(new ActionListener() {
+        	private boolean last = false;
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				last = !last;
+				((LatticeGraphView) view).idealHighlighting(last);
+				
+			}
+		});       
+        toolbar.add(showIdeal);
+        
 
         super.init();
 

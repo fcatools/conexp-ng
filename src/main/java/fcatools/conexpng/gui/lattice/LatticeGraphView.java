@@ -32,6 +32,7 @@ public class LatticeGraphView extends JSVGCanvas {
     private LatticeGraph graph;
     private ProgramState state;
 	private ArrayList<Node> lastIdeal;
+	private boolean idealHighlighting;
 
     public LatticeGraphView(LatticeGraph graph, ProgramState state) {
         this.graph = graph;
@@ -118,7 +119,7 @@ public class LatticeGraphView extends JSVGCanvas {
         for (Node n : graph.getNodes()) {
         	g.setColor(Color.LIGHT_GRAY);
             g.fillOval(n.getX(), n.getY(), radius * 2, radius * 2);
-            if(n.isPartOfAnIdeal()){
+            if(n.isPartOfAnIdeal() && idealHighlighting){
             	lastIdeal.add(n);
         		g.setColor(Color.BLUE);
         		g.drawOval(n.getX(), n.getY(), radius * 2, radius * 2);
@@ -232,6 +233,10 @@ public class LatticeGraphView extends JSVGCanvas {
         for (Node n : graph.getNodes()) {
             n.moveSubgraph(change);
         }
+    }
+    
+    public void idealHighlighting(boolean change){
+    	this.idealHighlighting = change;
     }
 
 }
