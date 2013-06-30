@@ -65,7 +65,7 @@ public class LatticeView extends View {
 			public void actionPerformed(ActionEvent arg0) {
 				last = !last;
 				((LatticeGraphView) view).idealHighlighting(last);
-				
+				((LatticeGraphView) view).repaint();
 			}
 		});       
         toolbar.add(showIdeal);
