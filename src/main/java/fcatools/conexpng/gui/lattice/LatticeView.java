@@ -92,7 +92,7 @@ public class LatticeView extends View {
         }
         if(evt instanceof ContextChangeEvent && (((ContextChangeEvent) evt).getName() == ContextChangeEvents.TEMPORARYCONTEXTCHANGED)){
         	((LatticeGraphView) view).setLatticeGraph(alg
-                    .computeLatticeGraph(state.tempContext));
+                    .computeLatticeGraph(state.context));
         }
         view.repaint();
     }

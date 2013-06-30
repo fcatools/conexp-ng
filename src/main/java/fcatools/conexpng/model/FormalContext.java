@@ -1,5 +1,6 @@
 package fcatools.conexpng.model;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,6 +29,8 @@ public class FormalContext extends
         de.tudresden.inf.tcs.fcalib.FormalContext<String, String> {
 
     protected HashMap<String, SortedSet<String>> objectsOfAttribute;
+    private ArrayList<String> dontConsideredAttr = new ArrayList<>();
+    private ArrayList<FullObject<String, String>> dontConsideredObj = new ArrayList<>();
 
     @Override
     public boolean addAttribute(String attribute)
@@ -104,13 +107,15 @@ public class FormalContext extends
          * not already present).
          */
         for (String s : this.getAttributes()) {
-            TreeSet<String> set = new TreeSet<String>();
-            for (FullObject<String, String> f : this.getObjects()) {
-                if (f.getDescription().getAttributes().contains(s)) {
-                    set.add(f.getIdentifier());
+        	if(!dontConsideredAttr.contains(s)){
+        		TreeSet<String> set = new TreeSet<String>();
+                for (FullObject<String, String> f : this.getObjects()) {
+                    if (f.getDescription().getAttributes().contains(s) && (!dontConsideredObj.contains(f))) {
+                        set.add(f.getIdentifier());
+                    }
                 }
-            }
-            extentPerAttr.put(s, set);
+                extentPerAttr.put(s, set);
+        	}         
         }
 
         /*
@@ -539,5 +544,42 @@ public class FormalContext extends
             result.add(s);
         }
         return result;
+    }
+    
+    /**
+     * Set Attribute which don't be consider by lattice computation.
+     * @param attr
+     */
+    public void dontConsiderAttribute(String attr){
+    	this.dontConsideredAttr.add(attr);
+    }
+    
+    /**
+     * Set Attribute which has to be reconsider by lattice computation.
+     * @param attr
+     */
+    public void considerAttribute(String attr){
+    	this.dontConsideredAttr.remove(attr);
+    }
+    
+    /**
+     * Set Object which don't be consider by lattice computation.
+     * @param obj
+     */
+    public void dontConsiderObject(FullObject<String, String> obj){
+    	this.dontConsideredObj.add(obj);
+    }
+    
+    /**
+     * Set Object which has to be reconsider by lattice computation.
+     * @param obj
+     */
+    public void considerObject(FullObject<String, String> obj){
+    	this.dontConsideredObj.remove(obj);
+    }
+    
+    public void clearConsidered(){
+    	dontConsideredAttr.clear();
+    	dontConsideredObj.clear();
     }
 }

@@ -391,7 +391,20 @@ public class AccordionMenue extends JPanel implements ActionListener {
 		gbc.gridy = 0;
 		for(FullObject<String, String> s : context.getObjects()){
 			gbc.gridy++;
-			JCheckBox box = new JCheckBox(s.getIdentifier());
+			final JCheckBox box = new JCheckBox(s.getIdentifier());
+			final FullObject<String, String> temp = s;
+			box.addActionListener(new ActionListener() {
+				
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					if(!box.isSelected()){
+						state.context.dontConsiderObject(temp);		
+					}else{
+						state.context.considerObject(temp);
+					}
+					state.temporaryContextChanged();			
+				}
+			});
 			box.setSelected(true);
 			panel.add(box, gbc);
 			objectCheckBoxes.add(box);
@@ -408,14 +421,20 @@ public class AccordionMenue extends JPanel implements ActionListener {
 		gbc.gridy = 0;
 		for(String s : context.getAttributes()){
 			gbc.gridy++;
-			JCheckBox box = new JCheckBox(s);
+			final JCheckBox box = new JCheckBox(s);
 			box.addActionListener(new ActionListener() {
 				
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
-					
+					if(!box.isSelected()){
+						state.context.dontConsiderAttribute(box.getText());		
+					}else{
+						state.context.considerAttribute(box.getText());
+					}
+					state.temporaryContextChanged();
 				}
 			});
+			
 			box.setSelected(true);
 			panel.add(box, gbc);
 			attributeCheckBoxes.add(box);
@@ -471,10 +490,6 @@ public class AccordionMenue extends JPanel implements ActionListener {
 		panel.add(noneEdges, gbc);
 		gbc.gridx = 1;
 		panel.add(showEdges, gbc);
-
-		
-		
-		
 		
 		return panel;
 	}
@@ -569,4 +584,6 @@ public class AccordionMenue extends JPanel implements ActionListener {
 		attributeCheckBoxes.clear();
 		this.addBar("Attributes", getAttributePanel());
 	}
+	
+	
 }

@@ -55,4 +55,6 @@ public class TestLatticeAlgorithm extends ILatticeAlgorithm {
 		computeAllIdeals();
 		return graph;
 	}
+	
+	
 }

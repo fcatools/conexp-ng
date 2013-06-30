@@ -2,6 +2,9 @@ package fcatools.conexpng.model;
 
 import java.util.Set;
 
+import de.tudresden.inf.tcs.fcaapi.Concept;
+import de.tudresden.inf.tcs.fcalib.FullObject;
+
 import fcatools.conexpng.gui.lattice.LatticeGraph;
 import fcatools.conexpng.gui.lattice.Node;
 

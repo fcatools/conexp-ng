@@ -11,6 +11,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import de.tudresden.inf.tcs.fcaapi.Concept;
+import de.tudresden.inf.tcs.fcalib.FullObject;
+import de.tudresden.inf.tcs.fcalib.utils.ListSet;
+
 /**
  * Contains context, lattice, implications, filePath, snapshots etc.
  * <p>
@@ -33,6 +37,7 @@ public class ProgramState {
     public boolean showObjectLabel = false;
     public boolean showAttributLabel = false;
     public boolean showEdges = true;
+    public boolean idealHighlighting = false;
 
     private PropertyChangeSupport propertyChangeSupport;
 
@@ -56,11 +61,13 @@ public class ProgramState {
     }
 
     public void contextChanged() {
+    	this.context.clearConsidered();
         firePropertyChange(ContextChangeEvents.CONTEXTCHANGED, null, context);
     }
 
     public void newContext(FormalContext context) {
         this.context = context;
+        this.context.clearConsidered();
         firePropertyChange(ContextChangeEvents.NEWCONTEXT, null, context);
     }
 
@@ -71,6 +78,10 @@ public class ProgramState {
 
     public void showLabelsChanged(){
         firePropertyChange(ContextChangeEvents.LABELSCHANGED, null, null);
+    }
+    
+    public void temporaryContextChanged(){
+    	firePropertyChange(ContextChangeEvents.TEMPORARYCONTEXTCHANGED, null, null);
     }
 
     public void startCalculation(String source){
