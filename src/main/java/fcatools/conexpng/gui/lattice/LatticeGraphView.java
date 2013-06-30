@@ -5,9 +5,14 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Writer;
+import java.net.MalformedURLException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.TreeSet;
@@ -16,6 +21,11 @@ import org.apache.batik.dom.GenericDOMImplementation;
 import org.apache.batik.dom.svg.SVGDOMImplementation;
 import org.apache.batik.svggen.SVGGraphics2D;
 import org.apache.batik.swing.JSVGCanvas;
+import org.apache.batik.transcoder.Transcoder;
+import org.apache.batik.transcoder.TranscoderException;
+import org.apache.batik.transcoder.TranscoderInput;
+import org.apache.batik.transcoder.TranscoderOutput;
+import org.apache.fop.svg.PDFTranscoder;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 
@@ -187,8 +197,34 @@ public class LatticeGraphView extends JSVGCanvas {
         } catch (IOException ioEx) {
             ioEx.printStackTrace();
         }
+        
+        String svg_URI_input;
+		try {
+			svg_URI_input = Paths.get("test_batik.svg").toUri().toURL().toString();
+			TranscoderInput input_svg_image = new TranscoderInput(svg_URI_input);
+			OutputStream pdf_ostream = new FileOutputStream("test.pdf");
+	        TranscoderOutput output_pdf_file = new TranscoderOutput(pdf_ostream);
+	        Transcoder transcoder = new PDFTranscoder();
+	        transcoder.transcode(input_svg_image, output_pdf_file);
+	        pdf_ostream.flush();
+	        pdf_ostream.close();
+	        
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (TranscoderException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        
 
-        // File outputFile = new File("D:/out.pdf");
+        // File outputFile = new File("out.pdf");
         // OutputStream out = null;
         // try {
         // out = new java.io.FileOutputStream(outputFile);
