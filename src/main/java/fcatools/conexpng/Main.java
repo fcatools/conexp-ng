@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
 import de.tudresden.inf.tcs.fcalib.FullObject;
 import fcatools.conexpng.gui.MainFrame;
+import fcatools.conexpng.gui.MainFrame.CloseAction;
 import fcatools.conexpng.model.FormalContext;
 
 import javax.swing.*;
@@ -65,11 +66,12 @@ public class Main {
 
         // Create main window and take care of correctly saving and restoring
         // the last window location
-        final JFrame f = new MainFrame(testState);
+        final MainFrame f = new MainFrame(testState);
         f.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent we) {
                 try {
                     storeOptions(f);
+                    f.new CloseAction().actionPerformed(null);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

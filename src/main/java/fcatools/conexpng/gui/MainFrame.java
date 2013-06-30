@@ -62,15 +62,6 @@ public class MainFrame extends JFrame {
         add(statusBar, BorderLayout.SOUTH);
     }
 
-    protected void processWindowEvent(WindowEvent e) {
-
-        if (e.getID() == WindowEvent.WINDOW_CLOSING) {
-            new CloseAction().actionPerformed(null);
-        } else
-            super.processWindowEvent(e);
-
-    }
-
     private void addTab(JTabbedPane t, View v, String title, String toolTip,
             int i) {
         t.insertTab("<html><body width='110' style='text-align:center'>"
@@ -161,12 +152,12 @@ public class MainFrame extends JFrame {
                     return;
                 }
             }
-            System.exit(0);
         }
     }
 
     @SuppressWarnings("serial")
-    private class MainStatusBar extends JPanel implements PropertyChangeListener {
+    private class MainStatusBar extends JPanel implements
+            PropertyChangeListener {
 
         public MainStatusBar() {
             setLayout(new BorderLayout());
