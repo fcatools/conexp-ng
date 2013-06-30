@@ -122,6 +122,11 @@ public class LatticeGraphView extends JSVGCanvas {
         int radius = LatticeView.radius;
         if (graph.getEdges() != null && state.showEdges) {
             for (Edge e : graph.getEdges()) {
+            	if(e.getU().isPartOfAnIdeal() && e.getV().isPartOfAnIdeal() && idealHighlighting){
+            		g.setColor(Color.BLUE);
+            	}else{
+            		g.setColor(Color.BLACK);
+            	}
                 g.drawLine(e.getU().getX() + radius, e.getU().getY() + radius,
                         e.getV().getX() + radius, e.getV().getY() + radius);
             }
