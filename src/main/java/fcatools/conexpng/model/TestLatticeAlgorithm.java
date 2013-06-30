@@ -15,9 +15,9 @@ public class TestLatticeAlgorithm extends ILatticeAlgorithm {
 	private Set<Concept<String, FullObject<String, String>>> lattConcepts;
 
 	@Override
-	public LatticeGraph computeLatticeGraph(FormalContext context) {
+	public LatticeGraph computeLatticeGraph(Set<Concept<String, FullObject<String, String>>> concepts) {
 		graph = new LatticeGraph();
-		this.lattConcepts = context.getConcepts();
+		this.lattConcepts = concepts;
 		
 		Iterator<Concept<String, FullObject<String, String>>> iter = lattConcepts.iterator();
 		while(iter.hasNext()){

@@ -20,10 +20,10 @@ public abstract class ILatticeAlgorithm {
 	protected LatticeGraph graph;
 	/**
 	 * 
-	 * @param context
+	 * @param set
 	 * @return
 	 */
-    public abstract LatticeGraph computeLatticeGraph(FormalContext context);
+    public abstract LatticeGraph computeLatticeGraph(Set<Concept<String, FullObject<String, String>>> set);
     
     
     /**

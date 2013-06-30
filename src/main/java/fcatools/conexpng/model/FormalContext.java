@@ -107,6 +107,107 @@ public class FormalContext extends
          * not already present).
          */
         for (String s : this.getAttributes()) {
+        		TreeSet<String> set = new TreeSet<String>();
+                for (FullObject<String, String> f : this.getObjects()) {
+                    if (f.getDescription().getAttributes().contains(s) && (!dontConsideredObj.contains(f))) {
+                        set.add(f.getIdentifier());
+                    }
+                }
+                extentPerAttr.put(s, set);         
+        }
+
+        /*
+         * Step 2: For any two sets in this list, compute their intersection. If
+         * the result is a set that is not yet in the list, then extend the list
+         * by this set. With the extended list, continue to build all pairwise
+         * intersections.
+         */
+        HashMap<String, Set<String>> temp = new HashMap<String, Set<String>>();
+        for (String s : extentPerAttr.keySet()) {
+            for (String t : extentPerAttr.keySet()) {
+                if (!s.equals(t)) {
+                    Set<String> result = this.intersection(
+                            extentPerAttr.get(s), extentPerAttr.get(t));
+                    if (!extentPerAttr.values().contains(result)) {
+                        if (!temp.containsValue(result)) {
+                            temp.put(s + ", " + t, result);
+                        }
+                    }
+                }
+            }
+        }
+        extentPerAttr.putAll(temp);
+
+        /*
+         * Step 3: If for any two sets of the list their intersection is also in
+         * the list, then extend the list by the set G (provided it is not yet
+         * contained in the list). The list then contains all concept extents
+         * (and nothing else).
+         */
+        for (String s : extentPerAttr.keySet()) {
+            for (String t : extentPerAttr.keySet()) {
+                if (!s.equals(t)) {
+                    Set<String> result = this.intersection(
+                            extentPerAttr.get(s), extentPerAttr.get(t));
+                    if (extentPerAttr.values().contains(result)) {
+                        TreeSet<String> set = new TreeSet<String>();
+                        for (FullObject<String, String> f : this.getObjects()) {
+                            set.add(f.getIdentifier());
+                        }
+                        extentPerAttr.put(null, set);
+                    }
+                    break;
+                }
+            }
+            break;
+        }
+
+        /*
+         * Step 4: For every concept extent A in the list compute the
+         * corresponding intent A' to obtain a list of all formal concepts
+         * (A,A') of (G,M, I).
+         */
+
+        for (Set<String> e : extentPerAttr.values()) {
+            TreeSet<String> intents = new TreeSet<String>();
+            int count = 0;
+
+            Concept<String, FullObject<String, String>> c = new LatticeConcept();
+
+            for (FullObject<String, String> i : this.getObjects()) {
+            		if (e.isEmpty()) {
+                        intents.addAll(i.getDescription().getAttributes());
+                    } else if (e.contains(i.getIdentifier().toString())) {
+                        TreeSet<String> prev = sort(i.getDescription()
+                                .getAttributes());
+                        if (count > 0) {
+                            intents = intersection(prev, intents);
+                        } else {
+                            intents = prev;
+                        }
+                        count++;
+                        c.getExtent().add(i);
+                    }        
+            }
+            // concepts.put(e, intents);
+            for (String s : intents) {
+                c.getIntent().add(s);
+            }
+            conceptLattice.add(c);
+        }
+        return conceptLattice;
+    }
+    
+    public Set<Concept<String, FullObject<String, String>>> getConceptsWithoutConsideredElementa(){
+        ListSet<Concept<String, FullObject<String, String>>> conceptLattice = new ListSet<Concept<String, FullObject<String, String>>>();
+
+        HashMap<String, Set<String>> extentPerAttr = new HashMap<String, Set<String>>();
+        /*
+         * Step 1: Initialize a list of concept extents. To begin with, write
+         * for each attribute m # M the attribute extent {m}$ to this list (if
+         * not already present).
+         */
+        for (String s : this.getAttributes()) {
         	if(!dontConsideredAttr.contains(s)){
         		TreeSet<String> set = new TreeSet<String>();
                 for (FullObject<String, String> f : this.getObjects()) {

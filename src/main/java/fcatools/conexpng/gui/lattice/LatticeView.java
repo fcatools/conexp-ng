@@ -26,7 +26,7 @@ public class LatticeView extends View {
         super(state);
 
         alg = new TestLatticeAlgorithm();
-        LatticeGraph graph = alg.computeLatticeGraph(state.context);
+        LatticeGraph graph = alg.computeLatticeGraph(state.context.getConcepts());
         view = new LatticeGraphView(graph, state);
         settings = new AccordionMenue(state);
 
@@ -93,7 +93,7 @@ public class LatticeView extends View {
                 @Override
                 protected Object doInBackground() throws Exception {
                     ((LatticeGraphView) view).setLatticeGraph(alg
-                            .computeLatticeGraph(state.context));
+                            .computeLatticeGraph(state.context.getConcepts()));
                     return null;
                 }
 
@@ -107,7 +107,7 @@ public class LatticeView extends View {
         }
         if(evt instanceof ContextChangeEvent && (((ContextChangeEvent) evt).getName() == ContextChangeEvents.TEMPORARYCONTEXTCHANGED)){
         	((LatticeGraphView) view).setLatticeGraph(alg
-                    .computeLatticeGraph(state.context));
+                    .computeLatticeGraph(state.context.getConceptsWithoutConsideredElementa()));
         }
         view.repaint();
     }
