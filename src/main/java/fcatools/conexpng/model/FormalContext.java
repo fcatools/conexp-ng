@@ -177,19 +177,21 @@ public class FormalContext extends
             Concept<String, FullObject<String, String>> c = new LatticeConcept();
 
             for (FullObject<String, String> i : this.getObjects()) {
-                if (e.isEmpty()) {
-                    intents.addAll(i.getDescription().getAttributes());
-                } else if (e.contains(i.getIdentifier().toString())) {
-                    TreeSet<String> prev = sort(i.getDescription()
-                            .getAttributes());
-                    if (count > 0) {
-                        intents = intersection(prev, intents);
-                    } else {
-                        intents = prev;
+            	if(!dontConsideredObj.contains(i)){
+            		if (e.isEmpty()) {
+                        intents.addAll(i.getDescription().getAttributes());
+                    } else if (e.contains(i.getIdentifier().toString())) {
+                        TreeSet<String> prev = sort(i.getDescription()
+                                .getAttributes());
+                        if (count > 0) {
+                            intents = intersection(prev, intents);
+                        } else {
+                            intents = prev;
+                        }
+                        count++;
+                        c.getExtent().add(i);
                     }
-                    count++;
-                    c.getExtent().add(i);
-                }
+            	}          
             }
             // concepts.put(e, intents);
             for (String s : intents) {
