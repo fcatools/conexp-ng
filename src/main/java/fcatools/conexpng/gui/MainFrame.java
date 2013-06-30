@@ -55,7 +55,6 @@ public class MainFrame extends JFrame {
         mainToolbar = new MainToolbar(this, state);
         mainToolbar.disableSaveButton();
         add(mainToolbar, BorderLayout.PAGE_START);
-        setExtendedState(JFrame.MAXIMIZED_BOTH);
 
         setTitle("ConExp-NG - \"" + state.filePath + "\"");
         MainStatusBar statusBar = new MainStatusBar();
@@ -179,17 +178,22 @@ public class MainFrame extends JFrame {
             if (evt instanceof ContextChangeEvent) {
                 ContextChangeEvent cce = (ContextChangeEvent) evt;
                 if (cce.getName() == ContextChangeEvents.STARTCALCULATION) {
-                    JPanel temp=new JPanel(new BorderLayout());
-                    temp.add(new JLabel((String) evt.getNewValue()+"  "), BorderLayout.CENTER);
+                    JPanel temp = new JPanel(new BorderLayout());
+                    temp.add(new JLabel((String) evt.getNewValue() + "  "),
+                            BorderLayout.CENTER);
                     JProgressBar progressbar = new JProgressBar();
                     progressbar.setIndeterminate(true);
                     temp.add(progressbar, BorderLayout.EAST);
-                    add(temp,BorderLayout.EAST);
+                    add(temp, BorderLayout.EAST);
                     revalidate();
+                    getParent().setCursor(
+                            Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                 } else if (cce.getName() == ContextChangeEvents.ENDCALCULATION) {
-                   removeAll();
-                   add(new JLabel(""));
-                   revalidate();
+                    getParent().setCursor(
+                            Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+                    removeAll();
+                    add(new JLabel(""));
+                    revalidate();
                 }
 
             }

@@ -87,7 +87,7 @@ public class LatticeView extends View {
         }
         if (isVisible() && updateLater) {
         	updateLater=false;
-            state.startCalculation("Calculating the Dependencies");
+            state.startCalculation("Calculating the Concepts");
             new SwingWorker<Object, Object>() {
 
                 @Override

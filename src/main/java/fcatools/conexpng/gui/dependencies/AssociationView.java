@@ -54,7 +54,7 @@ public class AssociationView extends View {
 
     private final String EOL = System.getProperty("line.separator");
 
-    private boolean sortBySupport = true;
+    private boolean sortBySupport = false;
 
     private boolean updateLater = false;
 
@@ -80,10 +80,6 @@ public class AssociationView extends View {
         settings.add(new AssociationSettings(), BorderLayout.NORTH);
         settings.getComponent(0).addPropertyChangeListener(this);
         super.init();
-        associationbase = state.context.getLuxenburgerBase(minsup, 0);
-        implications = state.context.getDuquenneGuiguesBase();
-        state.associations = associationbase;
-        writeAssociations();
     }
 
     private void writeAssociations() {
@@ -142,7 +138,8 @@ public class AssociationView extends View {
                             @Override
                             public int compare(AssociationRule o1,
                                     AssociationRule o2) {
-
+                            	if(o1.getPremise().contains("female"))
+                            		System.out.println(o1+" => "+o2);
                                 return Double.compare(o2.getSupport(),
                                         o1.getSupport());
                             }
@@ -195,14 +192,15 @@ public class AssociationView extends View {
         return attrs[INEXACT_RULE];
     }
 
-    private void updateAssociations() {
+    private void updateAssociations(final boolean withImplications) {
         state.startCalculation("Calculating the Dependencies");
         new SwingWorker<Object, Object>() {
 
             @Override
             protected Object doInBackground() throws Exception {
                 associationbase = state.context.getLuxenburgerBase(minsup, 0);
-                implications = state.context.getDuquenneGuiguesBase();
+                if (withImplications)
+                    implications = state.context.getDuquenneGuiguesBase();
                 state.associations = associationbase;
                 writeAssociations();
                 return null;
@@ -226,7 +224,7 @@ public class AssociationView extends View {
             return;
         }
         if (isVisible() && updateLater) {
-            updateAssociations();
+            updateAssociations(true);
             updateLater = false;
             return;
         }
@@ -237,7 +235,7 @@ public class AssociationView extends View {
 
         } else if (evt.getPropertyName().equals("MinimalSupportChanged")) {
             minsup = (double) evt.getNewValue();
-            updateAssociations();
+            updateAssociations(false);
         } else if (evt.getPropertyName().equals("ToggleSortingOrder")) {
             sortBySupport = !sortBySupport;
             writeAssociations();
