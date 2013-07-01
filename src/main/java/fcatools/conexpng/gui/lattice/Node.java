@@ -127,8 +127,8 @@ public class Node extends JPanel implements LatticeGraphElement {
 		if(this.y + y >= 0) updateY = this.y + y;
 		else updateY = 0;
 		
-//		visibleAttributes.update(x, y);
-//		visibleObjects.update(x, y);
+		visibleAttributes.update(x, y, false);
+		visibleObjects.update(x, y, true);
 		if (moveSubgraph && first) {
 			for(Node n : ideal){
 				n.update(x, y, false);

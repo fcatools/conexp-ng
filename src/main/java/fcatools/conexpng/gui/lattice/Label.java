@@ -1,6 +1,11 @@
 package fcatools.conexpng.gui.lattice;
 
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Toolkit;
+import java.awt.geom.Rectangle2D;
 import java.util.Set;
 
 import javax.swing.JPanel;
@@ -14,13 +19,27 @@ public class Label extends JPanel implements LatticeGraphElement{
 	private int x;
 	private int y;
 	private Set<String> set;
+	private String content;
 	
 	public Label(Set<String> set){
 		this.set = set;
 		this.setBounds(x, y, 15, 15);
+		this.setFont(new Font("Tahoma",Font.PLAIN,15));
+   
 	}
 	
 	public void paint(Graphics g) {
+		content = elementsToString();
+        FontMetrics metrics = Toolkit.getDefaultToolkit().getFontMetrics(this.getFont());
+
+        int i = metrics.stringWidth(content);
+		g.setColor(Color.WHITE);
+		g.fillRect(x, y, i, 15);
+		g.setColor(Color.BLACK);
+		g.drawRect(x, y, i, 15);
+		g.drawString(content, x + 5, (int) (y + 12) );
+		this.setBounds(x, y, i, 15);
+		
 	}
 
 	public void update(int x, int y, boolean first) {
@@ -55,8 +74,9 @@ public class Label extends JPanel implements LatticeGraphElement{
 	public String elementsToString(){
 		String s = "";
 		for(String t : set){
-			s = s + t + ", ";
+			s = s + t + ", " + "\n";
 		}
+		s = s.substring(0, s.length()-2);
 		return s;
 	}
 

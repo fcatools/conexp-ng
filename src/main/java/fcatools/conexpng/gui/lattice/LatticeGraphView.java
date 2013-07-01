@@ -122,27 +122,32 @@ public class LatticeGraphView extends JSVGCanvas {
         int radius = LatticeView.radius;
         if (graph.getEdges() != null && state.showEdges) {
             for (Edge e : graph.getEdges()) {
+            	g.setColor(Color.BLACK);
             	if(e.getU().isPartOfAnIdeal() && e.getV().isPartOfAnIdeal() && idealHighlighting){
             		g.setColor(Color.BLUE);
-            	}else{
-            		g.setColor(Color.BLACK);
+            	}else if(!(e.getU().isPartOfAnIdeal() && e.getV().isPartOfAnIdeal()) && idealHighlighting){
+            		g.setColor(Color.LIGHT_GRAY);
             	}
                 g.drawLine(e.getU().getX() + radius, e.getU().getY() + radius,
                         e.getV().getX() + radius, e.getV().getY() + radius);
             }
         }
         for (Node n : graph.getNodes()) {
-        	g.setColor(Color.LIGHT_GRAY);
+        	g.setColor(Color.BLACK);
             g.fillOval(n.getX(), n.getY(), radius * 2, radius * 2);
             if(n.isPartOfAnIdeal() && idealHighlighting){
             	lastIdeal.add(n);
         		g.setColor(Color.BLUE);
         		g.drawOval(n.getX(), n.getY(), radius * 2, radius * 2);
+            }else if((!n.isPartOfAnIdeal()) && idealHighlighting){
+            	g.setColor(Color.LIGHT_GRAY);
+            	g.fillOval(n.getX(), n.getY(), radius * 2, radius * 2);
             }
 
             Set<String> s = n.getVisibleObjects();
             if ((!s.isEmpty()) && state.showObjectLabel) {
                 // beneath the node
+//            	n.getObjectsLabel().paint(g0);
                 this.calcDrawPosition(g, s, true, n);
             }
             s = n.getVisibleAttributes();
