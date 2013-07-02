@@ -13,7 +13,7 @@ import java.awt.geom.Ellipse2D;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
-public class AssociationSettings extends JPanel {
+public class DependencySettings extends JPanel {
 
     private PropertyChangeSupport propertyChangeSupport;
 
@@ -47,11 +47,11 @@ public class AssociationSettings extends JPanel {
             int degree = (int) ((current * 360.0) / all);
             g.setColor(getBackground());
             g.fillRect(0, 0, getWidth(), getHeight());
-            g.setPaint(Color.BLUE);
+            g.setPaint(Color.BLACK);
             g.fillArc(0, 5, 140, 140, 0, 360);
             g.drawString("#Association Rules = " + all, 0, 165);
 
-            g.setColor(Color.RED);
+            g.setColor(new Color(0, 128, 0));
             g.fillArc(0, 5, 140, 140, 90, degree);
             g.drawString("#With minSup = " + current, 0, 180);
 
@@ -63,7 +63,7 @@ public class AssociationSettings extends JPanel {
 
     };
 
-    public AssociationSettings() {
+    public DependencySettings() {
         propertyChangeSupport = new PropertyChangeSupport(this);
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -230,11 +230,11 @@ public class AssociationSettings extends JPanel {
             double value = slider.getValue() / 100.0;
             if (minSup) {
                 supField.setText("" + value);
-                AssociationSettings.this.myFirePropertyChange(
+                DependencySettings.this.myFirePropertyChange(
                         "MinimalSupportChanged", 0, value);
             } else {
                 confField.setText("" + value);
-                AssociationSettings.this.myFirePropertyChange(
+                DependencySettings.this.myFirePropertyChange(
                         "ConfidenceChanged", 0, value);
             }
         }

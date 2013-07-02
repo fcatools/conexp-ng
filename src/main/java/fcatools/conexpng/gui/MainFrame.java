@@ -5,8 +5,7 @@ import fcatools.conexpng.ProgramState;
 import fcatools.conexpng.Util;
 import fcatools.conexpng.ProgramState.ContextChangeEvent;
 import fcatools.conexpng.gui.contexteditor.ContextEditor;
-import fcatools.conexpng.gui.dependencies.AssociationView;
-import fcatools.conexpng.gui.dependencies.ImplicationView;
+import fcatools.conexpng.gui.dependencies.DependencyView;
 import fcatools.conexpng.gui.lattice.LatticeView;
 
 import javax.swing.*;
@@ -15,7 +14,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
@@ -43,14 +41,12 @@ public class MainFrame extends JFrame {
 
         contextView = new ContextEditor(state);
         latticeView = new LatticeView(state);
-        associationView = new AssociationView(state);
-        new ImplicationView(state);
+        associationView = new DependencyView(state);
+
         addTab(tabPane, contextView, "Context", "Edit Context (CTRL + E)", 0);
         addTab(tabPane, latticeView, "Lattice", "Show Lattice (CTRL + L)", 1);
         addTab(tabPane, associationView, "Dependencies",
                 "Calculate Dependencies (CTRL + D)", 2);
-        // addTab(tabPane, implicationView, "Implications",
-        // "Calculate Implications (CTRL + I)", 3);
 
         mainToolbar = new MainToolbar(this, state);
         mainToolbar.disableSaveButton();
@@ -84,11 +80,6 @@ public class MainFrame extends JFrame {
                     InputEvent.CTRL_DOWN_MASK);
             break;
         }
-        // case 3: {
-        // shortcut = KeyStroke.getKeyStroke(KeyEvent.VK_I,
-        // InputEvent.CTRL_DOWN_MASK);
-        // break;
-        // }
         }
         t.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(shortcut, title);
         t.getActionMap().put(title, new SwitchTab(i, t));
