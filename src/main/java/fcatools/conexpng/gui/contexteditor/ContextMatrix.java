@@ -421,6 +421,12 @@ public class ContextMatrix extends JTable {
         restoreColumnWidths();
     }
 
+    public void loadColumnWidths(Map<Integer,Integer> loadedColumnWidths) {
+        compactedColumnWidths.clear();
+        columnWidths = loadedColumnWidths;
+        restoreColumnWidths();
+    }
+
     public void restoreColumnWidths() {
         if (columnWidths == null) return;
         if (!isCompacted) {

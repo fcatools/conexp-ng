@@ -1,9 +1,11 @@
 package fcatools.conexpng.io;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
+import de.tudresden.inf.tcs.fcalib.FullObject;
+import de.tudresden.inf.tcs.fcalib.utils.ListSet;
+import fcatools.conexpng.ProgramState;
+import fcatools.conexpng.model.FormalContext;
+
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
@@ -11,13 +13,10 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
-
-import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
-import de.tudresden.inf.tcs.fcalib.FullObject;
-import de.tudresden.inf.tcs.fcalib.utils.ListSet;
-
-import fcatools.conexpng.ProgramState;
-import fcatools.conexpng.model.FormalContext;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
 
 public class CEXReader {
 
@@ -62,6 +61,8 @@ public class CEXReader {
                 break;
             }
         }
+        // TODO: Read column widths if present!
+        state.columnWidths = new HashMap<>();
         state.newContext(context);
     }
 

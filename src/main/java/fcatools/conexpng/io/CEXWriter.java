@@ -1,16 +1,15 @@
 package fcatools.conexpng.io;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.util.HashMap;
+import de.tudresden.inf.tcs.fcalib.FullObject;
+import fcatools.conexpng.ProgramState;
 
 import javax.xml.stream.XMLEventFactory;
 import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
-import de.tudresden.inf.tcs.fcalib.FullObject;
-
-import fcatools.conexpng.ProgramState;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.util.HashMap;
 
 public class CEXWriter {
 
@@ -39,6 +38,7 @@ public class CEXWriter {
         addContext(writer);
         writer.add(eventFactory.createEndElement("", "", "ConceptualSystem"));
         writer.add(eventFactory.createEndDocument());
+        // TODO: Write column widths
     }
 
     private void addContext(XMLEventWriter writer) throws XMLStreamException {
