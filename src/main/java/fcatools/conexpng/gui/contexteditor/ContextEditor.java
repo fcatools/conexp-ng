@@ -335,6 +335,7 @@ public class ContextEditor extends View {
         }
 
         public void actionPerformed(ActionEvent e) {
+            if (matrix.isRenaming) return;
             lastActiveRowIndex = clamp(lastActiveRowIndex + vertical, 1,
                     state.context.getObjectCount());
             lastActiveColumnIndex = clamp(lastActiveColumnIndex + horizontal,
@@ -352,6 +353,7 @@ public class ContextEditor extends View {
         }
 
         public void actionPerformed(ActionEvent e) {
+            if (matrix.isRenaming) return;
             if (state.context.getObjectCount() == 0
                     || state.context.getAttributeCount() == 0)
                 return;
@@ -396,6 +398,7 @@ public class ContextEditor extends View {
         }
 
         public void actionPerformed(ActionEvent e) {
+            if (matrix.isRenaming) return;
             if (i <= 0 || j <= 0)
                 return;
             int i = clamp(this.i, 1, state.context.getObjectCount()) - 1;
@@ -412,6 +415,7 @@ public class ContextEditor extends View {
 
     class ToggleActiveAction extends AbstractAction {
         public void actionPerformed(ActionEvent e) {
+            if (matrix.isRenaming) return;
             invokeAction(ContextEditor.this, new ToggleAction(
                     lastActiveRowIndex, lastActiveColumnIndex));
         }
@@ -419,12 +423,14 @@ public class ContextEditor extends View {
 
     class SelectAllAction extends AbstractAction {
         public void actionPerformed(ActionEvent e) {
+            if (matrix.isRenaming) return;
             matrix.selectAll();
         }
     }
 
     abstract class AbstractFillClearInvertAction extends AbstractAction {
         public void actionPerformed(ActionEvent e) {
+            if (matrix.isRenaming) return;
             int i1 = matrix.getSelectedRow() - 1;
             int i2 = i1 + matrix.getSelectedRowCount();
             int j1 = matrix.getSelectedColumn() - 1;
@@ -459,6 +465,7 @@ public class ContextEditor extends View {
 
     class TransposeAction extends AbstractAction {
         public void actionPerformed(ActionEvent e) {
+            if (matrix.isRenaming) return;
             state.context.transpose();
             matrixModel.fireTableStructureChanged();
             matrix.clearSelection();
@@ -475,6 +482,7 @@ public class ContextEditor extends View {
         }
 
         public void actionPerformed(ActionEvent e) {
+            if (matrix.isRenaming) return;
             matrix.saveSelection();
             addAttributeAt(index);
             matrix.restoreSelection();
@@ -490,6 +498,7 @@ public class ContextEditor extends View {
         }
 
         public void actionPerformed(ActionEvent e) {
+            if (matrix.isRenaming) return;
             matrix.saveSelection();
             addObjectAt(index);
             matrix.restoreSelection();
@@ -499,6 +508,7 @@ public class ContextEditor extends View {
 
     class AddAttributeAtEndAction extends AbstractAction {
         public void actionPerformed(ActionEvent e) {
+            if (matrix.isRenaming) return;
             invokeAction(ContextEditor.this, new AddAttributeAtAction(
                     state.context.getAttributeCount()));
         }
@@ -506,6 +516,7 @@ public class ContextEditor extends View {
 
     class AddObjectAtEndAction extends AbstractAction {
         public void actionPerformed(ActionEvent e) {
+            if (matrix.isRenaming) return;
             invokeAction(ContextEditor.this, new AddObjectAtAction(
                     state.context.getObjectCount()));
         }
@@ -513,6 +524,7 @@ public class ContextEditor extends View {
 
     class RemoveActiveObjectAction extends AbstractAction {
         public void actionPerformed(ActionEvent e) {
+            if (matrix.isRenaming) return;
             if (state.context.getObjectCount() == 0)
                 return;
             matrix.saveSelection();
@@ -534,6 +546,7 @@ public class ContextEditor extends View {
 
     class RemoveActiveAttributeAction extends AbstractAction {
         public void actionPerformed(ActionEvent e) {
+            if (matrix.isRenaming) return;
             if (state.context.getAttributeCount() == 0)
                 return;
             matrix.saveSelection();
@@ -552,6 +565,7 @@ public class ContextEditor extends View {
 
     class RemoveSelectedObjectsAction extends AbstractAction {
         public void actionPerformed(ActionEvent e) {
+            if (matrix.isRenaming) return;
             if (state.context.getAttributeCount() == 0)
                 return;
             matrix.saveSelection();
@@ -576,6 +590,7 @@ public class ContextEditor extends View {
 
     class RemoveSelectedAttributesAction extends AbstractAction {
         public void actionPerformed(ActionEvent e) {
+            if (matrix.isRenaming) return;
             if (state.context.getAttributeCount() == 0)
                 return;
             matrix.saveSelection();

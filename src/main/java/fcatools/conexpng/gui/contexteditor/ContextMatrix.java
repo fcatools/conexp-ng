@@ -218,6 +218,9 @@ public class ContextMatrix extends JTable {
     // Renaming
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    // For preventing keyboard shortcuts to fire when entering a name
+    public boolean isRenaming = false;
+
     // For being able to rename headers
     private void makeHeaderCellsEditable() {
         for (int i = 0; i < getColumnCount(); i++) {
@@ -226,6 +229,7 @@ public class ContextMatrix extends JTable {
     }
 
     public void renameColumnHeader(int i) {
+        isRenaming = true;
         editCellAt(0, i);
         requestFocus();
         ContextCellEditor ed = (ContextCellEditor) editor;
@@ -234,6 +238,7 @@ public class ContextMatrix extends JTable {
     }
 
     public void renameRowHeader(int i) {
+        isRenaming = true;
         editCellAt(i, 0);
         requestFocus();
         ContextCellEditor ed = (ContextCellEditor) editor;
@@ -246,7 +251,7 @@ public class ContextMatrix extends JTable {
 
     // Custom cell editor. Needed for renaming of objects/attributes
     @SuppressWarnings("serial")
-    public static class ContextCellEditor extends DefaultCellEditor {
+    public class ContextCellEditor extends DefaultCellEditor {
 
         int lastRow = 0;
         int lastColumn = 0;
@@ -294,6 +299,7 @@ public class ContextMatrix extends JTable {
                     // TODO: Show dialog that says name already taken
                 }
             }
+            ContextMatrix.this.isRenaming = false;
             return super.getCellEditorValue();
         }
 

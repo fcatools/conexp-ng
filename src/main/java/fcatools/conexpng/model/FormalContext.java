@@ -1,13 +1,5 @@
 package fcatools.conexpng.model;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-
 import de.tudresden.inf.tcs.fcaapi.Concept;
 import de.tudresden.inf.tcs.fcaapi.FCAImplication;
 import de.tudresden.inf.tcs.fcaapi.exception.IllegalAttributeException;
@@ -19,6 +11,8 @@ import de.tudresden.inf.tcs.fcalib.ImplicationSet;
 import de.tudresden.inf.tcs.fcalib.utils.ListSet;
 import fcatools.conexpng.gui.dependencies.AssociationMiner;
 
+import java.util.*;
+
 /**
  * A specialization of FormalContext<String,String> with the aim to remove the
  * verbose repetition of <String,String>. Plus, adds a couple of useful methods.
@@ -28,7 +22,7 @@ import fcatools.conexpng.gui.dependencies.AssociationMiner;
 public class FormalContext extends
         de.tudresden.inf.tcs.fcalib.FormalContext<String, String> {
 
-    protected HashMap<String, SortedSet<String>> objectsOfAttribute;
+    protected HashMap<String, SortedSet<String>> objectsOfAttribute = new HashMap<>();
     private ArrayList<String> dontConsideredAttr = new ArrayList<>();
     private ArrayList<FullObject<String, String>> dontConsideredObj = new ArrayList<>();
 
@@ -46,7 +40,8 @@ public class FormalContext extends
     public boolean addAttributeToObject(String attribute, String id)
             throws IllegalAttributeException, IllegalObjectException {
         if (super.addAttributeToObject(attribute, id)) {
-            objectsOfAttribute.get(attribute).add(id);
+            SortedSet<String> objects = objectsOfAttribute.get(attribute);
+            if (objects != null) objects.add(id);
             return true;
         }
         return false;
@@ -68,7 +63,8 @@ public class FormalContext extends
     public boolean removeAttributeFromObject(String attribute, String id)
             throws IllegalAttributeException, IllegalObjectException {
         if (super.removeAttributeFromObject(attribute, id)) {
-            objectsOfAttribute.get(attribute).remove(id);
+            SortedSet<String> objects = objectsOfAttribute.get(attribute);
+            if (objects != null) objects.remove(id);
             return true;
         }
         return false;
