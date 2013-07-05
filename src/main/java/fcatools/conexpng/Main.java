@@ -4,7 +4,6 @@ import com.google.common.collect.Sets;
 import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
 import de.tudresden.inf.tcs.fcalib.FullObject;
 import fcatools.conexpng.gui.MainFrame;
-import fcatools.conexpng.gui.MainFrame.CloseAction;
 import fcatools.conexpng.model.FormalContext;
 
 import javax.swing.*;
@@ -43,7 +42,7 @@ public class Main {
         // the context editor concept
         UIManager.put("Table.focusCellForeground", Color.black);
 
-        ProgramState testState = new ProgramState();
+        final ProgramState testState = new ProgramState();
         testState.filePath = "example.cex";
         testState.lastOpened = "";
         testState.context = new FormalContext();
@@ -70,7 +69,7 @@ public class Main {
         f.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent we) {
                 try {
-                    storeOptions(f);
+                    storeOptions(f, testState.lastOpened);
                     f.new CloseAction().actionPerformed(null);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -82,7 +81,7 @@ public class Main {
         File optionsFile = new File(optionsFileName);
         if (optionsFile.exists()) {
             try {
-                restoreOptions(f);
+                restoreOptions(f, testState);
             } catch (IOException ioe) {
                 ioe.printStackTrace();
             }
@@ -92,8 +91,8 @@ public class Main {
         f.setVisible(true);
     }
 
-    // Store location & size of UI
-    private static void storeOptions(Frame f) throws Exception {
+    // Store location & size of UI & dir that was last opened from
+    private static void storeOptions(Frame f, String lastOpened) throws Exception {
         File file = new File(optionsFileName);
         Properties p = new Properties();
         // restore the frame from 'full screen' first!
@@ -108,13 +107,14 @@ public class Main {
         p.setProperty("y", "" + y);
         p.setProperty("w", "" + w);
         p.setProperty("h", "" + h);
+        p.setProperty("lastOpened", lastOpened);
 
         BufferedWriter br = new BufferedWriter(new FileWriter(file));
         p.store(br, "Properties of the user frame");
     }
 
-    // Restore location & size of UI
-    private static void restoreOptions(Frame f) throws IOException {
+    // Restore location & size of UI & dir that was last opened from
+    private static void restoreOptions(Frame f, ProgramState state) throws IOException {
         File file = new File(optionsFileName);
         Properties p = new Properties();
         BufferedReader br = new BufferedReader(new FileReader(file));
@@ -124,10 +124,11 @@ public class Main {
         int y = Integer.parseInt(p.getProperty("y"));
         int w = Integer.parseInt(p.getProperty("w"));
         int h = Integer.parseInt(p.getProperty("h"));
+        String lastOpened = p.getProperty("lastOpened");
 
         Rectangle r = new Rectangle(x, y, w, h);
-
         f.setBounds(r);
+        state.lastOpened = lastOpened;
     }
 
     // http://stackoverflow.com/a/193987/283607
