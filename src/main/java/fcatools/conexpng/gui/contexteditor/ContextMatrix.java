@@ -118,6 +118,8 @@ public class ContextMatrix extends JTable {
 
     /* For allowing a programmatical cell selection (i.e. not only through mouse/keyboard events) */
     public void selectCell(int row, int column) {
+        row = clamp(row, 1, getRowCount()-1);
+        column = clamp(column, 1, getColumnCount()-1);
         setRowSelectionInterval(row, row);
         setColumnSelectionInterval(column, column);
     }

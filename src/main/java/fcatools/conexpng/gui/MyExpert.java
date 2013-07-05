@@ -13,16 +13,14 @@ import fcatools.conexpng.gui.contexteditor.ContextMatrixModel;
 import fcatools.conexpng.model.FormalContext;
 
 import javax.swing.*;
-
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Set;
 
 import static fcatools.conexpng.Util.*;
+import static javax.swing.KeyStroke.getKeyStroke;
 
 public class MyExpert extends
         AbstractExpert<String, String, FullObject<String, String>> {
@@ -195,7 +193,19 @@ public class MyExpert extends
         final ContextMatrixModel matrixModel;
         final ContextMatrix matrix;
 
+        // Context menus
+        final JPopupMenu cellPopupMenu;
+        final JPopupMenu objectCellPopupMenu;
+        final JPopupMenu attributeCellPopupMenu;
+
+        int lastActiveRowIndex;
+        int lastActiveColumnIndex;
+
         public MiniContextEditor(FCAImplication<String> question) {
+            cellPopupMenu = new JPopupMenu();
+            objectCellPopupMenu = new JPopupMenu();
+            attributeCellPopupMenu = new JPopupMenu();
+
             mcestate = new ProgramState();
             mcestate.context = new FormalContext();
             mcestate.context.addAttributes(context.getAttributes());
@@ -228,24 +238,103 @@ public class MyExpert extends
                             invokeAction(MiniContextEditor.this,
                                     new ToggleAction(i, j));
                         }
-                        // TODO: maybe enable this in the real contexteditor?
                         else if (i == 1 && j == 0)
                             matrix.renameRowHeader(i);
                     }
                 }
 
                 public void mousePressed(MouseEvent e) {
-
+                    maybeShowPopup(e);
                 }
 
                 public void mouseReleased(MouseEvent e) {
+                    maybeShowPopup(e);
                 }
             };
             matrix.addMouseListener(mouseAdapter);
             matrix.addMouseMotionListener(mouseAdapter);
             matrixModel.fireTableStructureChanged();
-            // TODO: @eugen add toggleaction and move action or do what ever you
-            // want
+            registerActions();
+            createKeyActions();
+            createContextMenuActions();
+        }
+
+        private void maybeShowPopup(MouseEvent e) {
+            int i = matrix.rowAtPoint(e.getPoint());
+            int j = matrix.columnAtPoint(e.getPoint());
+            lastActiveRowIndex = i;
+            lastActiveColumnIndex = j;
+            if (e.isPopupTrigger()) {
+                if (i == 0 && j == 0) {
+                    // Don't show a context menu in the matrix corner
+                } else if (i > 0 && j > 0) {
+                    if (matrix.getSelectedColumn() <= 0
+                            || matrix.getSelectedRow() <= 0) {
+                        matrix.selectCell(i, j);
+                    }
+                    cellPopupMenu.show(e.getComponent(), e.getX(), e.getY());
+                } else if (j == 0) {
+                    objectCellPopupMenu.show(e.getComponent(), e.getX(), e.getY());
+                } else {
+                    attributeCellPopupMenu.show(e.getComponent(), e.getX(),
+                            e.getY());
+                }
+            }
+        }
+
+        private void registerActions() {
+            ActionMap am = matrix.getActionMap();
+            am.put("up", new MoveAction(0, -1));
+            am.put("down", new MoveAction(0, +1));
+            am.put("left", new MoveAction(-1, 0));
+            am.put("right", new MoveAction(+1, 0));
+            am.put("upCarry", new MoveWithCarryAction(0, -1));
+            am.put("downCarry", new MoveWithCarryAction(0, +1));
+            am.put("leftCarry", new MoveWithCarryAction(-1, 0));
+            am.put("rightCarry", new MoveWithCarryAction(+1, 0));
+            am.put("toggle", new ToggleActiveAction());
+        }
+
+        private void createKeyActions() {
+            InputMap im = matrix .getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+            im.put(getKeyStroke(KeyEvent.VK_UP, 0), "up");
+            im.put(getKeyStroke(KeyEvent.VK_DOWN, 0), "down");
+            im.put(getKeyStroke(KeyEvent.VK_LEFT, 0), "left");
+            im.put(getKeyStroke(KeyEvent.VK_RIGHT, 0), "right");
+            im.put(getKeyStroke(KeyEvent.VK_K, 0), "upCarry");
+            im.put(getKeyStroke(KeyEvent.VK_J, 0), "downCarry");
+            im.put(getKeyStroke(KeyEvent.VK_H, 0), "leftCarry");
+            im.put(getKeyStroke(KeyEvent.VK_L, 0), "rightCarry");
+            im.put(getKeyStroke(KeyEvent.VK_ENTER, 0), "toggle");
+            im.put(getKeyStroke(KeyEvent.VK_T, 0), "toggle");
+        }
+
+        private void createContextMenuActions() {
+            // ------------------------
+            // Inner cells context menu
+            // ------------------------
+            // See issue #42
+            /*
+             * addMenuItem(cellPopupMenu, "Cut", new CutAction());
+             * addMenuItem(cellPopupMenu, "Copy", new CopyAction());
+             * addMenuItem(cellPopupMenu, "Paste", new PasteAction());
+             */
+            addMenuItem(cellPopupMenu, "Select all", new SelectAllAction());
+            // --------
+            cellPopupMenu.add(new JPopupMenu.Separator());
+            // --------
+            addMenuItem(cellPopupMenu, "Fill", new FillAction());
+            addMenuItem(cellPopupMenu, "Clear", new ClearAction());
+            addMenuItem(cellPopupMenu, "Invert", new InvertAction());
+
+            // ------------------------
+            // Object cell context menu
+            // ------------------------
+            addMenuItem(objectCellPopupMenu, "Rename", new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    matrix.renameRowHeader(lastActiveRowIndex);
+                }
+            });
         }
 
         class ToggleAction extends AbstractAction {
@@ -268,6 +357,119 @@ public class MyExpert extends
                 matrixModel.fireTableDataChanged();
                 matrix.restoreSelection();
                 mcestate.contextChanged();
+            }
+        }
+
+        class MoveAction extends AbstractAction {
+            int horizontal, vertical;
+
+            MoveAction(int horizontal, int vertical) {
+                this.horizontal = horizontal;
+                this.vertical = vertical;
+            }
+
+            public void actionPerformed(ActionEvent e) {
+                if (matrix.isRenaming) return;
+                lastActiveRowIndex = clamp(lastActiveRowIndex + vertical, 1,
+                        state.context.getObjectCount());
+                lastActiveColumnIndex = clamp(lastActiveColumnIndex + horizontal,
+                        1, state.context.getAttributeCount());
+                matrix.selectCell(lastActiveRowIndex, lastActiveColumnIndex);
+            }
+        }
+
+        class MoveWithCarryAction extends AbstractAction {
+            int horizontal, vertical;
+
+            MoveWithCarryAction(int horizontal, int vertical) {
+                this.horizontal = horizontal;
+                this.vertical = vertical;
+            }
+
+            public void actionPerformed(ActionEvent e) {
+                if (matrix.isRenaming) return;
+                if (state.context.getObjectCount() == 0
+                        || state.context.getAttributeCount() == 0)
+                    return;
+                int i = lastActiveRowIndex + vertical - 1;
+                int j = lastActiveColumnIndex + horizontal - 1;
+                // noinspection LoopStatementThatDoesntLoop
+                while (true) {
+                    if (i < 0) {
+                        j -= 1;
+                        i = 0;
+                        break;
+                    }
+                    if (j < 0) {
+                        i -= 1;
+                        j = state.context.getAttributeCount() - 1;
+                    }
+                    if (i >= 1) {
+                        j += 1;
+                        i = 0;
+                        break;
+                    }
+                    if (j >= state.context.getAttributeCount()) {
+                        i += 1;
+                        j = 0;
+                    }
+                    break;
+                }
+                i = mod(i, 1);
+                j = mod(j, state.context.getAttributeCount());
+                lastActiveRowIndex = i + 1;
+                lastActiveColumnIndex = j + 1;
+                matrix.selectCell(lastActiveRowIndex, lastActiveColumnIndex);
+            }
+        }
+
+        class ToggleActiveAction extends AbstractAction {
+            public void actionPerformed(ActionEvent e) {
+                if (matrix.isRenaming) return;
+                invokeAction(MiniContextEditor.this, new ToggleAction(
+                        lastActiveRowIndex, lastActiveColumnIndex));
+            }
+        }
+
+        class SelectAllAction extends AbstractAction {
+            public void actionPerformed(ActionEvent e) {
+                if (matrix.isRenaming) return;
+                matrix.selectAll();
+            }
+        }
+
+        abstract class AbstractFillClearInvertAction extends AbstractAction {
+            public void actionPerformed(ActionEvent e) {
+                if (matrix.isRenaming) return;
+                int i1 = matrix.getSelectedRow() - 1;
+                int i2 = i1 + matrix.getSelectedRowCount();
+                int j1 = matrix.getSelectedColumn() - 1;
+                int j2 = j1 + matrix.getSelectedColumnCount();
+                matrix.saveSelection();
+                execute(i1, i2, j1, j2);
+                matrixModel.fireTableDataChanged();
+                matrix.restoreSelection();
+                state.contextChanged();
+            }
+
+            abstract void execute(int i1, int i2, int j1, int j2);
+        }
+
+        class FillAction extends AbstractFillClearInvertAction {
+            void execute(int i1, int i2, int j1, int j2) {
+                state.context.fill(i1, i2, j1, j2);
+            }
+        }
+
+        class ClearAction extends AbstractFillClearInvertAction {
+            void execute(int i1, int i2, int j1, int j2) {
+                state.context.clear(i1, i2, j1, j2);
+            }
+        }
+
+        class InvertAction extends AbstractFillClearInvertAction {
+            void execute(int i1, int i2, int j1, int j2) {
+                state.context.invert(i1, i2, j1, j2);
             }
         }
 
