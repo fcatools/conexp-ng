@@ -167,6 +167,13 @@ public class ContextMatrix extends JTable {
                 Math.max(lastSelectedColumnsStartIndex, lastSelectedColumnsEndIndex) == getColumnCount()-1);
     }
 
+    public boolean wasAllSelected() {
+        return (Math.min(lastSelectedRowsEndIndex, lastSelectedRowsStartIndex) == 1 &&
+                Math.max(lastSelectedRowsEndIndex, lastSelectedRowsStartIndex) == getRowCount()-1 &&
+                Math.min(lastSelectedColumnsStartIndex, lastSelectedColumnsEndIndex) == 1    &&
+                Math.max(lastSelectedColumnsStartIndex, lastSelectedColumnsEndIndex) == getColumnCount()-1);
+    }
+
     /* Overridden as header cells should *not* be selected when selecting all cells */
     @Override
     public void selectAll() {
@@ -371,6 +378,10 @@ public class ContextMatrix extends JTable {
                     }
                     if (SwingUtilities.isLeftMouseButton(e) && i == 0 && j > 0) {
                         if (!wasColumnSelected(j)) selectColumn(j);
+                        else clearSelection();
+                    }
+                    if (SwingUtilities.isLeftMouseButton(e) && i == 0 && j == 0) {
+                        if (!wasAllSelected()) selectAll();
                         else clearSelection();
                     }
                 }

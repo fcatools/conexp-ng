@@ -100,8 +100,7 @@ public class ContextEditor extends View {
     }
 
     // If context is not changed through the context editor (e.g. by
-    // exploration) be sure
-    // to reflect these changes inside the matrix
+    // exploration) be sure to reflect these changes inside the matrix
     @Override
     public void propertyChange(PropertyChangeEvent e) {
         if (e instanceof ContextChangeEvent) {
@@ -172,8 +171,7 @@ public class ContextEditor extends View {
                 int j = matrix.columnAtPoint(e.getPoint());
                 int clicks = e.getClickCount();
                 if (clicks >= 2 && clicks % 2 == 0
-                        && SwingUtilities.isLeftMouseButton(e)) { // Double
-                                                                    // Click
+                        && SwingUtilities.isLeftMouseButton(e)) { // Double Click
                     if (i > 0 && j > 0) {
                         invokeAction(ContextEditor.this, new ToggleAction(i, j));
                     }
