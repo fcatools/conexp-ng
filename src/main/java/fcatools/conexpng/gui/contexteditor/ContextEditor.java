@@ -110,10 +110,12 @@ public class ContextEditor extends View {
                 matrixModel.fireTableStructureChanged();
                 matrix.invalidate();
                 matrix.repaint();
+                matrix.restoreSelection();
             } else if (cce.getName() == ContextChangeEvents.NEWCONTEXT) {
                 matrix.setModel(new ContextMatrixModel(state));
                 matrix.invalidate();
                 matrix.repaint();
+                matrix.restoreSelection();
             }
 
         }
