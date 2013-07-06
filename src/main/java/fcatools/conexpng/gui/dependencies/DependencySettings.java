@@ -4,12 +4,10 @@ import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.text.JTextComponent;
-
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.geom.Ellipse2D;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
@@ -47,17 +45,21 @@ public class DependencySettings extends JPanel {
             int degree = (int) ((current * 360.0) / all);
             g.setColor(getBackground());
             g.fillRect(0, 0, getWidth(), getHeight());
-            g.setPaint(Color.BLACK);
+            Color gray = new Color(225, 225, 225);
+            g.setPaint(gray);
             g.fillArc(0, 5, 140, 140, 0, 360);
+            g.setPaint(gray.darker().darker());
             g.drawString("#Association Rules = " + all, 0, 165);
 
-            g.setColor(new Color(0, 128, 0));
+            Color green = new Color(150, 220, 150);
+            g.setColor(green);
             g.fillArc(0, 5, 140, 140, 90, degree);
+            g.setColor(green.darker().darker());
             g.drawString("#With minSup = " + current, 0, 180);
 
-            g.setColor(Color.BLACK);
-            Shape circ = new Ellipse2D.Double(0, 5, 140, 140);
-            g.draw(circ);
+//            g.setColor(Color.BLACK);
+//            Shape circ = new Ellipse2D.Double(0, 5, 140, 140);
+//            g.draw(circ);
 
         }
 
