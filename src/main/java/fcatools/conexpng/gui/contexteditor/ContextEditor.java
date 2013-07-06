@@ -218,14 +218,14 @@ public class ContextEditor extends View {
         addToolbarButton(toolbar, "addObject", "Add Object",
                 "conexp/addObj.gif", new AddObjectAtEndAction());
         addToolbarButton(toolbar, "clarifyObjects", "Clarify Objects",
-                "conexp/clarifyObj.gif", new ClarifyObjectsAction()); // TODO
+                "conexp/clarifyObj.gif", new ClarifyObjectsAction());
         addToolbarButton(toolbar, "reduceObjects", "Reduce Objects",
                 "conexp/reduceObj.gif", null); // TODO
         toolbar.addSeparator();
         addToolbarButton(toolbar, "addAttribute", "Add Attribute",
                 "conexp/addAttr.gif", new AddAttributeAtEndAction());
         addToolbarButton(toolbar, "clarifyAttributes", "Clarify Attributes",
-                "conexp/clarifyAttr.gif", null); // TODO
+                "conexp/clarifyAttr.gif", new ClarifyAttributesAction());
         addToolbarButton(toolbar, "reduceAttributes", "Reduce Attributes",
                 "conexp/reduceAttr.gif", null); // TODO
         toolbar.addSeparator();
@@ -235,7 +235,7 @@ public class ContextEditor extends View {
                 "conexp/transpose.gif", new TransposeAction());
         toolbar.addSeparator();
         addToolbarToggleButton(toolbar, "compactMatrix", "Compact Matrix",
-                "conexp/alignToGrid.gif", new CompactAction()); // TODO
+                "conexp/alignToGrid.gif", new CompactAction());
         addToolbarToggleButton(toolbar, "showArrowRelations",
                 "Show Arrow Relations", "conexp/associationRule.gif", null); // TODO
     }
@@ -468,6 +468,17 @@ public class ContextEditor extends View {
         public void actionPerformed(ActionEvent e) {
             if (matrix.isRenaming) return;
             state.context.clarifyObjects();
+            matrixModel.fireTableStructureChanged();
+            matrix.clearSelection();
+            matrix.saveSelection();
+            state.contextChanged();
+        }
+    }
+
+    class ClarifyAttributesAction extends AbstractAction {
+        public void actionPerformed(ActionEvent e) {
+            if (matrix.isRenaming) return;
+            state.context.clarifyAttributes();
             matrixModel.fireTableStructureChanged();
             matrix.clearSelection();
             matrix.saveSelection();

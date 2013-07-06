@@ -387,6 +387,12 @@ public class FormalContext extends
         }
     }
 
+    public void clarifyAttributes() {
+        transpose();
+        clarifyObjects();
+        transpose();
+    }
+
     public void transpose() {
         IndexedSet<FullObject<String, String>> newObjects = new ListSet<>();
         IndexedSet<String> newAttributes = new ListSet<>();
