@@ -1,15 +1,16 @@
 package fcatools.conexpng.io;
 
-import de.tudresden.inf.tcs.fcalib.FullObject;
-import fcatools.conexpng.ProgramState;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.util.HashMap;
 
 import javax.xml.stream.XMLEventFactory;
 import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.util.HashMap;
+import de.tudresden.inf.tcs.fcalib.FullObject;
+
+import fcatools.conexpng.ProgramState;
 
 public class CEXWriter {
 
@@ -32,13 +33,30 @@ public class CEXWriter {
         writer.add(eventFactory.createStartElement("", "", "ConceptualSystem"));
         writer.add(eventFactory.createStartElement("", "", "Version"));
         // to show that this is our cex-format (2.0)
-        writer.add(eventFactory.createAttribute("Majornumber", "2"));
-        writer.add(eventFactory.createAttribute("Minornumber", "0"));
+        writer.add(eventFactory.createAttribute("MajorNumber", "2"));
+        writer.add(eventFactory.createAttribute("MinorNumber", "0"));
         writer.add(eventFactory.createEndElement("", "", "Version"));
         addContext(writer);
+        addColumnWidths(writer);
         writer.add(eventFactory.createEndElement("", "", "ConceptualSystem"));
         writer.add(eventFactory.createEndDocument());
-        // TODO: Write column widths
+    }
+
+    private void addColumnWidths(XMLEventWriter writer) throws XMLStreamException {
+         writer.add(eventFactory.createStartElement("", "", "ColumnWidths"));
+
+         for (int column : state.columnWidths.keySet()) {
+             writer.add(eventFactory.createStartElement("", "", "Column"));
+             writer.add(eventFactory.createAttribute("Number", "" + column));
+             writer.add(eventFactory.createStartElement("", "", "Width"));
+
+             writer.add(eventFactory.createCharacters(""+state.columnWidths.get(column)));
+
+             writer.add(eventFactory.createEndElement("", "", "Width"));
+             writer.add(eventFactory.createEndElement("", "", "Column"));
+         }
+         writer.add(eventFactory.createEndElement("", "", "ColumnWidths"));
+
     }
 
     private void addContext(XMLEventWriter writer) throws XMLStreamException {

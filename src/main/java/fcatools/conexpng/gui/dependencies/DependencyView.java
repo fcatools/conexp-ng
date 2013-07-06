@@ -174,14 +174,20 @@ public class DependencyView extends View {
                                 buf.append("< "
                                         + state.context.supportCount(impl
                                                 .getPremise()) + " > ");
-                                buf.append(impl.getPremise() + " =["
-                                        + new BigDecimal(impl.getConfidence()).setScale(3,BigDecimal.ROUND_HALF_UP).doubleValue() + "]=> ");
-                                Set<String> temp=new HashSet<>(impl
+                                buf.append(impl.getPremise()
+                                        + " =["
+                                        + new BigDecimal(impl.getConfidence())
+                                                .setScale(
+                                                        3,
+                                                        BigDecimal.ROUND_HALF_UP)
+                                                .doubleValue() + "]=> ");
+                                Set<String> temp = new HashSet<>(impl
                                         .getConsequent());
                                 temp.addAll(impl.getPremise());
                                 buf.append("< "
-                                        + state.context.supportCount(temp) + " > "
-                                        + impl.getConsequent() + END_MARK);
+                                        + state.context.supportCount(temp)
+                                        + " > " + impl.getConsequent()
+                                        + END_MARK);
                                 buf.append(EOL);
 
                                 textpane.getDocument().insertString(
@@ -240,11 +246,14 @@ public class DependencyView extends View {
             if (cce.getName() == ContextChangeEvents.NEWCONTEXT
                     || cce.getName() == ContextChangeEvents.CONTEXTCHANGED)
                 updateLater = true;
+            // until we save the associations in the file
+            if (cce.getName() == ContextChangeEvents.LOADEDFILE)
+                updateLater = true;
         }
         if (isVisible() && updateLater) {
-        	updateLater = false;
-        	associationbase=new TreeSet<AssociationRule>();
-        	implications=new ImplicationSet<>(state.context);
+            updateLater = false;
+            associationbase = new TreeSet<AssociationRule>();
+            implications = new ImplicationSet<>(state.context);
             updateAssociations(true);
             return;
         }

@@ -110,7 +110,8 @@ public class ContextEditor extends View {
                 matrix.invalidate();
                 matrix.repaint();
                 matrix.restoreSelection();
-            } else if (cce.getName() == ContextChangeEvents.NEWCONTEXT) {
+            } else if (cce.getName() == ContextChangeEvents.NEWCONTEXT
+                    || cce.getName() == ContextChangeEvents.LOADEDFILE) {
                 matrix.setModel(new ContextMatrixModel(state));
                 matrix.loadColumnWidths(state.columnWidths);
                 matrixModel.fireTableStructureChanged();

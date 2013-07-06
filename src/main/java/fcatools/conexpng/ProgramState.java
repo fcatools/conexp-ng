@@ -34,13 +34,13 @@ public class ProgramState {
     public boolean unsavedChanges = false;
     public Map<Integer, Integer> columnWidths = new HashMap<>();
     public LatticeGraph lattice;
+    public ListSet<Concept<FullObject<String, String>, String>> concepts;
     public boolean showObjectLabel = false;
     public boolean showAttributLabel = false;
     public boolean showEdges = true;
     public boolean idealHighlighting = false;
 
     private PropertyChangeSupport propertyChangeSupport;
-
 
     public ProgramState() {
         propertyChangeSupport = new PropertyChangeSupport(this);
@@ -61,7 +61,7 @@ public class ProgramState {
     }
 
     public void contextChanged() {
-    	this.context.clearConsidered();
+        this.context.clearConsidered();
         firePropertyChange(ContextChangeEvents.CONTEXTCHANGED, null, context);
     }
 
@@ -76,22 +76,34 @@ public class ProgramState {
                 newName);
     }
 
-    public void showLabelsChanged(){
+    public void showLabelsChanged() {
         firePropertyChange(ContextChangeEvents.LABELSCHANGED, null, null);
     }
-    
-    public void temporaryContextChanged(){
-    	firePropertyChange(ContextChangeEvents.TEMPORARYCONTEXTCHANGED, null, null);
+
+    public void temporaryContextChanged() {
+        firePropertyChange(ContextChangeEvents.TEMPORARYCONTEXTCHANGED, null,
+                null);
     }
 
-    public void startCalculation(String source){
+    public void startCalculation(String source) {
         firePropertyChange(ContextChangeEvents.STARTCALCULATION, null, source);
     }
 
-    public void endCalculation(){
+    public void endCalculation() {
         firePropertyChange(ContextChangeEvents.ENDCALCULATION, null, null);
     }
 
+    public void newLattice(LatticeGraph lattice2) {
+        this.lattice = lattice2;
+        firePropertyChange(ContextChangeEvents.NEWLATTICE, null, lattice2);
+    }
+
+    public void loadedFile(FormalContext context2, LatticeGraph lattice2) {
+		this.context=context2;
+		this.lattice=lattice2;
+		   firePropertyChange(ContextChangeEvents.LOADEDFILE, null, lattice2);
+	}
+    
     @SuppressWarnings("serial")
     public class ContextChangeEvent extends PropertyChangeEvent {
 

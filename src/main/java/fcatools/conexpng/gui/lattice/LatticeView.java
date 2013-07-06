@@ -26,7 +26,8 @@ public class LatticeView extends View {
         super(state);
 
         alg = new TestLatticeAlgorithm();
-        LatticeGraph graph = alg.computeLatticeGraph(state.context.getConcepts());
+        LatticeGraph graph = alg.computeLatticeGraph(state.context
+                .getConcepts());
         view = new LatticeGraphView(graph, state);
         settings = new AccordionMenue(state);
 
@@ -55,21 +56,20 @@ public class LatticeView extends View {
             }
         });
         toolbar.add(move);
-        
-        JToggleButton showIdeal = Util.createToggleButton("Show Ideale", "ideal",
-                "conexp/contextIcon.gif");
+
+        JToggleButton showIdeal = Util.createToggleButton("Show Ideale",
+                "ideal", "conexp/contextIcon.gif");
         showIdeal.addActionListener(new ActionListener() {
-        	private boolean last = false;
-			
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				last = !last;
-				((LatticeGraphView) view).idealHighlighting(last);
-				((LatticeGraphView) view).repaint();
-			}
-		});       
+            private boolean last = false;
+
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                last = !last;
+                ((LatticeGraphView) view).idealHighlighting(last);
+                ((LatticeGraphView) view).repaint();
+            }
+        });
         toolbar.add(showIdeal);
-        
 
         super.init();
 
@@ -79,19 +79,19 @@ public class LatticeView extends View {
     public void propertyChange(PropertyChangeEvent evt) {
         // TODO: I would not use ContextChangeEvents for communicating between
         // the Latticeview and the AccordionMenue
-		if (evt instanceof ContextChangeEvent
-				&& (((ContextChangeEvent) evt).getName() == ContextChangeEvents.CONTEXTCHANGED
-				|| ((ContextChangeEvent) evt).getName() == ContextChangeEvents.NEWCONTEXT)) {
-			updateLater = true;
+        if (evt instanceof ContextChangeEvent
+                && (((ContextChangeEvent) evt).getName() == ContextChangeEvents.CONTEXTCHANGED || ((ContextChangeEvent) evt)
+                        .getName() == ContextChangeEvents.NEWCONTEXT)) {
+            updateLater = true;
             return;
         }
         if (isVisible() && updateLater) {
-        	updateLater=false;
+            updateLater = false;
             state.startCalculation("Calculating the Concepts");
-            new SwingWorker<Object, Object>() {
+            new SwingWorker<Void, Object>() {
 
                 @Override
-                protected Object doInBackground() throws Exception {
+                protected Void doInBackground() throws Exception {
                     ((LatticeGraphView) view).setLatticeGraph(alg
                             .computeLatticeGraph(state.context.getConcepts()));
                     return null;
@@ -103,11 +103,18 @@ public class LatticeView extends View {
             }.execute();
 
             ((AccordionMenue) settings).update();
-            
+
         }
-        if(evt instanceof ContextChangeEvent && (((ContextChangeEvent) evt).getName() == ContextChangeEvents.TEMPORARYCONTEXTCHANGED)){
-        	((LatticeGraphView) view).setLatticeGraph(alg
-                    .computeLatticeGraph(state.context.getConceptsWithoutConsideredElementa()));
+        if (evt instanceof ContextChangeEvent
+                && (((ContextChangeEvent) evt).getName() == ContextChangeEvents.TEMPORARYCONTEXTCHANGED)) {
+            ((LatticeGraphView) view).setLatticeGraph(alg
+                    .computeLatticeGraph(state.context
+                            .getConceptsWithoutConsideredElementa()));
+        }
+        if (evt instanceof ContextChangeEvent
+                && (((ContextChangeEvent) evt).getName() == ContextChangeEvents.LOADEDFILE)) {
+            ((LatticeGraphView) view).setLatticeGraph((LatticeGraph) evt
+                    .getNewValue());
         }
         view.repaint();
     }

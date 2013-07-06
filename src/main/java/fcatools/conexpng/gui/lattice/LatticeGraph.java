@@ -4,83 +4,88 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 
+ *
  * @author Jan
  *
  */
 public class LatticeGraph {
-	
-	private List<Node> nodes;
-	private List<Edge> edges;
-	
-	/**
-	 * 
-	 */
-	public LatticeGraph(){
-		this.nodes = new ArrayList<>();
-		this.edges = new ArrayList<>();
-	}
-	
-	/**
-	 * 
-	 * @param nodes
-	 * @param edges
-	 */
-	public LatticeGraph(List<Node> nodes, List<Edge> edges){
-		this.nodes = nodes;
-		this.edges = edges;
-	}
-	
-	/**
-	 * 
-	 * @param i
-	 * @return
-	 */
-	public Node getNode(int i){
-		return nodes.get(i);
-	}
 
-	/**
-	 * 
-	 * @return
-	 */
-	public List<Node> getNodes() {
-		return nodes;
-	}
+    private List<Node> nodes;
+    private List<Edge> edges;
 
-	/**
-	 * 
-	 * @param nodes
-	 */
-	public void setNodes(List<Node> nodes) {
-		this.nodes = nodes;
-	}
-	
-	/**
-	 * 
-	 * @param i
-	 * @return
-	 */
-	public Edge getEdge(int i){
-		return edges.get(i);
-	}
+    /**
+     *
+     */
+    public LatticeGraph() {
+        this.nodes = new ArrayList<>();
+        this.edges = new ArrayList<>();
+    }
 
-	/**
-	 * 
-	 * @return
-	 */
-	public List<Edge> getEdges() {
-		return edges;
-	}
+    /**
+     *
+     * @param nodes
+     * @param edges
+     */
+    public LatticeGraph(List<Node> nodes, List<Edge> edges) {
+        this.nodes = nodes;
+        this.edges = edges;
+    }
 
-	/**
-	 * 
-	 * @param edges
-	 */
-	public void setEdges(List<Edge> edges) {
-		this.edges = edges;
-	}
-	
-	
+    /**
+     *
+     * @param i
+     * @return
+     */
+    public Node getNode(int i) {
+        return nodes.get(i);
+    }
+
+    /**
+     *
+     * @return
+     */
+    public List<Node> getNodes() {
+        return nodes;
+    }
+
+    /**
+     *
+     * @param nodes
+     */
+    public void setNodes(List<Node> nodes) {
+        this.nodes = nodes;
+    }
+
+    /**
+     *
+     * @param i
+     * @return
+     */
+    public Edge getEdge(int i) {
+        return edges.get(i);
+    }
+
+    /**
+     *
+     * @return
+     */
+    public List<Edge> getEdges() {
+        return edges;
+    }
+
+    /**
+     *
+     * @param edges
+     */
+    public void setEdges(List<Edge> edges) {
+        this.edges = edges;
+    }
+
+    public void translate(int d, int e) {
+        for (Node n : nodes) {
+            n.setX(n.getX() + d);
+            n.setY(n.getY() + e);
+        }
+    }
 
 }
