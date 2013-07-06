@@ -1,5 +1,8 @@
 package fcatools.conexpng;
 
+import de.tudresden.inf.tcs.fcaapi.Concept;
+import de.tudresden.inf.tcs.fcalib.FullObject;
+import de.tudresden.inf.tcs.fcalib.utils.ListSet;
 import fcatools.conexpng.gui.lattice.LatticeGraph;
 import fcatools.conexpng.model.AssociationRule;
 import fcatools.conexpng.model.FormalContext;
@@ -10,10 +13,6 @@ import java.beans.PropertyChangeSupport;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
-import de.tudresden.inf.tcs.fcaapi.Concept;
-import de.tudresden.inf.tcs.fcalib.FullObject;
-import de.tudresden.inf.tcs.fcalib.utils.ListSet;
 
 /**
  * Contains context, lattice, implications, filePath, snapshots etc.
@@ -28,7 +27,7 @@ import de.tudresden.inf.tcs.fcalib.utils.ListSet;
 public class ProgramState {
 
     public String filePath;
-    public String lastOpened;
+    public String lastOpened = "";
     public FormalContext context;
     public Set<AssociationRule> associations;
     public boolean unsavedChanges = false;
@@ -101,9 +100,9 @@ public class ProgramState {
     public void loadedFile(FormalContext context2, LatticeGraph lattice2) {
 		this.context=context2;
 		this.lattice=lattice2;
-		   firePropertyChange(ContextChangeEvents.LOADEDFILE, null, lattice2);
+		firePropertyChange(ContextChangeEvents.LOADEDFILE, null, lattice2);
 	}
-    
+
     @SuppressWarnings("serial")
     public class ContextChangeEvent extends PropertyChangeEvent {
 

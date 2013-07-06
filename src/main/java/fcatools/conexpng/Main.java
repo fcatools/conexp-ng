@@ -42,22 +42,21 @@ public class Main {
         // the context editor concept
         UIManager.put("Table.focusCellForeground", Color.black);
 
-        final ProgramState testState = new ProgramState();
-        testState.filePath = "example.cex";
-        testState.lastOpened = "";
-        testState.context = new FormalContext();
-        testState.context.addAttribute("female");
-        testState.context.addAttribute("juvenile");
-        testState.context.addAttribute("adult");
-        testState.context.addAttribute("male");
+        final ProgramState state = new ProgramState();
+        state.filePath = "untitled.cex";
+        state.context = new FormalContext();
+        state.context.addAttribute("female");
+        state.context.addAttribute("juvenile");
+        state.context.addAttribute("adult");
+        state.context.addAttribute("male");
         try {
-            testState.context.addObject(new FullObject<>("girl", Sets
+            state.context.addObject(new FullObject<>("girl", Sets
                     .newHashSet("female", "juvenile")));
-            testState.context.addObject(new FullObject<>("woman", Sets
+            state.context.addObject(new FullObject<>("woman", Sets
                     .newHashSet("female", "adult")));
-            testState.context.addObject(new FullObject<>("boy", Sets
+            state.context.addObject(new FullObject<>("boy", Sets
                     .newHashSet("male", "juvenile")));
-            testState.context.addObject(new FullObject<>("man", Sets
+            state.context.addObject(new FullObject<>("man", Sets
                     .newHashSet("male", "adult")));
         } catch (IllegalObjectException e1) {
             e1.printStackTrace();
@@ -65,11 +64,11 @@ public class Main {
 
         // Create main window and take care of correctly saving and restoring
         // the last window location
-        final MainFrame f = new MainFrame(testState);
+        final MainFrame f = new MainFrame(state);
         f.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent we) {
                 try {
-                    storeOptions(f, testState.lastOpened);
+                    storeOptions(f, state.lastOpened);
                     f.new CloseAction().actionPerformed(null);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -81,7 +80,7 @@ public class Main {
         File optionsFile = new File(optionsFileName);
         if (optionsFile.exists()) {
             try {
-                restoreOptions(f, testState);
+                restoreOptions(f, state);
             } catch (IOException ioe) {
                 ioe.printStackTrace();
             }
@@ -89,6 +88,9 @@ public class Main {
             f.setLocationByPlatform(true);
         }
         f.setVisible(true);
+
+        // Force various GUI components to update
+        state.contextChanged();
     }
 
     // Store location & size of UI & dir that was last opened from
