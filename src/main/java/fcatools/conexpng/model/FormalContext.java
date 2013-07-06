@@ -10,6 +10,9 @@ import de.tudresden.inf.tcs.fcalib.Implication;
 import de.tudresden.inf.tcs.fcalib.ImplicationSet;
 import de.tudresden.inf.tcs.fcalib.utils.ListSet;
 import fcatools.conexpng.gui.dependencies.AssociationMiner;
+import org.paukov.combinatorics.Factory;
+import org.paukov.combinatorics.Generator;
+import org.paukov.combinatorics.ICombinatoricsVector;
 
 import java.util.*;
 
@@ -390,6 +393,59 @@ public class FormalContext extends
     public void clarifyAttributes() {
         transpose();
         clarifyObjects();
+        transpose();
+    }
+
+    // I have just implemented the functionality as I understood it by reading
+    // the documentation and playing around with the original ConExp. It seems
+    // to be correct. The code can probably be written in a much more efficient
+    // way, though.
+    public void reduceObjects() {
+        clarifyObjects();
+        ArrayList<FullObject<String, String>> toBeRemoved = new ArrayList<>();
+        for (int i = 0; i < getObjectCount(); i++) {
+            FullObject<String, String> o = objects.getElementAt(i);
+            IndexedSet<FullObject<String,String>> otherObjects0 = new ListSet<>();
+            for (FullObject<String,String> o0 : objects) {
+                otherObjects0.add(o0);
+            }
+            otherObjects0.remove(o);
+            for (FullObject<String,String> o0 : toBeRemoved) {
+                otherObjects0.remove(o0);
+            }
+            ICombinatoricsVector<FullObject<String,String>> otherObjects = Factory.createVector(otherObjects0);
+            Generator<FullObject<String,String>> gen = Factory.createSubSetGenerator(otherObjects);
+            for (ICombinatoricsVector<FullObject<String,String>> subSet : gen) {
+                if (subSet.getSize() < 2) continue;
+                IndexedSet<String> intersection = new ListSet<>();
+                for (String attribute : getAttributesForObject(subSet.getValue(0).getIdentifier())) {
+                    intersection.add(attribute);
+                }
+                for (int j = 1; j < subSet.getSize(); j++) {
+                    intersection.retainAll(getAttributesForObject(subSet.getValue(j).getIdentifier()));
+                }
+                if (intersection.size() == 0) continue;
+                if (getAttributesForObject(o.getIdentifier()).equals(intersection)) {
+                    toBeRemoved.add(o);
+                    break;
+                }
+            }
+        }
+        for (FullObject<String, String> o : toBeRemoved) {
+            objects.remove(o);
+        }
+    }
+
+    public void reduceAttributes() {
+        transpose();
+        reduceObjects();
+        transpose();
+    }
+
+    public void reduce() {
+        reduceObjects();
+        transpose();
+        reduceObjects();
         transpose();
     }
 

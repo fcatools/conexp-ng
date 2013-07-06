@@ -220,17 +220,17 @@ public class ContextEditor extends View {
         addToolbarButton(toolbar, "clarifyObjects", "Clarify Objects",
                 "conexp/clarifyObj.gif", new ClarifyObjectsAction());
         addToolbarButton(toolbar, "reduceObjects", "Reduce Objects",
-                "conexp/reduceObj.gif", null); // TODO
+                "conexp/reduceObj.gif", new ReduceObjectsAction());
         toolbar.addSeparator();
         addToolbarButton(toolbar, "addAttribute", "Add Attribute",
                 "conexp/addAttr.gif", new AddAttributeAtEndAction());
         addToolbarButton(toolbar, "clarifyAttributes", "Clarify Attributes",
                 "conexp/clarifyAttr.gif", new ClarifyAttributesAction());
         addToolbarButton(toolbar, "reduceAttributes", "Reduce Attributes",
-                "conexp/reduceAttr.gif", null); // TODO
+                "conexp/reduceAttr.gif", new ReduceAttributesAction());
         toolbar.addSeparator();
         addToolbarButton(toolbar, "reduceContext", "Reduce Context",
-                "conexp/reduceCxt.gif", null); // TODO
+                "conexp/reduceCxt.gif", new ReduceAction());
         addToolbarButton(toolbar, "transposeContext", "Transpose Context",
                 "conexp/transpose.gif", new TransposeAction());
         toolbar.addSeparator();
@@ -479,6 +479,39 @@ public class ContextEditor extends View {
         public void actionPerformed(ActionEvent e) {
             if (matrix.isRenaming) return;
             state.context.clarifyAttributes();
+            matrixModel.fireTableStructureChanged();
+            matrix.clearSelection();
+            matrix.saveSelection();
+            state.contextChanged();
+        }
+    }
+
+    class ReduceObjectsAction extends AbstractAction {
+        public void actionPerformed(ActionEvent e) {
+            if (matrix.isRenaming) return;
+            state.context.reduceObjects();
+            matrixModel.fireTableStructureChanged();
+            matrix.clearSelection();
+            matrix.saveSelection();
+            state.contextChanged();
+        }
+    }
+
+    class ReduceAttributesAction extends AbstractAction {
+        public void actionPerformed(ActionEvent e) {
+            if (matrix.isRenaming) return;
+            state.context.reduceAttributes();
+            matrixModel.fireTableStructureChanged();
+            matrix.clearSelection();
+            matrix.saveSelection();
+            state.contextChanged();
+        }
+    }
+
+    class ReduceAction extends AbstractAction {
+        public void actionPerformed(ActionEvent e) {
+            if (matrix.isRenaming) return;
+            state.context.reduce();
             matrixModel.fireTableStructureChanged();
             matrix.clearSelection();
             matrix.saveSelection();
