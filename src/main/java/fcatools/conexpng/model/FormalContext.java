@@ -371,13 +371,27 @@ public class FormalContext extends
                 .computeAssociationRules();
     }
 
+    public void clarifyObjects() {
+        ArrayList<FullObject<String, String>> toBeRemoved = new ArrayList<>();
+        for (int i = 0; i < getObjectCount(); i++) {
+            FullObject<String, String> o1 = objects.getElementAt(i);
+            for (int j = i+1; j < getObjectCount(); j++) {
+                FullObject<String, String> o2 = objects.getElementAt(j);
+                if (getAttributesForObject(o1.getIdentifier()).equals(getAttributesForObject(o2.getIdentifier()))) {
+                    toBeRemoved.add(o2);
+                }
+            }
+        }
+        for (FullObject<String, String> o : toBeRemoved) {
+            objects.remove(o);
+        }
+    }
+
     public void transpose() {
         IndexedSet<FullObject<String, String>> newObjects = new ListSet<>();
         IndexedSet<String> newAttributes = new ListSet<>();
         for (String attribute : getAttributes()) {
             IndexedSet<String> allObjectsForAttribute = new ListSet<>();
-            // TODO: there may be a more efficient way using the fcalib
-            // functions
             for (FullObject<String, String> object : objects) {
                 if (objectHasAttribute(object, attribute))
                     allObjectsForAttribute.add(object.getIdentifier());

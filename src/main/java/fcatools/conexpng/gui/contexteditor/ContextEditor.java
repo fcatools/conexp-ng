@@ -218,7 +218,7 @@ public class ContextEditor extends View {
         addToolbarButton(toolbar, "addObject", "Add Object",
                 "conexp/addObj.gif", new AddObjectAtEndAction());
         addToolbarButton(toolbar, "clarifyObjects", "Clarify Objects",
-                "conexp/clarifyObj.gif", null); // TODO
+                "conexp/clarifyObj.gif", new ClarifyObjectsAction()); // TODO
         addToolbarButton(toolbar, "reduceObjects", "Reduce Objects",
                 "conexp/reduceObj.gif", null); // TODO
         toolbar.addSeparator();
@@ -461,6 +461,17 @@ public class ContextEditor extends View {
     class InvertAction extends AbstractFillClearInvertAction {
         void execute(int i1, int i2, int j1, int j2) {
             state.context.invert(i1, i2, j1, j2);
+        }
+    }
+
+    class ClarifyObjectsAction extends AbstractAction {
+        public void actionPerformed(ActionEvent e) {
+            if (matrix.isRenaming) return;
+            state.context.clarifyObjects();
+            matrixModel.fireTableStructureChanged();
+            matrix.clearSelection();
+            matrix.saveSelection();
+            state.contextChanged();
         }
     }
 
