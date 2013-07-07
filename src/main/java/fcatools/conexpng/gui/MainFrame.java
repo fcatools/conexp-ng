@@ -1,15 +1,16 @@
 package fcatools.conexpng.gui;
 
+import com.alee.laf.tabbedpane.TabbedPaneStyle;
+import com.alee.laf.tabbedpane.WebTabbedPane;
 import fcatools.conexpng.ContextChangeEvents;
 import fcatools.conexpng.ProgramState;
-import fcatools.conexpng.Util;
 import fcatools.conexpng.ProgramState.ContextChangeEvent;
+import fcatools.conexpng.Util;
 import fcatools.conexpng.gui.contexteditor.ContextEditor;
 import fcatools.conexpng.gui.dependencies.DependencyView;
 import fcatools.conexpng.gui.lattice.LatticeView;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
@@ -22,7 +23,7 @@ public class MainFrame extends JFrame {
     private static final long serialVersionUID = -3768163989667340886L;
 
     // Components
-    private JTabbedPane tabPane;
+    private WebTabbedPane tabPane;
     private View contextView;
     private View latticeView;
     private View associationView;
@@ -33,10 +34,16 @@ public class MainFrame extends JFrame {
     public MainFrame(ProgramState state) {
         getContentPane().setLayout(new BorderLayout());
         this.state = state;
-        tabPane = new JTabbedPane();
+
+        tabPane = new WebTabbedPane () {
+            public Dimension getPreferredSize () {
+                Dimension ps = super.getPreferredSize ();
+                ps.width = 150;
+                return ps;
+            }
+        };
+        tabPane.setTabbedPaneStyle(TabbedPaneStyle.attached);
         tabPane.setTabPlacement(JTabbedPane.TOP);
-        tabPane.setOpaque(false);
-        tabPane.setBorder(new EmptyBorder(0, 8, 8, 8));
         add(tabPane);
 
         contextView = new ContextEditor(state);
@@ -58,27 +65,19 @@ public class MainFrame extends JFrame {
         add(statusBar, BorderLayout.SOUTH);
     }
 
-    private void addTab(JTabbedPane t, View v, String title, String toolTip,
-            int i) {
-        t.insertTab("<html><body width='110' style='text-align:center'>"
-                + title + "</body></html>", null, v, toolTip, i);
+    private void addTab(JTabbedPane t, View v, String title, String toolTip, int i) {
+        t.insertTab(title, null, v, toolTip, i);
         t.addPropertyChangeListener(v);
         KeyStroke shortcut = null;
         switch (i) {
         case 0: {
-            shortcut = KeyStroke.getKeyStroke(KeyEvent.VK_E,
-                    InputEvent.CTRL_DOWN_MASK);
-            break;
+            shortcut = KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_DOWN_MASK); break;
         }
         case 1: {
-            shortcut = KeyStroke.getKeyStroke(KeyEvent.VK_L,
-                    InputEvent.CTRL_DOWN_MASK);
-            break;
+            shortcut = KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.CTRL_DOWN_MASK); break;
         }
         case 2: {
-            shortcut = KeyStroke.getKeyStroke(KeyEvent.VK_D,
-                    InputEvent.CTRL_DOWN_MASK);
-            break;
+            shortcut = KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.CTRL_DOWN_MASK); break;
         }
         }
         t.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(shortcut, title);

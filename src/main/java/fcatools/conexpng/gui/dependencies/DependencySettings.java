@@ -77,8 +77,7 @@ public class DependencySettings extends JPanel {
         gbc.gridy = 0;
         add(minSupLabel, gbc);
         gbc.gridx = 1;
-        // TODO: @mac os user: size okay?
-        supField.setPreferredSize(new Dimension(30, 20));
+        supField.setPreferredSize(new Dimension(40, 20));
         add(supField, gbc);
         gbc.gridx = 0;
         gbc.gridy = 1;
@@ -88,7 +87,7 @@ public class DependencySettings extends JPanel {
         gbc.gridy = 2;
         add(confLabel, gbc);
         gbc.gridx = 1;
-        confField.setPreferredSize(new Dimension(30, 20));
+        confField.setPreferredSize(new Dimension(40, 20));
         add(confField, gbc);
         gbc.gridx = 0;
         gbc.gridy = 3;
