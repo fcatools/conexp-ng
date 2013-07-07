@@ -1,5 +1,7 @@
 package fcatools.conexpng.gui.dependencies;
 
+import de.tudresden.inf.tcs.fcaapi.FCAImplication;
+import de.tudresden.inf.tcs.fcalib.ImplicationSet;
 import fcatools.conexpng.ContextChangeEvents;
 import fcatools.conexpng.ProgramState;
 import fcatools.conexpng.ProgramState.ContextChangeEvent;
@@ -10,19 +12,10 @@ import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
-
-import de.tudresden.inf.tcs.fcaapi.FCAImplication;
-import de.tudresden.inf.tcs.fcalib.ImplicationSet;
-
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -84,6 +77,8 @@ public class DependencyView extends View {
         settings = new JPanel(new BorderLayout());
         settings.add(new DependencySettings(), BorderLayout.NORTH);
         settings.getComponent(0).addPropertyChangeListener(this);
+        settings.setMinimumSize(new Dimension(170, 400));
+        toolbar = null;
         super.init();
     }
 

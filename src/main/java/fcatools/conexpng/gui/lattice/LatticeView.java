@@ -9,7 +9,7 @@ import fcatools.conexpng.model.ILatticeAlgorithm;
 import fcatools.conexpng.model.TestLatticeAlgorithm;
 
 import javax.swing.*;
-
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -30,6 +30,7 @@ public class LatticeView extends View {
                 .getConcepts());
         view = new LatticeGraphView(graph, state);
         settings = new AccordionMenue(state);
+        settings.setMinimumSize(new Dimension(170,400));
 
         JButton export = Util.createButton("Export as .PDF", "export",
                 "conexp/cameraFlash.gif");

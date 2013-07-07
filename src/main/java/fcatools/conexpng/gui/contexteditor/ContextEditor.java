@@ -1,5 +1,6 @@
 package fcatools.conexpng.gui.contexteditor;
 
+import com.alee.laf.panel.WebPanel;
 import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
 import de.tudresden.inf.tcs.fcalib.FullObject;
 import fcatools.conexpng.ContextChangeEvents;
@@ -67,7 +68,7 @@ public class ContextEditor extends View {
         super(state);
 
         // Initialize various components
-        panel = new JPanel();
+        panel = new WebPanel();
         panel.setLayout(new BorderLayout());
         matrixModel = new ContextMatrixModel(state);
         matrix = new ContextMatrix(matrixModel, state.columnWidths);

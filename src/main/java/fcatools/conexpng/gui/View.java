@@ -1,11 +1,14 @@
 package fcatools.conexpng.gui;
 
-import fcatools.conexpng.OS;
+import com.alee.laf.panel.WebPanel;
+import com.alee.laf.splitpane.WebSplitPane;
 import fcatools.conexpng.ProgramState;
 
 import javax.swing.*;
 import java.awt.*;
 import java.beans.PropertyChangeListener;
+
+import static javax.swing.JSplitPane.HORIZONTAL_SPLIT;
 
 public abstract class View extends JPanel implements PropertyChangeListener {
 
@@ -17,9 +20,9 @@ public abstract class View extends JPanel implements PropertyChangeListener {
 
     protected JComponent view, settings;
 
-    protected JPanel panel;
+    protected WebPanel panel;
 
-    protected JSplitPane splitPane;
+    protected WebSplitPane splitPane;
 
     public View(ProgramState state) {
         this.state = state;
@@ -28,23 +31,18 @@ public abstract class View extends JPanel implements PropertyChangeListener {
 
     protected void init() {
         setLayout(new BorderLayout());
-        panel = new JPanel();
+        panel = new WebPanel();
         panel.setLayout(new BorderLayout());
-
-        toolbar.setFloatable(false);
-
-        panel.add(toolbar, BorderLayout.WEST);
+        if (toolbar != null) {
+            toolbar.setFloatable(false);
+            panel.add(toolbar, BorderLayout.WEST);
+        }
         panel.add(view, BorderLayout.CENTER);
 
-        // Important to make split pane divider properly visible on osx
-        if (OS.isMacOsX) {
-            settings.setBorder(BorderFactory.createLoweredSoftBevelBorder());
-            panel.setBorder(BorderFactory.createLoweredSoftBevelBorder());
-        }
-
-        splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, settings, panel);
+        splitPane = new WebSplitPane(HORIZONTAL_SPLIT, settings, panel);
         splitPane.setOneTouchExpandable(true);
-        splitPane.setBorder(null);
+        splitPane.setDividerLocation(170);
+        splitPane.setContinuousLayout(true);
         add(splitPane);
     }
 
