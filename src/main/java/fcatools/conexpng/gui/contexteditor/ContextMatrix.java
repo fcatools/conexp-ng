@@ -230,22 +230,24 @@ public class ContextMatrix extends JTable {
         }
     }
 
-    public void renameColumnHeader(int i) {
+    public JTextField renameColumnHeader(int i) {
         isRenaming = true;
         editCellAt(0, i);
         requestFocus();
         ContextCellEditor ed = (ContextCellEditor) editor;
         ed.getTextField().requestFocus();
         ed.getTextField().selectAll();
+        return ed.getTextField();
     }
 
-    public void renameRowHeader(int i) {
+    public JTextField renameRowHeader(int i) {
         isRenaming = true;
         editCellAt(i, 0);
         requestFocus();
         ContextCellEditor ed = (ContextCellEditor) editor;
         ed.getTextField().requestFocus();
         ed.getTextField().selectAll();
+        return ed.getTextField();
     }
 
     // For enabling renaming of headers
@@ -269,8 +271,7 @@ public class ContextMatrix extends JTable {
         }
 
         @Override
-        public Component getTableCellEditorComponent(JTable table,
-                                                     Object value, boolean isSelected, int row, int column) {
+        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
             JTextField f = (JTextField) super.getTableCellEditorComponent(table, value, isSelected, row, column);
             model = (ContextMatrixModel) table.getModel();
             String text;
