@@ -20,11 +20,15 @@ public class ContextMatrixModel extends AbstractTableModel implements Reorderabl
 
     private static final long serialVersionUID = -1509387655329719071L;
 
-    private final FormalContext context;
+    private FormalContext context;
     // Only needed for 'contextChanged' method when renaming s.th.
-    private final ProgramState state;
+    private ProgramState state;
 
     public ContextMatrixModel(ProgramState state) {
+        loadNewContext(state);
+    }
+
+    public void loadNewContext(ProgramState state) {
         this.state = state;
         this.context = state.context;
     }
