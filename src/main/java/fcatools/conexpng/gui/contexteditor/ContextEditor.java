@@ -72,12 +72,12 @@ public class ContextEditor extends View {
         panel.setLayout(new BorderLayout());
         matrixModel = new ContextMatrixModel(state);
         matrix = new ContextMatrix(matrixModel, state.columnWidths);
-        Border margin = new EmptyBorder(1, 3, 1, 4);
+        Border margin = new EmptyBorder(4, 4, 4, 4);
         Border border = BorderFactory.createMatteBorder(1, 1, 0, 0, new Color( 220, 220, 220));
-        JScrollPane scrollPane = matrix.createStripedJScrollPane(panel.getBackground());
-        scrollPane.setBorder(border);
+        JScrollPane scrollPane = matrix.createStripedJScrollPane(Color.white);
+        scrollPane.setBorder(margin);
         toolbar.setFloatable(false);
-        toolbar.setBorder(margin);
+//        toolbar.setBorder(margin);
         panel.add(toolbar, BorderLayout.WEST);
         panel.add(scrollPane, BorderLayout.CENTER);
         setLayout(new BorderLayout());
