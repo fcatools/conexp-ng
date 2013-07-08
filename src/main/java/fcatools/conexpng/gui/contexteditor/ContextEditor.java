@@ -234,19 +234,19 @@ public class ContextEditor extends View {
 
     private void createButtonActions() {
         ActionMap am = matrix.getActionMap();
-        addToolbarButton(toolbar, "addObject", "Add Object", "conexp/addObj.gif", am.get("addObjectAtEnd"));
-        addToolbarButton(toolbar, "clarifyObjects", "Clarify Objects", "conexp/clarifyObj.gif", am.get("clarifyObjects"));
-        addToolbarButton(toolbar, "reduceObjects", "Reduce Objects", "conexp/reduceObj.gif", am.get("reduceObjects"));
+        addToolbarButton(toolbar, "addObject", "Add Object", "icons/context editor/add_object.png", am.get("addObjectAtEnd"));
+        addToolbarButton(toolbar, "clarifyObjects", "Clarify Objects", "icons/context editor/clarify_objects.png", am.get("clarifyObjects"));
+        addToolbarButton(toolbar, "reduceObjects", "Reduce Objects", "icons/context editor/reduce_objects.png", am.get("reduceObjects"));
         toolbar.addSeparator();
-        addToolbarButton(toolbar, "addAttribute", "Add Attribute", "conexp/addAttr.gif", am.get("addAttributeAtEnd"));
-        addToolbarButton(toolbar, "clarifyAttributes", "Clarify Attributes", "conexp/clarifyAttr.gif", am.get("clarifyAttributes"));
-        addToolbarButton(toolbar, "reduceAttributes", "Reduce Attributes", "conexp/reduceAttr.gif", am.get("reduceAttributes"));
+        addToolbarButton(toolbar, "addAttribute", "Add Attribute", "icons/context editor/add_attribute.png", am.get("addAttributeAtEnd"));
+        addToolbarButton(toolbar, "clarifyAttributes", "Clarify Attributes", "icons/context editor/clarify_attributes.png", am.get("clarifyAttributes"));
+        addToolbarButton(toolbar, "reduceAttributes", "Reduce Attributes", "icons/context editor/reduce_attributes.png", am.get("reduceAttributes"));
         toolbar.addSeparator();
-        addToolbarButton(toolbar, "reduceContext", "Reduce Context", "conexp/reduceCxt.gif", am.get("reduce"));
-        addToolbarButton(toolbar, "transposeContext", "Transpose Context", "conexp/transpose.gif", am.get("transpose"));
+        addToolbarButton(toolbar, "reduceContext", "Reduce Context", "icons/context editor/reduce_context.png", am.get("reduce"));
+        addToolbarButton(toolbar, "transposeContext", "Transpose Context", "icons/context editor/transpose.png", am.get("transpose"));
         toolbar.addSeparator();
-        addToolbarToggleButton(toolbar, "compactMatrix", "Compact Matrix", "conexp/alignToGrid.gif", (ItemListener) am.get("compact"));
-        addToolbarToggleButton(toolbar, "showArrowRelations", "Show Arrow Relations", "conexp/associationRule.gif", null); // TODO
+        addToolbarToggleButton(toolbar, "compactMatrix", "Compact Matrix", "icons/context editor/compact.png", (ItemListener) am.get("compact"));
+        addToolbarToggleButton(toolbar, "showArrowRelations", "Show Arrow Relations", "icons/context editor/show_arrow_relations.png", null); // TODO
     }
 
     private void createContextMenuActions() {
