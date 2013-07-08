@@ -121,39 +121,36 @@ public class MainFrame extends JFrame {
             }
         });
 
+        // TODO: Add icons
         WebMenuBar menuBar = new WebMenuBar();
-//        menuBar.setUndecorated ( true );
-        menuBar.add ( new WebMenu( "", loadIcon ( "icons/menu.png" ) )
-        {
-            {
-                add ( new WebMenu ( "Open context" ) );
-                add ( new WebMenu ( "New context" )
-                {
-                    {
-                        add ( new WebMenuItem( "New image" )
-                        {
-                            {
-                                setHotkey ( Hotkey.CTRL_N );
-                            }
-                        } );
-                        add ( new WebMenuItem ( "New music" ) );
-                        add ( new WebMenuItem ( "New video" ) );
-                        add ( new WebMenuItem ( "New archive" ) );
-                    }
-                } );
-                addSeparator ();
-                add ( new WebMenuItem ( "New text document" ) );
-                add ( new WebMenuItem ( "New excel table" ) );
-                add ( new WebMenuItem ( "New presentation" ) );
-                addSeparator();
-                add ( new WebMenuItem ( "Exit" )
-                {
-                    {
-                        setHotkey ( Hotkey.ALT_F4 );
-                    }
-                } );
-            }
-        } );
+        menuBar.add(new WebMenu("", loadIcon("icons/menu.png" )) {{
+            add(new WebMenuItem("New...") {{
+                setHotkey(Hotkey.CTRL_N);
+            }});
+            add(new WebMenuItem("Open..."));
+            add(new WebMenu("Open recent") {{
+                add(new WebMenuItem("/tmp/cool.cex"));
+                add(new WebMenuItem("/Users/frank/projects/tealady.cex"));
+                add(new WebMenuItem("/Users/frank/projects/teaman.cex"));
+            }});
+            addSeparator();
+            add(new WebMenuItem("Save"));
+            add(new WebMenuItem("Save as..."));
+            addSeparator();
+            add(new WebMenuItem("Import..."));
+            add(new WebMenuItem("Export..."));
+            addSeparator();
+            add(new WebMenuItem("Undo"));
+            add(new WebMenuItem("Redo"));
+            addSeparator();
+            add(new WebMenuItem("Count concepts"));
+            add(new WebMenuItem("Start exploration"));
+            addSeparator();
+            add(new WebMenuItem("About"));
+            add(new WebMenuItem("Exit") {{
+                setHotkey(Hotkey.ALT_F4);
+            }});
+        }});
 
         menuPanel.add(menuBar);
     }
