@@ -1,6 +1,5 @@
 package fcatools.conexpng.gui;
 
-import com.alee.extended.layout.HorizontalFlowLayout;
 import com.alee.laf.button.WebButton;
 import com.alee.laf.label.WebLabel;
 import com.alee.laf.menu.WebMenu;
@@ -10,7 +9,6 @@ import com.alee.laf.panel.WebPanel;
 import com.alee.laf.tabbedpane.TabbedPaneStyle;
 import com.alee.laf.tabbedpane.WebTabbedPane;
 import com.alee.managers.hotkey.Hotkey;
-import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
 import fcatools.conexpng.ContextChangeEvents;
 import fcatools.conexpng.ProgramState;
 import fcatools.conexpng.ProgramState.ContextChangeEvent;
@@ -18,25 +16,18 @@ import fcatools.conexpng.Util;
 import fcatools.conexpng.gui.contexteditor.ContextEditor;
 import fcatools.conexpng.gui.dependencies.DependencyView;
 import fcatools.conexpng.gui.lattice.LatticeView;
-import fcatools.conexpng.io.BurmeisterReader;
-import fcatools.conexpng.io.CEXReader;
 
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.xml.stream.XMLStreamException;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 
 import static fcatools.conexpng.Util.loadIcon;
 
@@ -101,9 +92,9 @@ public class MainFrame extends JFrame {
         latticeView = new LatticeView(state);
         associationView = new DependencyView(state);
 
-        addTab(tabPane, contextView, "icons/context_editor.png", "Context", "Edit Context (CTRL + E)", 0);
-        addTab(tabPane, latticeView, "icons/lattice_editor.png", "Lattice", "Show Lattice (CTRL + L)", 1);
-        addTab(tabPane, associationView, "icons/dependencies_editor.png", "Dependencies", "Calculate Dependencies (CTRL + D)", 2);
+        addTab(tabPane, contextView, "icons/tabs/context_editor.png", "Context", "Edit Context (CTRL + E)", 0);
+        addTab(tabPane, latticeView, "icons/tabs/lattice_editor.png", "Lattice", "Show Lattice (CTRL + L)", 1);
+        addTab(tabPane, associationView, "icons/tabs/dependencies_editor.png", "Dependencies", "Calculate Dependencies (CTRL + D)", 2);
 
 //        mainToolbar = new MainToolbar(this, state);
 //        mainToolbar.disableSaveButton();
