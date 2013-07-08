@@ -9,7 +9,6 @@ import fcatools.conexpng.ProgramState.ContextChangeEvent;
 import fcatools.conexpng.gui.View;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.*;
@@ -66,25 +65,22 @@ public class ContextEditor extends View {
 
     public ContextEditor(final ProgramState state) {
         super(state);
+        setLayout(new BorderLayout());
 
         // Initialize various components
-        panel = new WebPanel();
-        panel.setLayout(new BorderLayout());
-        matrixModel = new ContextMatrixModel(state);
-        matrix = new ContextMatrix(matrixModel, state.columnWidths);
-        Border margin = new EmptyBorder(1, 3, 1, 4);
-        Border border = BorderFactory.createMatteBorder(1, 1, 0, 0, new Color( 220, 220, 220));
-        JScrollPane scrollPane = matrix.createStripedJScrollPane(panel.getBackground());
-        scrollPane.setBorder(border);
-        toolbar.setFloatable(false);
-        toolbar.setBorder(margin);
-        panel.add(toolbar, BorderLayout.WEST);
-        panel.add(scrollPane, BorderLayout.CENTER);
-        setLayout(new BorderLayout());
-        add(panel);
         cellPopupMenu = new JPopupMenu();
         objectCellPopupMenu = new JPopupMenu();
         attributeCellPopupMenu = new JPopupMenu();
+        matrixModel = new ContextMatrixModel(state);
+        matrix = new ContextMatrix(matrixModel, state.columnWidths);
+        JScrollPane scrollPane = matrix.createStripedJScrollPane(getBackground());
+        scrollPane.setBorder(new EmptyBorder(3, 3, 3, 3));
+        toolbar.setFloatable(false);
+        panel = new WebPanel();
+        panel.setLayout(new BorderLayout());
+        panel.add(toolbar, BorderLayout.WEST);
+        panel.add(scrollPane, BorderLayout.CENTER);
+        add(panel);
 
         // Add actions
         registerActions();
@@ -92,6 +88,13 @@ public class ContextEditor extends View {
         createKeyActions();
         createButtonActions();
         createContextMenuActions();
+        scrollPane.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                invokeAction(ContextEditor.this, matrix.getActionMap().get("selectNone"));
+                matrix.saveSelection();
+            }
+        });
 
         // Force an update of the table to display it correctly
         matrixModel.fireTableStructureChanged();
@@ -231,19 +234,19 @@ public class ContextEditor extends View {
 
     private void createButtonActions() {
         ActionMap am = matrix.getActionMap();
-        addToolbarButton(toolbar, "addObject", "Add Object", "conexp/addObj.gif", am.get("addObjectAtEnd"));
-        addToolbarButton(toolbar, "clarifyObjects", "Clarify Objects", "conexp/clarifyObj.gif", am.get("clarifyObjects"));
-        addToolbarButton(toolbar, "reduceObjects", "Reduce Objects", "conexp/reduceObj.gif", am.get("reduceObjects"));
+        addToolbarButton(toolbar, "addObject", "Add Object", "icons/context editor/add_object.png", am.get("addObjectAtEnd"));
+        addToolbarButton(toolbar, "clarifyObjects", "Clarify Objects", "icons/context editor/clarify_objects.png", am.get("clarifyObjects"));
+        addToolbarButton(toolbar, "reduceObjects", "Reduce Objects", "icons/context editor/reduce_objects.png", am.get("reduceObjects"));
         toolbar.addSeparator();
-        addToolbarButton(toolbar, "addAttribute", "Add Attribute", "conexp/addAttr.gif", am.get("addAttributeAtEnd"));
-        addToolbarButton(toolbar, "clarifyAttributes", "Clarify Attributes", "conexp/clarifyAttr.gif", am.get("clarifyAttributes"));
-        addToolbarButton(toolbar, "reduceAttributes", "Reduce Attributes", "conexp/reduceAttr.gif", am.get("reduceAttributes"));
+        addToolbarButton(toolbar, "addAttribute", "Add Attribute", "icons/context editor/add_attribute.png", am.get("addAttributeAtEnd"));
+        addToolbarButton(toolbar, "clarifyAttributes", "Clarify Attributes", "icons/context editor/clarify_attributes.png", am.get("clarifyAttributes"));
+        addToolbarButton(toolbar, "reduceAttributes", "Reduce Attributes", "icons/context editor/reduce_attributes.png", am.get("reduceAttributes"));
         toolbar.addSeparator();
-        addToolbarButton(toolbar, "reduceContext", "Reduce Context", "conexp/reduceCxt.gif", am.get("reduce"));
-        addToolbarButton(toolbar, "transposeContext", "Transpose Context", "conexp/transpose.gif", am.get("transpose"));
+        addToolbarButton(toolbar, "reduceContext", "Reduce Context", "icons/context editor/reduce_context.png", am.get("reduce"));
+        addToolbarButton(toolbar, "transposeContext", "Transpose Context", "icons/context editor/transpose.png", am.get("transpose"));
         toolbar.addSeparator();
-        addToolbarToggleButton(toolbar, "compactMatrix", "Compact Matrix", "conexp/alignToGrid.gif", (ItemListener) am.get("compact"));
-        addToolbarToggleButton(toolbar, "showArrowRelations", "Show Arrow Relations", "conexp/associationRule.gif", null); // TODO
+        addToolbarToggleButton(toolbar, "compactMatrix", "Compact Matrix", "icons/context editor/compact.png", (ItemListener) am.get("compact"));
+        addToolbarToggleButton(toolbar, "showArrowRelations", "Show Arrow Relations", "icons/context editor/show_arrow_relations.png", null); // TODO
     }
 
     private void createContextMenuActions() {
@@ -287,14 +290,8 @@ public class ContextEditor extends View {
                     }
                 }
             }
-
-            public void mousePressed(MouseEvent e) {
-                maybeShowPopup(e);
-            }
-
-            public void mouseReleased(MouseEvent e) {
-                maybeShowPopup(e);
-            }
+            public void mousePressed(MouseEvent e) { maybeShowPopup(e); }
+            public void mouseReleased(MouseEvent e) { maybeShowPopup(e); }
         };
         matrix.addMouseListener(mouseAdapter);
         matrix.addMouseMotionListener(mouseAdapter);

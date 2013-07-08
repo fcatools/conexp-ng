@@ -1,7 +1,14 @@
 package fcatools.conexpng.gui;
 
+import com.alee.laf.button.WebButton;
+import com.alee.laf.label.WebLabel;
+import com.alee.laf.menu.WebMenu;
+import com.alee.laf.menu.WebMenuBar;
+import com.alee.laf.menu.WebMenuItem;
+import com.alee.laf.panel.WebPanel;
 import com.alee.laf.tabbedpane.TabbedPaneStyle;
 import com.alee.laf.tabbedpane.WebTabbedPane;
+import com.alee.managers.hotkey.Hotkey;
 import fcatools.conexpng.ContextChangeEvents;
 import fcatools.conexpng.ProgramState;
 import fcatools.conexpng.ProgramState.ContextChangeEvent;
@@ -11,6 +18,10 @@ import fcatools.conexpng.gui.dependencies.DependencyView;
 import fcatools.conexpng.gui.lattice.LatticeView;
 
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
@@ -18,12 +29,18 @@ import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import static fcatools.conexpng.Util.loadIcon;
+
 public class MainFrame extends JFrame {
 
     private static final long serialVersionUID = -3768163989667340886L;
 
+    private static final String MARGIN = "                    ";
+
     // Components
+    private WebPanel mainPanel;
     private WebTabbedPane tabPane;
+    private WebLabel viewTitleLabel;
     private View contextView;
     private View latticeView;
     private View associationView;
@@ -33,6 +50,7 @@ public class MainFrame extends JFrame {
 
     public MainFrame(ProgramState state) {
         getContentPane().setLayout(new BorderLayout());
+        mainPanel = new WebPanel(new BorderLayout());
         this.state = state;
 
         tabPane = new WebTabbedPane () {
@@ -44,29 +62,138 @@ public class MainFrame extends JFrame {
         };
         tabPane.setTabbedPaneStyle(TabbedPaneStyle.attached);
         tabPane.setTabPlacement(JTabbedPane.TOP);
-        add(tabPane);
+        WebPanel tabPanel = new WebPanel();
+        tabPanel.setPreferredSize(new Dimension(105, 30));
+        tabPanel.add(tabPane);
+//        WebPanel topPanelContainer = new WebPanel();
+//        topPanelContainer.setPreferredSize(new Dimension(100, 37));
+        WebPanel topPanel = new WebPanel(new BorderLayout());
+        topPanel.add(tabPanel, BorderLayout.WEST);
+        WebButton b = new WebButton(loadIcon("icons/menu.png"));
+        WebPanel menuPanel = new WebPanel();
+//        menuPanel.add(b);
+        menuPanel.setBorder(BorderFactory.createMatteBorder(0, 1, 0, 0, new Color(140, 140, 140)));
+        topPanel.add(menuPanel, BorderLayout.EAST);
+        Border margin = new EmptyBorder(0, 0, 1, 0);
+        topPanel.setBorder(margin);
+        topPanel.setPreferredSize(new Dimension(100, 27+1));
+        WebPanel centerPanel = new WebPanel();
+        centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.X_AXIS));
+        centerPanel.add(Box.createHorizontalGlue());
+        viewTitleLabel = new WebLabel();
+        centerPanel.add(viewTitleLabel);
+        centerPanel.add(Box.createHorizontalGlue());
+        centerPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(140, 140, 140)));
+        topPanel.add(centerPanel, BorderLayout.CENTER);
+        mainPanel.add(topPanel, BorderLayout.NORTH);
+//        add(tabPane);
 
         contextView = new ContextEditor(state);
         latticeView = new LatticeView(state);
         associationView = new DependencyView(state);
 
-        addTab(tabPane, contextView, "Context", "Edit Context (CTRL + E)", 0);
-        addTab(tabPane, latticeView, "Lattice", "Show Lattice (CTRL + L)", 1);
-        addTab(tabPane, associationView, "Dependencies",
-                "Calculate Dependencies (CTRL + D)", 2);
+        addTab(tabPane, contextView, "icons/tabs/context_editor.png", "Context", "Edit Context (CTRL + E)", 0);
+        addTab(tabPane, latticeView, "icons/tabs/lattice_editor.png", "Lattice", "Show Lattice (CTRL + L)", 1);
+        addTab(tabPane, associationView, "icons/tabs/dependencies_editor.png", "Dependencies", "Calculate Dependencies (CTRL + D)", 2);
 
-        mainToolbar = new MainToolbar(this, state);
-        mainToolbar.disableSaveButton();
-        add(mainToolbar, BorderLayout.PAGE_START);
+//        mainToolbar = new MainToolbar(this, state);
+//        mainToolbar.disableSaveButton();
+//        add(mainToolbar, BorderLayout.PAGE_START);
 
         setTitle("ConExp-NG - \"" + state.filePath + "\"");
         MainStatusBar statusBar = new MainStatusBar();
         state.addPropertyChangeListener(statusBar);
-        add(statusBar, BorderLayout.SOUTH);
+        statusBar.setPreferredSize(new Dimension(0,0));
+        mainPanel.add(statusBar, BorderLayout.SOUTH);
+
+        add(mainPanel);
+
+        showContextEditor();
+
+        tabPane.addChangeListener(new ChangeListener() {
+            public void stateChanged(ChangeEvent e) {
+                JTabbedPane sourceTabbedPane = (JTabbedPane) e.getSource();
+                int index = sourceTabbedPane.getSelectedIndex();
+                switch (index) {
+                    case 0: showContextEditor(); break;
+                    case 1: showLatticeEditor(); break;
+                    case 2: showDependeciesEditor(); break;
+                }
+            }
+        });
+
+        // TODO: Add icons
+        WebMenuBar menuBar = new WebMenuBar();
+        menuBar.add(new WebMenu("", loadIcon("icons/menu.png" )) {{
+            add(new WebMenuItem("New...") {{
+                setHotkey(Hotkey.CTRL_N);
+            }});
+            add(new WebMenuItem("Open..."));
+            add(new WebMenu("Open recent") {{
+                add(new WebMenuItem("/tmp/cool.cex"));
+                add(new WebMenuItem("/Users/frank/projects/tealady.cex"));
+                add(new WebMenuItem("/Users/frank/projects/teaman.cex"));
+            }});
+            addSeparator();
+            add(new WebMenuItem("Save"));
+            add(new WebMenuItem("Save as..."));
+            addSeparator();
+            add(new WebMenuItem("Import..."));
+            add(new WebMenuItem("Export..."));
+            addSeparator();
+            add(new WebMenuItem("Undo"));
+            add(new WebMenuItem("Redo"));
+            addSeparator();
+            add(new WebMenuItem("Count concepts"));
+            add(new WebMenuItem("Start exploration"));
+            addSeparator();
+            add(new WebMenuItem("About"));
+            add(new WebMenuItem("Exit") {{
+                setHotkey(Hotkey.ALT_F4);
+            }});
+        }});
+
+        menuPanel.add(menuBar);
     }
 
-    private void addTab(JTabbedPane t, View v, String title, String toolTip, int i) {
-        t.insertTab(title, null, v, toolTip, i);
+    public void showContextEditor() {
+        removeOldView();
+        viewTitleLabel.setText("Context Editor" + MARGIN);
+        mainPanel.add(contextView, BorderLayout.CENTER);
+        validate();
+        revalidate();
+        repaint();
+    }
+
+    public void showLatticeEditor() {
+        removeOldView();
+        viewTitleLabel.setText("Lattice Editor" + MARGIN);
+        mainPanel.add(latticeView, BorderLayout.CENTER);
+        validate();
+        revalidate();
+        repaint();
+    }
+
+    public void showDependeciesEditor() {
+        removeOldView();
+        viewTitleLabel.setText("Dependencies Editor" + MARGIN);
+        mainPanel.add(associationView, BorderLayout.CENTER);
+        validate();
+        revalidate();
+        repaint();
+    }
+
+    private void removeOldView() {
+        BorderLayout layout = (BorderLayout) mainPanel.getLayout();
+        Component component = layout.getLayoutComponent(BorderLayout.CENTER);
+        if (component != null) {
+            mainPanel.remove(component);
+        }
+    }
+
+    private void addTab(WebTabbedPane t, View v, String iconPath, String title, String toolTip, int i) {
+//        t.insertTab(title, null, v, toolTip, i);
+        t.addTab("", loadIcon(iconPath), null, toolTip);
         t.addPropertyChangeListener(v);
         KeyStroke shortcut = null;
         switch (i) {
@@ -89,11 +216,11 @@ public class MainFrame extends JFrame {
     private class SwitchTab extends AbstractAction {
 
         private int tabnr;
-        private JTabbedPane tabPane;
+        private WebTabbedPane tabPane;
 
-        public SwitchTab(int i, JTabbedPane tabs) {
+        public SwitchTab(int i, WebTabbedPane tabPane) {
             tabnr = i;
-            tabPane = tabs;
+            this.tabPane = tabPane;
         }
 
         @Override
@@ -182,3 +309,5 @@ public class MainFrame extends JFrame {
     }
 
 }
+
+

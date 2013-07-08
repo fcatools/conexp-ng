@@ -13,10 +13,14 @@ public class Util {
         JButton b = new JButton();
         b.setToolTipText(title);
         b.setName(name);
+        b.setIcon(loadIcon(iconPath));
+        return b;
+    }
+
+    public static ImageIcon loadIcon(String iconPath) {
         URL url = Util.class.getClassLoader().getResource(iconPath);
         ImageIcon icon = new ImageIcon(url);
-        b.setIcon(icon);
-        return b;
+        return icon;
     }
 
     public static JToggleButton createToggleButton(String title, String name, String iconPath) {
