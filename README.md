@@ -1,5 +1,5 @@
-![Logo](src/main/resources/icons/logo.png) ConExp-NG
-==================================================================
+![Logo](logo_small.png) ConExp-NG
+=================================
 
 ConExp-NG is a simple GUI-centric tool for the study & research of Formal
 Concept Analysis (FCA) that allows you to create formal contexts, draw concept
