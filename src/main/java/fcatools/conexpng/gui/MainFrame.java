@@ -1,5 +1,8 @@
 package fcatools.conexpng.gui;
 
+import com.alee.extended.filechooser.SelectionMode;
+import com.alee.extended.filechooser.WebFileChooser;
+import com.alee.laf.StyleConstants;
 import com.alee.laf.button.WebButton;
 import com.alee.laf.label.WebLabel;
 import com.alee.laf.menu.WebMenu;
@@ -9,6 +12,9 @@ import com.alee.laf.panel.WebPanel;
 import com.alee.laf.tabbedpane.TabbedPaneStyle;
 import com.alee.laf.tabbedpane.WebTabbedPane;
 import com.alee.managers.hotkey.Hotkey;
+import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
+import de.tudresden.inf.tcs.fcalib.FullObject;
+import de.tudresden.inf.tcs.fcalib.action.StartExplorationAction;
 import fcatools.conexpng.ContextChangeEvents;
 import fcatools.conexpng.ProgramState;
 import fcatools.conexpng.ProgramState.ContextChangeEvent;
@@ -16,19 +22,29 @@ import fcatools.conexpng.Util;
 import fcatools.conexpng.gui.contexteditor.ContextEditor;
 import fcatools.conexpng.gui.dependencies.DependencyView;
 import fcatools.conexpng.gui.lattice.LatticeView;
+import fcatools.conexpng.io.BurmeisterReader;
+import fcatools.conexpng.io.BurmeisterWriter;
+import fcatools.conexpng.io.CEXReader;
+import fcatools.conexpng.io.CEXWriter;
 
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.xml.stream.XMLStreamException;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
+import static fcatools.conexpng.Util.centerDialogInsideMainFrame;
 import static fcatools.conexpng.Util.loadIcon;
 
 public class MainFrame extends JFrame {
@@ -48,7 +64,7 @@ public class MainFrame extends JFrame {
 
     private MainToolbar mainToolbar;
 
-    public MainFrame(ProgramState state) {
+    public MainFrame(final ProgramState state) {
         getContentPane().setLayout(new BorderLayout());
         mainPanel = new WebPanel(new BorderLayout());
         this.state = state;
@@ -127,29 +143,63 @@ public class MainFrame extends JFrame {
         menuBar.add(new WebMenu("", loadIcon("icons/menu.png" )) {{
             add(new WebMenuItem("New...") {{
                 setHotkey(Hotkey.CTRL_N);
+                setEnabled(false);
             }});
-            add(new WebMenuItem("Open..."));
+            add(new WebMenuItem("Open...") {{
+                addActionListener(new OpenAction(MainFrame.this, state));
+            }});
             add(new WebMenu("Open recent") {{
                 add(new WebMenuItem("/tmp/cool.cex"));
                 add(new WebMenuItem("/Users/frank/projects/tealady.cex"));
                 add(new WebMenuItem("/Users/frank/projects/teaman.cex"));
+                setEnabled(false);
             }});
             addSeparator();
-            add(new WebMenuItem("Save"));
-            add(new WebMenuItem("Save as..."));
+            add(new WebMenuItem("Save") {{
+                setEnabled(false);
+            }});
+            add(new WebMenuItem("Save as...") {{
+                addActionListener(new SaveAction(MainFrame.this, state));
+            }});
             addSeparator();
-            add(new WebMenuItem("Import..."));
-            add(new WebMenuItem("Export..."));
+            add(new WebMenuItem("Import...") {{
+                setEnabled(false);
+            }});
+            add(new WebMenuItem("Export...") {{
+                setEnabled(false);
+            }});
             addSeparator();
-            add(new WebMenuItem("Undo"));
-            add(new WebMenuItem("Redo"));
+            add(new WebMenuItem("Undo") {{
+                setEnabled(false);
+            }});
+            add(new WebMenuItem("Redo") {{
+                setEnabled(false);
+            }});
             addSeparator();
-            add(new WebMenuItem("Count concepts"));
-            add(new WebMenuItem("Start exploration"));
+            add(new WebMenuItem("Count concepts") {{
+                setEnabled(false);
+            }});
+            add(new WebMenuItem("Start exploration") {{
+                addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent arg0) {
+                        MyExpert expert = new MyExpert(MainFrame.this, state);
+                        state.context.setExpert(expert);
+                        expert.addExpertActionListener(state.context);
+                        // Create an expert action for starting attribute exploration
+                        StartExplorationAction<String, String, FullObject<String, String>> action = new StartExplorationAction<String, String, FullObject<String, String>>();
+                        action.setContext(state.context);
+                        // Fire the action, exploration starts...
+                        expert.fireExpertAction(action);
+                    }
+                });
+            }});
             addSeparator();
-            add(new WebMenuItem("About"));
+            add(new WebMenuItem("About") {{
+                setEnabled(false);
+            }});
             add(new WebMenuItem("Exit") {{
                 setHotkey(Hotkey.ALT_F4);
+                setEnabled(false);
             }});
         }});
 
@@ -311,3 +361,101 @@ public class MainFrame extends JFrame {
 }
 
 
+class OpenAction extends AbstractAction {
+    MainFrame mainFrame;
+    ProgramState state;
+
+    public OpenAction(MainFrame mainFrame, ProgramState state) {
+        this.mainFrame = mainFrame;
+        this.state = state;
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+
+        final WebFileChooser fc = new WebFileChooser(mainFrame, "Open context");
+        fc.setSelectionMode(SelectionMode.SINGLE_SELECTION);
+        fc.setCurrentDirectory(state.lastOpened);
+        fc.setVisible(true);
+
+        if (fc.getResult() == StyleConstants.OK_OPTION) {
+            File file = fc.getSelectedFile();
+            String path = file.getAbsolutePath();
+
+            state.lastOpened = path.substring(0, path.lastIndexOf(System.getProperty("file.separator")));
+            state.filePath = path;
+            mainFrame.setTitle("ConExp-NG - \"" + path + "\"");
+
+            try {
+                if (path.endsWith(".cex"))
+                    new CEXReader(state);
+                else
+                    new BurmeisterReader(state);
+            } catch (FileNotFoundException e1) {
+                showMessageDialog("Can not find this file: " + path, true);
+            } catch (IllegalObjectException | IOException
+                    | XMLStreamException e1) {
+                showMessageDialog(
+                        "The file seems to be corrupt: " + e1.getMessage(),
+                        true);
+            }
+        }
+    }
+
+    private void showMessageDialog(String message, boolean error) {
+        JOptionPane pane = new JOptionPane(message);
+        pane.setMessageType(error ? JOptionPane.ERROR_MESSAGE
+                : JOptionPane.INFORMATION_MESSAGE);
+        JDialog dialog = pane.createDialog(mainFrame, "Error");
+        dialog.pack();
+        centerDialogInsideMainFrame(mainFrame, dialog);
+        dialog.setVisible(true);
+    }
+}
+
+class SaveAction extends AbstractAction {
+    MainFrame mainFrame;
+    ProgramState state;
+
+    public SaveAction(MainFrame mainFrame, ProgramState state) {
+        this.mainFrame = mainFrame;
+        this.state = state;
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        state.filePath = "";
+        if (state.filePath.isEmpty()) {
+            final WebFileChooser fc = new WebFileChooser(mainFrame, "Save context");
+            fc.setSelectionMode(SelectionMode.SINGLE_SELECTION);
+            fc.setCurrentDirectory(state.lastOpened);
+            fc.setVisible(true);
+
+            if (fc.getResult() == StyleConstants.OK_OPTION) {
+                File file = fc.getSelectedFile();
+                String path = file.getAbsolutePath();
+                state.lastOpened = path.substring(0, path.lastIndexOf(System.getProperty("file.separator")));
+                state.filePath = path;
+                mainFrame.setTitle("ConExp-NG - \"" + path + "\"");
+            }
+        }
+        try {
+            if (state.filePath.endsWith(".cex"))
+
+                new CEXWriter(state);
+
+            else
+                new BurmeisterWriter(state);
+        } catch (FileNotFoundException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        } catch (XMLStreamException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        } catch (IOException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+    }
+
+}
