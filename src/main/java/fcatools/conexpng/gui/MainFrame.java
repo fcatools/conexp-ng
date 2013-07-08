@@ -74,9 +74,9 @@ public class MainFrame extends JFrame {
 //        menuPanel.add(b);
         menuPanel.setBorder(BorderFactory.createMatteBorder(0, 1, 0, 0, new Color(140, 140, 140)));
         topPanel.add(menuPanel, BorderLayout.EAST);
-        Border margin = new EmptyBorder(0, 0, 4, 0);
+        Border margin = new EmptyBorder(0, 0, 1, 0);
         topPanel.setBorder(margin);
-        topPanel.setPreferredSize(new Dimension(100, 27+4));
+        topPanel.setPreferredSize(new Dimension(100, 27+1));
         WebPanel centerPanel = new WebPanel();
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.X_AXIS));
         centerPanel.add(Box.createHorizontalGlue());
@@ -103,6 +103,7 @@ public class MainFrame extends JFrame {
         setTitle("ConExp-NG - \"" + state.filePath + "\"");
         MainStatusBar statusBar = new MainStatusBar();
         state.addPropertyChangeListener(statusBar);
+        statusBar.setPreferredSize(new Dimension(0,0));
         mainPanel.add(statusBar, BorderLayout.SOUTH);
 
         add(mainPanel);
