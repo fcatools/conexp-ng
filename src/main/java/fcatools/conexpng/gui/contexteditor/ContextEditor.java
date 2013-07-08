@@ -88,6 +88,13 @@ public class ContextEditor extends View {
         createKeyActions();
         createButtonActions();
         createContextMenuActions();
+        scrollPane.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                invokeAction(ContextEditor.this, matrix.getActionMap().get("selectNone"));
+                matrix.saveSelection();
+            }
+        });
 
         // Force an update of the table to display it correctly
         matrixModel.fireTableStructureChanged();
