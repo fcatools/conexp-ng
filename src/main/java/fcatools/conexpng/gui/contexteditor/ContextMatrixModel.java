@@ -54,12 +54,10 @@ public class ContextMatrixModel extends AbstractTableModel implements Reorderabl
             return "";
         }
         else if (columnIndex == 0) {
-            return String.format("<html><div style='margin:2px 4px'><b>%s</b></div></html>",
-                    context.getObjectAtIndex(rowIndex - 1).getIdentifier());
+            return String.format("%s", context.getObjectAtIndex(rowIndex - 1).getIdentifier());
         }
         else if (rowIndex == 0) {
-            return String.format("<html><div style='margin:2px 4px'><b>%s</b></div></html>",
-                    context.getAttributeAtIndex(columnIndex - 1));
+            return String.format("%s", context.getAttributeAtIndex(columnIndex - 1));
         }
         return context.objectHasAttribute(
                 context.getObjectAtIndex(rowIndex - 1),

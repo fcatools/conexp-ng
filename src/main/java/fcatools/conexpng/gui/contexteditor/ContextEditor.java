@@ -9,7 +9,6 @@ import fcatools.conexpng.ProgramState.ContextChangeEvent;
 import fcatools.conexpng.gui.View;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.*;
@@ -66,25 +65,22 @@ public class ContextEditor extends View {
 
     public ContextEditor(final ProgramState state) {
         super(state);
+        setLayout(new BorderLayout());
 
         // Initialize various components
-        panel = new WebPanel();
-        panel.setLayout(new BorderLayout());
-        matrixModel = new ContextMatrixModel(state);
-        matrix = new ContextMatrix(matrixModel, state.columnWidths);
-        Border margin = new EmptyBorder(4, 4, 4, 4);
-        Border border = BorderFactory.createMatteBorder(1, 1, 0, 0, new Color( 220, 220, 220));
-        JScrollPane scrollPane = matrix.createStripedJScrollPane(Color.white);
-        scrollPane.setBorder(margin);
-        toolbar.setFloatable(false);
-//        toolbar.setBorder(margin);
-        panel.add(toolbar, BorderLayout.WEST);
-        panel.add(scrollPane, BorderLayout.CENTER);
-        setLayout(new BorderLayout());
-        add(panel);
         cellPopupMenu = new JPopupMenu();
         objectCellPopupMenu = new JPopupMenu();
         attributeCellPopupMenu = new JPopupMenu();
+        matrixModel = new ContextMatrixModel(state);
+        matrix = new ContextMatrix(matrixModel, state.columnWidths);
+        JScrollPane scrollPane = matrix.createStripedJScrollPane(getBackground());
+        scrollPane.setBorder(new EmptyBorder(3, 3, 3, 3));
+        toolbar.setFloatable(false);
+        panel = new WebPanel();
+        panel.setLayout(new BorderLayout());
+        panel.add(toolbar, BorderLayout.WEST);
+        panel.add(scrollPane, BorderLayout.CENTER);
+        add(panel);
 
         // Add actions
         registerActions();
@@ -287,14 +283,8 @@ public class ContextEditor extends View {
                     }
                 }
             }
-
-            public void mousePressed(MouseEvent e) {
-                maybeShowPopup(e);
-            }
-
-            public void mouseReleased(MouseEvent e) {
-                maybeShowPopup(e);
-            }
+            public void mousePressed(MouseEvent e) { maybeShowPopup(e); }
+            public void mouseReleased(MouseEvent e) { maybeShowPopup(e); }
         };
         matrix.addMouseListener(mouseAdapter);
         matrix.addMouseMotionListener(mouseAdapter);
