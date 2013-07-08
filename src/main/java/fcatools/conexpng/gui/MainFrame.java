@@ -72,7 +72,7 @@ public class MainFrame extends JFrame {
         WebButton b = new WebButton(loadIcon("icons/menu.png"));
         WebPanel menuPanel = new WebPanel();
 //        menuPanel.add(b);
-        menuPanel.setBorder(BorderFactory.createMatteBorder(0, 1, 1, 0, new Color(140, 140, 140)));
+        menuPanel.setBorder(BorderFactory.createMatteBorder(0, 1, 0, 0, new Color(140, 140, 140)));
         topPanel.add(menuPanel, BorderLayout.EAST);
         Border margin = new EmptyBorder(0, 0, 4, 0);
         topPanel.setBorder(margin);
@@ -122,7 +122,7 @@ public class MainFrame extends JFrame {
         });
 
         WebMenuBar menuBar = new WebMenuBar();
-        menuBar.setUndecorated ( true );
+//        menuBar.setUndecorated ( true );
         menuBar.add ( new WebMenu( "", loadIcon ( "icons/menu.png" ) )
         {
             {
