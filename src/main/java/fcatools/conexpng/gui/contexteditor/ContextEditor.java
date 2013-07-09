@@ -237,14 +237,20 @@ public class ContextEditor extends View {
         addToolbarButton(toolbar, "addObject", "Add Object", "icons/context editor/add_object.png", am.get("addObjectAtEnd"));
         addToolbarButton(toolbar, "clarifyObjects", "Clarify Objects", "icons/context editor/clarify_objects.png", am.get("clarifyObjects"));
         addToolbarButton(toolbar, "reduceObjects", "Reduce Objects", "icons/context editor/reduce_objects.png", am.get("reduceObjects"));
+        toolbar.addSpacing();
         toolbar.addSeparator();
+        toolbar.addSpacing();
         addToolbarButton(toolbar, "addAttribute", "Add Attribute", "icons/context editor/add_attribute.png", am.get("addAttributeAtEnd"));
         addToolbarButton(toolbar, "clarifyAttributes", "Clarify Attributes", "icons/context editor/clarify_attributes.png", am.get("clarifyAttributes"));
         addToolbarButton(toolbar, "reduceAttributes", "Reduce Attributes", "icons/context editor/reduce_attributes.png", am.get("reduceAttributes"));
+        toolbar.addSpacing();
         toolbar.addSeparator();
+        toolbar.addSpacing();
         addToolbarButton(toolbar, "reduceContext", "Reduce Context", "icons/context editor/reduce_context.png", am.get("reduce"));
         addToolbarButton(toolbar, "transposeContext", "Transpose Context", "icons/context editor/transpose.png", am.get("transpose"));
+        toolbar.addSpacing();
         toolbar.addSeparator();
+        toolbar.addSpacing();
         addToolbarToggleButton(toolbar, "compactMatrix", "Compact Matrix", "icons/context editor/compact.png", (ItemListener) am.get("compact"));
         addToolbarToggleButton(toolbar, "showArrowRelations", "Show Arrow Relations", "icons/context editor/show_arrow_relations.png", null); // TODO
     }
