@@ -2,6 +2,7 @@ package fcatools.conexpng.gui;
 
 import com.alee.laf.panel.WebPanel;
 import com.alee.laf.splitpane.WebSplitPane;
+import com.alee.laf.toolbar.WebToolBar;
 import fcatools.conexpng.ProgramState;
 
 import javax.swing.*;
@@ -16,7 +17,7 @@ public abstract class View extends JPanel implements PropertyChangeListener {
 
     protected ProgramState state;
 
-    protected JToolBar toolbar = new JToolBar(JToolBar.VERTICAL);
+    protected WebToolBar toolbar;
 
     protected JComponent view, settings;
 
@@ -26,6 +27,7 @@ public abstract class View extends JPanel implements PropertyChangeListener {
 
     public View(ProgramState state) {
         this.state = state;
+        toolbar = new WebToolBar(WebToolBar.VERTICAL);
         state.addPropertyChangeListener(this);
     }
 
