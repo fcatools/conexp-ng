@@ -5,13 +5,11 @@ import com.alee.extended.filechooser.WebFileChooser;
 import com.alee.laf.StyleConstants;
 import com.alee.laf.button.WebButton;
 import com.alee.laf.label.WebLabel;
-import com.alee.laf.menu.WebMenu;
-import com.alee.laf.menu.WebMenuBar;
-import com.alee.laf.menu.WebMenuItem;
 import com.alee.laf.panel.WebPanel;
 import com.alee.laf.tabbedpane.TabbedPaneStyle;
 import com.alee.laf.tabbedpane.WebTabbedPane;
-import com.alee.managers.hotkey.Hotkey;
+import com.alee.laf.toolbar.ToolbarStyle;
+import com.alee.laf.toolbar.WebToolBar;
 import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
 import de.tudresden.inf.tcs.fcalib.FullObject;
 import de.tudresden.inf.tcs.fcalib.action.StartExplorationAction;
@@ -51,7 +49,7 @@ public class MainFrame extends JFrame {
 
     private static final long serialVersionUID = -3768163989667340886L;
 
-    private static final String MARGIN = "                    ";
+    private static final String MARGIN = "                              ";
 
     // Components
     private WebPanel mainPanel;
@@ -139,71 +137,74 @@ public class MainFrame extends JFrame {
         });
 
         // TODO: Add icons
-        WebMenuBar menuBar = new WebMenuBar();
-        menuBar.add(new WebMenu("", loadIcon("icons/menu.png" )) {{
-            add(new WebMenuItem("New...") {{
-                setHotkey(Hotkey.CTRL_N);
-                setEnabled(false);
-            }});
-            add(new WebMenuItem("Open...") {{
-                addActionListener(new OpenAction(MainFrame.this, state));
-            }});
-            add(new WebMenu("Open recent") {{
-                add(new WebMenuItem("/tmp/cool.cex"));
-                add(new WebMenuItem("/Users/frank/projects/tealady.cex"));
-                add(new WebMenuItem("/Users/frank/projects/teaman.cex"));
-                setEnabled(false);
-            }});
-            addSeparator();
-            add(new WebMenuItem("Save") {{
-                setEnabled(false);
-            }});
-            add(new WebMenuItem("Save as...") {{
-                addActionListener(new SaveAction(MainFrame.this, state));
-            }});
-            addSeparator();
-            add(new WebMenuItem("Import...") {{
-                setEnabled(false);
-            }});
-            add(new WebMenuItem("Export...") {{
-                setEnabled(false);
-            }});
-            addSeparator();
-            add(new WebMenuItem("Undo") {{
-                setEnabled(false);
-            }});
-            add(new WebMenuItem("Redo") {{
-                setEnabled(false);
-            }});
-            addSeparator();
-            add(new WebMenuItem("Count concepts") {{
-                setEnabled(false);
-            }});
-            add(new WebMenuItem("Start exploration") {{
-                addActionListener(new ActionListener() {
-                    public void actionPerformed(ActionEvent arg0) {
-                        MyExpert expert = new MyExpert(MainFrame.this, state);
-                        state.context.setExpert(expert);
-                        expert.addExpertActionListener(state.context);
-                        // Create an expert action for starting attribute exploration
-                        StartExplorationAction<String, String, FullObject<String, String>> action = new StartExplorationAction<String, String, FullObject<String, String>>();
-                        action.setContext(state.context);
-                        // Fire the action, exploration starts...
-                        expert.fireExpertAction(action);
-                    }
-                });
-            }});
-            addSeparator();
-            add(new WebMenuItem("About") {{
-                setEnabled(false);
-            }});
-            add(new WebMenuItem("Exit") {{
-                setHotkey(Hotkey.ALT_F4);
-                setEnabled(false);
-            }});
+        // toolbar.add ( WebButton.createIconWebButton ( loadIcon ( "toolbar/save.png" ), StyleConstants.smallRound, true ) );
+        WebToolBar menuBar = new WebToolBar();
+        menuBar.setToolbarStyle(ToolbarStyle.attached);
+        menuBar.setFloatable(false);
+        menuBar.add(new WebButton("New...") {{
+//            setHotkey(Hotkey.CTRL_N);
+            setEnabled(false);
+        }});
+        menuBar.add(new WebButton("Open...") {{
+            addActionListener(new OpenAction(MainFrame.this, state));
+        }});
+        // TODO: open recent
+//        menuBar.add(new WebMenu("Open recent") {{
+//            add(new WebMenuItem("/tmp/cool.cex"));
+//            add(new WebMenuItem("/Users/frank/projects/tealady.cex"));
+//            add(new WebMenuItem("/Users/frank/projects/teaman.cex"));
+//            setEnabled(false);
+//        }});
+        menuBar.addSeparator();
+        menuBar.add(new WebButton("Save") {{
+            setEnabled(false);
+        }});
+        menuBar.add(new WebButton("Save as...") {{
+            addActionListener(new SaveAction(MainFrame.this, state));
+        }});
+        menuBar.addSeparator();
+        menuBar.add(new WebButton("Import...") {{
+            setEnabled(false);
+        }});
+        menuBar.add(new WebButton("Export...") {{
+            setEnabled(false);
+        }});
+        menuBar.addSeparator();
+        menuBar.add(new WebButton("Undo") {{
+            setEnabled(false);
+        }});
+        menuBar.add(new WebButton("Redo") {{
+            setEnabled(false);
+        }});
+        menuBar.addSeparator();
+        menuBar.add(new WebButton("Count concepts") {{
+            setEnabled(false);
+        }});
+        menuBar.add(new WebButton("Start exploration") {{
+            addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent arg0) {
+                    MyExpert expert = new MyExpert(MainFrame.this, state);
+                    state.context.setExpert(expert);
+                    expert.addExpertActionListener(state.context);
+                    // Create an expert action for starting attribute exploration
+                    StartExplorationAction<String, String, FullObject<String, String>> action = new StartExplorationAction<String, String, FullObject<String, String>>();
+                    action.setContext(state.context);
+                    // Fire the action, exploration starts...
+                    expert.fireExpertAction(action);
+                }
+            });
+        }});
+        menuBar.addSeparator();
+        menuBar.add(new WebButton("About") {{
+            setEnabled(false);
+        }});
+        menuBar.add(new WebButton("Help") {{
+//            setHotkey(Hotkey.ALT_F4);
+            setEnabled(false);
         }});
 
-        menuPanel.add(menuBar);
+//        menuPanel.add(menuBar);
+        add(menuBar, BorderLayout.PAGE_START);
     }
 
     public void showContextEditor() {
