@@ -45,6 +45,7 @@ import java.io.IOException;
 import static fcatools.conexpng.Util.centerDialogInsideMainFrame;
 import static fcatools.conexpng.Util.loadIcon;
 
+// TODO: The code needs to be tidied up drastically
 public class MainFrame extends JFrame {
 
     private static final long serialVersionUID = -3768163989667340886L;
@@ -84,10 +85,6 @@ public class MainFrame extends JFrame {
         WebPanel topPanel = new WebPanel(new BorderLayout());
         topPanel.add(tabPanel, BorderLayout.WEST);
         WebButton b = new WebButton(loadIcon("icons/menu.png"));
-        WebPanel menuPanel = new WebPanel();
-//        menuPanel.add(b);
-        menuPanel.setBorder(BorderFactory.createMatteBorder(0, 1, 0, 0, new Color(140, 140, 140)));
-        topPanel.add(menuPanel, BorderLayout.EAST);
         Border margin = new EmptyBorder(0, 0, 1, 0);
         topPanel.setBorder(margin);
         topPanel.setPreferredSize(new Dimension(100, 27+1));
@@ -203,7 +200,6 @@ public class MainFrame extends JFrame {
             setEnabled(false);
         }});
 
-//        menuPanel.add(menuBar);
         add(menuBar, BorderLayout.PAGE_START);
     }
 
