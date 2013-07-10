@@ -269,8 +269,6 @@ public class ContextMatrix extends JTable {
         public ContextCellEditor(JTextField textField) {
             super(textField);
             this.textField = textField;
-            // Prevent double clicking from initiating edit operation
-            this.clickCountToStart = Integer.MAX_VALUE;
         }
 
         @Override
