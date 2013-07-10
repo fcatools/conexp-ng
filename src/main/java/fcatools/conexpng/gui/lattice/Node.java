@@ -117,9 +117,14 @@ public class Node extends JPanel implements LatticeGraphElement {
         below.add(n);
     }
 
+    
 
 
-    public void update(int x, int y, boolean first) {
+    public List<Node> getBelow() {
+		return below;
+	}
+
+	public void update(int x, int y, boolean first) {
         int updateX;
         int updateY;
         if(this.x + x >= 0) updateX = this.x + x;
@@ -145,23 +150,19 @@ public class Node extends JPanel implements LatticeGraphElement {
     }
 
     public void computeIdeal(){
-        ideal = this.getAllBelow();
-    }
+    	ListSet<Node> temp = new ListSet<>();
+    	for(Node n : below){
+    		temp.add(n);
+    		temp.addAll(n.getIdeal());
+    	}
+        ideal = temp;
+    }   
 
-    private ListSet<Node> getAllBelow(){
-        ListSet<Node> temp = new ListSet<>();
-        if(below == null){
-            return temp;
-        }else{
-            for(Node n : below){
-                temp.add(n);
-                temp.addAll(n.getAllBelow());
-            }
-        }
-        return temp;
-    }
+    public ListSet<Node> getIdeal() {
+		return ideal;
+	}
 
-    public void addObjects(Set<String> extent) {
+	public void addObjects(Set<String> extent) {
         objects.addAll(extent);
 
     }
