@@ -1,5 +1,6 @@
 package fcatools.conexpng.gui.contexteditor;
 
+import com.alee.extended.panel.WebButtonGroup;
 import com.alee.laf.panel.WebPanel;
 import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
 import de.tudresden.inf.tcs.fcalib.FullObject;
@@ -234,25 +235,36 @@ public class ContextEditor extends View {
 
     private void createButtonActions() {
         ActionMap am = matrix.getActionMap();
-        addToolbarButton(toolbar, "addObject", "Add Object", "icons/context editor/add_object.png", am.get("addObjectAtEnd"));
-        addToolbarButton(toolbar, "clarifyObjects", "Clarify Objects", "icons/context editor/clarify_objects.png", am.get("clarifyObjects"));
-        addToolbarButton(toolbar, "reduceObjects", "Reduce Objects", "icons/context editor/reduce_objects.png", am.get("reduceObjects"));
-        toolbar.addSpacing();
+        WebButtonGroup group;
+        group = new WebButtonGroup(WebButtonGroup.VERTICAL, true,
+                createButton("addObject", "Add Object", "icons/context editor/add_object.png", am.get("addObjectAtEnd")),
+                createButton("clarifyObjects", "Clarify Objects", "icons/context editor/clarify_objects.png", am.get("clarifyObjects")),
+                createButton("reduceObjects", "Reduce Objects", "icons/context editor/reduce_objects.png", am.get("reduceObjects"))
+        );
+        group.setButtonsDrawFocus(false);
+        toolbar.add(group);
         toolbar.addSeparator();
-        toolbar.addSpacing();
-        addToolbarButton(toolbar, "addAttribute", "Add Attribute", "icons/context editor/add_attribute.png", am.get("addAttributeAtEnd"));
-        addToolbarButton(toolbar, "clarifyAttributes", "Clarify Attributes", "icons/context editor/clarify_attributes.png", am.get("clarifyAttributes"));
-        addToolbarButton(toolbar, "reduceAttributes", "Reduce Attributes", "icons/context editor/reduce_attributes.png", am.get("reduceAttributes"));
-        toolbar.addSpacing();
+        group = new WebButtonGroup(WebButtonGroup.VERTICAL, true,
+                createButton("addAttribute", "Add Attribute", "icons/context editor/add_attribute.png", am.get("addAttributeAtEnd")),
+                createButton("clarifyAttributes", "Clarify Attributes", "icons/context editor/clarify_attributes.png", am.get("clarifyAttributes")),
+                createButton("reduceAttributes", "Reduce Attributes", "icons/context editor/reduce_attributes.png", am.get("reduceAttributes"))
+        );
+        group.setButtonsDrawFocus(false);
+        toolbar.add(group);
         toolbar.addSeparator();
-        toolbar.addSpacing();
-        addToolbarButton(toolbar, "reduceContext", "Reduce Context", "icons/context editor/reduce_context.png", am.get("reduce"));
-        addToolbarButton(toolbar, "transposeContext", "Transpose Context", "icons/context editor/transpose.png", am.get("transpose"));
-        toolbar.addSpacing();
+        group = new WebButtonGroup(WebButtonGroup.VERTICAL, true,
+                createButton("reduceContext", "Reduce Context", "icons/context editor/reduce_context.png", am.get("reduce")),
+                createButton("transposeContext", "Transpose Context", "icons/context editor/transpose.png", am.get("transpose"))
+        );
+        group.setButtonsDrawFocus(false);
+        toolbar.add(group);
         toolbar.addSeparator();
-        toolbar.addSpacing();
-        addToolbarToggleButton(toolbar, "compactMatrix", "Compact Matrix", "icons/context editor/compact.png", (ItemListener) am.get("compact"));
-        addToolbarToggleButton(toolbar, "showArrowRelations", "Show Arrow Relations", "icons/context editor/show_arrow_relations.png", null); // TODO
+        group = new WebButtonGroup(WebButtonGroup.VERTICAL, false,
+                createToggleButton("compactMatrix", "Compact Matrix", "icons/context editor/compact.png", (ItemListener) am.get("compact")),
+                createToggleButton("showArrowRelations", "Show Arrow Relations", "icons/context editor/show_arrow_relations.png", null) // TODO
+        );
+        group.setButtonsDrawFocus(false);
+        toolbar.add(group);
     }
 
     private void createContextMenuActions() {

@@ -9,11 +9,17 @@ import java.net.URL;
 
 public class Util {
 
-    public static JButton createButton(String title, String name, String iconPath) {
+    public static JButton createButton(String tooltip, String name, String iconPath) {
         JButton b = new JButton();
-        b.setToolTipText(title);
+        b.setToolTipText(tooltip);
         b.setName(name);
         b.setIcon(loadIcon(iconPath));
+        return b;
+    }
+
+    public static JButton createButton(String tooltip, String name, String iconPath, Action action) {
+        JButton b = createButton(tooltip, name, iconPath);
+        b.addActionListener(action);
         return b;
     }
 
@@ -33,22 +39,16 @@ public class Util {
         return b;
     }
 
+    public static JToggleButton createToggleButton(String tooltip, String name, String iconPath, ItemListener itemListener) {
+        JToggleButton b = createToggleButton(tooltip, name, iconPath);
+        b.addItemListener(itemListener);
+        return b;
+    }
+
     public static void addMenuItem(JPopupMenu menu, String name, ActionListener action) {
         JMenuItem item = new JMenuItem(name);
         menu.add(item);
         item.addActionListener(action);
-    }
-
-    public static void addToolbarButton(JToolBar toolbar, String name, String tooltip, String iconPath, Action action) {
-        JButton b = createButton(tooltip, name, iconPath);
-        toolbar.add(b);
-        b.addActionListener(action);
-    }
-
-    public static void addToolbarToggleButton(JToolBar toolbar, String name, String tooltip, String iconPath, ItemListener itemListener) {
-        JToggleButton b = createToggleButton(tooltip, name, iconPath);
-        toolbar.add(b);
-        b.addItemListener(itemListener);
     }
 
     // Needed as 'setLocationRelativeTo' doesn't work properly in a multi-monitor setup
