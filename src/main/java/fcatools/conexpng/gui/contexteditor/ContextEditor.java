@@ -1,7 +1,6 @@
 package fcatools.conexpng.gui.contexteditor;
 
 import com.alee.extended.panel.WebButtonGroup;
-import com.alee.laf.panel.WebPanel;
 import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
 import de.tudresden.inf.tcs.fcalib.FullObject;
 import fcatools.conexpng.ContextChangeEvents;
@@ -77,7 +76,6 @@ public class ContextEditor extends View {
         JScrollPane scrollPane = matrix.createStripedJScrollPane(getBackground());
         scrollPane.setBorder(new EmptyBorder(3, 3, 3, 3));
         toolbar.setFloatable(false);
-        panel = new WebPanel();
         panel.setLayout(new BorderLayout());
         panel.add(toolbar, BorderLayout.WEST);
         panel.add(scrollPane, BorderLayout.CENTER);

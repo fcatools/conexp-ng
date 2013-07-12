@@ -26,8 +26,6 @@ import fcatools.conexpng.io.CEXReader;
 import fcatools.conexpng.io.CEXWriter;
 
 import javax.swing.*;
-import javax.swing.border.Border;
-import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.xml.stream.XMLStreamException;
@@ -84,10 +82,7 @@ public class MainFrame extends JFrame {
 //        topPanelContainer.setPreferredSize(new Dimension(100, 37));
         WebPanel topPanel = new WebPanel(new BorderLayout());
         topPanel.add(tabPanel, BorderLayout.WEST);
-        WebButton b = new WebButton(loadIcon("icons/menu.png"));
-        Border margin = new EmptyBorder(0, 0, 1, 0);
-        topPanel.setBorder(margin);
-        topPanel.setPreferredSize(new Dimension(100, 27+1));
+        topPanel.setPreferredSize(new Dimension(100, 27));
         WebPanel centerPanel = new WebPanel();
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.X_AXIS));
         centerPanel.add(Box.createHorizontalGlue());
@@ -139,14 +134,17 @@ public class MainFrame extends JFrame {
         menuBar.setToolbarStyle(ToolbarStyle.attached);
         menuBar.setFloatable(false);
         menuBar.add(new WebButton("New...") {{
+            setDrawFocus(false);
 //            setHotkey(Hotkey.CTRL_N);
             setEnabled(false);
         }});
         menuBar.add(new WebButton("Open...") {{
+            setDrawFocus(false);
             addActionListener(new OpenAction(MainFrame.this, state));
         }});
         // TODO: open recent
 //        menuBar.add(new WebMenu("Open recent") {{
+//            setDrawFocus(false);
 //            add(new WebMenuItem("/tmp/cool.cex"));
 //            add(new WebMenuItem("/Users/frank/projects/tealady.cex"));
 //            add(new WebMenuItem("/Users/frank/projects/teaman.cex"));
@@ -154,30 +152,38 @@ public class MainFrame extends JFrame {
 //        }});
         menuBar.addSeparator();
         menuBar.add(new WebButton("Save") {{
+            setDrawFocus(false);
             setEnabled(false);
         }});
         menuBar.add(new WebButton("Save as...") {{
+            setDrawFocus(false);
             addActionListener(new SaveAction(MainFrame.this, state));
         }});
         menuBar.addSeparator();
         menuBar.add(new WebButton("Import...") {{
+            setDrawFocus(false);
             setEnabled(false);
         }});
         menuBar.add(new WebButton("Export...") {{
+            setDrawFocus(false);
             setEnabled(false);
         }});
         menuBar.addSeparator();
         menuBar.add(new WebButton("Undo") {{
+            setDrawFocus(false);
             setEnabled(false);
         }});
         menuBar.add(new WebButton("Redo") {{
+            setDrawFocus(false);
             setEnabled(false);
         }});
         menuBar.addSeparator();
         menuBar.add(new WebButton("Count concepts") {{
+            setDrawFocus(false);
             setEnabled(false);
         }});
         menuBar.add(new WebButton("Start exploration") {{
+            setDrawFocus(false);
             addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent arg0) {
                     MyExpert expert = new MyExpert(MainFrame.this, state);
@@ -193,9 +199,11 @@ public class MainFrame extends JFrame {
         }});
         menuBar.addSeparator();
         menuBar.add(new WebButton("About") {{
+            setDrawFocus(false);
             setEnabled(false);
         }});
         menuBar.add(new WebButton("Help") {{
+            setDrawFocus(false);
 //            setHotkey(Hotkey.ALT_F4);
             setEnabled(false);
         }});

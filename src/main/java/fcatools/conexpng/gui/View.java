@@ -6,6 +6,7 @@ import com.alee.laf.toolbar.WebToolBar;
 import fcatools.conexpng.ProgramState;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.beans.PropertyChangeListener;
 
@@ -27,13 +28,14 @@ public abstract class View extends JPanel implements PropertyChangeListener {
 
     public View(ProgramState state) {
         this.state = state;
-        toolbar = new WebToolBar(WebToolBar.VERTICAL);
         state.addPropertyChangeListener(this);
+        toolbar = new WebToolBar(WebToolBar.VERTICAL);
+        panel = new WebPanel();
+        setLayout(new BorderLayout());
+        setBorder(new EmptyBorder(3, 3, 3, 3));
     }
 
     protected void init() {
-        setLayout(new BorderLayout());
-        panel = new WebPanel();
         panel.setLayout(new BorderLayout());
         if (toolbar != null) {
             toolbar.setFloatable(false);
