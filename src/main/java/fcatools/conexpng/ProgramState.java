@@ -38,9 +38,9 @@ public class ProgramState {
     public boolean showAttributLabel = false;
     public boolean showEdges = true;
     public boolean idealHighlighting = false;
-
-    private PropertyChangeSupport propertyChangeSupport;
     public int numberOfConcepts;
+    private PropertyChangeSupport propertyChangeSupport;
+
 
     public ProgramState() {
         propertyChangeSupport = new PropertyChangeSupport(this);

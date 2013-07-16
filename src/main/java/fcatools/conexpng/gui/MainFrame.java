@@ -6,6 +6,7 @@ import com.alee.laf.StyleConstants;
 import com.alee.laf.button.WebButton;
 import com.alee.laf.label.WebLabel;
 import com.alee.laf.panel.WebPanel;
+import com.alee.laf.progressbar.WebProgressBar;
 import com.alee.laf.tabbedpane.TabbedPaneStyle;
 import com.alee.laf.tabbedpane.WebTabbedPane;
 import com.alee.laf.toolbar.ToolbarStyle;
@@ -61,7 +62,8 @@ public class MainFrame extends JFrame {
 
     private MainToolbar mainToolbar;
 
-    public MainFrame(final ProgramState state) {
+    @SuppressWarnings("serial")
+	public MainFrame(final ProgramState state) {
         getContentPane().setLayout(new BorderLayout());
         mainPanel = new WebPanel(new BorderLayout());
         this.state = state;
@@ -109,7 +111,6 @@ public class MainFrame extends JFrame {
         setTitle("ConExp-NG - \"" + state.filePath + "\"");
         MainStatusBar statusBar = new MainStatusBar();
         state.addPropertyChangeListener(statusBar);
-        statusBar.setPreferredSize(new Dimension(0,0));
         mainPanel.add(statusBar, BorderLayout.SOUTH);
 
         add(mainPanel);
@@ -328,7 +329,7 @@ public class MainFrame extends JFrame {
     }
 
     @SuppressWarnings("serial")
-    private class MainStatusBar extends JPanel implements
+    private class MainStatusBar extends WebPanel implements
             PropertyChangeListener {
 
         public MainStatusBar() {
@@ -341,10 +342,10 @@ public class MainFrame extends JFrame {
             if (evt instanceof ContextChangeEvent) {
                 ContextChangeEvent cce = (ContextChangeEvent) evt;
                 if (cce.getName() == ContextChangeEvents.STARTCALCULATION) {
-                    JPanel temp = new JPanel(new BorderLayout());
-                    temp.add(new JLabel((String) evt.getNewValue() + "  "),
+                    WebPanel temp = new WebPanel(new BorderLayout());
+                    temp.add(new WebLabel((String) evt.getNewValue() + "  "),
                             BorderLayout.CENTER);
-                    JProgressBar progressbar = new JProgressBar();
+                    WebProgressBar progressbar = new WebProgressBar();
                     progressbar.setIndeterminate(true);
                     temp.add(progressbar, BorderLayout.EAST);
                     add(temp, BorderLayout.EAST);
@@ -355,7 +356,7 @@ public class MainFrame extends JFrame {
                     getParent().setCursor(
                             Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
                     removeAll();
-                    add(new JLabel(""));
+                    add(new WebLabel(""));
                     revalidate();
                 }
 

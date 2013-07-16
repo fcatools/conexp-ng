@@ -12,13 +12,15 @@ import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
+
+import com.alee.laf.scroll.WebScrollPane;
+import com.alee.laf.splitpane.WebSplitPane;
+import com.alee.laf.text.WebTextPane;
+
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 public class DependencyView extends View {
 
@@ -28,13 +30,12 @@ public class DependencyView extends View {
 
     private static final long serialVersionUID = -6377834669097012170L;
 
-    private JTextPane textpane = new JTextPane();
+    private WebTextPane implpane = new WebTextPane();
+
+    private WebTextPane assopane = new WebTextPane();
 
     private Set<AssociationRule> associationbase;
     private Set<FCAImplication<String>> implications;
-
-    ThreadPoolExecutor pool = new ThreadPoolExecutor(1, 1, 0,
-            TimeUnit.NANOSECONDS, new SynchronousQueue<Runnable>());
 
     private SimpleAttributeSet[] attrs;
 
@@ -60,8 +61,7 @@ public class DependencyView extends View {
         super(state);
         attrs = new SimpleAttributeSet[3];
         attrs[NON_ZERO_SUPPORT_EXACT_RULE] = new SimpleAttributeSet();
-        StyleConstants.setForeground(attrs[NON_ZERO_SUPPORT_EXACT_RULE],
-                Color.blue);
+        StyleConstants.setForeground(attrs[NON_ZERO_SUPPORT_EXACT_RULE], Color.blue);
 
         attrs[ZERO_SUPPORT_EXACT_RULE] = new SimpleAttributeSet();
         StyleConstants.setForeground(attrs[ZERO_SUPPORT_EXACT_RULE], Color.red);
@@ -72,8 +72,15 @@ public class DependencyView extends View {
         header = new SimpleAttributeSet();
         StyleConstants.setFontSize(header, 12);
 
-        textpane.setEditable(false);
-        view = new JScrollPane(textpane);
+        implpane.setEditable(false);
+        assopane.setEditable(false);
+
+        WebSplitPane splitPane = new WebSplitPane(WebSplitPane.VERTICAL_SPLIT, new WebScrollPane(implpane),
+                new WebScrollPane(assopane));
+        splitPane.setOneTouchExpandable(true);
+        splitPane.setContinuousLayout(true);
+        view = splitPane;
+
         settings = new JPanel(new BorderLayout());
         settings.add(new DependencySettings(), BorderLayout.NORTH);
         settings.getComponent(0).addPropertyChangeListener(this);
@@ -92,104 +99,71 @@ public class DependencyView extends View {
                     StringBuffer buf;
                     int support = 0;
                     try {
-                        textpane.setText("");
-                        ArrayList<FCAImplication<String>> z = new ArrayList<>(
-                                implications);
+                        implpane.setText("");
+                        ArrayList<FCAImplication<String>> z = new ArrayList<>(implications);
                         if (sortBySupport) {
-                            Collections.sort(z,
-                                    new Comparator<FCAImplication<String>>() {
+                            Collections.sort(z, new Comparator<FCAImplication<String>>() {
 
-                                        @Override
-                                        public int compare(
-                                                FCAImplication<String> o1,
-                                                FCAImplication<String> o2) {
+                                @Override
+                                public int compare(FCAImplication<String> o1, FCAImplication<String> o2) {
 
-                                            return Integer.compare(
-                                                    state.context.supportCount(o2
-                                                            .getPremise()),
-                                                    state.context.supportCount(o1
-                                                            .getPremise()));
-                                        }
-                                    });
+                                    return Integer.compare(state.context.supportCount(o2.getPremise()),
+                                            state.context.supportCount(o1.getPremise()));
+                                }
+                            });
                         }
-                        textpane.getDocument()
-                                .insertString(
-                                        textpane.getDocument().getLength(),
-                                        "Implications (Duquenne-Guigues Base/Stem Base)\n",
-                                        header);
+                        implpane.getDocument().insertString(implpane.getDocument().getLength(),
+                                "Implications (Duquenne-Guigues Base/Stem Base)\n", header);
 
                         for (FCAImplication<String> impl : z) {
-                            support = state.context.supportCount(impl
-                                    .getPremise());
+                            support = state.context.supportCount(impl.getPremise());
                             buf = new StringBuffer();
                             buf.append(i);
                             buf.append("< " + support + " > ");
-                            buf.append(impl.getPremise() + FOLLOW
-                                    + impl.getConclusion() + END_MARK);
+                            buf.append(impl.getPremise() + FOLLOW + impl.getConclusion() + END_MARK);
                             buf.append(EOL);
                             i++;
 
-                            textpane.getDocument().insertString(
-                                    textpane.getDocument().getLength(),
-                                    buf.toString(),
+                            implpane.getDocument().insertString(implpane.getDocument().getLength(), buf.toString(),
                                     implicationStyle(support, 1));
                         }
-
-                        ArrayList<AssociationRule> t = new ArrayList<>(
-                                associationbase);
+                        // Associations
+                        assopane.setText("");
+                        ArrayList<AssociationRule> t = new ArrayList<>(associationbase);
 
                         if (sortBySupport) {
-                            Collections.sort(t,
-                                    new Comparator<AssociationRule>() {
+                            Collections.sort(t, new Comparator<AssociationRule>() {
 
-                                        @Override
-                                        public int compare(AssociationRule o1,
-                                                AssociationRule o2) {
-                                            return Double.compare(
-                                                    o2.getSupport(),
-                                                    o1.getSupport());
-                                        }
-                                    });
+                                @Override
+                                public int compare(AssociationRule o1, AssociationRule o2) {
+                                    return Double.compare(o2.getSupport(), o1.getSupport());
+                                }
+                            });
                         }
-                        textpane.getDocument().insertString(
-                                textpane.getDocument().getLength(),
-                                "------------------------------------\n"
-                                        + "Associations (Luxenburger Base)\n",
-                                header);
+                        assopane.getDocument().insertString(assopane.getDocument().getLength(),
+                                "Associations (Luxenburger Base)\n", header);
                         i = 0;
                         for (AssociationRule impl : t) {
                             buf = new StringBuffer();
                             if (impl.getConfidence() >= conf) {
                                 i++;
                                 buf.append(i);
-                                buf.append("< "
-                                        + state.context.supportCount(impl
-                                                .getPremise()) + " > ");
+                                buf.append("< " + state.context.supportCount(impl.getPremise()) + " > ");
                                 buf.append(impl.getPremise()
                                         + " =["
-                                        + new BigDecimal(impl.getConfidence())
-                                                .setScale(
-                                                        3,
-                                                        BigDecimal.ROUND_HALF_UP)
+                                        + new BigDecimal(impl.getConfidence()).setScale(3, BigDecimal.ROUND_HALF_UP)
                                                 .doubleValue() + "]=> ");
-                                Set<String> temp = new HashSet<>(impl
-                                        .getConsequent());
+                                Set<String> temp = new HashSet<>(impl.getConsequent());
                                 temp.addAll(impl.getPremise());
-                                buf.append("< "
-                                        + state.context.supportCount(temp)
-                                        + " > " + impl.getConsequent()
+                                buf.append("< " + state.context.supportCount(temp) + " > " + impl.getConsequent()
                                         + END_MARK);
                                 buf.append(EOL);
 
-                                textpane.getDocument().insertString(
-                                        textpane.getDocument().getLength(),
-                                        buf.toString(),
-                                        implicationStyle(impl.getSupport(),
-                                                impl.getConfidence()));
+                                assopane.getDocument().insertString(assopane.getDocument().getLength(), buf.toString(),
+                                        implicationStyle(impl.getSupport(), impl.getConfidence()));
                             }
                         }
-                        ((DependencySettings) settings.getComponent(0)).update(
-                                i, associationbase.size());
+                        ((DependencySettings) settings.getComponent(0)).update(i, associationbase.size());
                     } catch (BadLocationException e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
@@ -200,8 +174,7 @@ public class DependencyView extends View {
 
     public SimpleAttributeSet implicationStyle(double support, double confidence) {
         if (confidence == 1.0) {
-            return support > 0 ? attrs[NON_ZERO_SUPPORT_EXACT_RULE]
-                    : attrs[ZERO_SUPPORT_EXACT_RULE];
+            return support > 0 ? attrs[NON_ZERO_SUPPORT_EXACT_RULE] : attrs[ZERO_SUPPORT_EXACT_RULE];
         }
         return attrs[INEXACT_RULE];
     }
@@ -213,8 +186,7 @@ public class DependencyView extends View {
 
                 @Override
                 protected Object doInBackground() throws Exception {
-                    associationbase = state.context.getLuxenburgerBase(minsup,
-                            0);
+                    associationbase = state.context.getLuxenburgerBase(minsup, 0);
                     if (withImplications)
                         implications = state.context.getDuquenneGuiguesBase();
                     state.associations = associationbase;
@@ -234,8 +206,7 @@ public class DependencyView extends View {
 
         if (evt instanceof ContextChangeEvent) {
             ContextChangeEvent cce = (ContextChangeEvent) evt;
-            if (cce.getName() == ContextChangeEvents.NEWCONTEXT
-                    || cce.getName() == ContextChangeEvents.CONTEXTCHANGED)
+            if (cce.getName() == ContextChangeEvents.NEWCONTEXT || cce.getName() == ContextChangeEvents.CONTEXTCHANGED)
                 updateLater = true;
             // until we save the associations in the file
             if (cce.getName() == ContextChangeEvents.LOADEDFILE)
