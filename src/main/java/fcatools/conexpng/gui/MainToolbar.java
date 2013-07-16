@@ -45,24 +45,20 @@ public class MainToolbar extends JToolBar {
 		this.mainFrame = mainFrame;
 		this.state = state;
 		this.setFloatable(false);
-		this.setMargin(new Insets(getInsets().top + 2, getInsets().left + 3,
-				getInsets().bottom - 3, getInsets().right + 4));
+		this.setMargin(new Insets(getInsets().top + 2, getInsets().left + 3, getInsets().bottom - 3,
+				getInsets().right + 4));
 		if (OS.isMacOsX) {
-			this.setMargin(new Insets(getInsets().top, getInsets().left + 2,
-					getInsets().bottom, getInsets().right));
+			this.setMargin(new Insets(getInsets().top, getInsets().left + 2, getInsets().bottom, getInsets().right));
 		}
 
 		// Add buttons
 		newButton = createButton("New Context", "newContext", "conexp/new.gif");
 		add(newButton);
-		openButton = createButton("Open Context", "openContext",
-				"conexp/open.gif");
+		openButton = createButton("Open Context", "openContext", "conexp/open.gif");
 		add(openButton);
-		saveButton = createButton("Save Contex", "saveContext",
-				"conexp/save.gif");
+		saveButton = createButton("Save Contex", "saveContext", "conexp/save.gif");
 		add(saveButton);
-		saveAsButton = createButton("Save as another Context", "saveAsContext",
-				"conexp/save.gif");
+		saveAsButton = createButton("Save as another Context", "saveAsContext", "conexp/save.gif");
 		add(saveAsButton);
 		addSeparator();
 		undoButton = createButton("Undo", "undo", "conexp/Undo.gif");
@@ -70,11 +66,9 @@ public class MainToolbar extends JToolBar {
 		redoButton = createButton("Redo", "redo", "conexp/Redo.gif");
 		add(redoButton);
 		addSeparator();
-		countButton = createButton("Count Concepts", "countConcepts",
-				"conexp/numConcepts.gif");
+		countButton = createButton("Count Concepts", "countConcepts", "conexp/numConcepts.gif");
 		add(countButton);
-		exploreButton = createButton("Explore Attributes", "exploreAttributes",
-				"conexp/attrExploration.gif");
+		exploreButton = createButton("Explore Attributes", "exploreAttributes", "conexp/attrExploration.gif");
 		add(exploreButton);
 		helpButton = createButton("Help", "help", "conexp/question.gif");
 		add(Box.createGlue());
@@ -90,20 +84,19 @@ public class MainToolbar extends JToolBar {
 		saveButton.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent arg0) {
-				new SaveAction().actionPerformed(arg0);
+				new SaveAction(false).actionPerformed(arg0);
 			}
 		});
 		saveAsButton.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent arg0) {
-				state.filePath = "";
-				new SaveAction().actionPerformed(arg0);
+				new SaveAction(true).actionPerformed(arg0);
 			}
 		});
 		countButton.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent arg0) {
-				showMessageDialog("10 Concepts", false);
+				showMessageDialog(state.numberOfConcepts + " Concepts", false);
 			}
 		});
 		exploreButton.addActionListener(new ActionListener() {
@@ -147,8 +140,7 @@ public class MainToolbar extends JToolBar {
 	// TODO: Needs to be improved
 	private void showMessageDialog(String message, boolean error) {
 		JOptionPane pane = new JOptionPane(message);
-		pane.setMessageType(error ? JOptionPane.ERROR_MESSAGE
-				: JOptionPane.INFORMATION_MESSAGE);
+		pane.setMessageType(error ? JOptionPane.ERROR_MESSAGE : JOptionPane.INFORMATION_MESSAGE);
 		JDialog dialog = pane.createDialog(mainFrame, "Error");
 		dialog.pack();
 		centerDialogInsideMainFrame(mainFrame, dialog);
@@ -160,22 +152,77 @@ public class MainToolbar extends JToolBar {
 	@SuppressWarnings("serial")
 	class SaveAction extends AbstractAction {
 
+		private boolean saveAs;
+
+		public SaveAction(boolean saveAS) {
+			this.saveAs = saveAS;
+		}
+
+		private void saveFile(String path) {
+			try {
+				MainToolbar.this.state.filePath = path;
+				if (MainToolbar.this.state.filePath.endsWith(".cex"))
+
+					new CEXWriter(MainToolbar.this.state);
+
+				else
+					new BurmeisterWriter(MainToolbar.this.state);
+				System.out.println(path);
+				MainToolbar.this.state.lastOpened = path.substring(0,
+						path.lastIndexOf(System.getProperty("file.separator")));
+
+				mainFrame.setTitle("ConExp-NG - \"" + path + "\"");
+			} catch (FileNotFoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (XMLStreamException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+
+		}
+
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			if (state.filePath.isEmpty()) {
+			if (state.filePath.equals("untitled.cex") || saveAs) {
 				final JFileChooser fc = new JFileChooser(state.lastOpened);
-				final JDialog dialog = new JDialog(mainFrame, "Save file as",
-						true);
-
+				final JDialog dialog = new JDialog(mainFrame, "Save file as", true);
 				dialog.setContentPane(fc);
 				fc.setDialogType(JFileChooser.SAVE_DIALOG);
 				fc.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						String state = (String) e.getActionCommand();
-						if ((state.equals(JFileChooser.APPROVE_SELECTION) && fc
-								.getSelectedFile() != null)
-								|| state.equals(JFileChooser.CANCEL_SELECTION)) {
+						if ((state.equals(JFileChooser.APPROVE_SELECTION) && fc.getSelectedFile() != null)) {
+							File file = fc.getSelectedFile();
+							String path = file.getAbsolutePath();
+							if (file.exists()) {
+								JOptionPane pane = new JOptionPane(new JLabel("Do you really want to overwrite "
+										+ file.getName() + "?"), JOptionPane.YES_NO_OPTION);
+								pane.setMessageType(JOptionPane.QUESTION_MESSAGE);
+								JDialog dialog2 = pane.createDialog(mainFrame, "Overwriting existing file?");
+								Object[] options = { "Yes", "No" };
+								pane.setOptions(options);
+								dialog2.pack();
+								dialog2.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+								Util.centerDialogInsideMainFrame(mainFrame, dialog2);
+								dialog2.setVisible(true);
+								String n = (String) pane.getValue();
+								if (n != null)
+									if (n.equals("Yes")) {
+										saveFile(path);
+										dialog.setVisible(false);
+									}
+							} else {
+								MainToolbar.this.state.filePath = path;
+								saveFile(path);
+								dialog.setVisible(false);
+							}
+						} else if (state.equals(JFileChooser.CANCEL_SELECTION)) {
 							dialog.setVisible(false);
+							return;
 						}
 					}
 				});
@@ -184,33 +231,14 @@ public class MainToolbar extends JToolBar {
 				dialog.setVisible(true);
 
 				if (fc.getSelectedFile() != null) {
-					File file = fc.getSelectedFile();
-					String path = file.getAbsolutePath();
-					state.lastOpened = path
-							.substring(0, path.lastIndexOf(System.getProperty("file.separator")));
-					state.filePath = path;
-					mainFrame.setTitle("ConExp-NG - \"" + path + "\"");
-				}
+
+				} else
+					return;
+			} else {
+				saveFile(MainToolbar.this.state.filePath);
 			}
-			try {
-			if (state.filePath.endsWith(".cex"))
-				
-					new CEXWriter(state);
-				
-			else
-				new BurmeisterWriter(state);
-				} catch (FileNotFoundException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (XMLStreamException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				}
-			
+		}
+
 	}
 
 	@SuppressWarnings("serial")
@@ -227,8 +255,7 @@ public class MainToolbar extends JToolBar {
 			fc.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					String state = (String) e.getActionCommand();
-					if ((state.equals(JFileChooser.APPROVE_SELECTION) && fc
-							.getSelectedFile() != null)
+					if ((state.equals(JFileChooser.APPROVE_SELECTION) && fc.getSelectedFile() != null)
 							|| state.equals(JFileChooser.CANCEL_SELECTION)) {
 						dialog.setVisible(false);
 					}
@@ -242,8 +269,7 @@ public class MainToolbar extends JToolBar {
 				File file = fc.getSelectedFile();
 				String path = file.getAbsolutePath();
 
-				state.lastOpened = path.substring(0,
-						path.lastIndexOf(System.getProperty("file.separator")));
+				state.lastOpened = path.substring(0, path.lastIndexOf(System.getProperty("file.separator")));
 				state.filePath = path;
 				mainFrame.setTitle("ConExp-NG - \"" + path + "\"");
 
@@ -254,11 +280,8 @@ public class MainToolbar extends JToolBar {
 						new BurmeisterReader(state);
 				} catch (FileNotFoundException e1) {
 					showMessageDialog("Can not find this file: " + path, true);
-				} catch (IllegalObjectException | IOException
-						| XMLStreamException e1) {
-					showMessageDialog(
-							"The file seems to be corrupt: " + e1.getMessage(),
-							true);
+				} catch (IllegalObjectException | IOException | XMLStreamException e1) {
+					showMessageDialog("The file seems to be corrupt: " + e1.getMessage(), true);
 				}
 			}
 		}

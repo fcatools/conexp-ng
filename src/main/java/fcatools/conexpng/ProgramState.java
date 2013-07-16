@@ -40,6 +40,7 @@ public class ProgramState {
     public boolean idealHighlighting = false;
 
     private PropertyChangeSupport propertyChangeSupport;
+    public int numberOfConcepts;
 
     public ProgramState() {
         propertyChangeSupport = new PropertyChangeSupport(this);
@@ -98,10 +99,10 @@ public class ProgramState {
     }
 
     public void loadedFile(FormalContext context2, LatticeGraph lattice2) {
-		this.context=context2;
-		this.lattice=lattice2;
-		firePropertyChange(ContextChangeEvents.LOADEDFILE, null, lattice2);
-	}
+        this.context=context2;
+        this.lattice=lattice2;
+        firePropertyChange(ContextChangeEvents.LOADEDFILE, null, lattice2);
+    }
 
     @SuppressWarnings("serial")
     public class ContextChangeEvent extends PropertyChangeEvent {

@@ -157,7 +157,7 @@ public class MainFrame extends JFrame {
         }});
         menuBar.add(new WebButton("Save as...") {{
             setDrawFocus(false);
-            addActionListener(new SaveAction(MainFrame.this, state));
+            addActionListener(new MainToolbar(MainFrame.this, state).new SaveAction(true));
         }});
         menuBar.addSeparator();
         menuBar.add(new WebButton("Import...") {{
@@ -319,7 +319,7 @@ public class MainFrame extends JFrame {
                 if (n.equals("Yes")) {
                     // TODO: Question:
                     // if user selects cancel in the filedialog->exit?
-                    mainToolbar.new SaveAction().actionPerformed(arg0);
+                    new MainToolbar(MainFrame.this, state).new SaveAction(false).actionPerformed(arg0);
                 } else if (n.equals("Cancel")) {
                     return;
                 }

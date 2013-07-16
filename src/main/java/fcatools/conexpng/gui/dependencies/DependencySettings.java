@@ -17,7 +17,7 @@ public class DependencySettings extends JPanel {
 
     private static final long serialVersionUID = -3692280021161777005L;
 
-    JLabel minSupLabel = new JLabel("Minimal Support");
+    JLabel minSupLabel = new JLabel("Support");
     JTextField supField = new JTextField("0.1");
     JSlider minSupSlider = new JSlider(0, 100, 10);
 
@@ -49,13 +49,13 @@ public class DependencySettings extends JPanel {
             g.setPaint(gray);
             g.fillArc(0, 5, 140, 140, 0, 360);
             g.setPaint(gray.darker().darker());
-            g.drawString("#Association Rules = " + all, 0, 165);
+            g.drawString("#Association rules = " + all, 0, 165);
 
             Color green = new Color(150, 220, 150);
             g.setColor(green);
             g.fillArc(0, 5, 140, 140, 90, degree);
             g.setColor(green.darker().darker());
-            g.drawString("#With minSup = " + current, 0, 180);
+            g.drawString("#With support = " + current, 0, 180);
 
 //            g.setColor(Color.BLACK);
 //            Shape circ = new Ellipse2D.Double(0, 5, 140, 140);

@@ -145,10 +145,6 @@ public class DependencyView extends View {
                                         @Override
                                         public int compare(AssociationRule o1,
                                                 AssociationRule o2) {
-                                            if (o1.getPremise().contains(
-                                                    "female"))
-                                                System.out.println(o1 + " => "
-                                                        + o2);
                                             return Double.compare(
                                                     o2.getSupport(),
                                                     o1.getSupport());
