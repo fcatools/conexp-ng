@@ -110,6 +110,7 @@ public class MainFrame extends JFrame {
 
         setTitle("ConExp-NG - \"" + state.filePath + "\"");
         MainStatusBar statusBar = new MainStatusBar();
+        statusBar.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, new Color(140, 140, 140)));
         state.addPropertyChangeListener(statusBar);
         mainPanel.add(statusBar, BorderLayout.SOUTH);
 

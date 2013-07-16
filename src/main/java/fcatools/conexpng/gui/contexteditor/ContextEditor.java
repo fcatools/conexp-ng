@@ -81,7 +81,7 @@ public class ContextEditor extends View {
         panel.add(scrollPane, BorderLayout.CENTER);
         add(panel);
         // Make context editor tighter
-        setBorder(new EmptyBorder(3, -3, -3, -3));
+        setBorder(new EmptyBorder(3, -3, -4, -3));
         toolbar.setRound(4);
 
         // Add actions
