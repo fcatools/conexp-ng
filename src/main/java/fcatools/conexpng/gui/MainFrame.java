@@ -97,8 +97,11 @@ public class MainFrame extends JFrame {
 //        add(tabPane);
 
         contextView = new ContextEditor(state);
+        contextView.setVisible(false);
         latticeView = new LatticeView(state);
+        latticeView.setVisible(false);
         associationView = new DependencyView(state);
+        associationView.setVisible(false);
 
         addTab(tabPane, contextView, "icons/tabs/context_editor.png", "Context", "Edit Context (CTRL + E)", 0);
         addTab(tabPane, latticeView, "icons/tabs/lattice_editor.png", "Lattice", "Show Lattice (CTRL + L)", 1);
@@ -217,6 +220,7 @@ public class MainFrame extends JFrame {
         removeOldView();
         viewTitleLabel.setText("Context Editor" + MARGIN);
         mainPanel.add(contextView, BorderLayout.CENTER);
+        contextView.setVisible(true);
         validate();
         revalidate();
         repaint();
@@ -226,6 +230,7 @@ public class MainFrame extends JFrame {
         removeOldView();
         viewTitleLabel.setText("Lattice Editor" + MARGIN);
         mainPanel.add(latticeView, BorderLayout.CENTER);
+        latticeView.setVisible(true);
         validate();
         revalidate();
         repaint();
@@ -235,6 +240,7 @@ public class MainFrame extends JFrame {
         removeOldView();
         viewTitleLabel.setText("Dependencies Editor" + MARGIN);
         mainPanel.add(associationView, BorderLayout.CENTER);
+        associationView.setVisible(true);
         validate();
         revalidate();
         repaint();
@@ -244,6 +250,7 @@ public class MainFrame extends JFrame {
         BorderLayout layout = (BorderLayout) mainPanel.getLayout();
         Component component = layout.getLayoutComponent(BorderLayout.CENTER);
         if (component != null) {
+            component.setVisible(false);
             mainPanel.remove(component);
         }
     }
