@@ -13,6 +13,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 
+import com.alee.laf.panel.WebPanel;
 import com.alee.laf.scroll.WebScrollPane;
 import com.alee.laf.splitpane.WebSplitPane;
 import com.alee.laf.text.WebTextPane;
@@ -73,6 +74,8 @@ public class DependencyView extends View {
         StyleConstants.setFontSize(header, 12);
 
         implpane.setEditable(false);
+        // only for the Splitpanes height
+        implpane.setPreferredSize(new Dimension(300, 200));
         assopane.setEditable(false);
 
         WebSplitPane splitPane = new WebSplitPane(WebSplitPane.VERTICAL_SPLIT, new WebScrollPane(implpane),
@@ -81,7 +84,7 @@ public class DependencyView extends View {
         splitPane.setContinuousLayout(true);
         view = splitPane;
 
-        settings = new JPanel(new BorderLayout());
+        settings = new WebPanel(new BorderLayout());
         settings.add(new DependencySettings(), BorderLayout.NORTH);
         settings.getComponent(0).addPropertyChangeListener(this);
         settings.setMinimumSize(new Dimension(170, 400));
@@ -190,11 +193,11 @@ public class DependencyView extends View {
                     if (withImplications)
                         implications = state.context.getDuquenneGuiguesBase();
                     state.associations = associationbase;
-                    writeAssociations();
                     return null;
                 }
 
                 protected void done() {
+                    writeAssociations();
                     state.endCalculation();
                 };
             }.execute();
@@ -203,7 +206,6 @@ public class DependencyView extends View {
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-
         if (evt instanceof ContextChangeEvent) {
             ContextChangeEvent cce = (ContextChangeEvent) evt;
             if (cce.getName() == ContextChangeEvents.NEWCONTEXT || cce.getName() == ContextChangeEvents.CONTEXTCHANGED)

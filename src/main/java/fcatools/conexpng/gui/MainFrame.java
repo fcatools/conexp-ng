@@ -30,6 +30,7 @@ import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.xml.stream.XMLStreamException;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -119,6 +120,7 @@ public class MainFrame extends JFrame {
 
         add(mainPanel);
 
+        
         showContextEditor();
 
         tabPane.addChangeListener(new ChangeListener() {
@@ -132,7 +134,6 @@ public class MainFrame extends JFrame {
                 }
             }
         });
-
         // TODO: Add icons
         // toolbar.add ( WebButton.createIconWebButton ( loadIcon ( "toolbar/save.png" ), StyleConstants.smallRound, true ) );
         WebToolBar menuBar = new WebToolBar();
@@ -145,7 +146,7 @@ public class MainFrame extends JFrame {
         }});
         menuBar.add(new WebButton("Open...") {{
             setDrawFocus(false);
-            addActionListener(new OpenAction(MainFrame.this, state));
+            addActionListener(new MainToolbar(MainFrame.this, state).new OpenAction());
         }});
         // TODO: open recent
 //        menuBar.add(new WebMenu("Open recent") {{
@@ -217,20 +218,20 @@ public class MainFrame extends JFrame {
     }
 
     public void showContextEditor() {
-        removeOldView();
-        viewTitleLabel.setText("Context Editor" + MARGIN);
-        mainPanel.add(contextView, BorderLayout.CENTER);
+    	removeOldView();
         contextView.setVisible(true);
+    	viewTitleLabel.setText("Context Editor" + MARGIN);
+        mainPanel.add(contextView, BorderLayout.CENTER);
         validate();
         revalidate();
         repaint();
     }
 
     public void showLatticeEditor() {
-        removeOldView();
-        viewTitleLabel.setText("Lattice Editor" + MARGIN);
-        mainPanel.add(latticeView, BorderLayout.CENTER);
+    	removeOldView();
         latticeView.setVisible(true);
+    	viewTitleLabel.setText("Lattice Editor" + MARGIN);
+        mainPanel.add(latticeView, BorderLayout.CENTER);
         validate();
         revalidate();
         repaint();
@@ -238,9 +239,9 @@ public class MainFrame extends JFrame {
 
     public void showDependeciesEditor() {
         removeOldView();
+        associationView.setVisible(true);
         viewTitleLabel.setText("Dependencies Editor" + MARGIN);
         mainPanel.add(associationView, BorderLayout.CENTER);
-        associationView.setVisible(true);
         validate();
         revalidate();
         repaint();
@@ -258,7 +259,6 @@ public class MainFrame extends JFrame {
     private void addTab(WebTabbedPane t, View v, String iconPath, String title, String toolTip, int i) {
 //        t.insertTab(title, null, v, toolTip, i);
         t.addTab("", loadIcon(iconPath), null, toolTip);
-        t.addPropertyChangeListener(v);
         KeyStroke shortcut = null;
         switch (i) {
         case 0: {

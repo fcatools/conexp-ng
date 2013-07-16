@@ -12,7 +12,7 @@ import java.beans.PropertyChangeListener;
 
 import static javax.swing.JSplitPane.HORIZONTAL_SPLIT;
 
-public abstract class View extends JPanel implements PropertyChangeListener {
+public abstract class View extends WebPanel implements PropertyChangeListener {
 
     protected static final long serialVersionUID = -873702052790459127L;
 
@@ -49,5 +49,4 @@ public abstract class View extends JPanel implements PropertyChangeListener {
         splitPane.setContinuousLayout(true);
         add(splitPane);
     }
-
 }

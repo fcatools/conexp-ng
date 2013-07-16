@@ -17,6 +17,7 @@ import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
+import de.tudresden.inf.tcs.fcaapi.Concept;
 import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
 import de.tudresden.inf.tcs.fcalib.FullObject;
 import de.tudresden.inf.tcs.fcalib.utils.ListSet;
@@ -79,8 +80,7 @@ public class CEXReader {
             }
         }
         if (lattice == null) {
-            lattice = new TestLatticeAlgorithm().computeLatticeGraph(context
-                    .getConcepts());
+            lattice = new TestLatticeAlgorithm().computeLatticeGraph(new ListSet<Concept<String,FullObject<String,String>>>());
         }
         if (columnWidths == null) {
             columnWidths = new HashMap<>();
@@ -94,8 +94,7 @@ public class CEXReader {
 
     private void addLatice(XMLEventReader parser) throws XMLStreamException {
         if (!ourCEX)
-            lattice = new TestLatticeAlgorithm().computeLatticeGraph(context
-                    .getConcepts());
+            return;
         while (parser.hasNext()) {
             XMLEvent event = parser.nextEvent();
             switch (event.getEventType()) {
