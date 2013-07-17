@@ -8,6 +8,7 @@ import fcatools.conexpng.ProgramState;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import static javax.swing.JSplitPane.HORIZONTAL_SPLIT;
@@ -48,5 +49,12 @@ public abstract class View extends WebPanel implements PropertyChangeListener {
         splitPane.setDividerLocation(170);
         splitPane.setContinuousLayout(true);
         add(splitPane);
+    }
+
+    @Override
+    public void setVisible(boolean aFlag) {
+        boolean old=isVisible();
+        super.setVisible(aFlag);
+        propertyChange(new PropertyChangeEvent(this, "visibilityChanged", old, aFlag));
     }
 }
