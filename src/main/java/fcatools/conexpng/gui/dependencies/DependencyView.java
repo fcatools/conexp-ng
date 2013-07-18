@@ -181,18 +181,23 @@ public class DependencyView extends View {
         }
         return attrs[INEXACT_RULE];
     }
-
+    private SwingWorker<Void, Object> worker;
     private void updateAssociations(final boolean withImplications) {
         if (associationbase != null && implications != null) {
+        	if(worker!=null&& !worker.isDone())
+        		worker.cancel(true);
             state.startCalculation("Calculating the Dependencies");
-            new SwingWorker<Object, Object>() {
+            worker=new SwingWorker<Void, Object>() {
 
                 @Override
-                protected Object doInBackground() throws Exception {
+                protected Void doInBackground() throws Exception {
                     associationbase = state.context.getLuxenburgerBase(minsup, 0);
+                    state.associations = associationbase;
+                    if (Thread.interrupted()) {
+                        return null;
+                    }
                     if (withImplications)
                         implications = state.context.getDuquenneGuiguesBase();
-                    state.associations = associationbase;
                     return null;
                 }
 
@@ -200,7 +205,8 @@ public class DependencyView extends View {
                     writeAssociations();
                     state.endCalculation();
                 };
-            }.execute();
+            };
+            worker.execute();
         }
     }
 
