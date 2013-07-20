@@ -5,6 +5,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemListener;
+import java.io.FileNotFoundException;
 import java.net.URL;
 
 public class Util {
@@ -59,6 +60,23 @@ public class Util {
         int x = frameLocation.x + ((frameSize.width - dialogSize.width) / 2);
         int y = frameLocation.y + ((frameSize.height - dialogSize.height) / 2);
         dialog.setLocation(x, y);
+    }
+
+    public static void handleIOExceptions(JFrame parent, Exception ex, String path) {
+        if (ex instanceof FileNotFoundException) {
+            showMessageDialog(parent, "Can not find this file: " + path, true);
+        } else {
+            showMessageDialog(parent, "The file seems to be corrupt: " + ex.getMessage(), true);
+        }
+    }
+
+    private static void showMessageDialog(JFrame parent, String message, boolean error) {
+        JOptionPane pane = new JOptionPane(message);
+        pane.setMessageType(error ? JOptionPane.ERROR_MESSAGE : JOptionPane.INFORMATION_MESSAGE);
+        JDialog dialog = pane.createDialog(parent, "Error");
+        dialog.pack();
+        centerDialogInsideMainFrame(parent, dialog);
+        dialog.setVisible(true);
     }
 
     public static void invokeAction(ActionEvent e, Action action) {

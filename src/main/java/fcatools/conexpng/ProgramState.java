@@ -13,6 +13,7 @@ import java.beans.PropertyChangeSupport;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.Vector;
 
 /**
  * Contains context, lattice, implications, filePath, snapshots etc.
@@ -27,7 +28,7 @@ import java.util.Set;
 public class ProgramState {
 
     public String filePath;
-    public String lastOpened = "";
+    public Vector<String> lastOpened = new Vector<>(5);
     public FormalContext context;
     public Set<AssociationRule> associations;
     public boolean unsavedChanges = false;
@@ -41,7 +42,6 @@ public class ProgramState {
     public int numberOfConcepts;
     private PropertyChangeSupport propertyChangeSupport;
 
-
     public ProgramState() {
         propertyChangeSupport = new PropertyChangeSupport(this);
     }
@@ -54,10 +54,8 @@ public class ProgramState {
         propertyChangeSupport.removePropertyChangeListener(listener);
     }
 
-    private void firePropertyChange(ContextChangeEvents cce, Object oldValue,
-            Object newValue) {
-        propertyChangeSupport.firePropertyChange(new ContextChangeEvent(this,
-                cce, oldValue, newValue));
+    private void firePropertyChange(ContextChangeEvents cce, Object oldValue, Object newValue) {
+        propertyChangeSupport.firePropertyChange(new ContextChangeEvent(this, cce, oldValue, newValue));
     }
 
     public void contextChanged() {
@@ -72,8 +70,7 @@ public class ProgramState {
     }
 
     public void attributeNameChanged(String oldName, String newName) {
-        firePropertyChange(ContextChangeEvents.ATTRIBUTENAMECHANGED, oldName,
-                newName);
+        firePropertyChange(ContextChangeEvents.ATTRIBUTENAMECHANGED, oldName, newName);
     }
 
     public void showLabelsChanged() {
@@ -81,8 +78,7 @@ public class ProgramState {
     }
 
     public void temporaryContextChanged() {
-        firePropertyChange(ContextChangeEvents.TEMPORARYCONTEXTCHANGED, null,
-                null);
+        firePropertyChange(ContextChangeEvents.TEMPORARYCONTEXTCHANGED, null, null);
     }
 
     public void startCalculation(String source) {
@@ -99,8 +95,8 @@ public class ProgramState {
     }
 
     public void loadedFile(FormalContext context2, LatticeGraph lattice2) {
-        this.context=context2;
-        this.lattice=lattice2;
+        this.context = context2;
+        this.lattice = lattice2;
         firePropertyChange(ContextChangeEvents.LOADEDFILE, null, lattice2);
     }
 
@@ -109,13 +105,11 @@ public class ProgramState {
 
         private ContextChangeEvents cce;
 
-        public ContextChangeEvent(Object source, String propertyName,
-                Object oldValue, Object newValue) {
+        public ContextChangeEvent(Object source, String propertyName, Object oldValue, Object newValue) {
             super(source, propertyName, oldValue, newValue);
         }
 
-        public ContextChangeEvent(Object source, ContextChangeEvents cce,
-                Object oldValue, Object newValue) {
+        public ContextChangeEvent(Object source, ContextChangeEvents cce, Object oldValue, Object newValue) {
             super(source, cce.toString(), oldValue, newValue);
             this.cce = cce;
         }
@@ -124,4 +118,15 @@ public class ProgramState {
             return cce;
         }
     }
+
+    public void setNewFile(String filepath) {
+        lastOpened.remove(filepath);
+        if (!filePath.equals(System.getProperty("user.home"))) {
+            lastOpened.add(0, this.filePath);
+            if (lastOpened.size() > 5)
+                lastOpened.remove(5);
+        }
+        filePath = filepath;
+    }
+
 }

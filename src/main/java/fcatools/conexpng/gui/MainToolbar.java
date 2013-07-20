@@ -168,18 +168,13 @@ public class MainToolbar extends JToolBar {
                 else
                     new BurmeisterWriter(MainToolbar.this.state);
                 System.out.println(path);
-                MainToolbar.this.state.lastOpened = path;
+                MainToolbar.this.state.setNewFile(path);
 
                 mainFrame.setTitle("ConExp-NG - \"" + path + "\"");
             } catch (FileNotFoundException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
-            } catch (XMLStreamException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
-            } catch (IOException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
+                showMessageDialog("Can not find this file: " + path, true);
+            } catch (IOException | XMLStreamException e1) {
+                showMessageDialog("The file seems to be corrupt: " + e1.getMessage(), true);
             }
 
         }
@@ -187,7 +182,7 @@ public class MainToolbar extends JToolBar {
         @Override
         public void actionPerformed(ActionEvent e) {
             if (state.filePath.equals("untitled.cex") || saveAs) {
-                final JFileChooser fc = new JFileChooser(state.lastOpened);
+                final JFileChooser fc = new JFileChooser(state.filePath);
                 final JDialog dialog = new JDialog(mainFrame, "Save file as", true);
                 dialog.setContentPane(fc);
                 fc.setDialogType(JFileChooser.SAVE_DIALOG);
@@ -246,7 +241,7 @@ public class MainToolbar extends JToolBar {
         @Override
         public void actionPerformed(ActionEvent e) {
 
-            final JFileChooser fc = new JFileChooser(state.lastOpened);
+            final JFileChooser fc = new JFileChooser(state.filePath);
             final JDialog dialog = new JDialog(mainFrame, "Open file", true);
 
             dialog.setContentPane(fc);
@@ -267,9 +262,7 @@ public class MainToolbar extends JToolBar {
             if (fc.getSelectedFile() != null) {
                 File file = fc.getSelectedFile();
                 String path = file.getAbsolutePath();
-
-                state.lastOpened = path;
-                state.filePath = path;
+                state.setNewFile(path);
                 mainFrame.setTitle("ConExp-NG - \"" + path + "\"");
 
                 try {
