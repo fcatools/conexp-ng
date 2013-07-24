@@ -3,6 +3,9 @@ package fcatools.conexpng.gui.contexteditor;
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.*;
+
+import com.alee.laf.scroll.WebScrollPane;
+
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -59,8 +62,8 @@ public class ContextMatrix extends JTable {
     }
 
     // Create our custom viewport into which our custom JTable will be inserted
-    public JScrollPane createStripedJScrollPane(Color bg) {
-        JScrollPane scrollPane =  new JScrollPane(this);
+    public WebScrollPane createStripedJScrollPane(Color bg) {
+        WebScrollPane scrollPane =  new WebScrollPane(this);
         scrollPane.setViewport(new StripedViewport(this, bg));
         scrollPane.getViewport().setView(this);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());

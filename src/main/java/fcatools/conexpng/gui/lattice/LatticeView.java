@@ -3,6 +3,7 @@ package fcatools.conexpng.gui.lattice;
 import fcatools.conexpng.ContextChangeEvents;
 import fcatools.conexpng.ProgramState;
 import fcatools.conexpng.ProgramState.ContextChangeEvent;
+import fcatools.conexpng.ProgramState.StatusMessage;
 import fcatools.conexpng.Util;
 import fcatools.conexpng.gui.View;
 import fcatools.conexpng.model.ILatticeAlgorithm;
@@ -31,13 +32,12 @@ public class LatticeView extends View {
         super(state);
 
         alg = new TestLatticeAlgorithm();
-        LatticeGraph graph = alg.computeLatticeGraph(new ListSet<Concept<String,FullObject<String,String>>>());
+        LatticeGraph graph = alg.computeLatticeGraph(new ListSet<Concept<String, FullObject<String, String>>>());
         view = new LatticeGraphView(graph, state);
         settings = new AccordionMenue(state);
-        settings.setMinimumSize(new Dimension(170,400));
+        settings.setMinimumSize(new Dimension(170, 400));
 
-        JButton export = Util.createButton("Export as .PDF", "export",
-                "conexp/cameraFlash.gif");
+        JButton export = Util.createButton("Export as .PDF", "export", "conexp/cameraFlash.gif");
         export.addActionListener(new ActionListener() {
 
             @Override
@@ -48,8 +48,7 @@ public class LatticeView extends View {
         });
         toolbar.add(export);
 
-        JToggleButton move = Util.createToggleButton("Move subgraph", "move",
-                "conexp/moveMode.gif");
+        JToggleButton move = Util.createToggleButton("Move subgraph", "move", "conexp/moveMode.gif");
         move.addActionListener(new ActionListener() {
             private boolean last = false;
 
@@ -62,8 +61,7 @@ public class LatticeView extends View {
         });
         toolbar.add(move);
 
-        JToggleButton showIdeal = Util.createToggleButton("Show Ideale",
-                "ideal", "conexp/contextIcon.gif");
+        JToggleButton showIdeal = Util.createToggleButton("Show Ideale", "ideal", "conexp/contextIcon.gif");
         showIdeal.addActionListener(new ActionListener() {
             private boolean last = false;
 
@@ -80,30 +78,28 @@ public class LatticeView extends View {
 
     }
 
-
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         // TODO: I would not use ContextChangeEvents for communicating between
         // the Latticeview and the AccordionMenue
-           if (evt instanceof ContextChangeEvent
+        if (evt instanceof ContextChangeEvent
                 && (((ContextChangeEvent) evt).getName() == ContextChangeEvents.CONTEXTCHANGED || ((ContextChangeEvent) evt)
                         .getName() == ContextChangeEvents.NEWCONTEXT)) {
             updateLater = true;
         }
         if (isVisible() && updateLater) {
             updateLater = false;
-            state.startCalculation("Calculating the Concepts");
+            state.startCalculation(StatusMessage.CALCULATINGLATTICE);
             new SwingWorker<Void, Object>() {
 
                 @Override
                 protected Void doInBackground() throws Exception {
-                    ((LatticeGraphView) view).setLatticeGraph(alg
-                            .computeLatticeGraph(state.context.getConcepts()));
+                    ((LatticeGraphView) view).setLatticeGraph(alg.computeLatticeGraph(state.context.getConcepts()));
                     return null;
                 }
 
                 protected void done() {
-                    state.endCalculation();
+                    state.endCalculation(StatusMessage.CALCULATINGLATTICE);
                 };
             }.execute();
 
@@ -112,14 +108,12 @@ public class LatticeView extends View {
         }
         if (evt instanceof ContextChangeEvent
                 && (((ContextChangeEvent) evt).getName() == ContextChangeEvents.TEMPORARYCONTEXTCHANGED)) {
-            ((LatticeGraphView) view).setLatticeGraph(alg
-                    .computeLatticeGraph(state.context
-                            .getConceptsWithoutConsideredElementa()));
+            ((LatticeGraphView) view).setLatticeGraph(alg.computeLatticeGraph(state.context
+                    .getConceptsWithoutConsideredElementa()));
         }
         if (evt instanceof ContextChangeEvent
                 && (((ContextChangeEvent) evt).getName() == ContextChangeEvents.LOADEDFILE)) {
-            ((LatticeGraphView) view).setLatticeGraph((LatticeGraph) evt
-                    .getNewValue());
+            ((LatticeGraphView) view).setLatticeGraph((LatticeGraph) evt.getNewValue());
         }
         view.repaint();
     }

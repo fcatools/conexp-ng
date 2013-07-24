@@ -18,10 +18,8 @@ public class ThreadedAssociationMiner extends AbstractAssociationMiner implement
     // frequent and closed itemsets
     private IndexedSet<Set<SortedSet<String>>> FC;
 
-    private Set<AssociationRule> result;
-
     public Set<AssociationRule> getResult() {
-        return result;
+        return rules;
     }
 
     public ThreadedAssociationMiner(FormalContext context) {
@@ -36,11 +34,11 @@ public class ThreadedAssociationMiner extends AbstractAssociationMiner implement
 
     @Override
     public Set<AssociationRule> computeAssociationRules() {
-        result = new TreeSet<AssociationRule>();
+        rules = new TreeSet<AssociationRule>();
         FC = new ListSet<>();
         apriori();
         Gen_LB();
-        return result;
+        return rules;
     }
 
     /**
@@ -70,7 +68,7 @@ public class ThreadedAssociationMiner extends AbstractAssociationMiner implement
 
                         conf = supL / (double) context.supportCount(L_prime);
                         if (conf >= getConfidence()) {
-                            result.add(new AssociationRule(L_prime, minus(L, L_prime), supL
+                            rules.add(new AssociationRule(L_prime, minus(L, L_prime), supL
                                     / (double) context.getObjectCount(), conf));
                         }
 
@@ -298,7 +296,7 @@ public class ThreadedAssociationMiner extends AbstractAssociationMiner implement
 
     @Override
     public void run() {
-        result = new TreeSet<AssociationRule>();
+        rules = new TreeSet<AssociationRule>();
         FC = new ListSet<>();
         apriori();
         Gen_LB();

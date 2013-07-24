@@ -13,6 +13,15 @@ import fcatools.conexpng.gui.contexteditor.ContextMatrixModel;
 import fcatools.conexpng.model.FormalContext;
 
 import javax.swing.*;
+
+import com.alee.laf.label.WebLabel;
+import com.alee.laf.menu.WebPopupMenu;
+import com.alee.laf.optionpane.WebOptionPane;
+import com.alee.laf.panel.WebPanel;
+import com.alee.laf.rootpane.WebDialog;
+import com.alee.laf.rootpane.WebFrame;
+import com.alee.laf.scroll.WebScrollPane;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
@@ -25,11 +34,11 @@ import static javax.swing.KeyStroke.getKeyStroke;
 public class MyExpert extends
         AbstractExpert<String, String, FullObject<String, String>> {
 
-    private JFrame frame;
+    private WebFrame frame;
     private ProgramState state;
     private FormalContext context;
 
-    public MyExpert(JFrame mainFrame, ProgramState state) {
+    public MyExpert(WebFrame mainFrame, ProgramState state) {
         this.state = state;
         this.context = state.context;
         this.frame = mainFrame;
@@ -97,10 +106,10 @@ public class MyExpert extends
                         + ", that it also has attribute(s) "
                         + getElements(question.getConclusion()) + "?";
         Object[] options = { "Yes", "No", "Stop Attribute Exploration" };
-        final JOptionPane optionPane = new JOptionPane(questionstring,
-                JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_CANCEL_OPTION);
+        final WebOptionPane optionPane = new WebOptionPane(questionstring,
+                WebOptionPane.QUESTION_MESSAGE, WebOptionPane.YES_NO_CANCEL_OPTION);
         optionPane.setOptions(options);
-        final JDialog dialog = new JDialog(frame,
+        final WebDialog dialog = new WebDialog(frame,
                 "Confirm or reject implication", true);
 
         dialog.setContentPane(optionPane);
@@ -109,7 +118,7 @@ public class MyExpert extends
                 if (dialog.isVisible()
                         && (e.getSource() == optionPane)
                         && (e.getPropertyName()
-                                .equals(JOptionPane.VALUE_PROPERTY))) {
+                                .equals(WebOptionPane.VALUE_PROPERTY))) {
                     dialog.setVisible(false);
                 }
             }
@@ -141,10 +150,22 @@ public class MyExpert extends
 
     private void showCounterExampleDialog(FCAImplication<String> question) {
         MiniContextEditor mce = new MiniContextEditor(question);
-        JOptionPane pane = new JOptionPane(mce,
-                JOptionPane.YES_NO_CANCEL_OPTION);
-        pane.setMessageType(JOptionPane.PLAIN_MESSAGE);
-        JDialog dialog = pane.createDialog(frame, "Provide a counterexample");
+        final WebOptionPane pane = new WebOptionPane(mce,
+                WebOptionPane.YES_NO_CANCEL_OPTION);
+        pane.setMessageType(WebOptionPane.PLAIN_MESSAGE);
+        final WebDialog dialog = new WebDialog(frame,
+        		"Provide a counterexample", true);
+        pane.addPropertyChangeListener(new PropertyChangeListener() {
+            public void propertyChange(PropertyChangeEvent e) {
+                if (dialog.isVisible()
+                        && (e.getSource() == pane)
+                        && (e.getPropertyName()
+                                .equals(WebOptionPane.VALUE_PROPERTY))) {
+                    dialog.setVisible(false);
+                }
+            }
+        });
+        dialog.setContentPane(pane);
         Object[] options = { "Provide counterexample", "Accept implication",
                 "Stop" };
         pane.setOptions(options);
@@ -168,18 +189,42 @@ public class MyExpert extends
     }
 
     private void showFinishDialog(String message) {
-        JOptionPane pane = new JOptionPane();
-        JDialog dialog = pane.createDialog(frame, "Information");
-        pane.setMessageType(JOptionPane.INFORMATION_MESSAGE);
-        pane.setMessage(new JLabel(message));
+        final WebOptionPane pane = new WebOptionPane();
+        final WebDialog dialog= new WebDialog(frame,
+                "Information", true);
+        pane.setMessageType(WebOptionPane.INFORMATION_MESSAGE);
+        pane.setMessage(new WebLabel(message));
+        pane.addPropertyChangeListener(new PropertyChangeListener() {
+            public void propertyChange(PropertyChangeEvent e) {
+                if (dialog.isVisible()
+                        && (e.getSource() == pane)
+                        && (e.getPropertyName()
+                                .equals(WebOptionPane.VALUE_PROPERTY))) {
+                    dialog.setVisible(false);
+                }
+            }
+        });
+        dialog.setContentPane(pane);
         dialog.pack();
         Util.centerDialogInsideMainFrame(frame, dialog);
         dialog.setVisible(true);
     }
 
     private void showErrorDialog(String message) {
-        JOptionPane pane = new JOptionPane(message, JOptionPane.ERROR_MESSAGE);
-        JDialog dialog = pane.createDialog(frame, "Error");
+        final WebOptionPane pane = new WebOptionPane(message, WebOptionPane.ERROR_MESSAGE);
+        final WebDialog dialog= new WebDialog(frame,
+                "Error", true);
+        pane.addPropertyChangeListener(new PropertyChangeListener() {
+            public void propertyChange(PropertyChangeEvent e) {
+                if (dialog.isVisible()
+                        && (e.getSource() == pane)
+                        && (e.getPropertyName()
+                                .equals(WebOptionPane.VALUE_PROPERTY))) {
+                    dialog.setVisible(false);
+                }
+            }
+        });
+        dialog.setContentPane(pane);
         dialog.pack();
         centerDialogInsideMainFrame(frame, dialog);
         dialog.setVisible(true);
@@ -188,23 +233,23 @@ public class MyExpert extends
     // ////////////////////////////////////////////////////////////////////////////
 
     @SuppressWarnings("serial")
-    private class MiniContextEditor extends JPanel {
+    private class MiniContextEditor extends WebPanel {
         ProgramState mcestate;
         final ContextMatrixModel matrixModel;
         final ContextMatrix matrix;
 
         // Context menus
-        final JPopupMenu cellPopupMenu;
-        final JPopupMenu objectCellPopupMenu;
-        final JPopupMenu attributeCellPopupMenu;
+        final WebPopupMenu cellPopupMenu;
+        final WebPopupMenu objectCellPopupMenu;
+        final WebPopupMenu attributeCellPopupMenu;
 
         int lastActiveRowIndex;
         int lastActiveColumnIndex;
 
         public MiniContextEditor(FCAImplication<String> question) {
-            cellPopupMenu = new JPopupMenu();
-            objectCellPopupMenu = new JPopupMenu();
-            attributeCellPopupMenu = new JPopupMenu();
+            cellPopupMenu = new WebPopupMenu();
+            objectCellPopupMenu = new WebPopupMenu();
+            attributeCellPopupMenu = new WebPopupMenu();
 
             mcestate = new ProgramState();
             mcestate.context = new FormalContext();
@@ -218,13 +263,13 @@ public class MyExpert extends
                 // should never happen, because the context is empty
                 e.printStackTrace();
             }
-            JScrollPane scrollPane = matrix
+            WebScrollPane scrollPane = matrix
                     .createStripedJScrollPane(getBackground());
             // Only the height of 60 is important
             scrollPane.setPreferredSize(new Dimension(100, 60));
 
             setLayout(new BorderLayout(0, 10));
-            add(new JLabel("Implication: " + question), BorderLayout.NORTH);
+            add(new WebLabel("Implication: " + question), BorderLayout.NORTH);
             add(scrollPane, BorderLayout.CENTER);
             MouseAdapter mouseAdapter = new MouseAdapter() {
                 public void mouseClicked(MouseEvent e) {
@@ -321,7 +366,7 @@ public class MyExpert extends
              */
             addMenuItem(cellPopupMenu, "Select all", new SelectAllAction());
             // --------
-            cellPopupMenu.add(new JPopupMenu.Separator());
+            cellPopupMenu.add(new WebPopupMenu.Separator());
             // --------
             addMenuItem(cellPopupMenu, "Fill", new FillAction());
             addMenuItem(cellPopupMenu, "Clear", new ClearAction());

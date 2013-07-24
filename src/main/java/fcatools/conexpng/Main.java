@@ -1,5 +1,6 @@
 package fcatools.conexpng;
 
+import com.alee.laf.WebLookAndFeel;
 import com.google.common.collect.Sets;
 import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
 import de.tudresden.inf.tcs.fcalib.FullObject;
@@ -32,7 +33,7 @@ public class Main {
 
     public static void main(String... args) {
         // Disabled until there is a fix for #98
-        // WebLookAndFeel.install();
+        WebLookAndFeel.install();
 
         // Disable border around focused cells as it does not fit into the
         // context editor concept

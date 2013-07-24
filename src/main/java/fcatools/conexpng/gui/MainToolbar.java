@@ -12,7 +12,19 @@ import fcatools.conexpng.io.CEXReader;
 import fcatools.conexpng.io.CEXWriter;
 
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.xml.stream.XMLStreamException;
+
+import com.alee.extended.panel.GroupPanel;
+import com.alee.extended.panel.WebButtonGroup;
+import com.alee.laf.button.WebButton;
+import com.alee.laf.list.WebList;
+import com.alee.laf.rootpane.WebFrame;
+import com.alee.laf.toolbar.ToolbarStyle;
+import com.alee.laf.toolbar.WebToolBar;
+import com.alee.managers.popup.PopupWay;
+import com.alee.managers.popup.WebButtonPopup;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -22,26 +34,18 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import static fcatools.conexpng.Util.centerDialogInsideMainFrame;
-import static fcatools.conexpng.Util.createButton;
+import static fcatools.conexpng.Util.loadIcon;
 
-public class MainToolbar extends JToolBar {
+public class MainToolbar extends WebToolBar {
 
     private ProgramState state;
 
+    private WebFrame mainFrame;
+
     private static final long serialVersionUID = -3495670613141172867L;
 
-    private final JFrame mainFrame;
-    private final JButton newButton;
-    private final JButton openButton;
-    private final JButton saveButton;
-    private final JButton saveAsButton;
-    private final JButton undoButton;
-    private final JButton redoButton;
-    private final JButton countButton;
-    private final JButton exploreButton;
-    private final JButton helpButton;
-
-    public MainToolbar(final JFrame mainFrame, final ProgramState state) {
+    @SuppressWarnings("serial")
+    public MainToolbar(final WebFrame mainFrame, final ProgramState state) {
         this.mainFrame = mainFrame;
         this.state = state;
         this.setFloatable(false);
@@ -50,91 +54,136 @@ public class MainToolbar extends JToolBar {
         if (OS.isMacOsX) {
             this.setMargin(new Insets(getInsets().top, getInsets().left + 2, getInsets().bottom, getInsets().right));
         }
+        // TODO: Add icons
+        // toolbar.add ( WebButton.createIconWebButton ( loadIcon (
+        // "toolbar/save.png" ), StyleConstants.smallRound, true ) );
+        setToolbarStyle(ToolbarStyle.attached);
+        setFloatable(false);
+        add(new WebButton("New...") {
+            {
+                setDrawFocus(false);
+                // setHotkey(Hotkey.CTRL_N);
+                setEnabled(false);
+            }
+        });
 
-        // Add buttons
-        newButton = createButton("New Context", "newContext", "conexp/new.gif");
-        add(newButton);
-        openButton = createButton("Open Context", "openContext", "conexp/open.gif");
-        add(openButton);
-        saveButton = createButton("Save Contex", "saveContext", "conexp/save.gif");
-        add(saveButton);
-        saveAsButton = createButton("Save as another Context", "saveAsContext", "conexp/save.gif");
-        add(saveAsButton);
+        WebButton left = new WebButton(loadIcon("conexp/open.gif")) {
+            {
+                setDrawFocus(false);
+                addActionListener(new OpenAction());
+            }
+        };
+
+        final WebButton right = new WebButton(loadIcon("icons/arrow_down.png"));
+        right.setDrawFocus(false);
+        final WebButtonPopup popup = new WebButtonPopup(right, PopupWay.downRight);
+
+        WebList list = new WebList(state.lastOpened);
+        list.setVisibleRowCount(4);
+        list.setEditable(false);
+        list.addListSelectionListener(new ListSelectionListener() {
+            public void valueChanged(ListSelectionEvent e) {
+                if (!e.getValueIsAdjusting() && !((WebList) e.getSource()).isSelectionEmpty()) {
+                    popup.hidePopup();
+
+                    state.setNewFile(String.copyValueOf(((String) ((WebList) e.getSource()).getSelectedValue())
+                            .toCharArray()));
+                    try {
+                        if (state.filePath.endsWith(".cex"))
+
+                            new CEXReader(state);
+
+                        else
+                            new BurmeisterReader(state);
+                    } catch (Exception e1) {
+                        Util.handleIOExceptions(MainToolbar.this.mainFrame, e1, state.filePath);
+                    }
+                    ((WebList) e.getSource()).clearSelection();
+                }
+            }
+        });
+        popup.setContent(new GroupPanel(list));
+
+        add(new WebButtonGroup(true, left, right));
+
         addSeparator();
-        undoButton = createButton("Undo", "undo", "conexp/Undo.gif");
-        add(undoButton);
-        redoButton = createButton("Redo", "redo", "conexp/Redo.gif");
-        add(redoButton);
+        add(new WebButton("Save") {
+            {
+                setDrawFocus(false);
+                setEnabled(false);
+            }
+        });
+        add(new WebButton("Save as...") {
+            {
+                setDrawFocus(false);
+                addActionListener(new SaveAction(true));
+            }
+        });
         addSeparator();
-        countButton = createButton("Count Concepts", "countConcepts", "conexp/numConcepts.gif");
-        add(countButton);
-        exploreButton = createButton("Explore Attributes", "exploreAttributes", "conexp/attrExploration.gif");
-        add(exploreButton);
-        helpButton = createButton("Help", "help", "conexp/question.gif");
-        add(Box.createGlue());
-        add(helpButton);
-
-        // Add actions
-        openButton.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent arg0) {
-                new OpenAction().actionPerformed(arg0);
+        add(new WebButton("Import...") {
+            {
+                setDrawFocus(false);
+                setEnabled(false);
             }
         });
-        saveButton.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent arg0) {
-                new SaveAction(false).actionPerformed(arg0);
+        add(new WebButton("Export...") {
+            {
+                setDrawFocus(false);
+                setEnabled(false);
             }
         });
-        saveAsButton.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent arg0) {
-                new SaveAction(true).actionPerformed(arg0);
+        addSeparator();
+        add(new WebButton("Undo") {
+            {
+                setDrawFocus(false);
+                setEnabled(false);
             }
         });
-        countButton.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent arg0) {
-                showMessageDialog(state.numberOfConcepts + " Concepts", false);
+        add(new WebButton("Redo") {
+            {
+                setDrawFocus(false);
+                setEnabled(false);
             }
         });
-        exploreButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent arg0) {
-                MyExpert expert = new MyExpert(mainFrame, state);
-                state.context.setExpert(expert);
-                expert.addExpertActionListener(state.context);
-                // Create an expert action for starting attribute exploration
-                StartExplorationAction<String, String, FullObject<String, String>> action = new StartExplorationAction<String, String, FullObject<String, String>>();
-                action.setContext(state.context);
-                // Fire the action, exploration starts...
-                expert.fireExpertAction(action);
+        addSeparator();
+        add(new WebButton("Count concepts") {
+            {
+                setDrawFocus(false);
+                setEnabled(false);
             }
         });
-    }
-
-    public void enableSaveButton() {
-        saveButton.setEnabled(true);
-    }
-
-    public void disableSaveButton() {
-        saveButton.setEnabled(false);
-    }
-
-    public void enableUndoButton() {
-        undoButton.setEnabled(true);
-    }
-
-    public void disableUndoButton() {
-        undoButton.setEnabled(false);
-    }
-
-    public void enableRedoButton() {
-        redoButton.setEnabled(true);
-    }
-
-    public void disableRedoButton() {
-        redoButton.setEnabled(false);
+        add(new WebButton("Start exploration") {
+            {
+                setDrawFocus(false);
+                addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent arg0) {
+                        MyExpert expert = new MyExpert(MainToolbar.this.mainFrame, state);
+                        state.context.setExpert(expert);
+                        expert.addExpertActionListener(state.context);
+                        // Create an expert action for starting attribute
+                        // exploration
+                        StartExplorationAction<String, String, FullObject<String, String>> action = new StartExplorationAction<String, String, FullObject<String, String>>();
+                        action.setContext(state.context);
+                        // Fire the action, exploration starts...
+                        expert.fireExpertAction(action);
+                    }
+                });
+            }
+        });
+        addSeparator();
+        add(new WebButton("About") {
+            {
+                setDrawFocus(false);
+                setEnabled(false);
+            }
+        });
+        add(new WebButton("Help") {
+            {
+                setDrawFocus(false);
+                // setHotkey(Hotkey.ALT_F4);
+                setEnabled(false);
+            }
+        });
     }
 
     // TODO: Needs to be improved

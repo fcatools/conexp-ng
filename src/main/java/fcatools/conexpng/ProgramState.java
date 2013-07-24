@@ -58,6 +58,44 @@ public class ProgramState {
         propertyChangeSupport.firePropertyChange(new ContextChangeEvent(this, cce, oldValue, newValue));
     }
 
+    public static final int START = 1;
+
+    public static final int STOP = 2;
+
+    public enum StatusMessage {
+
+        LOADINGFILE("Loading the context"), SAVINGFILE("Saving the context"), CALCULATINGASSOCIATIONS(
+                "Calculating the associations"), CALCULATINGIMPLICATIONS("Calculating the implications"), CALCULATINGCONCEPTS(
+                "Calculating the concepts"), CALCULATINGLATTICE("Calculating the lattice");
+
+        private StatusMessage(String name) {
+            this.name = name;
+        }
+
+        private final String name;
+
+        public String toString() {
+            return name;
+        }
+    }
+
+    public class StatusBarMessage extends PropertyChangeEvent {
+
+        private static final long serialVersionUID = 1L;
+
+        public StatusBarMessage(Object source, String propertyName, Object oldValue, Object newValue) {
+            super(source, propertyName, oldValue, newValue);
+        }
+
+        public StatusBarMessage(Object source, StatusMessage status, Object oldValue, Object newValue) {
+            this(source, status.toString(), oldValue, newValue);
+        }
+    }
+
+    private void fireStatusBarPropertyChange(StatusMessage status, int newValue) {
+        propertyChangeSupport.firePropertyChange(new StatusBarMessage(this, status, 0, newValue));
+    }
+
     public void contextChanged() {
         this.context.clearConsidered();
         firePropertyChange(ContextChangeEvents.CONTEXTCHANGED, null, context);
@@ -81,12 +119,12 @@ public class ProgramState {
         firePropertyChange(ContextChangeEvents.TEMPORARYCONTEXTCHANGED, null, null);
     }
 
-    public void startCalculation(String source) {
-        firePropertyChange(ContextChangeEvents.STARTCALCULATION, null, source);
+    public void startCalculation(StatusMessage status) {
+        fireStatusBarPropertyChange(status, START);
     }
 
-    public void endCalculation() {
-        firePropertyChange(ContextChangeEvents.ENDCALCULATION, null, null);
+    public void endCalculation(StatusMessage status) {
+        fireStatusBarPropertyChange(status, STOP);
     }
 
     public void newLattice(LatticeGraph lattice2) {

@@ -21,8 +21,6 @@ public class AssociationMiner extends AbstractAssociationMiner {
     // frequent and closed itemsets
     private IndexedSet<Set<SortedSet<String>>> FC;
 
-    Set<AssociationRule> result;
-
     public AssociationMiner(FormalContext context) {
         super(context);
     }
@@ -35,11 +33,11 @@ public class AssociationMiner extends AbstractAssociationMiner {
 
     @Override
     public Set<AssociationRule> computeAssociationRules() {
-        result = new TreeSet<AssociationRule>();
+        rules = new TreeSet<AssociationRule>();
         FC = new ListSet<>();
         apriori();
         Gen_LB();
-        return result;
+        return rules;
     }
 
     /**
@@ -66,7 +64,7 @@ public class AssociationMiner extends AbstractAssociationMiner {
 
                         conf = supL / (double) context.supportCount(L_prime);
                         if (conf >= getConfidence()) {
-                            result.add(new AssociationRule(L_prime, minus(L,
+                            rules.add(new AssociationRule(L_prime, minus(L,
                                     L_prime), supL
                                     / (double) context.getObjectCount(), conf));
                         }

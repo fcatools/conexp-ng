@@ -4,9 +4,9 @@ import java.util.Set;
 
 public abstract class AbstractAssociationMiner {
 
-    private double minsup;
-    private double confidence;
-    private Set<AssociationRule> rules;
+    protected double minsup;
+    protected double confidence;
+    protected Set<AssociationRule> rules;
     protected FormalContext context;
 
     public abstract Set<AssociationRule> computeAssociationRules();
@@ -17,10 +17,6 @@ public abstract class AbstractAssociationMiner {
 
     public Set<AssociationRule> getRules() {
         return rules;
-    }
-
-    public void setRules(Set<AssociationRule> rules) {
-        this.rules = rules;
     }
 
     public double getMinsup() {

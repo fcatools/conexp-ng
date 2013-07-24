@@ -1,53 +1,28 @@
 package fcatools.conexpng.gui;
 
-import com.alee.extended.filechooser.SelectionMode;
-import com.alee.extended.filechooser.WebFileChooser;
-import com.alee.extended.panel.GroupPanel;
-import com.alee.extended.panel.WebButtonGroup;
-import com.alee.laf.StyleConstants;
-import com.alee.laf.button.WebButton;
 import com.alee.laf.label.WebLabel;
-import com.alee.laf.list.WebList;
 import com.alee.laf.panel.WebPanel;
-import com.alee.laf.progressbar.WebProgressBar;
+import com.alee.laf.rootpane.WebFrame;
 import com.alee.laf.tabbedpane.TabbedPaneStyle;
 import com.alee.laf.tabbedpane.WebTabbedPane;
-import com.alee.laf.toolbar.ToolbarStyle;
-import com.alee.laf.toolbar.WebToolBar;
-import com.alee.managers.popup.PopupWay;
-import com.alee.managers.popup.WebButtonPopup;
-
-import de.tudresden.inf.tcs.fcalib.FullObject;
-import de.tudresden.inf.tcs.fcalib.action.StartExplorationAction;
-import fcatools.conexpng.ContextChangeEvents;
 import fcatools.conexpng.ProgramState;
-import fcatools.conexpng.ProgramState.ContextChangeEvent;
 import fcatools.conexpng.Util;
 import fcatools.conexpng.gui.contexteditor.ContextEditor;
 import fcatools.conexpng.gui.dependencies.DependencyView;
 import fcatools.conexpng.gui.lattice.LatticeView;
-import fcatools.conexpng.io.BurmeisterReader;
-import fcatools.conexpng.io.BurmeisterWriter;
-import fcatools.conexpng.io.CEXReader;
-import fcatools.conexpng.io.CEXWriter;
-
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.File;
 import static fcatools.conexpng.Util.loadIcon;
 
 // TODO: The code needs to be tidied up drastically
-public class MainFrame extends JFrame {
+public class MainFrame extends WebFrame {
 
     private static final long serialVersionUID = -3768163989667340886L;
 
@@ -62,9 +37,7 @@ public class MainFrame extends JFrame {
     private View associationView;
     private ProgramState state;
 
-    private MainToolbar mainToolbar;
-
-    @SuppressWarnings({ "serial", "unchecked" })
+    @SuppressWarnings({ "serial" })
     public MainFrame(final ProgramState state) {
         getContentPane().setLayout(new BorderLayout());
         mainPanel = new WebPanel(new BorderLayout());
@@ -119,7 +92,6 @@ public class MainFrame extends JFrame {
         statusBar.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, new Color(140, 140, 140)));
         state.addPropertyChangeListener(statusBar);
         mainPanel.add(statusBar, BorderLayout.SOUTH);
-
         add(mainPanel);
 
         showContextEditor();
@@ -141,140 +113,9 @@ public class MainFrame extends JFrame {
                 }
             }
         });
-        // TODO: Add icons
-        // toolbar.add ( WebButton.createIconWebButton ( loadIcon (
-        // "toolbar/save.png" ), StyleConstants.smallRound, true ) );
-        WebToolBar menuBar = new WebToolBar();
-        menuBar.setToolbarStyle(ToolbarStyle.attached);
-        menuBar.setFloatable(false);
-        menuBar.add(new WebButton("New...") {
-            {
-                setDrawFocus(false);
-                // setHotkey(Hotkey.CTRL_N);
-                setEnabled(false);
-            }
-        });
 
-        WebButton left = new WebButton(loadIcon("conexp/open.gif")) {
-            {
-                setDrawFocus(false);
-                addActionListener(new MainToolbar(MainFrame.this, state).new OpenAction());
-            }
-        };
-        // TODO: open recent
 
-        final WebButton right = new WebButton(loadIcon("icons/arrow_down.png"));
-        right.setDrawFocus(false);
-        final WebButtonPopup popup = new WebButtonPopup(right, PopupWay.downRight);
-
-        WebList list = new WebList(state.lastOpened);
-        list.setVisibleRowCount(4);
-        list.setEditable(false);
-        list.addListSelectionListener(new ListSelectionListener() {
-            public void valueChanged(ListSelectionEvent e) {
-                if (!e.getValueIsAdjusting() && !((WebList) e.getSource()).isSelectionEmpty()) {
-                    popup.hidePopup();
-
-                    state.setNewFile(String.copyValueOf(((String) ((WebList) e.getSource()).getSelectedValue())
-                            .toCharArray()));
-                    try {
-                        if (state.filePath.endsWith(".cex"))
-
-                            new CEXReader(state);
-
-                        else
-                            new BurmeisterReader(state);
-                    } catch (Exception e1) {
-                        Util.handleIOExceptions(MainFrame.this, e1, state.filePath);
-                    }
-                    ((WebList) e.getSource()).clearSelection();
-                }
-            }
-        });
-        popup.setContent(new GroupPanel(list));
-
-        menuBar.add(new WebButtonGroup(true, left, right));
-
-        menuBar.addSeparator();
-        menuBar.add(new WebButton("Save") {
-            {
-                setDrawFocus(false);
-                setEnabled(false);
-            }
-        });
-        menuBar.add(new WebButton("Save as...") {
-            {
-                setDrawFocus(false);
-                addActionListener(new MainToolbar(MainFrame.this, state).new SaveAction(true));
-            }
-        });
-        menuBar.addSeparator();
-        menuBar.add(new WebButton("Import...") {
-            {
-                setDrawFocus(false);
-                setEnabled(false);
-            }
-        });
-        menuBar.add(new WebButton("Export...") {
-            {
-                setDrawFocus(false);
-                setEnabled(false);
-            }
-        });
-        menuBar.addSeparator();
-        menuBar.add(new WebButton("Undo") {
-            {
-                setDrawFocus(false);
-                setEnabled(false);
-            }
-        });
-        menuBar.add(new WebButton("Redo") {
-            {
-                setDrawFocus(false);
-                setEnabled(false);
-            }
-        });
-        menuBar.addSeparator();
-        menuBar.add(new WebButton("Count concepts") {
-            {
-                setDrawFocus(false);
-                setEnabled(false);
-            }
-        });
-        menuBar.add(new WebButton("Start exploration") {
-            {
-                setDrawFocus(false);
-                addActionListener(new ActionListener() {
-                    public void actionPerformed(ActionEvent arg0) {
-                        MyExpert expert = new MyExpert(MainFrame.this, state);
-                        state.context.setExpert(expert);
-                        expert.addExpertActionListener(state.context);
-                        // Create an expert action for starting attribute
-                        // exploration
-                        StartExplorationAction<String, String, FullObject<String, String>> action = new StartExplorationAction<String, String, FullObject<String, String>>();
-                        action.setContext(state.context);
-                        // Fire the action, exploration starts...
-                        expert.fireExpertAction(action);
-                    }
-                });
-            }
-        });
-        menuBar.addSeparator();
-        menuBar.add(new WebButton("About") {
-            {
-                setDrawFocus(false);
-                setEnabled(false);
-            }
-        });
-        menuBar.add(new WebButton("Help") {
-            {
-                setDrawFocus(false);
-                // setHotkey(Hotkey.ALT_F4);
-                setEnabled(false);
-            }
-        });
-
-        add(menuBar, BorderLayout.PAGE_START);
+        add(new MainToolbar(this, state), BorderLayout.PAGE_START);
     }
 
     public void showContextEditor() {
@@ -393,111 +234,4 @@ public class MainFrame extends JFrame {
         }
     }
 
-    @SuppressWarnings("serial")
-    private class MainStatusBar extends WebPanel implements PropertyChangeListener {
-
-        public MainStatusBar() {
-            setLayout(new BorderLayout());
-            setPreferredSize(new Dimension(100, 20));
-        }
-
-        @Override
-        public void propertyChange(PropertyChangeEvent evt) {
-            if (evt instanceof ContextChangeEvent) {
-                ContextChangeEvent cce = (ContextChangeEvent) evt;
-                if (cce.getName() == ContextChangeEvents.STARTCALCULATION) {
-                    WebPanel temp = new WebPanel(new BorderLayout());
-                    temp.add(new WebLabel((String) evt.getNewValue() + "  "), BorderLayout.CENTER);
-                    WebProgressBar progressbar = new WebProgressBar();
-                    progressbar.setIndeterminate(true);
-                    temp.add(progressbar, BorderLayout.EAST);
-                    add(temp, BorderLayout.EAST);
-                    revalidate();
-                    getParent().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-                } else if (cce.getName() == ContextChangeEvents.ENDCALCULATION) {
-                    getParent().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-                    removeAll();
-                    add(new WebLabel(""));
-                    revalidate();
-                }
-
-            }
-        }
-    }
-
-}
-
-@SuppressWarnings("serial")
-class OpenAction extends AbstractAction {
-    MainFrame mainFrame;
-    ProgramState state;
-
-    public OpenAction(MainFrame mainFrame, ProgramState state) {
-        this.mainFrame = mainFrame;
-        this.state = state;
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-
-        final WebFileChooser fc = new WebFileChooser(mainFrame, "Open context");
-        fc.setSelectionMode(SelectionMode.SINGLE_SELECTION);
-        fc.setCurrentDirectory(state.filePath);
-        fc.setVisible(true);
-
-        if (fc.getResult() == StyleConstants.OK_OPTION) {
-            File file = fc.getSelectedFile();
-            String path = file.getAbsolutePath();
-
-            state.setNewFile(path);
-            mainFrame.setTitle("ConExp-NG - \"" + path + "\"");
-
-            try {
-                if (path.endsWith(".cex"))
-                    new CEXReader(state);
-                else
-                    new BurmeisterReader(state);
-            } catch (Exception e1) {
-                Util.handleIOExceptions(mainFrame, e1, path);
-            }
-        }
-    }
-}
-
-@SuppressWarnings("serial")
-class SaveAction extends AbstractAction {
-    MainFrame mainFrame;
-    ProgramState state;
-
-    public SaveAction(MainFrame mainFrame, ProgramState state) {
-        this.mainFrame = mainFrame;
-        this.state = state;
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        if (state.filePath.equals(System.getProperty("user.home"))) {
-            final WebFileChooser fc = new WebFileChooser(mainFrame, "Save context");
-            fc.setSelectionMode(SelectionMode.SINGLE_SELECTION);
-            fc.setCurrentDirectory(state.filePath);
-            fc.setVisible(true);
-
-            if (fc.getResult() == StyleConstants.OK_OPTION) {
-                File file = fc.getSelectedFile();
-                String path = file.getAbsolutePath();
-                state.setNewFile(path);
-                mainFrame.setTitle("ConExp-NG - \"" + path + "\"");
-            }
-        }
-        try {
-            if (state.filePath.endsWith(".cex"))
-
-                new CEXWriter(state);
-
-            else
-                new BurmeisterWriter(state);
-        } catch (Exception e1) {
-            Util.handleIOExceptions(mainFrame, e1, state.filePath);
-        }
-    }
 }
