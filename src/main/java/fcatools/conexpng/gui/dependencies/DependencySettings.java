@@ -3,11 +3,15 @@ package fcatools.conexpng.gui.dependencies;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
+import com.alee.laf.button.WebButton;
 import com.alee.laf.label.WebLabel;
 import com.alee.laf.panel.WebPanel;
 import com.alee.laf.radiobutton.WebRadioButton;
 import com.alee.laf.slider.WebSlider;
 import com.alee.laf.text.WebTextField;
+
+import fcatools.conexpng.GUIState;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -23,12 +27,12 @@ public class DependencySettings extends JPanel {
     private static final long serialVersionUID = -3692280021161777005L;
 
     WebLabel minSupLabel = new WebLabel("Support");
-    WebTextField supField = new WebTextField("0.1");
-    WebSlider minSupSlider = new WebSlider(0, 100, 10);
+    WebTextField supField = new WebTextField("");
+    WebSlider minSupSlider = new WebSlider(0, 100, 0);
 
     WebLabel confLabel = new WebLabel("Confidence");
-    WebTextField confField = new WebTextField("0.5");
-    WebSlider confSlider = new WebSlider(0, 100, 50);
+    WebTextField confField = new WebTextField("");
+    WebSlider confSlider = new WebSlider(0, 100, 0);
 
     // Only for testing
     private int current = 0, all = 0;
@@ -67,7 +71,14 @@ public class DependencySettings extends JPanel {
 
     };
 
-    public DependencySettings() {
+    private GUIState state;
+
+    public DependencySettings(GUIState state) {
+        this.state = state;
+        supField.setText("" + state.support);
+        minSupSlider.setValue((int) (state.support * 100));
+        confField.setText("" + state.confidence);
+        confSlider.setValue((int) (state.confidence * 100));
         propertyChangeSupport = new PropertyChangeSupport(this);
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -102,30 +113,35 @@ public class DependencySettings extends JPanel {
         piechart.setPreferredSize(new Dimension(150, 200));
         add(piechart, gbc);
         gbc.gridy = 6;
+        add(new WebLabel("Together with Implications"),gbc);
+        gbc.gridy = 7;
         add(new WebLabel("Sorting by:"), gbc);
         Action sortAction = new SortAction();
-        WebRadioButton lexical = new WebRadioButton();
-        lexical.setSelected(true);
-        lexical.setAction(sortAction);
-        lexical.setText("Lexical order");
-        lexical.setMnemonic(KeyEvent.VK_L);
-        lexical.setActionCommand("LexicalOrder");
+        WebRadioButton lexicalSorting = new WebRadioButton();
+        lexicalSorting.setAction(sortAction);
+        lexicalSorting.setText("Lexical order");
+        lexicalSorting.setMnemonic(KeyEvent.VK_L);
+        lexicalSorting.setActionCommand("LexicalOrder");
 
-        WebRadioButton support = new WebRadioButton();
-        support.setAction(sortAction);
-        support.setText("Support");
-        support.setMnemonic(KeyEvent.VK_S);
-        support.setActionCommand("Support");
-
+        WebRadioButton supportSorting = new WebRadioButton();
+        supportSorting.setAction(sortAction);
+        supportSorting.setText("Support");
+        supportSorting.setMnemonic(KeyEvent.VK_S);
+        supportSorting.setActionCommand("Support");
+        if (state.lexsorting)
+            lexicalSorting.setSelected(true);
+        else
+            supportSorting.setSelected(true);
         // Group the radio buttons.
         ButtonGroup group = new ButtonGroup();
-        group.add(lexical);
-        group.add(support);
-        gbc.gridy = 7;
-        add(lexical, gbc);
+        group.add(lexicalSorting);
+        group.add(supportSorting);
         gbc.gridy = 8;
-        add(support, gbc);
-
+        add(lexicalSorting, gbc);
+        gbc.gridy = 9;
+        add(supportSorting, gbc);
+        gbc.gridy=10;
+        add(new WebButton("Store as default"),gbc);
         confSlider.addChangeListener(new SliderListener(false));
         minSupSlider.addChangeListener(new SliderListener(true));
         confField.addKeyListener(new TextFieldAction(false));
@@ -157,22 +173,20 @@ public class DependencySettings extends JPanel {
     @SuppressWarnings("serial")
     private class SortAction extends AbstractAction {
 
-        boolean lex = true;
-
         @Override
         public void actionPerformed(ActionEvent arg0) {
             if (arg0.getActionCommand().equals("LexicalOrder")) {
-                if (lex)
+                if (state.lexsorting)
                     return;
                 else {
-                    lex = true;
+                    state.lexsorting = !state.lexsorting;
                     myFirePropertyChange("ToggleSortingOrder", null, null);
                 }
             } else {
-                if (!lex)
+                if (!state.lexsorting)
                     return;
                 else {
-                    lex = false;
+                    state.lexsorting = !state.lexsorting;
                     myFirePropertyChange("ToggleSortingOrder", null, null);
                 }
             }
@@ -232,12 +246,14 @@ public class DependencySettings extends JPanel {
             double value = slider.getValue() / 100.0;
             if (minSup) {
                 supField.setText("" + value);
-                if (!slider.getValueIsAdjusting()) {
-                    DependencySettings.this.myFirePropertyChange("MinimalSupportChanged", 0, value);
-                }
+                state.support = value;
+                DependencySettings.this.myFirePropertyChange("MinimalSupportChanged", 0, value);
             } else {
                 confField.setText("" + value);
-                DependencySettings.this.myFirePropertyChange("ConfidenceChanged", 0, value);
+                state.confidence = value;
+                if (!slider.getValueIsAdjusting()) {
+                    DependencySettings.this.myFirePropertyChange("ConfidenceChanged", 0, value);
+                }
             }
         }
     }

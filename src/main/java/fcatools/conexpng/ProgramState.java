@@ -10,8 +10,6 @@ import fcatools.conexpng.model.FormalContext;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
@@ -22,7 +20,7 @@ import java.util.Vector;
  * component can be passed a "MockProgramState" very easily and it is better to
  * have a central place for the program's state as opposed to have it scattered
  * throughout different classes. If you want you can see this class as the
- * "Model" in an MVC context.
+ * "Model" in a MVC context.
  *
  */
 public class ProgramState {
@@ -32,18 +30,21 @@ public class ProgramState {
     public FormalContext context;
     public Set<AssociationRule> associations;
     public boolean unsavedChanges = false;
-    public Map<Integer, Integer> columnWidths = new HashMap<>();
     public LatticeGraph lattice;
     public ListSet<Concept<FullObject<String, String>, String>> concepts;
+    public GUIState guistate;
+    // TODO: @Jan this should be moved to the guistate
     public boolean showObjectLabel = false;
     public boolean showAttributLabel = false;
     public boolean showEdges = true;
     public boolean idealHighlighting = false;
+
     public int numberOfConcepts;
     private PropertyChangeSupport propertyChangeSupport;
 
     public ProgramState() {
         propertyChangeSupport = new PropertyChangeSupport(this);
+        guistate = new GUIState();
     }
 
     public void addPropertyChangeListener(PropertyChangeListener listener) {

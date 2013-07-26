@@ -33,7 +33,7 @@ public class Main {
 
     public static void main(String... args) {
         // Disabled until there is a fix for #98
-        WebLookAndFeel.install();
+       WebLookAndFeel.install();
 
         // Disable border around focused cells as it does not fit into the
         // context editor concept
@@ -61,6 +61,7 @@ public class Main {
         // Create main window and take care of correctly saving and restoring
         // the last window location
         final MainFrame f = new MainFrame(state);
+        f.setMinimumSize(new Dimension(1000, 660));
         f.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent we) {
                 try {
@@ -76,9 +77,8 @@ public class Main {
             Util.handleIOExceptions(f, exception, state.filePath);
         }
         if (firstStart) {
-            f.setSize(1000, 600);
+            f.setSize(1000, 660);
             f.setLocationByPlatform(true);
-
         } else
             f.setBounds(r);
         f.setVisible(true);

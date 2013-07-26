@@ -10,7 +10,6 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-
 import static javax.swing.JSplitPane.HORIZONTAL_SPLIT;
 
 public abstract class View extends WebPanel implements PropertyChangeListener {
@@ -53,7 +52,7 @@ public abstract class View extends WebPanel implements PropertyChangeListener {
 
     @Override
     public void setVisible(boolean aFlag) {
-        boolean old=isVisible();
+        boolean old = isVisible();
         super.setVisible(aFlag);
         propertyChange(new PropertyChangeEvent(this, "visibilityChanged", old, aFlag));
     }

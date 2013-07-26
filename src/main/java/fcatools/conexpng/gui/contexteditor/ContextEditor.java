@@ -72,7 +72,7 @@ public class ContextEditor extends View {
         objectCellPopupMenu = new JPopupMenu();
         attributeCellPopupMenu = new JPopupMenu();
         matrixModel = new ContextMatrixModel(state);
-        matrix = new ContextMatrix(matrixModel, state.columnWidths);
+        matrix = new ContextMatrix(matrixModel, state.guistate.columnWidths);
         JScrollPane scrollPane = matrix.createStripedJScrollPane(getBackground());
         scrollPane.setBorder(new EmptyBorder(3, 3, 3, 3));
         toolbar.setFloatable(false);
@@ -116,7 +116,7 @@ public class ContextEditor extends View {
             } else if (cce.getName() == ContextChangeEvents.NEWCONTEXT
                     || cce.getName() == ContextChangeEvents.LOADEDFILE) {
                 matrixModel.loadNewContext(state);
-                matrix.loadColumnWidths(state.columnWidths);
+                matrix.loadColumnWidths(state.guistate.columnWidths);
                 matrixModel.fireTableStructureChanged();
                 matrix.invalidate();
                 matrix.repaint();

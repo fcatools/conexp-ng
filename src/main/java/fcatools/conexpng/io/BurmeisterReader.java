@@ -80,7 +80,7 @@ public class BurmeisterReader {
             throw new IOException("file starts not with a \"B\"");
         }
 
-        state.columnWidths = new HashMap<>();
+        state.guistate.columnWidths = new HashMap<>();
         state.newContext(context);
     }
 }

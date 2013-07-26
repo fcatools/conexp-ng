@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import javax.xml.namespace.QName;
@@ -22,6 +21,7 @@ import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
 import de.tudresden.inf.tcs.fcalib.FullObject;
 import de.tudresden.inf.tcs.fcalib.utils.ListSet;
 
+import fcatools.conexpng.GUIState;
 import fcatools.conexpng.ProgramState;
 import fcatools.conexpng.gui.lattice.LatticeGraph;
 import fcatools.conexpng.gui.lattice.Node;
@@ -33,10 +33,12 @@ public class CEXReader {
     private FormalContext context;
     private LatticeGraph lattice;
     private boolean ourCEX;
-    private Map<Integer, Integer> columnWidths;
+    private GUIState guistate;
 
-    public CEXReader(ProgramState state) throws XMLStreamException,
-            IllegalObjectException, IOException {
+    public CEXReader(ProgramState state) throws XMLStreamException, IllegalObjectException, IOException,
+            NumberFormatException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException,
+            SecurityException {
+        guistate=new GUIState();
         InputStream in = null;
 
         in = new FileInputStream(state.filePath);
@@ -63,34 +65,65 @@ public class CEXReader {
             case XMLStreamConstants.START_ELEMENT:
                 StartElement element = event.asStartElement();
                 if (name(element, "Version"))
-                    ourCEX = element.asStartElement()
-                            .getAttributeByName(new QName("MajorNumber"))
-                            .toString().equals("1") ? true : false;
+                    ourCEX = element.asStartElement().getAttributeByName(new QName("MajorNumber")).toString()
+                            .equals("1") ? true : false;
                 if (name(element, "Attributes"))
                     addAttributes(parser);
                 if (name(element, "Objects"))
                     addObjects(parser);
                 if (name(element, "Lattice"))
                     addLatice(parser);
-                if (name(element, "ColumnWidths"))
-                    getColumnWidths(parser);
+                if (name(element, "Settings"))
+                    addGuiState(parser);
                 break;
             default:
                 break;
             }
         }
         if (lattice == null) {
-            lattice = new TestLatticeAlgorithm().computeLatticeGraph(new ListSet<Concept<String,FullObject<String,String>>>());
+            lattice = new TestLatticeAlgorithm()
+                    .computeLatticeGraph(new ListSet<Concept<String, FullObject<String, String>>>());
         }
-        if (columnWidths == null) {
-            columnWidths = new HashMap<>();
+        if (guistate.columnWidths == null) {
+            guistate.columnWidths = new HashMap<>();
         }
 
-        state.columnWidths = columnWidths;
+        state.guistate = guistate;
         state.loadedFile(context, lattice);
     }
 
- 
+    private void addGuiState(XMLEventReader parser) throws XMLStreamException, NumberFormatException,
+            IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+        while (parser.hasNext()) {
+            XMLEvent event = parser.nextEvent();
+            if (event.getEventType() == XMLStreamConstants.START_ELEMENT) {
+                StartElement element = event.asStartElement();
+                if (name(element, "ColumnWidths"))
+                    getColumnWidths(parser);
+                else {
+                    String name = element.getName().toString();
+
+                    String temp = "";
+                    while ((event = parser.nextEvent()).isCharacters()) {
+                        temp += event.asCharacters().getData();
+                    }
+                    if (guistate.getClass().getField(name).getType() == Integer.TYPE)
+                        guistate.getClass().getField(name).setInt(guistate, Integer.parseInt(temp));
+                    else if (guistate.getClass().getField(name).getType() == Boolean.TYPE)
+                        guistate.getClass().getField(name).setBoolean(guistate, Boolean.parseBoolean(temp));
+                    else if (guistate.getClass().getField(name).getType() == Double.TYPE)
+                        guistate.getClass().getField(name).setDouble(guistate, Double.parseDouble(temp));
+                    else if (guistate.getClass().getField(name).getClass().equals(String.class))
+                        guistate.getClass().getField(name).set(guistate, temp);
+
+                }
+            }
+            if (event.getEventType() == XMLStreamConstants.END_ELEMENT) {
+                if (event.asEndElement().getName().toString().equals("Settings"))
+                    return;
+            }
+        }
+    }
 
     private void addLatice(XMLEventReader parser) throws XMLStreamException {
         if (!ourCEX)
@@ -122,10 +155,8 @@ public class CEXReader {
             case XMLStreamConstants.START_ELEMENT: {
                 StartElement element = event.asStartElement();
                 if (name(element, "Point2D")) {
-                    x = Double.parseDouble(event.asStartElement()
-                            .getAttributeByName(new QName("x")).getValue());
-                    y = Double.parseDouble(event.asStartElement()
-                            .getAttributeByName(new QName("y")).getValue());
+                    x = Double.parseDouble(event.asStartElement().getAttributeByName(new QName("x")).getValue());
+                    y = Double.parseDouble(event.asStartElement().getAttributeByName(new QName("y")).getValue());
                     if (x < minx)
                         minx = x;
                     if (y < miny)
@@ -134,14 +165,10 @@ public class CEXReader {
                 if (name(element, "Intent")) {
                     HashSet<String> attr = new HashSet<>();
                     event = parser.nextEvent();
-                    while (!(event.isEndElement() && name(event.asEndElement(),
-                            "Intent"))) {
+                    while (!(event.isEndElement() && name(event.asEndElement(), "Intent"))) {
                         if (event.isStartElement()) {
-                            int i = Integer.parseInt(event
-                                    .asStartElement()
-                                    .getAttributeByName(
-                                            new QName("AttributeIdentifier"))
-                                    .getValue());
+                            int i = Integer.parseInt(event.asStartElement()
+                                    .getAttributeByName(new QName("AttributeIdentifier")).getValue());
                             attr.add(context.getAttributeAtIndex(i));
                         }
                         event = parser.nextEvent();
@@ -173,16 +200,14 @@ public class CEXReader {
 
     private Node getNodeWithIntent(Set<String> attributes) {
         for (Node n : lattice.getNodes()) {
-            if (n.getAttributes().containsAll(attributes)
-                    && attributes.containsAll(n.getAttributes()))
+            if (n.getAttributes().containsAll(attributes) && attributes.containsAll(n.getAttributes()))
                 return n;
         }
         return null;
     }
-    
-    private void getColumnWidths(XMLEventReader parser)
-            throws XMLStreamException {
-        columnWidths = new HashMap<>();
+
+    private void getColumnWidths(XMLEventReader parser) throws XMLStreamException {
+        guistate.columnWidths = new HashMap<>();
         int column = 0, width = 0;
         while (parser.hasNext()) {
             XMLEvent event = parser.nextEvent();
@@ -190,20 +215,18 @@ public class CEXReader {
             case XMLStreamConstants.START_ELEMENT:
                 StartElement element = event.asStartElement();
                 if (name(element, "Column")) {
-                    column = Integer.parseInt(element.getAttributeByName(
-                            new QName("Number")).getValue());
+                    column = Integer.parseInt(element.getAttributeByName(new QName("Number")).getValue());
                     event = parser.nextEvent();
                     String temp = "";
                     while ((event = parser.nextEvent()).isCharacters()) {
                         temp += event.asCharacters().getData();
                     }
                     width = Integer.parseInt(temp);
-                    columnWidths.put(column, width);
+                    guistate.columnWidths.put(column, width);
                 }
                 break;
             case XMLStreamConstants.END_ELEMENT:
-                if (event.asEndElement().getName().toString()
-                        .equals("ColumnWidths"))
+                if (event.asEndElement().getName().toString().equals("ColumnWidths"))
                     return;
             }
         }
@@ -217,8 +240,7 @@ public class CEXReader {
         return element.getName().toString().equals(string);
     }
 
-    private void addObjects(XMLEventReader parser) throws XMLStreamException,
-            IllegalObjectException, IOException {
+    private void addObjects(XMLEventReader parser) throws XMLStreamException, IllegalObjectException, IOException {
         while (parser.hasNext()) {
             XMLEvent event = parser.nextEvent();
             switch (event.getEventType()) {
@@ -230,28 +252,21 @@ public class CEXReader {
                         objName += event.asCharacters().getData();
                     }
                     ListSet<String> attrs = new ListSet<>();
-                    while (!((event = parser.nextEvent()).isEndElement() && event
-                            .asEndElement().getName().toString()
+                    while (!((event = parser.nextEvent()).isEndElement() && event.asEndElement().getName().toString()
                             .equals("Intent"))) {
                         if (event.isStartElement()
-                                && event.asStartElement().getName().toString()
-                                        .equals("HasAttribute")) {
-                            int i = Integer.parseInt(event
-                                    .asStartElement()
-                                    .getAttributeByName(
-                                            new QName("AttributeIdentifier"))
-                                    .getValue());
+                                && event.asStartElement().getName().toString().equals("HasAttribute")) {
+                            int i = Integer.parseInt(event.asStartElement()
+                                    .getAttributeByName(new QName("AttributeIdentifier")).getValue());
                             try {
                                 attrs.add(context.getAttributeAtIndex(i));
                             } catch (java.lang.IndexOutOfBoundsException e) {
-                                throw new IOException(
-                                        "There are not enough attributes");
+                                throw new IOException("There are not enough attributes");
                             }
                         }
                     }
 
-                    context.addObject(new FullObject<String, String>(objName,
-                            attrs));
+                    context.addObject(new FullObject<String, String>(objName, attrs));
                 }
                 break;
             case XMLStreamConstants.END_ELEMENT:
@@ -276,8 +291,7 @@ public class CEXReader {
                 }
                 break;
             case XMLStreamConstants.END_ELEMENT:
-                if (event.asEndElement().getName().toString()
-                        .equals("Attributes"))
+                if (event.asEndElement().getName().toString().equals("Attributes"))
                     return;
             }
         }

@@ -316,12 +316,15 @@ public class MainToolbar extends WebToolBar {
 
                 try {
                     if (path.endsWith(".cex"))
+
                         new CEXReader(state);
+
                     else
                         new BurmeisterReader(state);
                 } catch (FileNotFoundException e1) {
                     showMessageDialog("Can not find this file: " + path, true);
-                } catch (IllegalObjectException | IOException | XMLStreamException e1) {
+                } catch (IllegalObjectException | IOException | XMLStreamException | IllegalArgumentException
+                        | IllegalAccessException | NoSuchFieldException | SecurityException e1) {
                     showMessageDialog("The file seems to be corrupt: " + e1.getMessage(), true);
                 }
             }

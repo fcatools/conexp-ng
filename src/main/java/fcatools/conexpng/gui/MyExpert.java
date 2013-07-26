@@ -154,7 +154,7 @@ public class MyExpert extends
                 WebOptionPane.YES_NO_CANCEL_OPTION);
         pane.setMessageType(WebOptionPane.PLAIN_MESSAGE);
         final WebDialog dialog = new WebDialog(frame,
-        		"Provide a counterexample", true);
+                "Provide a counterexample", true);
         pane.addPropertyChangeListener(new PropertyChangeListener() {
             public void propertyChange(PropertyChangeEvent e) {
                 if (dialog.isVisible()
@@ -255,7 +255,7 @@ public class MyExpert extends
             mcestate.context = new FormalContext();
             mcestate.context.addAttributes(context.getAttributes());
             matrixModel = new ContextMatrixModel(mcestate);
-            matrix = new ContextMatrix(matrixModel, mcestate.columnWidths);
+            matrix = new ContextMatrix(matrixModel, mcestate.guistate.columnWidths);
             try {
                 mcestate.context.addObject(new FullObject<String, String>("obj"
                         + context.getObjectCount(), question.getPremise()));
