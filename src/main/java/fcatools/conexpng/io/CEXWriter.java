@@ -1,7 +1,9 @@
 package fcatools.conexpng.io;
 
+import de.tudresden.inf.tcs.fcaapi.FCAImplication;
 import de.tudresden.inf.tcs.fcalib.FullObject;
-import fcatools.conexpng.ProgramState;
+import fcatools.conexpng.Conf;
+import fcatools.conexpng.model.AssociationRule;
 
 import javax.xml.stream.XMLEventFactory;
 import javax.xml.stream.XMLEventWriter;
@@ -14,13 +16,13 @@ import java.util.HashMap;
 
 public class CEXWriter {
 
-    private ProgramState state;
+    private Conf state;
 
     private XMLEventFactory eventFactory = XMLEventFactory.newInstance();
 
     private HashMap<String, String> ids = new HashMap<>();
 
-    public CEXWriter(ProgramState state) throws XMLStreamException, FileNotFoundException {
+    public CEXWriter(Conf state) throws XMLStreamException, FileNotFoundException {
         this.state = state;
         XMLEventWriter writer = null;
         XMLOutputFactory outputFactory = XMLOutputFactory.newInstance();
@@ -35,23 +37,75 @@ public class CEXWriter {
         writer.add(eventFactory.createAttribute("MinorNumber", "0"));
         writer.add(eventFactory.createEndElement("", "", "Version"));
         addContext(writer);
+        addAssociations(writer);
+        addImplications(writer);
         addGUIState(writer);
         writer.add(eventFactory.createEndElement("", "", "ConceptualSystem"));
         writer.add(eventFactory.createEndDocument());
         writer.close();
     }
 
+    private void addImplications(XMLEventWriter writer) throws XMLStreamException {
+        writer.add(eventFactory.createStartElement("", "", "Implications"));
+        for (FCAImplication<String> i : state.implications) {
+            writer.add(eventFactory.createStartElement("", "", "Implication"));
+            writer.add(eventFactory.createStartElement("", "", "Premise"));
+            for (String premise : i.getPremise()) {
+                writer.add(eventFactory.createStartElement("", "", "HasAttribute"));
+                writer.add(eventFactory.createAttribute("AttributeIdentifier", "" + ids.get(premise)));
+                writer.add(eventFactory.createEndElement("", "", "HasAttribute"));
+            }
+            writer.add(eventFactory.createEndElement("", "", "Premise"));
+            writer.add(eventFactory.createStartElement("", "", "Conclusion"));
+            for (String conc : i.getConclusion()) {
+                writer.add(eventFactory.createStartElement("", "", "HasAttribute"));
+                writer.add(eventFactory.createAttribute("AttributeIdentifier", "" + ids.get(conc)));
+                writer.add(eventFactory.createEndElement("", "", "HasAttribute"));
+            }
+            writer.add(eventFactory.createEndElement("", "", "Conclusion"));
+            writer.add(eventFactory.createEndElement("", "", "Implication"));
+        }
+        writer.add(eventFactory.createEndElement("", "", "Implications"));
+    }
+
+    private void addAssociations(XMLEventWriter writer) throws XMLStreamException {
+        writer.add(eventFactory.createStartElement("", "", "Associations"));
+        for (AssociationRule a : state.associations) {
+            writer.add(eventFactory.createStartElement("", "", "Association"));
+            writer.add(eventFactory.createAttribute("Support", "" + a.getSupport()));
+            writer.add(eventFactory.createAttribute("Confidence", "" + a.getConfidence()));
+
+            writer.add(eventFactory.createStartElement("", "", "Premise"));
+            for (String premise : a.getPremise()) {
+                writer.add(eventFactory.createStartElement("", "", "HasAttribute"));
+                writer.add(eventFactory.createAttribute("AttributeIdentifier", "" + ids.get(premise)));
+                writer.add(eventFactory.createEndElement("", "", "HasAttribute"));
+            }
+            writer.add(eventFactory.createEndElement("", "", "Premise"));
+
+            writer.add(eventFactory.createStartElement("", "", "Consequent"));
+            for (String cons : a.getConsequent()) {
+                writer.add(eventFactory.createStartElement("", "", "HasAttribute"));
+                writer.add(eventFactory.createAttribute("AttributeIdentifier", "" + ids.get(cons)));
+                writer.add(eventFactory.createEndElement("", "", "HasAttribute"));
+            }
+            writer.add(eventFactory.createEndElement("", "", "Consequent"));
+            writer.add(eventFactory.createEndElement("", "", "Association"));
+        }
+        writer.add(eventFactory.createEndElement("", "", "Associations"));
+    }
+
     private void addGUIState(XMLEventWriter writer) throws XMLStreamException {
         writer.add(eventFactory.createStartElement("", "", "Settings"));
 
-        for (Field f : state.guistate.getClass().getDeclaredFields()) {
+        for (Field f : state.guiConf.getClass().getDeclaredFields()) {
             if (f.getName().equals("columnWidths")) {
                 addColumnWidths(writer);
                 continue;
             }
             try {
                 writer.add(eventFactory.createStartElement("", "", f.getName()));
-                writer.add(eventFactory.createCharacters("" + f.get(state.guistate)));
+                writer.add(eventFactory.createCharacters("" + f.get(state.guiConf)));
                 writer.add(eventFactory.createEndElement("", "", f.getName()));
 
             } catch (IllegalArgumentException e) {
@@ -68,12 +122,12 @@ public class CEXWriter {
     private void addColumnWidths(XMLEventWriter writer) throws XMLStreamException {
         writer.add(eventFactory.createStartElement("", "", "ColumnWidths"));
 
-        for (int column : state.guistate.columnWidths.keySet()) {
+        for (int column : state.guiConf.columnWidths.keySet()) {
             writer.add(eventFactory.createStartElement("", "", "Column"));
             writer.add(eventFactory.createAttribute("Number", "" + column));
             writer.add(eventFactory.createStartElement("", "", "Width"));
 
-            writer.add(eventFactory.createCharacters("" + state.guistate.columnWidths.get(column)));
+            writer.add(eventFactory.createCharacters("" + state.guiConf.columnWidths.get(column)));
 
             writer.add(eventFactory.createEndElement("", "", "Width"));
             writer.add(eventFactory.createEndElement("", "", "Column"));

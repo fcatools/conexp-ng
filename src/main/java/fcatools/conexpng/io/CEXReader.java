@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
@@ -17,14 +18,17 @@ import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
 import de.tudresden.inf.tcs.fcaapi.Concept;
+import de.tudresden.inf.tcs.fcaapi.FCAImplication;
 import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
 import de.tudresden.inf.tcs.fcalib.FullObject;
+import de.tudresden.inf.tcs.fcalib.Implication;
 import de.tudresden.inf.tcs.fcalib.utils.ListSet;
 
-import fcatools.conexpng.GUIState;
-import fcatools.conexpng.ProgramState;
+import fcatools.conexpng.GUIConf;
+import fcatools.conexpng.Conf;
 import fcatools.conexpng.gui.lattice.LatticeGraph;
 import fcatools.conexpng.gui.lattice.Node;
+import fcatools.conexpng.model.AssociationRule;
 import fcatools.conexpng.model.FormalContext;
 import fcatools.conexpng.model.TestLatticeAlgorithm;
 
@@ -33,12 +37,14 @@ public class CEXReader {
     private FormalContext context;
     private LatticeGraph lattice;
     private boolean ourCEX;
-    private GUIState guistate;
+    private GUIConf guistate;
+    private Set<AssociationRule> associations;
+    private Set<FCAImplication<String>> implications;
 
-    public CEXReader(ProgramState state) throws XMLStreamException, IllegalObjectException, IOException,
+    public CEXReader(Conf state) throws XMLStreamException, IllegalObjectException, IOException,
             NumberFormatException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException,
             SecurityException {
-        guistate=new GUIState();
+        guistate = new GUIConf();
         InputStream in = null;
 
         in = new FileInputStream(state.filePath);
@@ -75,6 +81,11 @@ public class CEXReader {
                     addLatice(parser);
                 if (name(element, "Settings"))
                     addGuiState(parser);
+                if (name(element, "Implications"))
+                    addImplications(parser);
+                if (name(element, "Associations"))
+                    addAssociations(parser);
+
                 break;
             default:
                 break;
@@ -88,8 +99,97 @@ public class CEXReader {
             guistate.columnWidths = new HashMap<>();
         }
 
-        state.guistate = guistate;
-        state.loadedFile(context, lattice);
+        state.guiConf = guistate;
+        state.associations=associations;
+        state.implications=implications;
+        state.lattice=lattice;
+        state.context=context;
+        state.loadedFile();
+    }
+
+    private void addImplications(XMLEventReader parser) throws XMLStreamException, IOException {
+        implications = new HashSet<>();
+        while (parser.hasNext()) {
+            XMLEvent event = parser.nextEvent();
+            switch (event.getEventType()) {
+            case XMLStreamConstants.START_ELEMENT:
+                StartElement element = event.asStartElement();
+                if (element.getName().toString().equals("Implication")) {
+
+                    Set<String> premise = new TreeSet<>();
+                    while (!((event = parser.nextEvent()).isEndElement() && event.asEndElement().getName().toString()
+                            .equals("Premise"))) {
+                        if (event.isStartElement()
+                                && event.asStartElement().getName().toString().equals("HasAttribute")) {
+                            int i = Integer.parseInt(event.asStartElement()
+                                    .getAttributeByName(new QName("AttributeIdentifier")).getValue());
+                            premise.add(context.getAttributeAtIndex(i));
+                        }
+                    }
+                    Set<String> conc = new TreeSet<>();
+                    while (!((event = parser.nextEvent()).isEndElement() && event.asEndElement().getName().toString()
+                            .equals("Conclusion"))) {
+                        if (event.isStartElement()
+                                && event.asStartElement().getName().toString().equals("HasAttribute")) {
+                            int i = Integer.parseInt(event.asStartElement()
+                                    .getAttributeByName(new QName("AttributeIdentifier")).getValue());
+                            conc.add(context.getAttributeAtIndex(i));
+                        }
+                    }
+
+                    implications.add(new Implication<String>(premise, conc));
+                }
+                break;
+            case XMLStreamConstants.END_ELEMENT:
+                if (event.asEndElement().getName().toString().equals("Implications"))
+                    return;
+            }
+        }
+    }
+
+    private void addAssociations(XMLEventReader parser) throws XMLStreamException, IOException {
+        associations = new TreeSet<>();
+        while (parser.hasNext()) {
+            XMLEvent event = parser.nextEvent();
+            switch (event.getEventType()) {
+            case XMLStreamConstants.START_ELEMENT:
+                StartElement element = event.asStartElement();
+                if (element.getName().toString().equals("Association")) {
+
+                    double sup=0;
+                    double conf=0;
+                    sup=Double.parseDouble(element.getAttributeByName(new QName("Support")).getValue());
+                    conf=Double.parseDouble(element.getAttributeByName(new QName("Confidence")).getValue());
+
+                    Set<String> premise = new TreeSet<>();
+                    while (!((event = parser.nextEvent()).isEndElement() && event.asEndElement().getName().toString()
+                            .equals("Premise"))) {
+                        if (event.isStartElement()
+                                && event.asStartElement().getName().toString().equals("HasAttribute")) {
+                            int i = Integer.parseInt(event.asStartElement()
+                                    .getAttributeByName(new QName("AttributeIdentifier")).getValue());
+                            premise.add(context.getAttributeAtIndex(i));
+                        }
+                    }
+                    Set<String> cons = new TreeSet<>();
+                    while (!((event = parser.nextEvent()).isEndElement() && event.asEndElement().getName().toString()
+                            .equals("Consequent"))) {
+                        if (event.isStartElement()
+                                && event.asStartElement().getName().toString().equals("HasAttribute")) {
+                            int i = Integer.parseInt(event.asStartElement()
+                                    .getAttributeByName(new QName("AttributeIdentifier")).getValue());
+                            cons.add(context.getAttributeAtIndex(i));
+                        }
+                    }
+
+                    associations.add(new AssociationRule(premise, cons, sup, conf));
+                }
+                break;
+            case XMLStreamConstants.END_ELEMENT:
+                if (event.asEndElement().getName().toString().equals("Associations"))
+                    return;
+            }
+        }
     }
 
     private void addGuiState(XMLEventReader parser) throws XMLStreamException, NumberFormatException,

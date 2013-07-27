@@ -30,10 +30,11 @@ public class Main {
     public static final String optionsFileName = new File(getSettingsDirectory(), "options.prop").getPath();
     private static Rectangle r;
     private static Exception exception = null;
+    private static boolean fileOpened=false;
 
     public static void main(String... args) {
         // Disabled until there is a fix for #98
-       WebLookAndFeel.install();
+        // WebLookAndFeel.install();
 
         // Disable border around focused cells as it does not fit into the
         // context editor concept
@@ -42,7 +43,7 @@ public class Main {
         // the context editor concept
         UIManager.put("Table.focusCellForeground", Color.black);
 
-        final ProgramState state = new ProgramState();
+        final Conf state = new Conf();
 
         boolean firstStart = false;
         File optionsFile = new File(optionsFileName);
@@ -84,10 +85,13 @@ public class Main {
         f.setVisible(true);
 
         // Force various GUI components to update
-        state.contextChanged();
+        if (fileOpened)
+            state.loadedFile();
+        else
+            state.contextChanged();
     }
 
-    private static void showExample(ProgramState state) {
+    private static void showExample(Conf state) {
         state.filePath = "untitled.cex";
         state.context = new FormalContext();
         state.context.addAttribute("female");
@@ -105,7 +109,7 @@ public class Main {
     }
 
     // Store location & size of UI & dir that was last opened from
-    private static void storeOptions(Frame f, ProgramState state) throws Exception {
+    private static void storeOptions(Frame f, Conf state) throws Exception {
         File file = new File(optionsFileName);
         Properties p = new Properties();
         // restore the frame from 'full screen' first!
@@ -132,7 +136,7 @@ public class Main {
     }
 
     // Restore location & size of UI & dir that was last opened from
-    private static void restoreOptions(ProgramState state) throws IOException {
+    private static void restoreOptions(Conf state) throws IOException {
         File file = new File(optionsFileName);
         Properties p = new Properties();
         BufferedReader br = new BufferedReader(new FileReader(file));
@@ -160,6 +164,7 @@ public class Main {
                 else
 
                     new BurmeisterReader(state);
+                fileOpened = true;
             } catch (Exception e) {
                 exception = e;
             }

@@ -6,7 +6,7 @@ import de.tudresden.inf.tcs.fcalib.AbstractExpert;
 import de.tudresden.inf.tcs.fcalib.FullObject;
 import de.tudresden.inf.tcs.fcalib.action.CounterExampleProvidedAction;
 import de.tudresden.inf.tcs.fcalib.action.QuestionConfirmedAction;
-import fcatools.conexpng.ProgramState;
+import fcatools.conexpng.Conf;
 import fcatools.conexpng.Util;
 import fcatools.conexpng.gui.contexteditor.ContextMatrix;
 import fcatools.conexpng.gui.contexteditor.ContextMatrixModel;
@@ -35,10 +35,10 @@ public class MyExpert extends
         AbstractExpert<String, String, FullObject<String, String>> {
 
     private WebFrame frame;
-    private ProgramState state;
+    private Conf state;
     private FormalContext context;
 
-    public MyExpert(WebFrame mainFrame, ProgramState state) {
+    public MyExpert(WebFrame mainFrame, Conf state) {
         this.state = state;
         this.context = state.context;
         this.frame = mainFrame;
@@ -234,7 +234,7 @@ public class MyExpert extends
 
     @SuppressWarnings("serial")
     private class MiniContextEditor extends WebPanel {
-        ProgramState mcestate;
+        Conf mcestate;
         final ContextMatrixModel matrixModel;
         final ContextMatrix matrix;
 
@@ -251,11 +251,11 @@ public class MyExpert extends
             objectCellPopupMenu = new WebPopupMenu();
             attributeCellPopupMenu = new WebPopupMenu();
 
-            mcestate = new ProgramState();
+            mcestate = new Conf();
             mcestate.context = new FormalContext();
             mcestate.context.addAttributes(context.getAttributes());
             matrixModel = new ContextMatrixModel(mcestate);
-            matrix = new ContextMatrix(matrixModel, mcestate.guistate.columnWidths);
+            matrix = new ContextMatrix(matrixModel, mcestate.guiConf.columnWidths);
             try {
                 mcestate.context.addObject(new FullObject<String, String>("obj"
                         + context.getObjectCount(), question.getPremise()));

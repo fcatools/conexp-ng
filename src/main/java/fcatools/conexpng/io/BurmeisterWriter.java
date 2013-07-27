@@ -7,13 +7,13 @@ import java.io.OutputStreamWriter;
 
 import de.tudresden.inf.tcs.fcalib.FullObject;
 
-import fcatools.conexpng.ProgramState;
+import fcatools.conexpng.Conf;
 
 public class BurmeisterWriter {
 
     private final String EOL = System.getProperty("line.separator");
 
-    public BurmeisterWriter(ProgramState state) throws IOException {
+    public BurmeisterWriter(Conf state) throws IOException {
 
         FileOutputStream fos = new FileOutputStream(state.filePath);
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));

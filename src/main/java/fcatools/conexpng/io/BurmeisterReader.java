@@ -2,7 +2,7 @@ package fcatools.conexpng.io;
 
 import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
 import de.tudresden.inf.tcs.fcalib.FullObject;
-import fcatools.conexpng.ProgramState;
+import fcatools.conexpng.Conf;
 import fcatools.conexpng.model.FormalContext;
 
 import java.io.BufferedReader;
@@ -13,7 +13,7 @@ import java.util.HashMap;
 
 public class BurmeisterReader {
 
-    public BurmeisterReader(ProgramState state) throws IllegalObjectException,
+    public BurmeisterReader(Conf state) throws IllegalObjectException,
             IOException {
         FileInputStream fis = new FileInputStream(state.filePath);
         BufferedReader br = new BufferedReader(new InputStreamReader(fis));
@@ -80,7 +80,7 @@ public class BurmeisterReader {
             throw new IOException("file starts not with a \"B\"");
         }
 
-        state.guistate.columnWidths = new HashMap<>();
+        state.guiConf.columnWidths = new HashMap<>();
         state.newContext(context);
     }
 }

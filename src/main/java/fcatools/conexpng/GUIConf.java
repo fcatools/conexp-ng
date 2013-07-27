@@ -14,7 +14,10 @@ import java.util.Map;
  * @author DavidBormann
  *
  */
-public class GUIState {
+public class GUIConf {
+
+    // general
+    public int lastTab = 0;
 
     // Dependencies
     public double support = 0.5;
@@ -23,8 +26,12 @@ public class GUIState {
     public int splitpanepos = 206;
     public int assoscrollpos = 0;
     public int implscrollpos = 0;
+    public int dependenciessettingssplitpos = 170;
 
     // Contexteditor
     public Map<Integer, Integer> columnWidths = new HashMap<>();
+
+    // Latticeview
+    public int latticesettingssplitpos = 170;
 
 }

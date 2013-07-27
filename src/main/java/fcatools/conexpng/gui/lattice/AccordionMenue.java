@@ -21,7 +21,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
 import de.tudresden.inf.tcs.fcalib.FullObject;
-import fcatools.conexpng.ProgramState;
+import fcatools.conexpng.Conf;
 import fcatools.conexpng.model.FormalContext;
 
 @SuppressWarnings("serial")
@@ -46,7 +46,7 @@ public class AccordionMenue extends JPanel implements ActionListener {
 	 * A place-holder for the currently visible component
 	 */
 	private JComponent visibleComponent = null;
-	private static ProgramState state;
+	private static Conf state;
 	private static FormalContext context;
 	private static List<JCheckBox> attributeCheckBoxes;
 	private static List<JCheckBox> objectCheckBoxes;
@@ -55,7 +55,7 @@ public class AccordionMenue extends JPanel implements ActionListener {
 	 * Creates a new JOutlookBar; after which you should make repeated calls to
 	 * addBar() for each bar
 	 */
-	public AccordionMenue(ProgramState state) {
+	public AccordionMenue(Conf state) {
 		this.setLayout(new BorderLayout());
 		this.add(topPanel, BorderLayout.NORTH);
 		this.add(bottomPanel, BorderLayout.SOUTH);

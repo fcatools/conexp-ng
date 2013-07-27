@@ -3,7 +3,7 @@ package fcatools.conexpng.gui;
 import com.alee.laf.panel.WebPanel;
 import com.alee.laf.splitpane.WebSplitPane;
 import com.alee.laf.toolbar.WebToolBar;
-import fcatools.conexpng.ProgramState;
+import fcatools.conexpng.Conf;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -16,7 +16,7 @@ public abstract class View extends WebPanel implements PropertyChangeListener {
 
     protected static final long serialVersionUID = -873702052790459127L;
 
-    protected ProgramState state;
+    protected Conf state;
 
     protected WebToolBar toolbar;
 
@@ -26,7 +26,7 @@ public abstract class View extends WebPanel implements PropertyChangeListener {
 
     protected WebSplitPane splitPane;
 
-    public View(ProgramState state) {
+    public View(Conf state) {
         this.state = state;
         state.addPropertyChangeListener(this);
         toolbar = new WebToolBar(WebToolBar.VERTICAL);
@@ -45,7 +45,6 @@ public abstract class View extends WebPanel implements PropertyChangeListener {
 
         splitPane = new WebSplitPane(HORIZONTAL_SPLIT, settings, panel);
         splitPane.setOneTouchExpandable(true);
-        splitPane.setDividerLocation(170);
         splitPane.setContinuousLayout(true);
         add(splitPane);
     }

@@ -11,7 +11,7 @@ import com.alee.laf.radiobutton.WebRadioButton;
 import com.alee.laf.slider.WebSlider;
 import com.alee.laf.text.WebTextField;
 
-import fcatools.conexpng.GUIState;
+import fcatools.conexpng.GUIConf;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -71,9 +71,9 @@ public class DependencySettings extends JPanel {
 
     };
 
-    private GUIState state;
+    private GUIConf state;
 
-    public DependencySettings(GUIState state) {
+    public DependencySettings(GUIConf state) {
         this.state = state;
         supField.setText("" + state.support);
         minSupSlider.setValue((int) (state.support * 100));
@@ -113,7 +113,7 @@ public class DependencySettings extends JPanel {
         piechart.setPreferredSize(new Dimension(150, 200));
         add(piechart, gbc);
         gbc.gridy = 6;
-        add(new WebLabel("Together with Implications"),gbc);
+        add(new WebLabel("Together with Implications"), gbc);
         gbc.gridy = 7;
         add(new WebLabel("Sorting by:"), gbc);
         Action sortAction = new SortAction();
@@ -140,8 +140,8 @@ public class DependencySettings extends JPanel {
         add(lexicalSorting, gbc);
         gbc.gridy = 9;
         add(supportSorting, gbc);
-        gbc.gridy=10;
-        add(new WebButton("Store as default"),gbc);
+        gbc.gridy = 10;
+        add(new WebButton("Store as default"), gbc);
         confSlider.addChangeListener(new SliderListener(false));
         minSupSlider.addChangeListener(new SliderListener(true));
         confField.addKeyListener(new TextFieldAction(false));
@@ -246,14 +246,14 @@ public class DependencySettings extends JPanel {
             double value = slider.getValue() / 100.0;
             if (minSup) {
                 supField.setText("" + value);
-                state.support = value;
-                DependencySettings.this.myFirePropertyChange("MinimalSupportChanged", 0, value);
+                if (!slider.getValueIsAdjusting()) {
+                    state.support = value;
+                    DependencySettings.this.myFirePropertyChange("MinimalSupportChanged", 0, value);
+                }
             } else {
                 confField.setText("" + value);
                 state.confidence = value;
-                if (!slider.getValueIsAdjusting()) {
-                    DependencySettings.this.myFirePropertyChange("ConfidenceChanged", 0, value);
-                }
+                DependencySettings.this.myFirePropertyChange("ConfidenceChanged", 0, value);
             }
         }
     }

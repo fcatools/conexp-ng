@@ -11,8 +11,8 @@ import javax.swing.SwingWorker;
 import com.alee.laf.label.WebLabel;
 import com.alee.laf.panel.WebPanel;
 import com.alee.laf.progressbar.WebProgressBar;
-import fcatools.conexpng.ProgramState;
-import fcatools.conexpng.ProgramState.StatusBarMessage;
+import fcatools.conexpng.Conf;
+import fcatools.conexpng.Conf.StatusBarMessage;
 
 @SuppressWarnings("serial")
 public class MainStatusBar extends WebPanel implements PropertyChangeListener {
@@ -63,7 +63,7 @@ public class MainStatusBar extends WebPanel implements PropertyChangeListener {
     public void propertyChange(PropertyChangeEvent evt) {
         if (evt instanceof StatusBarMessage) {
             StatusBarMessage status = (StatusBarMessage) evt;
-            if ((int) status.getNewValue() == ProgramState.START) {
+            if ((int) status.getNewValue() == Conf.START) {
                 if (bar == null || bar.isDone()) {
                     bar = new StatusBar();
                     bar.execute();
@@ -75,7 +75,7 @@ public class MainStatusBar extends WebPanel implements PropertyChangeListener {
                         ;
                     text += ", " + status.getPropertyName();
                 }
-            } else if ((int) status.getNewValue() == ProgramState.STOP) {
+            } else if ((int) status.getNewValue() == Conf.STOP) {
 
                 text = text.replace(status.getPropertyName(), "");
                 text = text.replace(", , ", ", ");

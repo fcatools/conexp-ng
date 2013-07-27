@@ -29,7 +29,7 @@ import org.apache.fop.svg.PDFTranscoder;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 
-import fcatools.conexpng.ProgramState;
+import fcatools.conexpng.Conf;
 
 /*The JSVGCanvas provides a set of build-in interactors that
  * let the users manipulate the displayed document, including ones for zooming,
@@ -40,11 +40,11 @@ public class LatticeGraphView extends JSVGCanvas {
 
     private static final long serialVersionUID = -8623872314193862285L;
     private LatticeGraph graph;
-    private ProgramState state;
+    private Conf state;
 	private ArrayList<Node> lastIdeal;
 	private boolean idealHighlighting;
 
-    public LatticeGraphView(LatticeGraph graph, ProgramState state) {
+    public LatticeGraphView(LatticeGraph graph, Conf state) {
         this.graph = graph;
         this.state = state;
         this.lastIdeal = new ArrayList<Node>();

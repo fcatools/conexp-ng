@@ -2,7 +2,7 @@ package fcatools.conexpng.gui.contexteditor;
 
 import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
 import de.tudresden.inf.tcs.fcalib.FullObject;
-import fcatools.conexpng.ProgramState;
+import fcatools.conexpng.Conf;
 import fcatools.conexpng.model.FormalContext;
 
 import javax.swing.table.AbstractTableModel;
@@ -22,13 +22,13 @@ public class ContextMatrixModel extends AbstractTableModel implements Reorderabl
 
     private FormalContext context;
     // Only needed for 'contextChanged' method when renaming s.th.
-    private ProgramState state;
+    private Conf state;
 
-    public ContextMatrixModel(ProgramState state) {
+    public ContextMatrixModel(Conf state) {
         loadNewContext(state);
     }
 
-    public void loadNewContext(ProgramState state) {
+    public void loadNewContext(Conf state) {
         this.state = state;
         this.context = state.context;
     }

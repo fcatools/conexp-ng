@@ -1,6 +1,7 @@
 package fcatools.conexpng;
 
 import de.tudresden.inf.tcs.fcaapi.Concept;
+import de.tudresden.inf.tcs.fcaapi.FCAImplication;
 import de.tudresden.inf.tcs.fcalib.FullObject;
 import de.tudresden.inf.tcs.fcalib.utils.ListSet;
 import fcatools.conexpng.gui.lattice.LatticeGraph;
@@ -16,24 +17,25 @@ import java.util.Vector;
 /**
  * Contains context, lattice, implications, filePath, snapshots etc.
  * <p>
- * Why 'ProgramState'? "Dependency Injection", e.g. for testing purposes a
+ * Why 'Conf'? "Dependency Injection", e.g. for testing purposes a
  * component can be passed a "MockProgramState" very easily and it is better to
  * have a central place for the program's state as opposed to have it scattered
  * throughout different classes. If you want you can see this class as the
  * "Model" in a MVC context.
  *
  */
-public class ProgramState {
+public class Conf {
 
     public String filePath;
     public Vector<String> lastOpened = new Vector<>(5);
     public FormalContext context;
     public Set<AssociationRule> associations;
+    public Set<FCAImplication<String>> implications;
     public boolean unsavedChanges = false;
     public LatticeGraph lattice;
     public ListSet<Concept<FullObject<String, String>, String>> concepts;
-    public GUIState guistate;
-    // TODO: @Jan this should be moved to the guistate
+    public GUIConf guiConf;
+    // TODO: @Jan this should be moved to the guiConf
     public boolean showObjectLabel = false;
     public boolean showAttributLabel = false;
     public boolean showEdges = true;
@@ -42,9 +44,9 @@ public class ProgramState {
     public int numberOfConcepts;
     private PropertyChangeSupport propertyChangeSupport;
 
-    public ProgramState() {
+    public Conf() {
         propertyChangeSupport = new PropertyChangeSupport(this);
-        guistate = new GUIState();
+        guiConf = new GUIConf();
     }
 
     public void addPropertyChangeListener(PropertyChangeListener listener) {
@@ -133,10 +135,8 @@ public class ProgramState {
         firePropertyChange(ContextChangeEvents.NEWLATTICE, null, lattice2);
     }
 
-    public void loadedFile(FormalContext context2, LatticeGraph lattice2) {
-        this.context = context2;
-        this.lattice = lattice2;
-        firePropertyChange(ContextChangeEvents.LOADEDFILE, null, lattice2);
+    public void loadedFile() {
+        firePropertyChange(ContextChangeEvents.LOADEDFILE, null, lattice);
     }
 
     @SuppressWarnings("serial")

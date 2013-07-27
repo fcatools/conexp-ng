@@ -4,8 +4,8 @@ import com.alee.extended.panel.WebButtonGroup;
 import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
 import de.tudresden.inf.tcs.fcalib.FullObject;
 import fcatools.conexpng.ContextChangeEvents;
-import fcatools.conexpng.ProgramState;
-import fcatools.conexpng.ProgramState.ContextChangeEvent;
+import fcatools.conexpng.Conf;
+import fcatools.conexpng.Conf.ContextChangeEvent;
 import fcatools.conexpng.gui.View;
 
 import javax.swing.*;
@@ -63,7 +63,7 @@ public class ContextEditor extends View {
     int lastActiveRowIndex;
     int lastActiveColumnIndex;
 
-    public ContextEditor(final ProgramState state) {
+    public ContextEditor(final Conf state) {
         super(state);
         setLayout(new BorderLayout());
 
@@ -72,7 +72,7 @@ public class ContextEditor extends View {
         objectCellPopupMenu = new JPopupMenu();
         attributeCellPopupMenu = new JPopupMenu();
         matrixModel = new ContextMatrixModel(state);
-        matrix = new ContextMatrix(matrixModel, state.guistate.columnWidths);
+        matrix = new ContextMatrix(matrixModel, state.guiConf.columnWidths);
         JScrollPane scrollPane = matrix.createStripedJScrollPane(getBackground());
         scrollPane.setBorder(new EmptyBorder(3, 3, 3, 3));
         toolbar.setFloatable(false);
@@ -116,7 +116,7 @@ public class ContextEditor extends View {
             } else if (cce.getName() == ContextChangeEvents.NEWCONTEXT
                     || cce.getName() == ContextChangeEvents.LOADEDFILE) {
                 matrixModel.loadNewContext(state);
-                matrix.loadColumnWidths(state.guistate.columnWidths);
+                matrix.loadColumnWidths(state.guiConf.columnWidths);
                 matrixModel.fireTableStructureChanged();
                 matrix.invalidate();
                 matrix.repaint();

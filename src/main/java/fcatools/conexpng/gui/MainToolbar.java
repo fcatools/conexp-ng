@@ -4,7 +4,7 @@ import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
 import de.tudresden.inf.tcs.fcalib.FullObject;
 import de.tudresden.inf.tcs.fcalib.action.StartExplorationAction;
 import fcatools.conexpng.OS;
-import fcatools.conexpng.ProgramState;
+import fcatools.conexpng.Conf;
 import fcatools.conexpng.Util;
 import fcatools.conexpng.io.BurmeisterReader;
 import fcatools.conexpng.io.BurmeisterWriter;
@@ -38,14 +38,14 @@ import static fcatools.conexpng.Util.loadIcon;
 
 public class MainToolbar extends WebToolBar {
 
-    private ProgramState state;
+    private Conf state;
 
     private WebFrame mainFrame;
 
     private static final long serialVersionUID = -3495670613141172867L;
 
     @SuppressWarnings("serial")
-    public MainToolbar(final WebFrame mainFrame, final ProgramState state) {
+    public MainToolbar(final WebFrame mainFrame, final Conf state) {
         this.mainFrame = mainFrame;
         this.state = state;
         this.setFloatable(false);

@@ -3,9 +3,9 @@ package fcatools.conexpng.gui.dependencies;
 import de.tudresden.inf.tcs.fcaapi.FCAImplication;
 import de.tudresden.inf.tcs.fcalib.ImplicationSet;
 import fcatools.conexpng.ContextChangeEvents;
-import fcatools.conexpng.ProgramState;
-import fcatools.conexpng.ProgramState.ContextChangeEvent;
-import fcatools.conexpng.ProgramState.StatusMessage;
+import fcatools.conexpng.Conf;
+import fcatools.conexpng.Conf.ContextChangeEvent;
+import fcatools.conexpng.Conf.StatusMessage;
 import fcatools.conexpng.gui.View;
 import fcatools.conexpng.model.AssociationRule;
 
@@ -30,299 +30,333 @@ import java.util.*;
 
 public class DependencyView extends View {
 
-    private static final long serialVersionUID = -6377834669097012170L;
+	private static final long serialVersionUID = -6377834669097012170L;
 
-    private WebTextPane implpane = new WebTextPane();
+	private WebTextPane implpane = new WebTextPane();
 
-    private WebTextPane assopane = new WebTextPane();
+	private WebTextPane assopane = new WebTextPane();
 
-    private Set<AssociationRule> associationbase;
-    private Set<FCAImplication<String>> implications;
+	private Set<AssociationRule> associationbase;
+	private Set<FCAImplication<String>> implications;
 
-    private SimpleAttributeSet[] attrs;
+	private SimpleAttributeSet[] attrs;
 
-    private SimpleAttributeSet header;
+	private SimpleAttributeSet header;
 
-    private final int NON_ZERO_SUPPORT_EXACT_RULE = 0;
+	private final int NON_ZERO_SUPPORT_EXACT_RULE = 0;
 
-    private final int INEXACT_RULE = 1;
+	private final int INEXACT_RULE = 1;
 
-    private final int ZERO_SUPPORT_EXACT_RULE = 2;
+	private final int ZERO_SUPPORT_EXACT_RULE = 2;
 
-    private final String FOLLOW = " ==> ";
+	private final String FOLLOW = " ==> ";
 
-    private final String END_MARK = ";";
+	private final String END_MARK = ";";
 
-    private final String EOL = System.getProperty("line.separator");
+	private final String EOL = System.getProperty("line.separator");
 
-    private boolean updateLater = false;
+	private boolean updateLater = false;
 
-    public DependencyView(final ProgramState state) {
-        super(state);
-        attrs = new SimpleAttributeSet[3];
-        attrs[NON_ZERO_SUPPORT_EXACT_RULE] = new SimpleAttributeSet();
-        StyleConstants.setForeground(attrs[NON_ZERO_SUPPORT_EXACT_RULE], Color.blue);
+	public DependencyView(final Conf state) {
+		super(state);
 
-        attrs[ZERO_SUPPORT_EXACT_RULE] = new SimpleAttributeSet();
-        StyleConstants.setForeground(attrs[ZERO_SUPPORT_EXACT_RULE], Color.red);
+		attrs = new SimpleAttributeSet[3];
+		attrs[NON_ZERO_SUPPORT_EXACT_RULE] = new SimpleAttributeSet();
+		StyleConstants.setForeground(attrs[NON_ZERO_SUPPORT_EXACT_RULE], Color.blue);
 
-        attrs[INEXACT_RULE] = new SimpleAttributeSet();
-        StyleConstants.setForeground(attrs[INEXACT_RULE], new Color(0, 128, 0));
+		attrs[ZERO_SUPPORT_EXACT_RULE] = new SimpleAttributeSet();
+		StyleConstants.setForeground(attrs[ZERO_SUPPORT_EXACT_RULE], Color.red);
 
-        header = new SimpleAttributeSet();
-        StyleConstants.setFontSize(header, 12);
+		attrs[INEXACT_RULE] = new SimpleAttributeSet();
+		StyleConstants.setForeground(attrs[INEXACT_RULE], new Color(0, 128, 0));
 
-        implpane.setEditable(false);
-        // only for the Splitpanes height
-        implpane.setPreferredSize(new Dimension(300, 200));
-        assopane.setEditable(false);
+		header = new SimpleAttributeSet();
+		StyleConstants.setFontSize(header, 12);
 
-        final WebScrollPane scroll2 = new WebScrollPane(assopane);
-        scroll2.getViewport().addChangeListener(new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                state.guistate.assoscrollpos = scroll2.getVerticalScrollBar().getValue();
-            }
-        });
-        final WebScrollPane scroll1 = new WebScrollPane(implpane);
-        scroll1.getViewport().addChangeListener(new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                state.guistate.implscrollpos = scroll1.getVerticalScrollBar().getValue();
-            }
-        });
-        final WebSplitPane splitPane = new WebSplitPane(WebSplitPane.VERTICAL_SPLIT, scroll1, scroll2);
-        splitPane.setOneTouchExpandable(true);
-        splitPane.setContinuousLayout(true);
-        splitPane.addDividerListener(new ComponentListener() {
-            @Override
-            public void componentShown(ComponentEvent arg0) {
-            }
+		implpane.setEditable(false);
+		// only for the Splitpanes height
+		// implpane.setPreferredSize(new Dimension(300, 200));
+		assopane.setEditable(false);
 
-            @Override
-            public void componentResized(ComponentEvent arg0) {
-            }
+		final WebScrollPane scroll2 = new WebScrollPane(assopane);
+		scroll2.getViewport().addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				state.guiConf.assoscrollpos = scroll2.getVerticalScrollBar().getValue();
+			}
+		});
 
-            @Override
-            public void componentMoved(ComponentEvent arg0) {
-                state.guistate.splitpanepos = splitPane.getDividerLocation();
-            }
+		final WebScrollPane scroll1 = new WebScrollPane(implpane);
+		scroll1.getViewport().addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				state.guiConf.implscrollpos = scroll1.getVerticalScrollBar().getValue();
+			}
+		});
+		final WebSplitPane splitPane = new WebSplitPane(WebSplitPane.VERTICAL_SPLIT, scroll1, scroll2);
+		splitPane.setOneTouchExpandable(true);
+		splitPane.setContinuousLayout(true);
+		splitPane.addDividerListener(new ComponentListener() {
+			@Override
+			public void componentShown(ComponentEvent arg0) {
+			}
 
-            @Override
-            public void componentHidden(ComponentEvent arg0) {
-            }
-        });
-        view = splitPane;
+			@Override
+			public void componentResized(ComponentEvent arg0) {
+			}
 
-        settings = new WebPanel(new BorderLayout());
-        settings.add(new DependencySettings(state.guistate), BorderLayout.NORTH);
-        settings.getComponent(0).addPropertyChangeListener(this);
-        settings.setMinimumSize(new Dimension(170, 400));
-        toolbar = null;
-        super.init();
-    }
+			@Override
+			public void componentMoved(ComponentEvent arg0) {
+				state.guiConf.splitpanepos = splitPane.getDividerLocation();
+			}
 
-    private void writeAssociations() {
-        if (associationbase != null)
-            SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void componentHidden(ComponentEvent arg0) {
+			}
+		});
+		view = splitPane;
+		splitPane.setDividerLocation(state.guiConf.splitpanepos);
 
-                @Override
-                public void run() {
-                    int i = 0;
-                    StringBuffer buf;
-                    assopane.setText("");
-                    ArrayList<AssociationRule> t = new ArrayList<>(associationbase);
+		settings = new WebPanel(new BorderLayout());
 
-                    if (!state.guistate.lexsorting) {
-                        Collections.sort(t, new Comparator<AssociationRule>() {
-                            @Override
-                            public int compare(AssociationRule o1, AssociationRule o2) {
-                                int support1 = state.context.supportCount(o1.getPremise());
-                                int support2 = state.context.supportCount(o2.getPremise());
+		settings.add(new DependencySettings(state.guiConf), BorderLayout.NORTH);
+		settings.getComponent(0).addPropertyChangeListener(this);
+		settings.setMinimumSize(new Dimension(170, 400));
+		toolbar = null;
+		super.init();
+		this.splitPane.setDividerLocation(state.guiConf.dependenciessettingssplitpos);
+		this.splitPane.addDividerListener(new ComponentListener() {
+			@Override
+			public void componentShown(ComponentEvent arg0) {
+			}
 
-                                if (support1 == support2)
-                                    return (int) (o2.getConfidence() - o1.getConfidence());
-                                else
-                                    return support2 - support1;
-                            }
-                        });
-                    }
-                    try {
-                        assopane.getDocument().insertString(assopane.getDocument().getLength(),
-                                "Associations (Luxenburger Base)\n", header);
-                        i = 0;
-                        for (AssociationRule asso : t) {
-                            buf = new StringBuffer();
-                            if (asso.getConfidence() >= state.guistate.confidence) {
-                                i++;
-                                buf.append(i);
-                                buf.append("< " + state.context.supportCount(asso.getPremise()) + " > ");
-                                buf.append(asso.getPremise()
-                                        + " =["
-                                        + new BigDecimal(asso.getConfidence()).setScale(3, BigDecimal.ROUND_HALF_UP)
-                                                .doubleValue() + "]=> ");
-                                Set<String> temp = new HashSet<>(asso.getConsequent());
-                                temp.addAll(asso.getPremise());
-                                buf.append("< " + state.context.supportCount(temp) + " > " + asso.getConsequent()
-                                        + END_MARK);
-                                buf.append(EOL);
+			@Override
+			public void componentResized(ComponentEvent arg0) {
+			}
 
-                                assopane.getDocument().insertString(assopane.getDocument().getLength(), buf.toString(),
-                                        implicationStyle(asso.getSupport(), asso.getConfidence()));
-                            }
-                        }
-                        assopane.setCaretPosition(0);
-                        ((DependencySettings) settings.getComponent(0)).update(i, associationbase.size());
-                    } catch (BadLocationException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                }
-            });
-    }
+			@Override
+			public void componentMoved(ComponentEvent arg0) {
+				state.guiConf.dependenciessettingssplitpos = DependencyView.this.splitPane.getDividerLocation();
+			}
 
-    private void writeImplications() {
-        if (implications != null)
-            SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void componentHidden(ComponentEvent arg0) {
+			}
+		});
+	}
 
-                @Override
-                public void run() {
-                    int i = 0;
-                    StringBuffer buf;
-                    int support = 0;
-                    implpane.setText("");
-                    ArrayList<FCAImplication<String>> z = new ArrayList<>(implications);
-                    if (!state.guistate.lexsorting) {
-                        Collections.sort(z, new Comparator<FCAImplication<String>>() {
+	private void writeAssociations(final int assoscrollpos) {
+		if (associationbase != null)
+			SwingUtilities.invokeLater(new Runnable() {
 
-                            @Override
-                            public int compare(FCAImplication<String> o1, FCAImplication<String> o2) {
+				@Override
+				public void run() {
+					int i = 0;
+					StringBuffer buf;
+					assopane.setText("");
+					ArrayList<AssociationRule> t = new ArrayList<>(associationbase);
 
-                                return Integer.compare(state.context.supportCount(o2.getPremise()),
-                                        state.context.supportCount(o1.getPremise()));
-                            }
-                        });
-                    }
-                    try {
-                        implpane.getDocument().insertString(implpane.getDocument().getLength(),
-                                "Implications (Duquenne-Guigues Base/Stem Base)\n", header);
+					if (!state.guiConf.lexsorting) {
+						Collections.sort(t, new Comparator<AssociationRule>() {
+							@Override
+							public int compare(AssociationRule o1, AssociationRule o2) {
+								int support1 = state.context.supportCount(o1.getPremise());
+								int support2 = state.context.supportCount(o2.getPremise());
 
-                        for (FCAImplication<String> impl : z) {
-                            support = state.context.supportCount(impl.getPremise());
-                            buf = new StringBuffer();
-                            buf.append(i);
-                            buf.append("< " + support + " > ");
-                            buf.append(impl.getPremise() + FOLLOW + impl.getConclusion() + END_MARK);
-                            buf.append(EOL);
-                            i++;
+								if (support1 == support2)
+									return (int) (o2.getConfidence() - o1.getConfidence());
+								else
+									return support2 - support1;
+							}
+						});
+					}
+					try {
+						assopane.getDocument().insertString(assopane.getDocument().getLength(),
+								"Associations (Luxenburger Base)\n", header);
+						i = 0;
+						for (AssociationRule asso : t) {
+							buf = new StringBuffer();
+							if (asso.getConfidence() >= state.guiConf.confidence) {
+								i++;
+								buf.append(i);
+								buf.append("< " + state.context.supportCount(asso.getPremise()) + " > ");
+								buf.append(asso.getPremise()
+										+ " =["
+										+ new BigDecimal(asso.getConfidence()).setScale(3, BigDecimal.ROUND_HALF_UP)
+												.doubleValue() + "]=> ");
+								Set<String> temp = new HashSet<>(asso.getConsequent());
+								temp.addAll(asso.getPremise());
+								buf.append("< " + state.context.supportCount(temp) + " > " + asso.getConsequent()
+										+ END_MARK);
+								buf.append(EOL);
 
-                            implpane.getDocument().insertString(implpane.getDocument().getLength(), buf.toString(),
-                                    implicationStyle(support, 1));
-                        }
-                        implpane.setCaretPosition(0);
+								assopane.getDocument().insertString(assopane.getDocument().getLength(), buf.toString(),
+										implicationStyle(asso.getSupport(), asso.getConfidence()));
+							}
+						}
+						((WebScrollPane) ((WebSplitPane) view).getBottomComponent()).getVerticalScrollBar().setValue(
+								assoscrollpos);
+						((DependencySettings) settings.getComponent(0)).update(i, associationbase.size());
+					} catch (BadLocationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			});
+	}
 
-                    } catch (BadLocationException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                }
-            });
-    }
+	private void writeImplications(final int implscrollpos) {
+		if (implications != null)
+			SwingUtilities.invokeLater(new Runnable() {
 
-    public SimpleAttributeSet implicationStyle(double support, double confidence) {
-        if (confidence == 1.0) {
-            return support > 0 ? attrs[NON_ZERO_SUPPORT_EXACT_RULE] : attrs[ZERO_SUPPORT_EXACT_RULE];
-        }
-        return attrs[INEXACT_RULE];
-    }
+				@Override
+				public void run() {
+					int i = 0;
+					StringBuffer buf;
+					int support = 0;
+					implpane.setText("");
+					ArrayList<FCAImplication<String>> z = new ArrayList<>(implications);
+					if (!state.guiConf.lexsorting) {
+						Collections.sort(z, new Comparator<FCAImplication<String>>() {
 
-    private SwingWorker<Void, Object> worker;
+							@Override
+							public int compare(FCAImplication<String> o1, FCAImplication<String> o2) {
 
-    private void updateAssociations(final boolean withImplications) {
-        if (withImplications) {
+								return Integer.compare(state.context.supportCount(o2.getPremise()),
+										state.context.supportCount(o1.getPremise()));
+							}
+						});
+					}
+					try {
+						implpane.getDocument().insertString(implpane.getDocument().getLength(),
+								"Implications (Duquenne-Guigues Base/Stem Base)\n", header);
 
-            new SwingWorker<Void, Object>() {
+						for (FCAImplication<String> impl : z) {
+							support = state.context.supportCount(impl.getPremise());
+							buf = new StringBuffer();
+							buf.append(i);
+							buf.append("< " + support + " > ");
+							buf.append(impl.getPremise() + FOLLOW + impl.getConclusion() + END_MARK);
+							buf.append(EOL);
+							i++;
 
-                @Override
-                protected Void doInBackground() {
-                    state.startCalculation(StatusMessage.CALCULATINGIMPLICATIONS);
-                    implications = state.context.getDuquenneGuiguesBase();
-                    return null;
-                }
+							implpane.getDocument().insertString(implpane.getDocument().getLength(), buf.toString(),
+									implicationStyle(support, 1));
+						}
+						((WebScrollPane) ((WebSplitPane) view).getTopComponent()).getVerticalScrollBar().setValue(
+								implscrollpos);
+					} catch (BadLocationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			});
+	}
 
-                protected void done() {
-                    writeImplications();
-                    state.endCalculation(StatusMessage.CALCULATINGIMPLICATIONS);
-                };
-            }.execute();
+	public SimpleAttributeSet implicationStyle(double support, double confidence) {
+		if (confidence == 1.0) {
+			return support > 0 ? attrs[NON_ZERO_SUPPORT_EXACT_RULE] : attrs[ZERO_SUPPORT_EXACT_RULE];
+		}
+		return attrs[INEXACT_RULE];
+	}
 
-        }
-        if (worker != null && !worker.isDone()) {
-            worker.cancel(true);
+	private SwingWorker<Void, Object> worker;
 
-        }
+	private void updateAssociations(final boolean withImplications) {
+		if (withImplications) {
 
-        worker = new SwingWorker<Void, Object>() {
+			new SwingWorker<Void, Object>() {
 
-            @Override
-            protected Void doInBackground() throws Exception {
-                state.startCalculation(StatusMessage.CALCULATINGASSOCIATIONS);
+				@Override
+				protected Void doInBackground() {
+					state.startCalculation(StatusMessage.CALCULATINGIMPLICATIONS);
+					implications = state.context.getDuquenneGuiguesBase();
+					return null;
+				}
 
-                ThreadedAssociationMiner tam = new ThreadedAssociationMiner(state.context, state.guistate.support, 0);
-                Thread t = new Thread(tam);
-                t.setPriority(Thread.MIN_PRIORITY);
-                t.start();
-                while (t.isAlive()) {
-                    if (isCancelled()) {
-                        t.interrupt();
-                        t.join();
-                        break;
-                    }
-                }
-                if (!isCancelled()) {
-                    associationbase = tam.getResult();
-                    state.associations = associationbase;
-                }
-                return null;
-            }
+				protected void done() {
+					writeImplications(0);
+					state.implications = implications;
+					state.endCalculation(StatusMessage.CALCULATINGIMPLICATIONS);
+				};
+			}.execute();
 
-            protected void done() {
-                if (!isCancelled()) {
-                    writeAssociations();
-                }
-                state.endCalculation(StatusMessage.CALCULATINGASSOCIATIONS);
-            };
-        };
-        worker.execute();
+		}
+		if (worker != null && !worker.isDone()) {
+			worker.cancel(true);
 
-    }
+		}
 
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        if (evt instanceof ContextChangeEvent) {
-            ContextChangeEvent cce = (ContextChangeEvent) evt;
-            if (cce.getName() == ContextChangeEvents.NEWCONTEXT || cce.getName() == ContextChangeEvents.CONTEXTCHANGED)
-                updateLater = true;
-            // until we save the associations in the file
-            if (cce.getName() == ContextChangeEvents.LOADEDFILE)
-                updateLater = true;
-        }
-        if (isVisible() && updateLater) {
-            updateLater = false;
-            associationbase = new TreeSet<AssociationRule>();
-            implications = new ImplicationSet<>(state.context);
-            updateAssociations(true);
-            return;
-        }
-        if (evt.getPropertyName().equals("ConfidenceChanged")) {
-            writeAssociations();
-        } else if (evt.getPropertyName().equals("MinimalSupportChanged")) {
-            updateAssociations(false);
-        } else if (evt.getPropertyName().equals("ToggleSortingOrder")) {
-            writeAssociations();
-            writeImplications();
-        }
+		worker = new SwingWorker<Void, Object>() {
 
-    }
+			@Override
+			protected Void doInBackground() throws Exception {
+				state.startCalculation(StatusMessage.CALCULATINGASSOCIATIONS);
+
+				ThreadedAssociationMiner tam = new ThreadedAssociationMiner(state.context, state.guiConf.support, 0);
+				Thread t = new Thread(tam);
+				t.setPriority(Thread.MIN_PRIORITY);
+				t.start();
+				while (t.isAlive()) {
+					if (isCancelled()) {
+						t.interrupt();
+						t.join();
+						break;
+					}
+				}
+				if (!isCancelled()) {
+					associationbase = tam.getResult();
+					state.associations = associationbase;
+				}
+				return null;
+			}
+
+			protected void done() {
+				if (!isCancelled()) {
+					writeAssociations(0);
+				}
+				state.endCalculation(StatusMessage.CALCULATINGASSOCIATIONS);
+			};
+		};
+		worker.execute();
+
+	}
+
+	@Override
+	public void propertyChange(PropertyChangeEvent evt) {
+		if (evt instanceof ContextChangeEvent) {
+			ContextChangeEvent cce = (ContextChangeEvent) evt;
+			if (cce.getName() == ContextChangeEvents.NEWCONTEXT || cce.getName() == ContextChangeEvents.CONTEXTCHANGED)
+				updateLater = true;
+
+			if (cce.getName() == ContextChangeEvents.LOADEDFILE) {
+				if (state.associations != null) {
+					associationbase = state.associations;
+					writeAssociations(state.guiConf.assoscrollpos);
+					implications = state.implications;
+					writeImplications(state.guiConf.implscrollpos);
+					updateLater = false;
+				} else
+					updateLater = true;
+			}
+		}
+		if (isVisible() && updateLater) {
+
+			updateLater = false;
+			associationbase = new TreeSet<AssociationRule>();
+			implications = new ImplicationSet<>(state.context);
+			updateAssociations(true);
+			return;
+		}
+		if (evt.getPropertyName().equals("ConfidenceChanged")) {
+			writeAssociations(0);
+		} else if (evt.getPropertyName().equals("MinimalSupportChanged")) {
+			updateAssociations(false);
+		} else if (evt.getPropertyName().equals("ToggleSortingOrder")) {
+			writeAssociations(0);
+			writeImplications(0);
+		}
+
+	}
 
 }

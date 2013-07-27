@@ -1,9 +1,9 @@
 package fcatools.conexpng.gui.lattice;
 
 import fcatools.conexpng.ContextChangeEvents;
-import fcatools.conexpng.ProgramState;
-import fcatools.conexpng.ProgramState.ContextChangeEvent;
-import fcatools.conexpng.ProgramState.StatusMessage;
+import fcatools.conexpng.Conf;
+import fcatools.conexpng.Conf.ContextChangeEvent;
+import fcatools.conexpng.Conf.StatusMessage;
 import fcatools.conexpng.Util;
 import fcatools.conexpng.gui.View;
 import fcatools.conexpng.model.ILatticeAlgorithm;
@@ -18,6 +18,8 @@ import de.tudresden.inf.tcs.fcalib.utils.ListSet;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.beans.PropertyChangeEvent;
 
 public class LatticeView extends View {
@@ -28,7 +30,7 @@ public class LatticeView extends View {
 
     private boolean updateLater;
 
-    public LatticeView(ProgramState state) {
+    public LatticeView(final Conf state) {
         super(state);
 
         alg = new TestLatticeAlgorithm();
@@ -75,7 +77,25 @@ public class LatticeView extends View {
         toolbar.add(showIdeal);
 
         super.init();
+        splitPane.setDividerLocation(state.guiConf.latticesettingssplitpos);
+        splitPane.addDividerListener(new ComponentListener() {
+            @Override
+            public void componentShown(ComponentEvent arg0) {
+            }
 
+            @Override
+            public void componentResized(ComponentEvent arg0) {
+            }
+
+            @Override
+            public void componentMoved(ComponentEvent arg0) {
+                state.guiConf.latticesettingssplitpos = splitPane.getDividerLocation();
+            }
+
+            @Override
+            public void componentHidden(ComponentEvent arg0) {
+            }
+        });
     }
 
     @Override
