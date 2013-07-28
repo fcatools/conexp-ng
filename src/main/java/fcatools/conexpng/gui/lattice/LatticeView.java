@@ -36,7 +36,7 @@ public class LatticeView extends View {
         alg = new TestLatticeAlgorithm();
         LatticeGraph graph = alg.computeLatticeGraph(new ListSet<Concept<String, FullObject<String, String>>>());
         view = new LatticeGraphView(graph, state);
-        settings = new AccordionMenue(state);
+        settings = new AccordionMenu(state);
         settings.setMinimumSize(new Dimension(170, 400));
 
         JButton export = Util.createButton("Export as .PDF", "export", "conexp/cameraFlash.gif");

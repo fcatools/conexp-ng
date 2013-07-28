@@ -89,7 +89,7 @@ public abstract class ILatticeAlgorithm {
                 q.add(n);
             }else{
             	for (int i = 0; i < q.size(); i++) {
-                    if (q.get(i).getLevel() > n.getLevel()) {
+                    if (n.getObjects().containsAll(q.get(i).getObjects())) {
                         q.add(i, n);
                         break;
                     }
@@ -98,15 +98,21 @@ public abstract class ILatticeAlgorithm {
                     	break;
                     }
                 }
-            }     
+            }
+            String s = "";
+
+            for (int i = q.size() - 1; i >= 0; i--) {
+                Node u = q.get(i);
+               s = s + " " + u.getObjects();
+            }
+            System.out.println(s);
+            System.out.println("/");
         }
+        
         for (int i = q.size() - 1; i >= 0; i--) {
             Node n = q.get(i);
             n.computeIdeal();
         }
-		for(Node n:graph.getNodes()){
-			
-		}
 	}
 
 
