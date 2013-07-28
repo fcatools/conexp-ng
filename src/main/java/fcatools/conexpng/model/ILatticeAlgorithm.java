@@ -11,30 +11,29 @@ import fcatools.conexpng.gui.lattice.LatticeGraphNodeMouseMotionListener;
 import fcatools.conexpng.gui.lattice.Node;
 import fcatools.conexpng.gui.lattice.NodeMouseClickListener;
 
-
 /**
  * 
  * @author Jan
- *
+ * 
  */
 public abstract class ILatticeAlgorithm {
 
-
 	protected LatticeGraph graph;
+
 	/**
 	 * 
 	 * @param set
 	 * @return
 	 */
-    public abstract LatticeGraph computeLatticeGraph(Set<Concept<String, FullObject<String, String>>> set);
-    
-    
-    /**
-     * 
-     * @param subEx
-     * @param superEx
-     * @return
-     */
+	public abstract LatticeGraph computeLatticeGraph(
+			Set<Concept<String, FullObject<String, String>>> set);
+
+	/**
+	 * 
+	 * @param subEx
+	 * @param superEx
+	 * @return
+	 */
 	public boolean isSubconcept(Set<String> subEx, Set<String> superEx) {
 		if (subEx == superEx) {
 			return false;
@@ -66,9 +65,9 @@ public abstract class ILatticeAlgorithm {
 		for (Node n : graph.getNodes()) {
 			Set<String> set = n.getObjects();
 			if (!subEx.equals(set)) {
-				if(!superEx.equals(set)){
-					if(isSubconcept(subEx, set)){
-						if(isSubconcept(set, superEx)){
+				if (!superEx.equals(set)) {
+					if (isSubconcept(subEx, set)) {
+						if (isSubconcept(set, superEx)) {
 							return false;
 						}
 					}
@@ -77,43 +76,44 @@ public abstract class ILatticeAlgorithm {
 		}
 		return true;
 	}
-	
+
 	/**
 	 * 
 	 */
-	public void computeAllIdeals(){
-		//sort the list of nodes from bottom too top
+	public void computeAllIdeals() {
+		// sort the list of nodes from bottom too top
 		ArrayList<Node> q = new ArrayList<>();
-        for (Node n : graph.getNodes()) {
-            if (q.size() == 0) {
-                q.add(n);
-            }else{
-            	for (int i = 0; i < q.size(); i++) {
-                    if (n.getObjects().containsAll(q.get(i).getObjects())) {
-                        q.add(i, n);
-                        break;
-                    }
-                    if(i + 1 == q.size()){
-                    	q.add(i+1, n);
-                    	break;
-                    }
-                }
-            }
-            String s = "";
+		for (Node n : graph.getNodes()) {
+			if (q.size() == 0) {
+				q.add(n);
+			} else {
+				for (int i = 0; i < q.size(); i++) {
+					if (q.get(i).getObjects().containsAll(n.getObjects())
+							|| q.get(i).getObjects().size() > n.getObjects()
+									.size()) {
+						q.add(i, n);
+						break;
+					}
+					if (i + 1 == q.size()) {
+						q.add(i + 1, n);
+						break;
+					}
+				}
+			}
+			String s = "";
 
-            for (int i = q.size() - 1; i >= 0; i--) {
-                Node u = q.get(i);
-               s = s + " " + u.getObjects();
-            }
-            System.out.println(s);
-            System.out.println("/");
-        }
-        
-        for (int i = q.size() - 1; i >= 0; i--) {
-            Node n = q.get(i);
-            n.computeIdeal();
-        }
+			for (int i = 0; i < q.size(); i++) {
+				Node u = q.get(i);
+				s = s + " " + u.getObjects();
+			}
+			System.out.println(s);
+			System.out.println("/");
+		}
+
+		for (int i = 0; i < q.size(); i++) {
+			Node n = q.get(i);
+			n.computeIdeal();
+		}
 	}
-
 
 }

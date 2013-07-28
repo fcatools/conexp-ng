@@ -123,7 +123,7 @@ public class LatticeView extends View {
                 };
             }.execute();
 
-            ((AccordionMenue) settings).update();
+            ((AccordionMenu) settings).update();
 
         }
         if (evt instanceof ContextChangeEvent

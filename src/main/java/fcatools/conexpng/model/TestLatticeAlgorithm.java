@@ -15,22 +15,25 @@ public class TestLatticeAlgorithm extends ILatticeAlgorithm {
 	private Set<Concept<String, FullObject<String, String>>> lattConcepts;
 
 	@Override
-	public LatticeGraph computeLatticeGraph(Set<Concept<String, FullObject<String, String>>> concepts) {
+	public LatticeGraph computeLatticeGraph(
+			Set<Concept<String, FullObject<String, String>>> concepts) {
 		graph = new LatticeGraph();
 		this.lattConcepts = concepts;
-		
-		Iterator<Concept<String, FullObject<String, String>>> iter = lattConcepts.iterator();
-		while(iter.hasNext()){
+
+		Iterator<Concept<String, FullObject<String, String>>> iter = lattConcepts
+				.iterator();
+		while (iter.hasNext()) {
 			Node n = new Node();
-			Concept<String, FullObject<String, String>> c = (Concept<String, FullObject<String, String>>) iter.next();
+			Concept<String, FullObject<String, String>> c = (Concept<String, FullObject<String, String>>) iter
+					.next();
 			n.addAttributs(c.getIntent());
-			
+
 			ListSet<String> extent = new ListSet<>();
-			for(FullObject<String, String> fo : c.getExtent()){
+			for (FullObject<String, String> fo : c.getExtent()) {
 				extent.add(fo.getIdentifier());
-			}			
+			}
 			n.getObjects().addAll(extent);
-			System.out.println(c.getIntent() + " : "+ extent);
+			System.out.println(c.getIntent() + " : " + extent);
 			graph.getNodes().add(n);
 		}
 
@@ -42,7 +45,7 @@ public class TestLatticeAlgorithm extends ILatticeAlgorithm {
 				Set<String> vEx = v.getObjects();
 				if (isLowerNeighbour(uEx, vEx)) {
 					v.addBelowNode(u);
-					graph.getEdges().add(new Edge(v,u));
+					graph.getEdges().add(new Edge(v, u));
 					count++;
 				}
 
@@ -50,11 +53,9 @@ public class TestLatticeAlgorithm extends ILatticeAlgorithm {
 			u.setLevel(count);
 			u.update((int) (Math.random() * 500), count * 100, true);
 		}
-		
-		
+
 		computeAllIdeals();
 		return graph;
 	}
-	
-	
+
 }

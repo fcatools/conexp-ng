@@ -20,6 +20,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
+import com.alee.laf.checkbox.WebCheckBox;
+
 import de.tudresden.inf.tcs.fcalib.FullObject;
 import fcatools.conexpng.Conf;
 import fcatools.conexpng.model.FormalContext;
@@ -315,7 +317,7 @@ public class AccordionMenue extends JPanel implements ActionListener {
 		gbc.gridy = 0;
 		for(FullObject<String, String> s : context.getObjects()){
 			gbc.gridy++;
-			final JCheckBox box = new JCheckBox(s.getIdentifier());
+			final WebCheckBox box = new WebCheckBox(s.getIdentifier());
 			final FullObject<String, String> temp = s;
 			box.addActionListener(new ActionListener() {
 				

@@ -16,6 +16,7 @@ import javax.swing.JRadioButton;
 import com.alee.extended.panel.WebAccordion;
 import com.alee.laf.checkbox.WebCheckBox;
 import com.alee.laf.radiobutton.WebRadioButton;
+import com.alee.laf.scroll.WebScrollPane;
 
 import de.tudresden.inf.tcs.fcalib.FullObject;
 import fcatools.conexpng.Conf;
@@ -91,7 +92,7 @@ public class AccordionMenu extends WebAccordion {
 		return panel;
 	}
 
-	//this methode places object's radiobuttons
+	// this methode places object's radiobuttons
 	private static JPanel getLatticeObjectPanel() {
 		JPanel panelObjects = new JPanel(new BorderLayout());
 		panelObjects.setLayout(new GridBagLayout());
@@ -133,7 +134,7 @@ public class AccordionMenu extends WebAccordion {
 		return panelObjects;
 	}
 
-	//this methode places attributes' radiobuttons
+	// this methode places attributes' radiobuttons
 	private static JPanel getLatticeAttrPanel() {
 		JPanel panelAttributes = new JPanel(new BorderLayout());
 		panelAttributes.setLayout(new GridBagLayout());
@@ -174,69 +175,71 @@ public class AccordionMenu extends WebAccordion {
 		return panelAttributes;
 	}
 
-	//creates a jpanel including checkbox for each attribute
-	private static JPanel getAttributePanel(){
+	// creates a jpanel including checkbox for each attribute
+	private static WebScrollPane getAttributePanel() {
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.setLayout(new GridBagLayout());
 		GridBagConstraints gbc = new GridBagConstraints();
-        gbc.anchor = GridBagConstraints.WEST;
-        gbc.gridx = 0;
+		gbc.anchor = GridBagConstraints.WEST;
+		gbc.gridx = 0;
 		gbc.gridy = 0;
-		for(String s : context.getAttributes()){
+		for (String s : context.getAttributes()) {
 			gbc.gridy++;
 			final WebCheckBox box = new WebCheckBox(s);
 			box.addActionListener(new ActionListener() {
-				
+
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
-					if(!box.isSelected()){
-						state.context.dontConsiderAttribute(box.getText());		
-					}else{
+					if (!box.isSelected()) {
+						state.context.dontConsiderAttribute(box.getText());
+					} else {
 						state.context.considerAttribute(box.getText());
 					}
 					state.temporaryContextChanged();
 				}
 			});
-			
+
 			box.setSelected(true);
 			panel.add(box, gbc);
 			attributeCheckBoxes.add(box);
 		}
-		return panel;
+		WebScrollPane sp = new WebScrollPane(panel);
+		return sp;
 	}
-	
-	//creates a jpanel including checkbox for each object
-	private static JPanel getObjectPanel(){
+
+	// creates a jpanel including checkbox for each object
+	private static WebScrollPane getObjectPanel() {
 		JPanel panel = new JPanel(new BorderLayout());
 		panel.setLayout(new GridBagLayout());
 		GridBagConstraints gbc = new GridBagConstraints();
-        gbc.anchor = GridBagConstraints.WEST;
+		gbc.anchor = GridBagConstraints.WEST;
 		gbc.gridx = 0;
 		gbc.gridy = 0;
-		for(FullObject<String, String> s : context.getObjects()){
+		for (FullObject<String, String> s : context.getObjects()) {
 			gbc.gridy++;
 			final WebCheckBox box = new WebCheckBox(s.getIdentifier());
 			final FullObject<String, String> temp = s;
 			box.addActionListener(new ActionListener() {
-				
+
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
-					if(!box.isSelected()){
-						state.context.dontConsiderObject(temp);		
-					}else{
+					if (!box.isSelected()) {
+						state.context.dontConsiderObject(temp);
+					} else {
 						state.context.considerObject(temp);
 					}
-					state.temporaryContextChanged();			
+					state.temporaryContextChanged();
 				}
 			});
 			box.setSelected(true);
 			panel.add(box, gbc);
 			objectCheckBoxes.add(box);
 		}
-		return panel;
+		WebScrollPane sp = new WebScrollPane(panel);
+		return sp;
 	}
-	
-	public void update(){
+
+	public void update() {
 		this.removePane(1);
 		objectCheckBoxes.clear();
 		this.addPane(1, "Objects", getObjectPanel());
