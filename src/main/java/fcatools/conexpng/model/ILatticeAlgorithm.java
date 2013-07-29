@@ -76,12 +76,29 @@ public abstract class ILatticeAlgorithm {
 		}
 		return true;
 	}
+	
+	private void removeAllDuplicates(){
+		ArrayList<Node> duplicates = new ArrayList<>();
+		for(int i = 0; i < graph.getNodes().size()-1; i++){
+			Node u = graph.getNodes().get(i);
+			for(int j = i+1; j < graph.getNodes().size(); j++){
+				Node v = graph.getNodes().get(j);
+				if(u.getObjects().equals(v.getObjects()) && u.getAttributes().equals(v.getAttributes())){
+					duplicates.add(v);
+					u.getBelow().remove(v);
+				}
+			}
+			
+		}
+		graph.getNodes().removeAll(duplicates);
+	}
 
 	/**
 	 * 
 	 */
 	public void computeAllIdeals() {
 		// sort the list of nodes from bottom too top
+		removeAllDuplicates();
 		ArrayList<Node> q = new ArrayList<>();
 		for (Node n : graph.getNodes()) {
 			if (q.size() == 0) {
@@ -101,15 +118,18 @@ public abstract class ILatticeAlgorithm {
 				}
 			}
 			String s = "";
+			String a = "";
 
 			for (int i = 0; i < q.size(); i++) {
 				Node u = q.get(i);
 				s = s + " " + u.getObjects();
+				a = a + " " + u.getAttributes();
 			}
 			System.out.println(s);
+			System.out.println(a);
 			System.out.println("/");
 		}
-
+		System.out.println("test");
 		for (int i = 0; i < q.size(); i++) {
 			Node n = q.get(i);
 			n.computeIdeal();

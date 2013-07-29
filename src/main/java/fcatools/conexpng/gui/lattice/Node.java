@@ -153,7 +153,10 @@ public class Node extends JPanel implements LatticeGraphElement {
     	ListSet<Node> temp = new ListSet<>();
     	for(Node n : below){
     		temp.add(n);
-    		temp.addAll(n.getIdeal());
+    		if(n.getIdeal() != null){
+    			temp.addAll(n.getIdeal());
+    		}
+    		
     	}
         ideal = temp;
     }   
