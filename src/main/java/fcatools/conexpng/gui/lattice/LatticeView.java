@@ -180,7 +180,9 @@ public class LatticeView extends View {
         }
         if (evt instanceof ContextChangeEvent
                 && (((ContextChangeEvent) evt).getName() == ContextChangeEvents.LOADEDFILE)) {
-            ((LatticeGraphView) view).setLatticeGraph((LatticeGraph) evt.getNewValue());
+            if(state.lattice.missingEdges())
+            	state.lattice.addEdges(state.context.getConceptsWithoutConsideredElementa());
+            ((LatticeGraphView) view).setLatticeGraph(state.lattice);
         }
         view.repaint();
     }

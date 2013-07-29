@@ -2,6 +2,11 @@ package fcatools.conexpng.gui.lattice;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+
+import de.tudresden.inf.tcs.fcaapi.Concept;
+import de.tudresden.inf.tcs.fcalib.FullObject;
+import fcatools.conexpng.model.TestLatticeAlgorithm;
 
 /**
  *
@@ -81,11 +86,110 @@ public class LatticeGraph {
         this.edges = edges;
     }
 
+    public boolean missingEdges() {
+        return edges.isEmpty() && nodes.size() > 1;
+    }
+
     public void translate(int d, int e) {
         for (Node n : nodes) {
             n.setX(n.getX() + d);
             n.setY(n.getY() + e);
+            n.getObjectsLabel().update(d, e, false);
+            n.getAttributesLabel().update(d, e, false);
         }
+    }
+
+    public void addEdges(Set<Concept<String, FullObject<String, String>>> concepts) {
+        LatticeGraph temp = new TestLatticeAlgorithm().computeLatticeGraph(concepts);
+        for (Edge e : temp.edges) {
+            Node u = getNodeWithIntent(e.getU().getAttributes());
+            Node v = getNodeWithIntent(e.getV().getAttributes());
+            if (u != null && v != null && !u.equals(v)) {
+                u.getObjects().addAll(e.getU().getObjects());
+                v.getObjects().addAll(e.getV().getObjects());
+                u.getObjectsLabel().setSet(u.getObjects());
+                v.getObjectsLabel().setSet(v.getObjects());
+                u.getAttributesLabel().setSet(u.getAttributes());
+                v.getAttributesLabel().setSet(v.getAttributes());
+                System.out.println(u.getObjects());
+                u.addBelowNode(v);
+                edges.add(new Edge(u, v));
+            }
+        }
+        
+        computeAllIdeals();
+    }
+
+    private void removeAllDuplicates() {
+        ArrayList<Node> duplicates = new ArrayList<>();
+        for (int i = 0; i < getNodes().size() - 1; i++) {
+            Node u = getNodes().get(i);
+            for (int j = i + 1; j < getNodes().size(); j++) {
+                Node v = getNodes().get(j);
+                if (u.getObjects().equals(v.getObjects()) && u.getAttributes().equals(v.getAttributes())) {
+                    duplicates.add(v);
+                    u.getBelow().remove(v);
+                }
+            }
+
+        }
+        getNodes().removeAll(duplicates);
+    }
+
+    /**
+     *
+     */
+    public void computeAllIdeals() {
+        // sort the list of nodes from bottom too top
+
+        ArrayList<Node> q = new ArrayList<>();
+        for (Node n : getNodes()) {
+            if (q.size() == 0) {
+                q.add(n);
+            } else {
+                for (int i = 0; i < q.size(); i++) {
+                    if (q.get(i).getObjects().containsAll(n.getObjects())
+                            || q.get(i).getObjects().size() > n.getObjects().size()) {
+                        q.add(i, n);
+                        break;
+                    }
+                    if (i + 1 == q.size()) {
+                        q.add(i + 1, n);
+                        break;
+                    }
+                }
+            }
+            String s = "";
+            String a = "";
+
+            for (int i = 0; i < q.size(); i++) {
+                Node u = q.get(i);
+                s = s + " " + u.getObjects();
+                a = a + " " + u.getAttributes();
+            }
+            // System.out.println(s);
+            // System.out.println(a);
+            // System.out.println("/");
+        }
+        // System.out.println("test");
+        for (int i = 1; i < q.size(); i++) {
+            Node u = q.get(i);
+            for (int j = i - 1; j >= 0; j--) {
+                Node v = q.get(j);
+                if (u.getObjects().containsAll(v.getObjects()) && v.getAttributes().containsAll(u.getAttributes())) {
+                    u.getIdeal().add(v);
+                }
+            }
+        }
+        removeAllDuplicates();
+    }
+
+    private Node getNodeWithIntent(Set<String> attributes) {
+        for (Node n : nodes) {
+            if (n.getAttributes().containsAll(attributes) && attributes.containsAll(n.getAttributes()))
+                return n;
+        }
+        return null;
     }
 
 }

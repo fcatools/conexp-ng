@@ -18,10 +18,10 @@ import java.util.Vector;
  * Contains context, lattice, implications, filePath, snapshots etc.
  * <p>
  * Why 'Conf'? "Dependency Injection", e.g. for testing purposes a
- * component can be passed a "MockProgramState" very easily and it is better to
+ * component can be passed a "MockConfiguration" very easily and it is better to
  * have a central place for the program's state as opposed to have it scattered
  * throughout different classes. If you want you can see this class as the
- * "Model" in a MVC context.
+ * "Model" in an MVC context.
  *
  */
 public class Conf {

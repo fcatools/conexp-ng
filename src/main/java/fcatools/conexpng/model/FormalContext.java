@@ -22,16 +22,14 @@ import java.util.*;
  * Due to the API of FormalContext<String,String> the here implemented methods
  * are extremely inefficient.
  */
-public class FormalContext extends
-        de.tudresden.inf.tcs.fcalib.FormalContext<String, String> {
+public class FormalContext extends de.tudresden.inf.tcs.fcalib.FormalContext<String, String> {
 
     protected HashMap<String, SortedSet<String>> objectsOfAttribute = new HashMap<>();
     private ArrayList<String> dontConsideredAttr = new ArrayList<>();
     private ArrayList<FullObject<String, String>> dontConsideredObj = new ArrayList<>();
 
     @Override
-    public boolean addAttribute(String attribute)
-            throws IllegalAttributeException {
+    public boolean addAttribute(String attribute) throws IllegalAttributeException {
         if (super.addAttribute(attribute)) {
             objectsOfAttribute.put(attribute, new TreeSet<String>());
             return true;
@@ -40,19 +38,19 @@ public class FormalContext extends
     }
 
     @Override
-    public boolean addAttributeToObject(String attribute, String id)
-            throws IllegalAttributeException, IllegalObjectException {
+    public boolean addAttributeToObject(String attribute, String id) throws IllegalAttributeException,
+            IllegalObjectException {
         if (super.addAttributeToObject(attribute, id)) {
             SortedSet<String> objects = objectsOfAttribute.get(attribute);
-            if (objects != null) objects.add(id);
+            if (objects != null)
+                objects.add(id);
             return true;
         }
         return false;
     }
 
     @Override
-    public boolean addObject(FullObject<String, String> arg0)
-            throws IllegalObjectException {
+    public boolean addObject(FullObject<String, String> arg0) throws IllegalObjectException {
         if (super.addObject(arg0)) {
             for (String attribute : arg0.getDescription().getAttributes()) {
                 objectsOfAttribute.get(attribute).add(arg0.getIdentifier());
@@ -63,11 +61,12 @@ public class FormalContext extends
     }
 
     @Override
-    public boolean removeAttributeFromObject(String attribute, String id)
-            throws IllegalAttributeException, IllegalObjectException {
+    public boolean removeAttributeFromObject(String attribute, String id) throws IllegalAttributeException,
+            IllegalObjectException {
         if (super.removeAttributeFromObject(attribute, id)) {
             SortedSet<String> objects = objectsOfAttribute.get(attribute);
-            if (objects != null) objects.remove(id);
+            if (objects != null)
+                objects.remove(id);
             return true;
         }
         return false;
@@ -79,12 +78,10 @@ public class FormalContext extends
     }
 
     @Override
-    public boolean removeObject(FullObject<String, String> object)
-            throws IllegalObjectException {
+    public boolean removeObject(FullObject<String, String> object) throws IllegalObjectException {
         if (super.removeObject(object)) {
             for (String attribute : object.getDescription().getAttributes()) {
-                objectsOfAttribute.get(attribute)
-                        .remove(object.getIdentifier());
+                objectsOfAttribute.get(attribute).remove(object.getIdentifier());
             }
         }
         return false;
@@ -106,13 +103,13 @@ public class FormalContext extends
          * not already present).
          */
         for (String s : this.getAttributes()) {
-        		TreeSet<String> set = new TreeSet<String>();
-                for (FullObject<String, String> f : this.getObjects()) {
-                    if (f.getDescription().getAttributes().contains(s) && (!dontConsideredObj.contains(f))) {
-                        set.add(f.getIdentifier());
-                    }
+            TreeSet<String> set = new TreeSet<String>();
+            for (FullObject<String, String> f : this.getObjects()) {
+                if (f.getDescription().getAttributes().contains(s) && (!dontConsideredObj.contains(f))) {
+                    set.add(f.getIdentifier());
                 }
-                extentPerAttr.put(s, set);         
+            }
+            extentPerAttr.put(s, set);
         }
 
         /*
@@ -125,8 +122,7 @@ public class FormalContext extends
         for (String s : extentPerAttr.keySet()) {
             for (String t : extentPerAttr.keySet()) {
                 if (!s.equals(t)) {
-                    Set<String> result = this.intersection(
-                            extentPerAttr.get(s), extentPerAttr.get(t));
+                    Set<String> result = this.intersection(extentPerAttr.get(s), extentPerAttr.get(t));
                     if (!extentPerAttr.values().contains(result)) {
                         if (!temp.containsValue(result)) {
                             temp.put(s + ", " + t, result);
@@ -146,8 +142,7 @@ public class FormalContext extends
         for (String s : extentPerAttr.keySet()) {
             for (String t : extentPerAttr.keySet()) {
                 if (!s.equals(t)) {
-                    Set<String> result = this.intersection(
-                            extentPerAttr.get(s), extentPerAttr.get(t));
+                    Set<String> result = this.intersection(extentPerAttr.get(s), extentPerAttr.get(t));
                     if (extentPerAttr.values().contains(result)) {
                         TreeSet<String> set = new TreeSet<String>();
                         for (FullObject<String, String> f : this.getObjects()) {
@@ -174,19 +169,18 @@ public class FormalContext extends
             Concept<String, FullObject<String, String>> c = new LatticeConcept();
 
             for (FullObject<String, String> i : this.getObjects()) {
-            		if (e.isEmpty()) {
-                        intents.addAll(i.getDescription().getAttributes());
-                    } else if (e.contains(i.getIdentifier().toString())) {
-                        TreeSet<String> prev = sort(i.getDescription()
-                                .getAttributes());
-                        if (count > 0) {
-                            intents = intersection(prev, intents);
-                        } else {
-                            intents = prev;
-                        }
-                        count++;
-                        c.getExtent().add(i);
-                    }        
+                if (e.isEmpty()) {
+                    intents.addAll(i.getDescription().getAttributes());
+                } else if (e.contains(i.getIdentifier().toString())) {
+                    TreeSet<String> prev = sort(i.getDescription().getAttributes());
+                    if (count > 0) {
+                        intents = intersection(prev, intents);
+                    } else {
+                        intents = prev;
+                    }
+                    count++;
+                    c.getExtent().add(i);
+                }
             }
             // concepts.put(e, intents);
             for (String s : intents) {
@@ -196,8 +190,8 @@ public class FormalContext extends
         }
         return conceptLattice;
     }
-    
-    public Set<Concept<String, FullObject<String, String>>> getConceptsWithoutConsideredElementa(){
+
+    public Set<Concept<String, FullObject<String, String>>> getConceptsWithoutConsideredElementa() {
         ListSet<Concept<String, FullObject<String, String>>> conceptLattice = new ListSet<Concept<String, FullObject<String, String>>>();
 
         HashMap<String, Set<String>> extentPerAttr = new HashMap<String, Set<String>>();
@@ -207,15 +201,15 @@ public class FormalContext extends
          * not already present).
          */
         for (String s : this.getAttributes()) {
-        	if(!dontConsideredAttr.contains(s)){
-        		TreeSet<String> set = new TreeSet<String>();
+            if (!dontConsideredAttr.contains(s)) {
+                TreeSet<String> set = new TreeSet<String>();
                 for (FullObject<String, String> f : this.getObjects()) {
                     if (f.getDescription().getAttributes().contains(s) && (!dontConsideredObj.contains(f))) {
                         set.add(f.getIdentifier());
                     }
                 }
                 extentPerAttr.put(s, set);
-        	}         
+            }
         }
 
         /*
@@ -228,8 +222,7 @@ public class FormalContext extends
         for (String s : extentPerAttr.keySet()) {
             for (String t : extentPerAttr.keySet()) {
                 if (!s.equals(t)) {
-                    Set<String> result = this.intersection(
-                            extentPerAttr.get(s), extentPerAttr.get(t));
+                    Set<String> result = this.intersection(extentPerAttr.get(s), extentPerAttr.get(t));
                     if (!extentPerAttr.values().contains(result)) {
                         if (!temp.containsValue(result)) {
                             temp.put(s + ", " + t, result);
@@ -249,8 +242,7 @@ public class FormalContext extends
         for (String s : extentPerAttr.keySet()) {
             for (String t : extentPerAttr.keySet()) {
                 if (!s.equals(t)) {
-                    Set<String> result = this.intersection(
-                            extentPerAttr.get(s), extentPerAttr.get(t));
+                    Set<String> result = this.intersection(extentPerAttr.get(s), extentPerAttr.get(t));
                     if (extentPerAttr.values().contains(result)) {
                         TreeSet<String> set = new TreeSet<String>();
                         for (FullObject<String, String> f : this.getObjects()) {
@@ -277,12 +269,11 @@ public class FormalContext extends
             Concept<String, FullObject<String, String>> c = new LatticeConcept();
 
             for (FullObject<String, String> i : this.getObjects()) {
-            	if(!dontConsideredObj.contains(i)){
-            		if (e.isEmpty()) {
+                if (!dontConsideredObj.contains(i)) {
+                    if (e.isEmpty()) {
                         intents.addAll(i.getDescription().getAttributes());
                     } else if (e.contains(i.getIdentifier().toString())) {
-                        TreeSet<String> prev = sort(i.getDescription()
-                                .getAttributes());
+                        TreeSet<String> prev = sort(i.getDescription().getAttributes());
                         if (count > 0) {
                             intents = intersection(prev, intents);
                         } else {
@@ -291,11 +282,12 @@ public class FormalContext extends
                         count++;
                         c.getExtent().add(i);
                     }
-            	}          
+                }
             }
             // concepts.put(e, intents);
             for (String s : intents) {
-                c.getIntent().add(s);
+                if (!dontConsideredAttr.contains(s))
+                    c.getIntent().add(s);
             }
             conceptLattice.add(c);
         }
@@ -303,7 +295,7 @@ public class FormalContext extends
     }
 
     public int supportCount(Set<String> attributes) {
-        if(attributes.isEmpty())
+        if (attributes.isEmpty())
             return objects.size();
         int mincount = Integer.MAX_VALUE;
         String attributeWithMincount = "";
@@ -357,8 +349,7 @@ public class FormalContext extends
         }
         // remove redundant items in the conclusion
         for (FCAImplication<String> fcaImplication : result) {
-            fcaImplication.getConclusion().removeAll(
-                    fcaImplication.getPremise());
+            fcaImplication.getConclusion().removeAll(fcaImplication.getPremise());
         }
 
         return result;
@@ -370,15 +361,14 @@ public class FormalContext extends
     }
 
     public Set<AssociationRule> getLuxenburgerBase(double minsup, double conf) {
-        return new AssociationMiner(this, minsup, conf)
-                .computeAssociationRules();
+        return new AssociationMiner(this, minsup, conf).computeAssociationRules();
     }
 
     public void clarifyObjects() {
         ArrayList<FullObject<String, String>> toBeRemoved = new ArrayList<>();
         for (int i = 0; i < getObjectCount(); i++) {
             FullObject<String, String> o1 = objects.getElementAt(i);
-            for (int j = i+1; j < getObjectCount(); j++) {
+            for (int j = i + 1; j < getObjectCount(); j++) {
                 FullObject<String, String> o2 = objects.getElementAt(j);
                 if (getAttributesForObject(o1.getIdentifier()).equals(getAttributesForObject(o2.getIdentifier()))) {
                     toBeRemoved.add(o2);
@@ -405,18 +395,19 @@ public class FormalContext extends
         ArrayList<FullObject<String, String>> toBeRemoved = new ArrayList<>();
         for (int i = 0; i < getObjectCount(); i++) {
             FullObject<String, String> o = objects.getElementAt(i);
-            IndexedSet<FullObject<String,String>> otherObjects0 = new ListSet<>();
-            for (FullObject<String,String> o0 : objects) {
+            IndexedSet<FullObject<String, String>> otherObjects0 = new ListSet<>();
+            for (FullObject<String, String> o0 : objects) {
                 otherObjects0.add(o0);
             }
             otherObjects0.remove(o);
-            for (FullObject<String,String> o0 : toBeRemoved) {
+            for (FullObject<String, String> o0 : toBeRemoved) {
                 otherObjects0.remove(o0);
             }
-            ICombinatoricsVector<FullObject<String,String>> otherObjects = Factory.createVector(otherObjects0);
-            Generator<FullObject<String,String>> gen = Factory.createSubSetGenerator(otherObjects);
-            for (ICombinatoricsVector<FullObject<String,String>> subSet : gen) {
-                if (subSet.getSize() < 2) continue;
+            ICombinatoricsVector<FullObject<String, String>> otherObjects = Factory.createVector(otherObjects0);
+            Generator<FullObject<String, String>> gen = Factory.createSubSetGenerator(otherObjects);
+            for (ICombinatoricsVector<FullObject<String, String>> subSet : gen) {
+                if (subSet.getSize() < 2)
+                    continue;
                 IndexedSet<String> intersection = new ListSet<>();
                 for (String attribute : getAttributesForObject(subSet.getValue(0).getIdentifier())) {
                     intersection.add(attribute);
@@ -424,7 +415,8 @@ public class FormalContext extends
                 for (int j = 1; j < subSet.getSize(); j++) {
                     intersection.retainAll(getAttributesForObject(subSet.getValue(j).getIdentifier()));
                 }
-                if (intersection.size() == 0) continue;
+                if (intersection.size() == 0)
+                    continue;
                 if (getAttributesForObject(o.getIdentifier()).equals(intersection)) {
                     toBeRemoved.add(o);
                     break;
@@ -496,8 +488,7 @@ public class FormalContext extends
         }
     }
 
-    public void invert(int objectStartIndex, int objectEndIndex,
-            int attributeStartIndex, int attributeEndIndex) {
+    public void invert(int objectStartIndex, int objectEndIndex, int attributeStartIndex, int attributeEndIndex) {
         for (int i = objectStartIndex; i < objectEndIndex; i++) {
             for (int j = attributeStartIndex; j < attributeEndIndex; j++) {
                 String objectID = getObjectAtIndex(i).getIdentifier();
@@ -511,16 +502,14 @@ public class FormalContext extends
         invert(0, getObjectCount() - 1, 0, getAttributeCount() - 1);
     }
 
-    public void clear(int objectStartIndex, int objectEndIndex,
-            int attributeStartIndex, int attributeEndIndex) {
+    public void clear(int objectStartIndex, int objectEndIndex, int attributeStartIndex, int attributeEndIndex) {
         for (int i = objectStartIndex; i < objectEndIndex; i++) {
             for (int j = attributeStartIndex; j < attributeEndIndex; j++) {
                 FullObject<String, String> object = getObjectAtIndex(i);
                 String attribute = getAttributeAtIndex(j);
                 if (objectHasAttribute(object, attribute)) {
                     try {
-                        removeAttributeFromObject(attribute,
-                                object.getIdentifier());
+                        removeAttributeFromObject(attribute, object.getIdentifier());
                     } catch (IllegalObjectException e) {
                         e.printStackTrace();
                     }
@@ -533,8 +522,7 @@ public class FormalContext extends
         clear(0, getObjectCount() - 1, 0, getAttributeCount() - 1);
     }
 
-    public void fill(int objectStartIndex, int objectEndIndex,
-            int attributeStartIndex, int attributeEndIndex) {
+    public void fill(int objectStartIndex, int objectEndIndex, int attributeStartIndex, int attributeEndIndex) {
         for (int i = objectStartIndex; i < objectEndIndex; i++) {
             for (int j = attributeStartIndex; j < attributeEndIndex; j++) {
                 FullObject<String, String> object = getObjectAtIndex(i);
@@ -592,8 +580,7 @@ public class FormalContext extends
         // IndexedSet<String> filteredAttributes = new ListSet<>();
         for (FullObject<String, String> object : objects) {
             if (object.getIdentifier().equals(oldName)) {
-                newObjects.add(new FullObject<String, String>(newName,
-                        getAttributesForObject(oldName)));
+                newObjects.add(new FullObject<String, String>(newName, getAttributesForObject(oldName)));
             } else {
                 newObjects.add(object);
             }
@@ -700,8 +687,7 @@ public class FormalContext extends
         objectsOfAttribute.put(attribute, new TreeSet<String>());
     }
 
-    private TreeSet<String> intersection(Set<String> firstSet,
-            Set<String> secondSet) {
+    private TreeSet<String> intersection(Set<String> firstSet, Set<String> secondSet) {
         TreeSet<String> result = new TreeSet<String>();
         for (String s : firstSet) {
             for (String t : secondSet) {
@@ -720,43 +706,50 @@ public class FormalContext extends
         }
         return result;
     }
-    
+
     /**
      * Set Attribute which don't be consider by lattice computation.
+     *
      * @param attr
      */
-    public void dontConsiderAttribute(String attr){
-    	this.dontConsideredAttr.add(attr);
+    public void dontConsiderAttribute(String attr) {
+        this.dontConsideredAttr.add(attr);
     }
-    
+
     /**
      * Set Attribute which has to be reconsider by lattice computation.
+     *
      * @param attr
      */
-    public void considerAttribute(String attr){
-    	this.dontConsideredAttr.remove(attr);
+    public void considerAttribute(String attr) {
+        this.dontConsideredAttr.remove(attr);
     }
-    
+
     /**
      * Set Object which don't be consider by lattice computation.
+     *
      * @param obj
      */
-    public void dontConsiderObject(FullObject<String, String> obj){
-    	this.dontConsideredObj.add(obj);
+    public void dontConsiderObject(FullObject<String, String> obj) {
+        this.dontConsideredObj.add(obj);
     }
-    
+
     /**
      * Set Object which has to be reconsider by lattice computation.
+     *
      * @param obj
      */
-    public void considerObject(FullObject<String, String> obj){
-    	this.dontConsideredObj.remove(obj);
+    public void considerObject(FullObject<String, String> obj) {
+        this.dontConsideredObj.remove(obj);
     }
-    
-    public void clearConsidered(){
-    	dontConsideredAttr.clear();
-    	dontConsideredObj.clear();
+
+    public void clearConsidered() {
+        dontConsideredAttr.clear();
+        dontConsideredObj.clear();
     }
+
+
+
 
 	public ArrayList<String> getDontConsideredAttr() {
 		return dontConsideredAttr;

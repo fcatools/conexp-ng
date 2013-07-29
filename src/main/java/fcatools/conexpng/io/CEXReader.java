@@ -3,6 +3,7 @@ package fcatools.conexpng.io;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -17,7 +18,6 @@ import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
-import de.tudresden.inf.tcs.fcaapi.Concept;
 import de.tudresden.inf.tcs.fcaapi.FCAImplication;
 import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
 import de.tudresden.inf.tcs.fcalib.FullObject;
@@ -30,7 +30,6 @@ import fcatools.conexpng.gui.lattice.LatticeGraph;
 import fcatools.conexpng.gui.lattice.Node;
 import fcatools.conexpng.model.AssociationRule;
 import fcatools.conexpng.model.FormalContext;
-import fcatools.conexpng.model.TestLatticeAlgorithm;
 
 public class CEXReader {
 
@@ -41,9 +40,8 @@ public class CEXReader {
     private Set<AssociationRule> associations;
     private Set<FCAImplication<String>> implications;
 
-    public CEXReader(Conf state) throws XMLStreamException, IllegalObjectException, IOException,
-            NumberFormatException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException,
-            SecurityException {
+    public CEXReader(Conf state) throws XMLStreamException, IllegalObjectException, IOException, NumberFormatException,
+            IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
         guistate = new GUIConf();
         InputStream in = null;
 
@@ -92,18 +90,17 @@ public class CEXReader {
             }
         }
         if (lattice == null) {
-            lattice = new TestLatticeAlgorithm()
-                    .computeLatticeGraph(new ListSet<Concept<String, FullObject<String, String>>>());
+            lattice = new LatticeGraph();
         }
         if (guistate.columnWidths == null) {
             guistate.columnWidths = new HashMap<>();
         }
 
         state.guiConf = guistate;
-        state.associations=associations;
-        state.implications=implications;
-        state.lattice=lattice;
-        state.context=context;
+        state.associations = associations;
+        state.implications = implications;
+        state.lattice = lattice;
+        state.context = context;
         state.loadedFile();
     }
 
@@ -156,10 +153,10 @@ public class CEXReader {
                 StartElement element = event.asStartElement();
                 if (element.getName().toString().equals("Association")) {
 
-                    double sup=0;
-                    double conf=0;
-                    sup=Double.parseDouble(element.getAttributeByName(new QName("Support")).getValue());
-                    conf=Double.parseDouble(element.getAttributeByName(new QName("Confidence")).getValue());
+                    double sup = 0;
+                    double conf = 0;
+                    sup = Double.parseDouble(element.getAttributeByName(new QName("Support")).getValue());
+                    conf = Double.parseDouble(element.getAttributeByName(new QName("Confidence")).getValue());
 
                     Set<String> premise = new TreeSet<>();
                     while (!((event = parser.nextEvent()).isEndElement() && event.asEndElement().getName().toString()
@@ -226,15 +223,50 @@ public class CEXReader {
     }
 
     private void addLatice(XMLEventReader parser) throws XMLStreamException {
-        if (!ourCEX)
-            return;
+        lattice = new LatticeGraph();
         while (parser.hasNext()) {
             XMLEvent event = parser.nextEvent();
             switch (event.getEventType()) {
             case XMLStreamConstants.START_ELEMENT: {
                 StartElement element = event.asStartElement();
+                if (name(element, "AttributeMask")) {
+                    for (String s : context.getAttributes()) {
+                        context.dontConsiderAttribute(s);
+                    }
+                    event = parser.nextEvent();
+                    while (!(event.isEndElement() && name(event.asEndElement(), "AttributeMask"))) {
+                        if (event.isStartElement()) {
+                            int i = Integer.parseInt(event.asStartElement()
+                                    .getAttributeByName(new QName("AttributeIdentifier")).getValue());
+                            context.considerAttribute(context.getAttributeAtIndex(i));
+                        }
+                        event = parser.nextEvent();
+                    }
+                }
+                if (name(element, "ObjectMask")) {
+                    for (FullObject<String, String> o : context.getObjects()) {
+                        context.dontConsiderObject(o);
+                    }
+                    event = parser.nextEvent();
+                    while (!(event.isEndElement() && name(event.asEndElement(), "ObjectMask"))) {
+                        if (event.isStartElement()) {
+                            int i = Integer.parseInt(event.asStartElement()
+                                    .getAttributeByName(new QName("AttributeIdentifier")).getValue());
+                            context.considerObject(context.getObjectAtIndex(i));
+                        }
+                        event = parser.nextEvent();
+                    }
+                }
                 if (name(element, "ConceptFigures")) {
                     getNodes(parser);
+                }
+                // TODO? other labels of conexp like attributelabels or
+                // objectlabels
+                if (name(element, "UpConceptLabels")) {
+                    getAttributeLabels(parser);
+                }
+                if (name(element, "ConceptLabels")) {
+                    getObjectLabels(parser);
                 }
                 break;
             }
@@ -246,7 +278,7 @@ public class CEXReader {
 
     }
 
-    private void getNodes(XMLEventReader parser) throws XMLStreamException {
+    private void getObjectLabels(XMLEventReader parser) throws XMLStreamException {
         double x = 0, y = 0;
         double minx = Double.MAX_VALUE, miny = Double.MAX_VALUE;
         while (parser.hasNext()) {
@@ -274,13 +306,119 @@ public class CEXReader {
                         event = parser.nextEvent();
                     }
                     Node n = getNodeWithIntent(attr);
-                    n.setX((int) x);
-                    n.setY((int) y);
+                    n.getObjectsLabel().setXY((int) x, (int) y);
                 }
                 break;
             }
             case XMLStreamConstants.END_ELEMENT:
+                if (name(event.asEndElement(), "ConceptLabels")) {
+                    if (minx < 0 && miny < 0) {
+                        lattice.translate((int) -minx + 10, (int) -miny + 10);
+                        return;
+                    } else if (miny < 0) {
+                        lattice.translate(0, (int) -miny + 10);
+                        return;
+
+                    } else if (minx < 0) {
+                        lattice.translate((int) -minx + 10, 0);
+                        return;
+                    }
+                    return;
+                }
+            }
+        }
+    }
+
+    private void getAttributeLabels(XMLEventReader parser) throws XMLStreamException {
+        double x = 0, y = 0;
+        double minx = Double.MAX_VALUE, miny = Double.MAX_VALUE;
+        while (parser.hasNext()) {
+            XMLEvent event = parser.nextEvent();
+            switch (event.getEventType()) {
+            case XMLStreamConstants.START_ELEMENT: {
+                StartElement element = event.asStartElement();
+                if (name(element, "Point2D")) {
+                    x = Double.parseDouble(event.asStartElement().getAttributeByName(new QName("x")).getValue());
+                    y = Double.parseDouble(event.asStartElement().getAttributeByName(new QName("y")).getValue());
+                    if (x < minx)
+                        minx = x;
+                    if (y < miny)
+                        miny = y;
+                }
+                if (name(element, "Intent")) {
+                    HashSet<String> attr = new HashSet<>();
+                    event = parser.nextEvent();
+                    while (!(event.isEndElement() && name(event.asEndElement(), "Intent"))) {
+                        if (event.isStartElement()) {
+                            int i = Integer.parseInt(event.asStartElement()
+                                    .getAttributeByName(new QName("AttributeIdentifier")).getValue());
+                            attr.add(context.getAttributeAtIndex(i));
+                        }
+                        event = parser.nextEvent();
+                    }
+                    Node n = getNodeWithIntent(attr);
+                    n.getAttributesLabel().setXY((int) x, (int) y);
+                }
+                break;
+            }
+            case XMLStreamConstants.END_ELEMENT:
+                if (name(event.asEndElement(), "UpConceptLabels")) {
+                    if (minx < 0 && miny < 0) {
+                        lattice.translate((int) -minx + 10, (int) -miny + 10);
+                        return;
+                    } else if (miny < 0) {
+                        lattice.translate(0, (int) -miny + 10);
+                        return;
+
+                    } else if (minx < 0) {
+                        lattice.translate((int) -minx + 10, 0);
+                        return;
+                    }
+                    return;
+                }
+            }
+        }
+    }
+
+    private void getNodes(XMLEventReader parser) throws XMLStreamException {
+        double x = 0, y = 0;
+        ArrayList<Node> nodes = new ArrayList<>();
+        double minx = Double.MAX_VALUE, miny = Double.MAX_VALUE;
+        while (parser.hasNext()) {
+            XMLEvent event = parser.nextEvent();
+            switch (event.getEventType()) {
+            case XMLStreamConstants.START_ELEMENT: {
+                StartElement element = event.asStartElement();
+                if (name(element, "Point2D")) {
+                    x = Double.parseDouble(event.asStartElement().getAttributeByName(new QName("x")).getValue());
+                    y = Double.parseDouble(event.asStartElement().getAttributeByName(new QName("y")).getValue());
+                    if (x < minx)
+                        minx = x;
+                    if (y < miny)
+                        miny = y;
+                }
+                Node n = new Node();
+                n.setX((int) x);
+                n.setY((int) y);
+
+                if (name(element, "Intent")) {
+                    event = parser.nextEvent();
+                    while (!(event.isEndElement() && name(event.asEndElement(), "Intent"))) {
+                        if (event.isStartElement()) {
+                            int i = Integer.parseInt(event.asStartElement()
+                                    .getAttributeByName(new QName("AttributeIdentifier")).getValue());
+                            n.addAttribut(context.getAttributeAtIndex(i));
+                        }
+                        event = parser.nextEvent();
+                    }
+                    nodes.add(n);
+                }
+
+                break;
+            }
+            case XMLStreamConstants.END_ELEMENT:
                 if (name(event.asEndElement(), "ConceptFigures")) {
+                    lattice.setNodes(nodes);
                     if (minx < 0 && miny < 0) {
                         lattice.translate((int) -minx + 10, (int) -miny + 10);
                         return;
