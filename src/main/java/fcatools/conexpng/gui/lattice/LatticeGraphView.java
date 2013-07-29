@@ -25,6 +25,7 @@ import org.apache.batik.transcoder.Transcoder;
 import org.apache.batik.transcoder.TranscoderException;
 import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
+import org.apache.fop.pdf.TempFileStreamCache;
 import org.apache.fop.svg.PDFTranscoder;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
@@ -120,21 +121,21 @@ public class LatticeGraphView extends JSVGCanvas {
 
 		g.setColor(Color.BLACK);
 		int radius = LatticeView.radius;
-//		if (graph.getEdges() != null && state.showEdges) {
-//			for (Edge e : graph.getEdges()) {
-//				g.setColor(Color.BLACK);
-//				if (e.getU().isPartOfAnIdeal() && e.getV().isPartOfAnIdeal()
-//						&& idealHighlighting) {
-//					g.setColor(Color.BLUE);
-//				} else if (!(e.getU().isPartOfAnIdeal() && e.getV()
-//						.isPartOfAnIdeal()) && idealHighlighting) {
-//					g.setColor(Color.LIGHT_GRAY);
-//				}
-//				g.drawLine(e.getU().getX() + radius, e.getU().getY() + radius,
-//						e.getV().getX() + radius, e.getV().getY() + radius);
-//			}
-//		}
-		for(Node n: graph.getNodes()){
+		// if (graph.getEdges() != null && state.showEdges) {
+		// for (Edge e : graph.getEdges()) {
+		// g.setColor(Color.BLACK);
+		// if (e.getU().isPartOfAnIdeal() && e.getV().isPartOfAnIdeal()
+		// && idealHighlighting) {
+		// g.setColor(Color.BLUE);
+		// } else if (!(e.getU().isPartOfAnIdeal() && e.getV()
+		// .isPartOfAnIdeal()) && idealHighlighting) {
+		// g.setColor(Color.LIGHT_GRAY);
+		// }
+		// g.drawLine(e.getU().getX() + radius, e.getU().getY() + radius,
+		// e.getV().getX() + radius, e.getV().getY() + radius);
+		// }
+		// }
+		for (Node n : graph.getNodes()) {
 			if (state.showEdges) {
 				for (Node u : n.getBelow()) {
 					g.setColor(Color.BLACK);
@@ -208,7 +209,7 @@ public class LatticeGraphView extends JSVGCanvas {
 		}
 	}
 
-	public void exportLatticeAsPDF() {
+	public void exportLatticeAsPDF(String path) {
 		DOMImplementation domImpl = GenericDOMImplementation
 				.getDOMImplementation();
 
@@ -219,67 +220,35 @@ public class LatticeGraphView extends JSVGCanvas {
 		this.paint(svgGenerator);
 
 		Writer out;
-		try {
-			out = new FileWriter(new File("test_batik.svg"));
-			svgGenerator.stream(out, true);
-		} catch (IOException ioEx) {
-			ioEx.printStackTrace();
-		}
-
+		File temp = null;
 		String svg_URI_input;
+
 		try {
-			svg_URI_input = Paths.get("test_batik.svg").toUri().toURL()
-					.toString();
+			temp = File.createTempFile("temp", ".svg");
+			out = new FileWriter(temp);
+			svgGenerator.stream(out, true);
+
+			svg_URI_input = Paths.get(temp.getAbsolutePath()).toUri().toURL().toString();
 			TranscoderInput input_svg_image = new TranscoderInput(svg_URI_input);
-			OutputStream pdf_ostream = new FileOutputStream("test.pdf");
+			OutputStream pdf_ostream;
+			if(path.contains(".pdf")){
+				pdf_ostream = new FileOutputStream(path);
+			}else{
+				pdf_ostream = new FileOutputStream(path + ".pdf");
+			}
+			
 			TranscoderOutput output_pdf_file = new TranscoderOutput(pdf_ostream);
 			Transcoder transcoder = new PDFTranscoder();
 			transcoder.transcode(input_svg_image, output_pdf_file);
 			pdf_ostream.flush();
 			pdf_ostream.close();
 
-		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (IOException ioEx) {
+			ioEx.printStackTrace();
 		} catch (TranscoderException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
-
-		// File outputFile = new File("out.pdf");
-		// OutputStream out = null;
-		// try {
-		// out = new java.io.FileOutputStream(outputFile);
-		// out = new java.io.BufferedOutputStream(out);
-		// PDFDocumentGraphics2D g2d = new PDFDocumentGraphics2D();
-		// g2d.setDeviceDPI(PDFDocumentGraphics2D.NORMAL_PDF_RESOLUTION);
-		// g2d.setGraphicContext(new GraphicContext());
-		// Dimension pageSize = new Dimension(595, 842); //A4
-		// g2d.setupDocument(out, pageSize.width, pageSize.height);
-		//
-		//
-		// //Works:
-		// //g2d.addLink(targetRect, tx,
-		// "http://www.apache.org",PDFLink.EXTERNAL);
-		// //Doesn't work
-		// //g2d.addLink(targetRect, tx, "[/XYZ 0 0 null]", PDFLink.INTERNAL);
-		// //Works:
-		// g2d.finish();
-		// } catch (FileNotFoundException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// } catch (IOException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// } finally {
-		// IOUtils.closeQuietly(out);
-		// }
 	}
 
 	public void setLatticeGraph(LatticeGraph g) {

@@ -5,11 +5,16 @@ import fcatools.conexpng.Conf;
 import fcatools.conexpng.Conf.ContextChangeEvent;
 import fcatools.conexpng.Conf.StatusMessage;
 import fcatools.conexpng.Util;
+import fcatools.conexpng.gui.MainToolbar;
 import fcatools.conexpng.gui.View;
 import fcatools.conexpng.model.ILatticeAlgorithm;
 import fcatools.conexpng.model.TestLatticeAlgorithm;
 
 import javax.swing.*;
+
+import com.alee.extended.filechooser.WebDirectoryChooser;
+import com.alee.laf.optionpane.WebOptionPane;
+import com.alee.laf.rootpane.WebDialog;
 
 import de.tudresden.inf.tcs.fcaapi.Concept;
 import de.tudresden.inf.tcs.fcalib.FullObject;
@@ -21,6 +26,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.beans.PropertyChangeEvent;
+import java.io.File;
 
 public class LatticeView extends View {
     private static final long serialVersionUID = 1660117627650529212L;
@@ -44,7 +50,48 @@ public class LatticeView extends View {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                ((LatticeGraphView) view).exportLatticeAsPDF();
+                final JFileChooser fc = new JFileChooser(state.filePath);
+            	final WebDialog dialog = new WebDialog();
+            	dialog.setContentPane(fc);
+                fc.setDialogType(JFileChooser.SAVE_DIALOG);
+                fc.addActionListener(new ActionListener() {
+
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						String command = (String) e.getActionCommand();
+						if(command.equals(JFileChooser.CANCEL_SELECTION)){
+							dialog.setVisible(false);
+							return;
+						}else if(command.equals(JFileChooser.APPROVE_SELECTION)){
+                            File file = fc.getSelectedFile();
+                            String path = file.getAbsolutePath();
+                            if(file.exists()){
+                            	WebOptionPane pane = new WebOptionPane(new JLabel("File already exists. Do you really want to overwrite "
+                                        + file.getName() + "?"), JOptionPane.YES_NO_OPTION);
+                                pane.setMessageType(WebOptionPane.QUESTION_MESSAGE);
+                                Object[] options = { "Yes", "No" };
+                                pane.setOptions(options);
+                                JDialog dialog2 = pane.createDialog("Overwriting existing file?");
+                                dialog2.pack();
+                                dialog2.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+                                String n = (String) pane.getValue();
+                                dialog2.setVisible(true);
+                                //TODO
+                                if(n.equals("Yes")){
+                                	((LatticeGraphView) view).exportLatticeAsPDF(path); 
+                                	dialog.setVisible(false);
+                                }else{
+                                }
+                            }else {
+                                ((LatticeGraphView) view).exportLatticeAsPDF(path); 
+                                dialog.setVisible(false);
+                            }
+						}
+					}
+                	
+                });
+                dialog.pack();
+                dialog.setVisible(true);
 
             }
         });
