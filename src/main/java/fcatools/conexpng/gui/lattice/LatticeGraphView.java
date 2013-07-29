@@ -134,7 +134,7 @@ public class LatticeGraphView extends JSVGCanvas {
 //						e.getV().getX() + radius, e.getV().getY() + radius);
 //			}
 //		}
-		for (Node n : graph.getNodes()) {
+		for(Node n: graph.getNodes()){
 			if (state.showEdges) {
 				for (Node u : n.getBelow()) {
 					g.setColor(Color.BLACK);
@@ -149,6 +149,8 @@ public class LatticeGraphView extends JSVGCanvas {
 							+ radius, u.getY() + radius);
 				}
 			}
+		}
+		for (Node n : graph.getNodes()) {
 			g.setColor(Color.BLACK);
 			g.fillOval(n.getX(), n.getY(), radius * 2, radius * 2);
 			if (n.isPartOfAnIdeal() && idealHighlighting) {

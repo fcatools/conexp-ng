@@ -98,7 +98,7 @@ public abstract class ILatticeAlgorithm {
 	 */
 	public void computeAllIdeals() {
 		// sort the list of nodes from bottom too top
-		removeAllDuplicates();
+		
 		ArrayList<Node> q = new ArrayList<>();
 		for (Node n : graph.getNodes()) {
 			if (q.size() == 0) {
@@ -130,10 +130,16 @@ public abstract class ILatticeAlgorithm {
 			System.out.println("/");
 		}
 		System.out.println("test");
-		for (int i = 0; i < q.size(); i++) {
-			Node n = q.get(i);
-			n.computeIdeal();
+		for (int i = 1; i < q.size(); i++) {
+			Node u = q.get(i);
+			for (int j = i-1; j >= 0; j--) {
+				Node v = q.get(j);
+				if(u.getObjects().containsAll(v.getObjects()) && v.getAttributes().containsAll(u.getAttributes())){
+					u.getIdeal().add(v);
+				}
+			}
 		}
+		removeAllDuplicates();
 	}
 
 }

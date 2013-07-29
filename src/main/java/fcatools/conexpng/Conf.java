@@ -41,7 +41,7 @@ public class Conf {
     public boolean showEdges = true;
     public boolean idealHighlighting = false;
 
-    public int numberOfConcepts;
+    public int numberOfConcepts = 0;
     private PropertyChangeSupport propertyChangeSupport;
 
     public Conf() {

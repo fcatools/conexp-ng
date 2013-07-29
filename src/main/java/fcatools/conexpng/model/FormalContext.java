@@ -757,4 +757,14 @@ public class FormalContext extends
     	dontConsideredAttr.clear();
     	dontConsideredObj.clear();
     }
+
+	public ArrayList<String> getDontConsideredAttr() {
+		return dontConsideredAttr;
+	}
+
+	public ArrayList<FullObject<String, String>> getDontConsideredObj() {
+		return dontConsideredObj;
+	}
+    
+    
 }

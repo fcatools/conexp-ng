@@ -186,6 +186,7 @@ public class AccordionMenu extends WebAccordion {
 		for (String s : context.getAttributes()) {
 			gbc.gridy++;
 			final WebCheckBox box = new WebCheckBox(s);
+			box.setSelected(!state.context.getDontConsideredAttr().contains(box.getText()));
 			box.addActionListener(new ActionListener() {
 
 				@Override
@@ -219,6 +220,7 @@ public class AccordionMenu extends WebAccordion {
 			gbc.gridy++;
 			final WebCheckBox box = new WebCheckBox(s.getIdentifier());
 			final FullObject<String, String> temp = s;
+			box.setSelected(!state.context.getDontConsideredAttr().contains(box.getText()));
 			box.addActionListener(new ActionListener() {
 
 				@Override
