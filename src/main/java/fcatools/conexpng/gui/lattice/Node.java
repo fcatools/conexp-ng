@@ -79,7 +79,7 @@ public class Node extends JPanel implements LatticeGraphElement {
      */
     public void setX(int x) {
         this.x = x;
-
+        this.setBounds(x, y, 15, 15);
     }
 
     /**
@@ -96,6 +96,7 @@ public class Node extends JPanel implements LatticeGraphElement {
      */
     public void setY(int y) {
         this.y = y;
+        this.setBounds(x, y, 15, 15);
     }
 
     /**

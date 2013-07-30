@@ -107,16 +107,16 @@ public class LatticeGraph {
             if (u != null && v != null && !u.equals(v)) {
                 u.getObjects().addAll(e.getU().getObjects());
                 v.getObjects().addAll(e.getV().getObjects());
-                u.getObjectsLabel().setSet(u.getObjects());
-                v.getObjectsLabel().setSet(v.getObjects());
-                u.getAttributesLabel().setSet(u.getAttributes());
-                v.getAttributesLabel().setSet(v.getAttributes());
-                System.out.println(u.getObjects());
+                u.getObjectsLabel().setSet(u.getVisibleObjects());
+                v.getObjectsLabel().setSet(v.getVisibleObjects());
+                u.getAttributesLabel().setSet(u.getVisibleAttributes());
+                v.getAttributesLabel().setSet(v.getVisibleAttributes());
+                u.setLevel(e.getU().getLevel());
+                v.setLevel(e.getV().getLevel());
                 u.addBelowNode(v);
                 edges.add(new Edge(u, v));
             }
         }
-        
         computeAllIdeals();
     }
 
