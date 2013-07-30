@@ -85,12 +85,14 @@ public abstract class ILatticeAlgorithm {
 				Node v = graph.getNodes().get(j);
 				if(u.getObjects().equals(v.getObjects()) && u.getAttributes().equals(v.getAttributes())){
 					duplicates.add(v);
-					u.getBelow().remove(v);
 				}
 			}
 			
 		}
 		graph.getNodes().removeAll(duplicates);
+		for(Node n : graph.getNodes()){
+			n.getBelow().removeAll(duplicates);
+		}
 	}
 
 	/**
@@ -117,17 +119,6 @@ public abstract class ILatticeAlgorithm {
 					}
 				}
 			}
-			String s = "";
-			String a = "";
-
-			for (int i = 0; i < q.size(); i++) {
-				Node u = q.get(i);
-				s = s + " " + u.getObjects();
-				a = a + " " + u.getAttributes();
-			}
-			System.out.println(s);
-			System.out.println(a);
-			System.out.println("/");
 		}
 		System.out.println("test");
 		for (int i = 1; i < q.size(); i++) {
