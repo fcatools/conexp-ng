@@ -152,8 +152,10 @@ public class LatticeGraphView extends JSVGCanvas {
             }
         }
         for (Node n : graph.getNodes()) {
-            g.setColor(Color.BLACK);
+            g.setColor(Color.WHITE);
             g.fillOval(n.getX(), n.getY(), radius * 2, radius * 2);
+            g.setColor(Color.BLACK);
+            g.drawOval(n.getX(), n.getY(), radius * 2, radius * 2);
             if (n.isPartOfAnIdeal() && idealHighlighting) {
                 lastIdeal.add(n);
                 g.setColor(Color.BLUE);
@@ -188,6 +190,31 @@ public class LatticeGraphView extends JSVGCanvas {
             boolean areObjects, Node node) {
         int x = node.getX();
         int y = node.getY();
+        
+        if(!node.getVisibleAttributes().isEmpty() && !node.getVisibleObjects().isEmpty()){
+        	g.setColor(Color.BLUE);
+        	g.fillArc(x, y, LatticeView.radius * 2, LatticeView.radius * 2, 0, 180);
+        	g.setColor(Color.BLACK);
+        	g.fillArc(x, y, LatticeView.radius * 2, LatticeView.radius * 2, 180, 180);
+            g.drawOval(x, y, LatticeView.radius * 2, LatticeView.radius * 2);
+        	
+        }else if(!node.getVisibleObjects().isEmpty()){
+        	g.setColor(Color.BLACK);
+        	g.fillOval(x, y, LatticeView.radius * 2, LatticeView.radius * 2);
+        	g.setColor(Color.WHITE);
+            g.fillArc(x, y, LatticeView.radius * 2, LatticeView.radius * 2, 0, 180);
+            g.setColor(Color.BLACK);
+            g.drawOval(x, y, LatticeView.radius * 2, LatticeView.radius * 2);
+        }else {
+        	g.setColor(Color.BLUE);
+        	g.fillOval(x, y, LatticeView.radius * 2, LatticeView.radius * 2);
+        	g.setColor(Color.WHITE);
+            g.fillArc(x, y, LatticeView.radius * 2, LatticeView.radius * 2, 180, 180);
+            g.setColor(Color.BLACK);
+            g.drawOval(x, y, LatticeView.radius * 2, LatticeView.radius * 2);
+        }
+        
+        
         if (areObjects) {
             y += 4 * LatticeView.radius;
             for (String s : elements) {
