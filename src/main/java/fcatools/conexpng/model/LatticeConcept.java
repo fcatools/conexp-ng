@@ -27,4 +27,8 @@ public class LatticeConcept implements Concept<String, FullObject<String, String
 		return this.intent;
 	}
 
+	@Override
+	public String toString(){
+		return "Objects: "+extent+"\nAttributes: "+intent+"\n";
+	}
 }

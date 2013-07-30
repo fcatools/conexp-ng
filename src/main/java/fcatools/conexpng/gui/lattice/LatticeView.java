@@ -161,7 +161,8 @@ public class LatticeView extends View {
 
                 @Override
                 protected Void doInBackground() throws Exception {
-                    ((LatticeGraphView) view).setLatticeGraph(alg.computeLatticeGraph(state.context.getConcepts()));
+                	state.concepts=state.context.getConcepts();
+                    ((LatticeGraphView) view).setLatticeGraph(alg.computeLatticeGraph(state.concepts));
                     return null;
                 }
 
@@ -175,13 +176,15 @@ public class LatticeView extends View {
         }
         if (evt instanceof ContextChangeEvent
                 && (((ContextChangeEvent) evt).getName() == ContextChangeEvents.TEMPORARYCONTEXTCHANGED)) {
-            ((LatticeGraphView) view).setLatticeGraph(alg.computeLatticeGraph(state.context
-                    .getConceptsWithoutConsideredElementa()));
+        	state.concepts=state.context.getConceptsWithoutConsideredElementa();
+        	((LatticeGraphView) view).setLatticeGraph(alg.computeLatticeGraph(state.concepts));
         }
         if (evt instanceof ContextChangeEvent
                 && (((ContextChangeEvent) evt).getName() == ContextChangeEvents.LOADEDFILE)) {
-            if(state.lattice.missingEdges())
-            	state.lattice.addEdges(state.context.getConceptsWithoutConsideredElementa());
+            if(state.lattice.missingEdges()){
+            	state.concepts=state.context.getConceptsWithoutConsideredElementa();
+            	state.lattice.addEdges(state.concepts);
+            	}
             ((LatticeGraphView) view).setLatticeGraph(state.lattice);
         }
         view.repaint();

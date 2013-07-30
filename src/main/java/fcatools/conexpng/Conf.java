@@ -33,7 +33,7 @@ public class Conf {
     public Set<FCAImplication<String>> implications;
     public boolean unsavedChanges = false;
     public LatticeGraph lattice;
-    public ListSet<Concept<FullObject<String, String>, String>> concepts;
+    public Set<Concept<String, FullObject<String, String>>> concepts;
     public GUIConf guiConf;
     // TODO: @Jan this should be moved to the guiConf
     public boolean showObjectLabel = false;
@@ -41,12 +41,15 @@ public class Conf {
     public boolean showEdges = true;
     public boolean idealHighlighting = false;
 
-    public int numberOfConcepts = 0;
     private PropertyChangeSupport propertyChangeSupport;
 
     public Conf() {
         propertyChangeSupport = new PropertyChangeSupport(this);
         guiConf = new GUIConf();
+    }
+
+    public int getNumberOfConcepts(){
+        return concepts.size();
     }
 
     public void addPropertyChangeListener(PropertyChangeListener listener) {

@@ -16,15 +16,25 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.xml.stream.XMLStreamException;
 
+import com.alee.extended.filechooser.WebFileChooser;
 import com.alee.extended.panel.GroupPanel;
 import com.alee.extended.panel.WebButtonGroup;
+import com.alee.extended.statusbar.WebStatusBar;
+import com.alee.laf.WebLookAndFeel;
 import com.alee.laf.button.WebButton;
+import com.alee.laf.button.WebButtonStyle;
+import com.alee.laf.button.WebButtonUI;
+import com.alee.laf.desktoppane.WebDesktopIconUI;
+import com.alee.laf.filechooser.WebFileChooserUI;
 import com.alee.laf.list.WebList;
 import com.alee.laf.rootpane.WebFrame;
 import com.alee.laf.toolbar.ToolbarStyle;
 import com.alee.laf.toolbar.WebToolBar;
+import com.alee.laf.toolbar.WebToolBarUI;
+import com.alee.laf.tree.WebTreeUI;
 import com.alee.managers.popup.PopupWay;
 import com.alee.managers.popup.WebButtonPopup;
+import com.alee.utils.WebUtils;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -59,15 +69,15 @@ public class MainToolbar extends WebToolBar {
         // "toolbar/save.png" ), StyleConstants.smallRound, true ) );
         setToolbarStyle(ToolbarStyle.attached);
         setFloatable(false);
-        add(new WebButton("New...") {
+        add(new WebButton(loadIcon("icons/jlfgr/New24.gif")) {
             {
                 setDrawFocus(false);
                 // setHotkey(Hotkey.CTRL_N);
-                setEnabled(false);
+                setEnabled(true);
             }
         });
 
-        WebButton left = new WebButton(loadIcon("conexp/open.gif")) {
+        WebButton left = new WebButton(loadIcon("icons/jlfgr/Open24.gif")) {
             {
                 setDrawFocus(false);
                 addActionListener(new OpenAction());
@@ -107,53 +117,61 @@ public class MainToolbar extends WebToolBar {
         add(new WebButtonGroup(true, left, right));
 
         addSeparator();
-        add(new WebButton("Save") {
+        add(new WebButton(loadIcon("icons/jlfgr/Save24.gif")) {
             {
                 setDrawFocus(false);
-                setEnabled(false);
+                setEnabled(true);
             }
         });
-        add(new WebButton("Save as...") {
+        add(new WebButton(loadIcon("icons/jlfgr/SaveAs24.gif")) {
             {
                 setDrawFocus(false);
                 addActionListener(new SaveAction(true));
             }
         });
         addSeparator();
-        add(new WebButton("Import...") {
+        add(new WebButton(loadIcon("icons/jlfgr/Import24.gif")) {
             {
                 setDrawFocus(false);
-                setEnabled(false);
+                setEnabled(true);
             }
         });
-        add(new WebButton("Export...") {
+        add(new WebButton(loadIcon("icons/jlfgr/Export24.gif")) {
             {
                 setDrawFocus(false);
-                setEnabled(false);
-            }
-        });
-        addSeparator();
-        add(new WebButton("Undo") {
-            {
-                setDrawFocus(false);
-                setEnabled(false);
-            }
-        });
-        add(new WebButton("Redo") {
-            {
-                setDrawFocus(false);
-                setEnabled(false);
+                setEnabled(true);
             }
         });
         addSeparator();
-        add(new WebButton("Count concepts") {
+        add(new WebButton(loadIcon("icons/jlfgr/Undo24.gif")) {
             {
                 setDrawFocus(false);
-                setEnabled(false);
+                setEnabled(true);            }
+        });
+        add(new WebButton(loadIcon("icons/jlfgr/Redo24.gif")) {
+            {
+                setDrawFocus(false);
+                setEnabled(true);
             }
         });
-        add(new WebButton("Start exploration") {
+        addSeparator();
+        add(new WebButton(loadIcon("icons/jlfgr/TipOfTheDay24.gif")) {
             {
+                setDrawFocus(false);
+                setEnabled(true);
+                addActionListener(new ActionListener() {
+					
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						System.out.println(state.concepts);
+						showMessageDialog("The number of concepts is "+state.getNumberOfConcepts()+".", false);
+					}
+				});
+            }
+        });
+        add(new WebButton(loadIcon("icons/jlfgr/Replace24.gif")) {
+            {
+            	setToolTipText("Start Attribute Exploration");
                 setDrawFocus(false);
                 addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent arg0) {
@@ -171,17 +189,17 @@ public class MainToolbar extends WebToolBar {
             }
         });
         addSeparator();
-        add(new WebButton("About") {
+        add(new WebButton(loadIcon("icons/jlfgr/About24.gif")) {
             {
                 setDrawFocus(false);
-                setEnabled(false);
+                setEnabled(true);
             }
         });
-        add(new WebButton("Help") {
+        add(new WebButton(loadIcon("icons/jlfgr/Help24.gif")) {
             {
                 setDrawFocus(false);
                 // setHotkey(Hotkey.ALT_F4);
-                setEnabled(false);
+                setEnabled(true);
             }
         });
     }
@@ -190,7 +208,7 @@ public class MainToolbar extends WebToolBar {
     private void showMessageDialog(String message, boolean error) {
         JOptionPane pane = new JOptionPane(message);
         pane.setMessageType(error ? JOptionPane.ERROR_MESSAGE : JOptionPane.INFORMATION_MESSAGE);
-        JDialog dialog = pane.createDialog(mainFrame, "Error");
+        JDialog dialog = pane.createDialog(mainFrame, error? "Error" : "Message");
         dialog.pack();
         centerDialogInsideMainFrame(mainFrame, dialog);
         dialog.setVisible(true);
