@@ -4,7 +4,6 @@ import de.tudresden.inf.tcs.fcaapi.Concept;
 import de.tudresden.inf.tcs.fcaapi.FCAImplication;
 import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
 import de.tudresden.inf.tcs.fcalib.FullObject;
-import de.tudresden.inf.tcs.fcalib.utils.ListSet;
 import fcatools.conexpng.gui.MainToolbar;
 import fcatools.conexpng.gui.lattice.LatticeGraph;
 import fcatools.conexpng.model.AssociationRule;
@@ -13,7 +12,6 @@ import fcatools.conexpng.model.FormalContext;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.util.ArrayList;
 import java.util.Set;
 import java.util.Vector;
 
@@ -64,7 +62,6 @@ public class Conf extends UndoManager {
 
     public void saveConf() {
         lastConf = copy(this);
-        System.out.println(lastConf.context.getObjects());
     }
 
     public Conf copy(Conf conf){
@@ -206,7 +203,6 @@ public class Conf extends UndoManager {
                 public void redo() throws javax.swing.undo.CannotRedoException {
                     super.redo();
                     context = curConf.context;
-                    Conf.this.lastConf=curConf;
                     undoRedoInProgress = true;
                     newContext(context);
                     undoRedoInProgress = false;
@@ -231,6 +227,7 @@ public class Conf extends UndoManager {
             MainToolbar.getRedoButton().setEnabled(canRedo());
             MainToolbar.getUndoButton().setEnabled(canUndo());
         }
+        lastConf=copy(this);
 
     }
 

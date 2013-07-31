@@ -121,7 +121,6 @@ public class ContextEditor extends View {
                 matrix.invalidate();
                 matrix.repaint();
             }
-            matrix.repaint();
         }
     }
 
@@ -505,8 +504,8 @@ public class ContextEditor extends View {
             matrix.saveSelection();
             matrixModel.fireTableDataChanged();
             matrix.restoreSelection();
-			state.contextChanged();
-			state.makeRedoable();
+            state.contextChanged();
+            state.makeRedoable();
         }
     }
 
@@ -777,8 +776,8 @@ public class ContextEditor extends View {
             if (state.context.getObjectCount() == 0) return;
             matrix.saveSelection();
             try {
-            	state.saveConf();
-            	state.context.removeObject(state.context.getObjectAtIndex(lastActiveRowIndex - 1).getIdentifier());
+                state.saveConf();
+                state.context.removeObject(state.context.getObjectAtIndex(lastActiveRowIndex - 1).getIdentifier());
                 if (lastActiveRowIndex - 1 >= state.context.getObjectCount()) lastActiveRowIndex--;
             } catch (IllegalObjectException e1) {
                 e1.printStackTrace();

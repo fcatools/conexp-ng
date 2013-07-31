@@ -31,8 +31,7 @@ import java.util.Set;
 import static fcatools.conexpng.Util.*;
 import static javax.swing.KeyStroke.getKeyStroke;
 
-public class MyExpert extends
-        AbstractExpert<String, String, FullObject<String, String>> {
+public class MyExpert extends AbstractExpert<String, String, FullObject<String, String>> {
 
     private WebFrame frame;
     private Conf state;
@@ -69,11 +68,9 @@ public class MyExpert extends
     }
 
     @Override
-    public void counterExampleInvalid(
-            FullObject<String, String> counterexample, int reason) {
+    public void counterExampleInvalid(FullObject<String, String> counterexample, int reason) {
         if (reason == COUNTEREXAMPLE_INVALID) {
-            showErrorDialog(counterexample.getIdentifier()
-                    + " doesn't respect the implication.");
+            showErrorDialog(counterexample.getIdentifier() + " doesn't respect the implication.");
         }
         if (reason == COUNTEREXAMPLE_EXISTS) {
             showErrorDialog(counterexample.getIdentifier() + " already exists.");
@@ -92,33 +89,27 @@ public class MyExpert extends
     }
 
     @Override
-    public void implicationFollowsFromBackgroundKnowledge(
-            FCAImplication<String> arg0) {
+    public void implicationFollowsFromBackgroundKnowledge(FCAImplication<String> arg0) {
         // nothing todo
     }
 
     private void showQuestionDialog(final FCAImplication<String> question) {
 
         String questionstring = question.getPremise().isEmpty() ? "Is it true, that all objects have the attribute(s) "
-                + getElements(question.getConclusion()) + "?"
-                : "Is it true, that when an object has attribute(s) "
-                        + getElements(question.getPremise())
-                        + ", that it also has attribute(s) "
-                        + getElements(question.getConclusion()) + "?";
+                + getElements(question.getConclusion()) + "?" : "Is it true, that when an object has attribute(s) "
+                + getElements(question.getPremise()) + ", that it also has attribute(s) "
+                + getElements(question.getConclusion()) + "?";
         Object[] options = { "Yes", "No", "Stop Attribute Exploration" };
-        final WebOptionPane optionPane = new WebOptionPane(questionstring,
-                WebOptionPane.QUESTION_MESSAGE, WebOptionPane.YES_NO_CANCEL_OPTION);
+        final WebOptionPane optionPane = new WebOptionPane(questionstring, WebOptionPane.QUESTION_MESSAGE,
+                WebOptionPane.YES_NO_CANCEL_OPTION);
         optionPane.setOptions(options);
-        final WebDialog dialog = new WebDialog(frame,
-                "Confirm or reject implication", true);
+        final WebDialog dialog = new WebDialog(frame, "Confirm or reject implication", true);
 
         dialog.setContentPane(optionPane);
         optionPane.addPropertyChangeListener(new PropertyChangeListener() {
             public void propertyChange(PropertyChangeEvent e) {
-                if (dialog.isVisible()
-                        && (e.getSource() == optionPane)
-                        && (e.getPropertyName()
-                                .equals(WebOptionPane.VALUE_PROPERTY))) {
+                if (dialog.isVisible() && (e.getSource() == optionPane)
+                        && (e.getPropertyName().equals(WebOptionPane.VALUE_PROPERTY))) {
                     dialog.setVisible(false);
                 }
             }
@@ -150,24 +141,19 @@ public class MyExpert extends
 
     private void showCounterExampleDialog(FCAImplication<String> question) {
         MiniContextEditor mce = new MiniContextEditor(question);
-        final WebOptionPane pane = new WebOptionPane(mce,
-                WebOptionPane.YES_NO_CANCEL_OPTION);
+        final WebOptionPane pane = new WebOptionPane(mce, WebOptionPane.YES_NO_CANCEL_OPTION);
         pane.setMessageType(WebOptionPane.PLAIN_MESSAGE);
-        final WebDialog dialog = new WebDialog(frame,
-                "Provide a counterexample", true);
+        final WebDialog dialog = new WebDialog(frame, "Provide a counterexample", true);
         pane.addPropertyChangeListener(new PropertyChangeListener() {
             public void propertyChange(PropertyChangeEvent e) {
-                if (dialog.isVisible()
-                        && (e.getSource() == pane)
-                        && (e.getPropertyName()
-                                .equals(WebOptionPane.VALUE_PROPERTY))) {
+                if (dialog.isVisible() && (e.getSource() == pane)
+                        && (e.getPropertyName().equals(WebOptionPane.VALUE_PROPERTY))) {
                     dialog.setVisible(false);
                 }
             }
         });
         dialog.setContentPane(pane);
-        Object[] options = { "Provide counterexample", "Accept implication",
-                "Stop" };
+        Object[] options = { "Provide counterexample", "Accept implication", "Stop" };
         pane.setOptions(options);
         dialog.pack();
         Util.centerDialogInsideMainFrame(frame, dialog);
@@ -175,9 +161,11 @@ public class MyExpert extends
         String n = (String) pane.getValue();
         if (n != null)
             if (n.equals("Provide counterexample")) {
+                state.saveConf();
                 CounterExampleProvidedAction<String, String, FullObject<String, String>> action = new CounterExampleProvidedAction<>(
                         context, question, mce.getCounterexample());
                 fireExpertAction(action);
+                state.makeRedoable();
             } else if (n.equals("Accept implication")) {
                 QuestionConfirmedAction<String, String, FullObject<String, String>> action = new QuestionConfirmedAction<>();
                 action.setQuestion(question);
@@ -190,16 +178,13 @@ public class MyExpert extends
 
     private void showFinishDialog(String message) {
         final WebOptionPane pane = new WebOptionPane();
-        final WebDialog dialog= new WebDialog(frame,
-                "Information", true);
+        final WebDialog dialog = new WebDialog(frame, "Information", true);
         pane.setMessageType(WebOptionPane.INFORMATION_MESSAGE);
         pane.setMessage(new WebLabel(message));
         pane.addPropertyChangeListener(new PropertyChangeListener() {
             public void propertyChange(PropertyChangeEvent e) {
-                if (dialog.isVisible()
-                        && (e.getSource() == pane)
-                        && (e.getPropertyName()
-                                .equals(WebOptionPane.VALUE_PROPERTY))) {
+                if (dialog.isVisible() && (e.getSource() == pane)
+                        && (e.getPropertyName().equals(WebOptionPane.VALUE_PROPERTY))) {
                     dialog.setVisible(false);
                 }
             }
@@ -212,14 +197,11 @@ public class MyExpert extends
 
     private void showErrorDialog(String message) {
         final WebOptionPane pane = new WebOptionPane(message, WebOptionPane.ERROR_MESSAGE);
-        final WebDialog dialog= new WebDialog(frame,
-                "Error", true);
+        final WebDialog dialog = new WebDialog(frame, "Error", true);
         pane.addPropertyChangeListener(new PropertyChangeListener() {
             public void propertyChange(PropertyChangeEvent e) {
-                if (dialog.isVisible()
-                        && (e.getSource() == pane)
-                        && (e.getPropertyName()
-                                .equals(WebOptionPane.VALUE_PROPERTY))) {
+                if (dialog.isVisible() && (e.getSource() == pane)
+                        && (e.getPropertyName().equals(WebOptionPane.VALUE_PROPERTY))) {
                     dialog.setVisible(false);
                 }
             }
@@ -257,14 +239,13 @@ public class MyExpert extends
             matrixModel = new ContextMatrixModel(mcestate);
             matrix = new ContextMatrix(matrixModel, mcestate.guiConf.columnWidths);
             try {
-                mcestate.context.addObject(new FullObject<String, String>("obj"
-                        + context.getObjectCount(), question.getPremise()));
+                mcestate.context.addObject(new FullObject<String, String>("obj" + context.getObjectCount(), question
+                        .getPremise()));
             } catch (IllegalObjectException e) {
                 // should never happen, because the context is empty
                 e.printStackTrace();
             }
-            WebScrollPane scrollPane = matrix
-                    .createStripedJScrollPane(getBackground());
+            WebScrollPane scrollPane = matrix.createStripedJScrollPane(getBackground());
             // Only the height of 60 is important
             scrollPane.setPreferredSize(new Dimension(100, 60));
 
@@ -276,14 +257,11 @@ public class MyExpert extends
                     int i = matrix.rowAtPoint(e.getPoint());
                     int j = matrix.columnAtPoint(e.getPoint());
                     int clicks = e.getClickCount();
-                    if (clicks >= 2 && clicks % 2 == 0
-                            && SwingUtilities.isLeftMouseButton(e)) { // Double
-                                                                        // Click
+                    if (clicks >= 2 && clicks % 2 == 0 && SwingUtilities.isLeftMouseButton(e)) { // Double
+                                                                                                    // Click
                         if (i > 0 && j > 0) {
-                            invokeAction(MiniContextEditor.this,
-                                    new ToggleAction(i, j));
-                        }
-                        else if (i == 1 && j == 0)
+                            invokeAction(MiniContextEditor.this, new ToggleAction(i, j));
+                        } else if (i == 1 && j == 0)
                             matrix.renameRowHeader(i);
                     }
                 }
@@ -313,16 +291,14 @@ public class MyExpert extends
                 if (i == 0 && j == 0) {
                     // Don't show a context menu in the matrix corner
                 } else if (i > 0 && j > 0) {
-                    if (matrix.getSelectedColumn() <= 0
-                            || matrix.getSelectedRow() <= 0) {
+                    if (matrix.getSelectedColumn() <= 0 || matrix.getSelectedRow() <= 0) {
                         matrix.selectCell(i, j);
                     }
                     cellPopupMenu.show(e.getComponent(), e.getX(), e.getY());
                 } else if (j == 0) {
                     objectCellPopupMenu.show(e.getComponent(), e.getX(), e.getY());
                 } else {
-                    attributeCellPopupMenu.show(e.getComponent(), e.getX(),
-                            e.getY());
+                    attributeCellPopupMenu.show(e.getComponent(), e.getX(), e.getY());
                 }
             }
         }
@@ -341,7 +317,7 @@ public class MyExpert extends
         }
 
         private void createKeyActions() {
-            InputMap im = matrix .getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+            InputMap im = matrix.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
             im.put(getKeyStroke(KeyEvent.VK_UP, 0), "up");
             im.put(getKeyStroke(KeyEvent.VK_DOWN, 0), "down");
             im.put(getKeyStroke(KeyEvent.VK_LEFT, 0), "left");
@@ -395,9 +371,8 @@ public class MyExpert extends
                     return;
                 int i = clamp(this.i, 1, mcestate.context.getObjectCount()) - 1;
                 int j = clamp(this.j, 1, mcestate.context.getAttributeCount()) - 1;
-                mcestate.context.toggleAttributeForObject(
-                        mcestate.context.getAttributeAtIndex(j),
-                        mcestate.context.getObjectAtIndex(i).getIdentifier());
+                mcestate.context.toggleAttributeForObject(mcestate.context.getAttributeAtIndex(j), mcestate.context
+                        .getObjectAtIndex(i).getIdentifier());
                 matrix.saveSelection();
                 matrixModel.fireTableDataChanged();
                 matrix.restoreSelection();
@@ -414,11 +389,10 @@ public class MyExpert extends
             }
 
             public void actionPerformed(ActionEvent e) {
-                if (matrix.isRenaming) return;
-                lastActiveRowIndex = clamp(lastActiveRowIndex + vertical, 1,
-                        state.context.getObjectCount());
-                lastActiveColumnIndex = clamp(lastActiveColumnIndex + horizontal,
-                        1, state.context.getAttributeCount());
+                if (matrix.isRenaming)
+                    return;
+                lastActiveRowIndex = clamp(lastActiveRowIndex + vertical, 1, state.context.getObjectCount());
+                lastActiveColumnIndex = clamp(lastActiveColumnIndex + horizontal, 1, state.context.getAttributeCount());
                 matrix.selectCell(lastActiveRowIndex, lastActiveColumnIndex);
             }
         }
@@ -432,9 +406,9 @@ public class MyExpert extends
             }
 
             public void actionPerformed(ActionEvent e) {
-                if (matrix.isRenaming) return;
-                if (state.context.getObjectCount() == 0
-                        || state.context.getAttributeCount() == 0)
+                if (matrix.isRenaming)
+                    return;
+                if (state.context.getObjectCount() == 0 || state.context.getAttributeCount() == 0)
                     return;
                 int i = lastActiveRowIndex + vertical - 1;
                 int j = lastActiveColumnIndex + horizontal - 1;
@@ -470,22 +444,24 @@ public class MyExpert extends
 
         class ToggleActiveAction extends AbstractAction {
             public void actionPerformed(ActionEvent e) {
-                if (matrix.isRenaming) return;
-                invokeAction(MiniContextEditor.this, new ToggleAction(
-                        lastActiveRowIndex, lastActiveColumnIndex));
+                if (matrix.isRenaming)
+                    return;
+                invokeAction(MiniContextEditor.this, new ToggleAction(lastActiveRowIndex, lastActiveColumnIndex));
             }
         }
 
         class SelectAllAction extends AbstractAction {
             public void actionPerformed(ActionEvent e) {
-                if (matrix.isRenaming) return;
+                if (matrix.isRenaming)
+                    return;
                 matrix.selectAll();
             }
         }
 
         abstract class AbstractFillClearInvertAction extends AbstractAction {
             public void actionPerformed(ActionEvent e) {
-                if (matrix.isRenaming) return;
+                if (matrix.isRenaming)
+                    return;
                 int i1 = matrix.getSelectedRow() - 1;
                 int i2 = i1 + matrix.getSelectedRowCount();
                 int j1 = matrix.getSelectedColumn() - 1;

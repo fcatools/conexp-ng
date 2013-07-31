@@ -27,7 +27,7 @@ public class MainStatusBar extends WebPanel implements PropertyChangeListener {
         private WebLabel label = null;
 
         @Override
-        protected Void doInBackground() throws Exception {
+        protected Void doInBackground() {
             WebPanel panel = new WebPanel(new BorderLayout());
             label = new WebLabel("");
             panel.add(label, BorderLayout.CENTER);
@@ -67,6 +67,13 @@ public class MainStatusBar extends WebPanel implements PropertyChangeListener {
                 if (bar == null || bar.isDone()) {
                     bar = new StatusBar();
                     bar.execute();
+                    // if the calculationtime is too short, we will get an
+                    // InterruptedException while building the statusBar
+                    // To avoid this, we will sleep some time
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                    }
                 }
                 if (text.isEmpty()) {
                     text = status.getPropertyName();
@@ -84,7 +91,7 @@ public class MainStatusBar extends WebPanel implements PropertyChangeListener {
                 if (text.startsWith(", "))
                     text = text.substring(2);
                 if (text.trim().isEmpty() && bar != null) {
-                    bar.cancel(true);
+                    bar.cancel(false);
                 }
             }
 
