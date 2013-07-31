@@ -3,7 +3,6 @@ package fcatools.conexpng.gui;
 import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
 import de.tudresden.inf.tcs.fcalib.FullObject;
 import de.tudresden.inf.tcs.fcalib.action.StartExplorationAction;
-import fcatools.conexpng.OS;
 import fcatools.conexpng.Conf;
 import fcatools.conexpng.Util;
 import fcatools.conexpng.io.BurmeisterReader;
@@ -16,27 +15,16 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.xml.stream.XMLStreamException;
 
-import com.alee.extended.filechooser.WebFileChooser;
 import com.alee.extended.panel.GroupPanel;
 import com.alee.extended.panel.WebButtonGroup;
-import com.alee.extended.statusbar.WebStatusBar;
-import com.alee.laf.WebLookAndFeel;
 import com.alee.laf.button.WebButton;
-import com.alee.laf.button.WebButtonStyle;
-import com.alee.laf.button.WebButtonUI;
-import com.alee.laf.desktoppane.WebDesktopIconUI;
-import com.alee.laf.filechooser.WebFileChooserUI;
 import com.alee.laf.list.WebList;
 import com.alee.laf.rootpane.WebFrame;
 import com.alee.laf.toolbar.ToolbarStyle;
 import com.alee.laf.toolbar.WebToolBar;
-import com.alee.laf.toolbar.WebToolBarUI;
-import com.alee.laf.tree.WebTreeUI;
+import com.alee.managers.hotkey.Hotkey;
 import com.alee.managers.popup.PopupWay;
 import com.alee.managers.popup.WebButtonPopup;
-import com.alee.utils.WebUtils;
-
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -52,6 +40,9 @@ public class MainToolbar extends WebToolBar {
 
     private WebFrame mainFrame;
 
+    private static WebButton redoButton;
+    private static WebButton undoButton;
+
     private static final long serialVersionUID = -3495670613141172867L;
 
     @SuppressWarnings("serial")
@@ -59,33 +50,35 @@ public class MainToolbar extends WebToolBar {
         this.mainFrame = mainFrame;
         this.state = state;
         this.setFloatable(false);
-        this.setMargin(new Insets(getInsets().top + 2, getInsets().left + 3, getInsets().bottom - 3,
-                getInsets().right + 4));
-        if (OS.isMacOsX) {
-            this.setMargin(new Insets(getInsets().top, getInsets().left + 2, getInsets().bottom, getInsets().right));
-        }
-        // TODO: Add icons
-        // toolbar.add ( WebButton.createIconWebButton ( loadIcon (
-        // "toolbar/save.png" ), StyleConstants.smallRound, true ) );
+
         setToolbarStyle(ToolbarStyle.attached);
         setFloatable(false);
         add(new WebButton(loadIcon("icons/jlfgr/New24.gif")) {
             {
                 setDrawFocus(false);
-                // setHotkey(Hotkey.CTRL_N);
-                setEnabled(true);
+                addHotkey(Hotkey.CTRL_N);
+                setToolTipText("New context...");
+                addActionListener(new ActionListener() {
+
+                    @Override
+                    public void actionPerformed(ActionEvent arg0) {
+                        Conf.init();
+                    }
+                });
             }
         });
 
         WebButton left = new WebButton(loadIcon("icons/jlfgr/Open24.gif")) {
             {
                 setDrawFocus(false);
+                setToolTipText("Open a CEX-file");
                 addActionListener(new OpenAction());
             }
         };
 
         final WebButton right = new WebButton(loadIcon("icons/arrow_down.png"));
         right.setDrawFocus(false);
+        right.setToolTipText("Open a previous CEX-file");
         final WebButtonPopup popup = new WebButtonPopup(right, PopupWay.downRight);
 
         WebList list = new WebList(state.lastOpened);
@@ -121,11 +114,13 @@ public class MainToolbar extends WebToolBar {
             {
                 setDrawFocus(false);
                 setEnabled(true);
+                setToolTipText("Save the context in a CEX-file");
             }
         });
         add(new WebButton(loadIcon("icons/jlfgr/SaveAs24.gif")) {
             {
                 setDrawFocus(false);
+                setToolTipText("Save as a CEX-file");
                 addActionListener(new SaveAction(true));
             }
         });
@@ -134,44 +129,68 @@ public class MainToolbar extends WebToolBar {
             {
                 setDrawFocus(false);
                 setEnabled(true);
+                setToolTipText("Import a context");
             }
         });
         add(new WebButton(loadIcon("icons/jlfgr/Export24.gif")) {
             {
                 setDrawFocus(false);
+                setToolTipText("Export this context");
                 setEnabled(true);
             }
         });
         addSeparator();
-        add(new WebButton(loadIcon("icons/jlfgr/Undo24.gif")) {
+        undoButton = new WebButton(loadIcon("icons/jlfgr/Undo24.gif")) {
             {
+                setEnabled(false);
                 setDrawFocus(false);
-                setEnabled(true);            }
-        });
-        add(new WebButton(loadIcon("icons/jlfgr/Redo24.gif")) {
-            {
-                setDrawFocus(false);
-                setEnabled(true);
+                setToolTipText("Undo");
+                addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent arg0) {
+                        state.undo();
+                        getRedoButton().setEnabled(state.canRedo());
+                        getUndoButton().setEnabled(state.canUndo());
+                    }
+                });
             }
-        });
+        };
+        redoButton = new WebButton(loadIcon("icons/jlfgr/Redo24.gif")) {
+            {
+                setEnabled(false);
+                setDrawFocus(false);
+                setToolTipText("Redo");
+                addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent arg0) {
+                        state.redo();
+                        getRedoButton().setEnabled(state.canRedo());
+                        getUndoButton().setEnabled(state.canUndo());
+                    }
+                });
+            }
+        };
+        add(undoButton);
+        add(redoButton);
         addSeparator();
         add(new WebButton(loadIcon("icons/jlfgr/TipOfTheDay24.gif")) {
             {
                 setDrawFocus(false);
                 setEnabled(true);
+                setToolTipText("Show the number of concepts");
                 addActionListener(new ActionListener() {
-					
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						System.out.println(state.concepts);
-						showMessageDialog("The number of concepts is "+state.getNumberOfConcepts()+".", false);
-					}
-				});
+
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        System.out.println(state.concepts);
+                        showMessageDialog("The number of concepts is " + state.getNumberOfConcepts() + ".", false);
+                    }
+                });
             }
         });
         add(new WebButton(loadIcon("icons/jlfgr/Replace24.gif")) {
             {
-            	setToolTipText("Start Attribute Exploration");
+                setToolTipText("Start Attribute Exploration");
                 setDrawFocus(false);
                 addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent arg0) {
@@ -193,22 +212,32 @@ public class MainToolbar extends WebToolBar {
             {
                 setDrawFocus(false);
                 setEnabled(true);
+                setToolTipText("About");
             }
         });
         add(new WebButton(loadIcon("icons/jlfgr/Help24.gif")) {
             {
                 setDrawFocus(false);
-                // setHotkey(Hotkey.ALT_F4);
+                addHotkey(Hotkey.ALT_F4);
                 setEnabled(true);
+                setToolTipText("Help");
             }
         });
+    }
+
+    public static WebButton getUndoButton() {
+        return undoButton;
+    }
+
+    public static WebButton getRedoButton() {
+        return redoButton;
     }
 
     // TODO: Needs to be improved
     private void showMessageDialog(String message, boolean error) {
         JOptionPane pane = new JOptionPane(message);
         pane.setMessageType(error ? JOptionPane.ERROR_MESSAGE : JOptionPane.INFORMATION_MESSAGE);
-        JDialog dialog = pane.createDialog(mainFrame, error? "Error" : "Message");
+        JDialog dialog = pane.createDialog(mainFrame, error ? "Error" : "Message");
         dialog.pack();
         centerDialogInsideMainFrame(mainFrame, dialog);
         dialog.setVisible(true);

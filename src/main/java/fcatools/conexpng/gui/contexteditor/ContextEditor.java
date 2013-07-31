@@ -121,7 +121,7 @@ public class ContextEditor extends View {
                 matrix.invalidate();
                 matrix.repaint();
             }
-
+            matrix.repaint();
         }
     }
 
@@ -499,12 +499,14 @@ public class ContextEditor extends View {
             if (i <= 0 || j <= 0) return;
             int i = clamp(this.i, 1, state.context.getObjectCount()) - 1;
             int j = clamp(this.j, 1, state.context.getAttributeCount()) - 1;
+            state.saveConf();
             state.context.toggleAttributeForObject(state.context.getAttributeAtIndex(j),
                                                    state.context.getObjectAtIndex(i).getIdentifier());
             matrix.saveSelection();
             matrixModel.fireTableDataChanged();
             matrix.restoreSelection();
-            state.contextChanged();
+			state.contextChanged();
+			state.makeRedoable();
         }
     }
 
@@ -540,10 +542,12 @@ public class ContextEditor extends View {
             int j1 = matrix.getSelectedColumn() - 1;
             int j2 = j1 + matrix.getSelectedColumnCount();
             matrix.saveSelection();
+            state.saveConf();
             execute(i1, i2, j1, j2);
             matrixModel.fireTableDataChanged();
             matrix.restoreSelection();
             state.contextChanged();
+            state.makeRedoable();
         }
 
         abstract void execute(int i1, int i2, int j1, int j2);
@@ -592,44 +596,52 @@ public class ContextEditor extends View {
     class ReduceObjectsAction extends AbstractAction {
         public void actionPerformed(ActionEvent e) {
             if (matrix.isRenaming) return;
+            state.saveConf();
             state.context.reduceObjects();
             matrixModel.fireTableStructureChanged();
             matrix.clearSelection();
             matrix.saveSelection();
             state.contextChanged();
+            state.makeRedoable();
         }
     }
 
     class ReduceAttributesAction extends AbstractAction {
         public void actionPerformed(ActionEvent e) {
             if (matrix.isRenaming) return;
+            state.saveConf();
             state.context.reduceAttributes();
             matrixModel.fireTableStructureChanged();
             matrix.clearSelection();
             matrix.saveSelection();
             state.contextChanged();
+            state.makeRedoable();
         }
     }
 
     class ReduceAction extends AbstractAction {
         public void actionPerformed(ActionEvent e) {
             if (matrix.isRenaming) return;
+            state.saveConf();
             state.context.reduce();
             matrixModel.fireTableStructureChanged();
             matrix.clearSelection();
             matrix.saveSelection();
             state.contextChanged();
+            state.makeRedoable();
         }
     }
 
     class TransposeAction extends AbstractAction {
         public void actionPerformed(ActionEvent e) {
             if (matrix.isRenaming) return;
+            state.saveConf();
             state.context.transpose();
             matrixModel.fireTableStructureChanged();
             matrix.clearSelection();
             matrix.saveSelection();
             state.contextChanged();
+            state.makeRedoable();
         }
     }
 
@@ -642,10 +654,12 @@ public class ContextEditor extends View {
 
         public void actionPerformed(ActionEvent e) {
             if (matrix.isRenaming) return;
+            state.saveConf();
             matrix.saveSelection();
             addAttributeAt(index);
             matrix.restoreSelection();
             state.contextChanged();
+            state.makeRedoable();
         }
     }
 
@@ -658,10 +672,12 @@ public class ContextEditor extends View {
 
         public void actionPerformed(ActionEvent e) {
             if (matrix.isRenaming) return;
+            state.saveConf();
             matrix.saveSelection();
             addObjectAt(index);
             matrix.restoreSelection();
             state.contextChanged();
+            state.makeRedoable();
         }
     }
 
@@ -761,7 +777,8 @@ public class ContextEditor extends View {
             if (state.context.getObjectCount() == 0) return;
             matrix.saveSelection();
             try {
-                state.context.removeObject(state.context.getObjectAtIndex(lastActiveRowIndex - 1).getIdentifier());
+            	state.saveConf();
+            	state.context.removeObject(state.context.getObjectAtIndex(lastActiveRowIndex - 1).getIdentifier());
                 if (lastActiveRowIndex - 1 >= state.context.getObjectCount()) lastActiveRowIndex--;
             } catch (IllegalObjectException e1) {
                 e1.printStackTrace();
@@ -771,6 +788,7 @@ public class ContextEditor extends View {
             matrix.repaint();
             matrix.restoreSelection();
             state.contextChanged();
+            state.makeRedoable();
         }
     }
 
@@ -779,6 +797,7 @@ public class ContextEditor extends View {
             if (matrix.isRenaming) return;
             if (state.context.getAttributeCount() == 0) return;
             matrix.saveSelection();
+            state.saveConf();
             state.context.removeAttribute(state.context.getAttributeAtIndex(lastActiveColumnIndex - 1));
             matrix.updateColumnWidths(lastActiveColumnIndex);
             if (lastActiveColumnIndex - 1 >= state.context.getAttributeCount()) lastActiveColumnIndex--;
@@ -787,6 +806,7 @@ public class ContextEditor extends View {
             matrix.repaint();
             matrix.restoreSelection();
             state.contextChanged();
+            state.makeRedoable();
         }
     }
 
@@ -797,6 +817,7 @@ public class ContextEditor extends View {
             matrix.saveSelection();
             int i = Math.min(matrix.getLastSelectedRowsStartIndex(), matrix.getLastSelectedRowsEndIndex()) - 1;
             int d = Math.abs(matrix.getLastSelectedRowsStartIndex() - matrix.getLastSelectedRowsEndIndex()) + 1;
+            state.saveConf();
             for (int unused = 0; unused < d; unused++) {
                 try {
                     state.context.removeObject(state.context .getObjectAtIndex(i).getIdentifier());
@@ -808,6 +829,7 @@ public class ContextEditor extends View {
             matrix.invalidate();
             matrix.repaint();
             state.contextChanged();
+            state.makeRedoable();
         }
     }
 
@@ -818,6 +840,7 @@ public class ContextEditor extends View {
             matrix.saveSelection();
             int i = Math.min(matrix.getLastSelectedColumnsStartIndex(), matrix.getLastSelectedColumnsEndIndex()) - 1;
             int d = Math.abs(matrix.getLastSelectedColumnsStartIndex() - matrix.getLastSelectedColumnsEndIndex()) + 1;
+            state.saveConf();
             for (int unused = 0; unused < d; unused++) {
                 state.context.removeAttribute(state.context.getAttributeAtIndex(i));
                 matrix.updateColumnWidths(i + 1);
@@ -826,6 +849,7 @@ public class ContextEditor extends View {
             matrix.invalidate();
             matrix.repaint();
             state.contextChanged();
+            state.makeRedoable();
         }
     }
 

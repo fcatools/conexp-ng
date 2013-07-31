@@ -81,8 +81,10 @@ public class ContextMatrixModel extends AbstractTableModel implements Reorderabl
         if (context.existsAttributeAlready(newName)) {
             return false;
         } else {
+            state.saveConf();
             context.renameAttribute(oldName, newName);
             state.contextChanged();
+            state.makeRedoable();
             return true;
         }
     }
@@ -91,7 +93,9 @@ public class ContextMatrixModel extends AbstractTableModel implements Reorderabl
         if (context.existsObjectAlready(newName)) {
             return false;
         } else {
+            state.saveConf();
             context.renameObject(oldName, newName);
+            state.makeRedoable();
             state.contextChanged();
             return true;
         }
@@ -104,12 +108,14 @@ public class ContextMatrixModel extends AbstractTableModel implements Reorderabl
         from = clamp(from, 0, context.getObjectCount() - 1);
         to = clamp(to, 0, context.getObjectCount() - 1);
         FullObject<String, String> o = context.getObjectAtIndex(from);
+        state.saveConf();
         try {
             context.removeObject(o.getIdentifier());
         } catch (IllegalObjectException e) {
             e.printStackTrace();
         }
         context.addObjectAt(o, to);
+        state.makeRedoable();
     }
 
     public void reorderColumns(int from, int to) {
@@ -119,8 +125,10 @@ public class ContextMatrixModel extends AbstractTableModel implements Reorderabl
         from = clamp(from, 0, context.getAttributeCount() - 1);
         to = clamp(to, 0, context.getAttributeCount() - 1);
         String a = context.getAttributeAtIndex(from);
+        state.saveConf();
         context.removeAttributeInternal(a);
         context.addAttributeAt(a, to);
+        state.makeRedoable();
     }
 
 }

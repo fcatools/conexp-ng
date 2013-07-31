@@ -299,6 +299,7 @@ public class ThreadedAssociationMiner extends AbstractAssociationMiner implement
         rules = new TreeSet<AssociationRule>();
         FC = new ListSet<>();
         apriori();
+        System.out.println(FC);
         Gen_LB();
     }
 }

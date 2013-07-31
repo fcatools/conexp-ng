@@ -2,8 +2,10 @@ package fcatools.conexpng;
 
 import de.tudresden.inf.tcs.fcaapi.Concept;
 import de.tudresden.inf.tcs.fcaapi.FCAImplication;
+import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
 import de.tudresden.inf.tcs.fcalib.FullObject;
 import de.tudresden.inf.tcs.fcalib.utils.ListSet;
+import fcatools.conexpng.gui.MainToolbar;
 import fcatools.conexpng.gui.lattice.LatticeGraph;
 import fcatools.conexpng.model.AssociationRule;
 import fcatools.conexpng.model.FormalContext;
@@ -11,21 +13,26 @@ import fcatools.conexpng.model.FormalContext;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.ArrayList;
 import java.util.Set;
 import java.util.Vector;
+
+import javax.swing.undo.AbstractUndoableEdit;
+import javax.swing.undo.UndoManager;
+import javax.swing.undo.UndoableEdit;
 
 /**
  * Contains context, lattice, implications, filePath, snapshots etc.
  * <p>
- * Why 'Conf'? "Dependency Injection", e.g. for testing purposes a
- * component can be passed a "MockConfiguration" very easily and it is better to
- * have a central place for the program's state as opposed to have it scattered
+ * Why 'Conf'? "Dependency Injection", e.g. for testing purposes a component can
+ * be passed a "MockConfiguration" very easily and it is better to have a
+ * central place for the program's state as opposed to have it scattered
  * throughout different classes. If you want you can see this class as the
  * "Model" in an MVC context.
  *
  */
-public class Conf {
-
+public class Conf extends UndoManager {
+    private static final long serialVersionUID = 1L;
     public String filePath;
     public Vector<String> lastOpened = new Vector<>(5);
     public FormalContext context;
@@ -48,8 +55,29 @@ public class Conf {
         guiConf = new GUIConf();
     }
 
-    public int getNumberOfConcepts(){
+    public int getNumberOfConcepts() {
         return concepts.size();
+    }
+
+    private Conf lastConf;
+    private boolean undoRedoInProgress;
+
+    public void saveConf() {
+        lastConf = copy(this);
+        System.out.println(lastConf.context.getObjects());
+    }
+
+    public Conf copy(Conf conf){
+        Conf copy=new Conf();
+        copy.context = new FormalContext();
+        copy.context.addAttributes(conf.context.getAttributes());
+        try {
+            copy.context.addObjects(conf.context.getObjects());
+        } catch (IllegalObjectException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return copy;
     }
 
     public void addPropertyChangeListener(PropertyChangeListener listener) {
@@ -108,6 +136,7 @@ public class Conf {
     }
 
     public void newContext(FormalContext context) {
+
         this.context = context;
         this.context.clearConsidered();
         firePropertyChange(ContextChangeEvents.NEWCONTEXT, null, context);
@@ -131,11 +160,6 @@ public class Conf {
 
     public void endCalculation(StatusMessage status) {
         fireStatusBarPropertyChange(status, STOP);
-    }
-
-    public void newLattice(LatticeGraph lattice2) {
-        this.lattice = lattice2;
-        firePropertyChange(ContextChangeEvents.NEWLATTICE, null, lattice2);
     }
 
     public void loadedFile() {
@@ -169,6 +193,50 @@ public class Conf {
                 lastOpened.remove(5);
         }
         filePath = filepath;
+    }
+
+    @SuppressWarnings("serial")
+    public void makeRedoable() {
+        if (!undoRedoInProgress) {
+            UndoableEdit undoableEdit = new AbstractUndoableEdit() {
+                final Conf curConf = copy(Conf.this);
+                final Conf lastConf = copy(Conf.this.lastConf);
+
+                // Method that is called when we must redo the undone action
+                public void redo() throws javax.swing.undo.CannotRedoException {
+                    super.redo();
+                    context = curConf.context;
+                    Conf.this.lastConf=curConf;
+                    undoRedoInProgress = true;
+                    newContext(context);
+                    undoRedoInProgress = false;
+                    MainToolbar.getRedoButton().setEnabled(canRedo());
+                    MainToolbar.getUndoButton().setEnabled(canUndo());
+                }
+
+                public void undo() throws javax.swing.undo.CannotUndoException {
+                    super.undo();
+                    context = lastConf.context;
+
+                    undoRedoInProgress = true;
+                    newContext(context);
+                    undoRedoInProgress = false;
+                    MainToolbar.getRedoButton().setEnabled(canRedo());
+                    MainToolbar.getUndoButton().setEnabled(canUndo());
+                }
+            };
+
+            // Add this undoable edit to the undo manager
+            addEdit(undoableEdit);
+            MainToolbar.getRedoButton().setEnabled(canRedo());
+            MainToolbar.getUndoButton().setEnabled(canUndo());
+        }
+
+    }
+
+    public static void init() {
+        // TODO Auto-generated method stub
+
     }
 
 }
