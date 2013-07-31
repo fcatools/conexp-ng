@@ -28,6 +28,7 @@ import com.alee.managers.popup.WebButtonPopup;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import javax.swing.filechooser.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
@@ -42,6 +43,36 @@ public class MainToolbar extends WebToolBar {
 
     private static WebButton redoButton;
     private static WebButton undoButton;
+
+    public FileFilter cexFilter = new FileFilter() {
+
+        @Override
+        public boolean accept(File pathname) {
+
+            return !pathname.isHidden() && (pathname.isDirectory() || pathname.getName().endsWith(".cex"));
+        }
+
+        @Override
+        public String getDescription() {
+            return "Cex-Files";
+        }
+    };
+
+    public FileFilter otherFilter = new FileFilter() {
+
+        @Override
+        public boolean accept(File pathname) {
+
+            return !pathname.isHidden()
+                    && (pathname.isDirectory() || pathname.getName().endsWith(".cxt")
+                            || pathname.getName().endsWith(".oal") || pathname.getName().endsWith(".csv"));
+        }
+
+        @Override
+        public String getDescription() {
+            return "Cex-Files";
+        }
+    };
 
     private static final long serialVersionUID = -3495670613141172867L;
 
@@ -72,7 +103,7 @@ public class MainToolbar extends WebToolBar {
             {
                 setDrawFocus(false);
                 setToolTipText("Open a CEX-file");
-                addActionListener(new OpenAction());
+                addActionListener(new OpenAction(cexFilter));
             }
         };
 
@@ -128,7 +159,7 @@ public class MainToolbar extends WebToolBar {
         add(new WebButton(loadIcon("icons/jlfgr/Import24.gif")) {
             {
                 setDrawFocus(false);
-                setEnabled(true);
+                addActionListener(new OpenAction(otherFilter));
                 setToolTipText("Import a context");
             }
         });
@@ -334,12 +365,18 @@ public class MainToolbar extends WebToolBar {
     @SuppressWarnings("serial")
     class OpenAction extends AbstractAction {
 
+        private FileFilter filter;
+
+        public OpenAction(FileFilter filter) {
+            this.filter = filter;
+        }
+
         @Override
         public void actionPerformed(ActionEvent e) {
 
             final JFileChooser fc = new JFileChooser(state.filePath);
             final JDialog dialog = new JDialog(mainFrame, "Open file", true);
-
+            fc.setFileFilter(filter);
             dialog.setContentPane(fc);
             fc.setDialogType(JFileChooser.OPEN_DIALOG);
             fc.addActionListener(new ActionListener() {

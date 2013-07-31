@@ -34,7 +34,7 @@ public class Main {
 
     public Main(){
          // Disabled until there is a fix for #98
-        WebLookAndFeel.install();
+       // WebLookAndFeel.install();
 
        // Disable border around focused cells as it does not fit into the
        // context editor concept

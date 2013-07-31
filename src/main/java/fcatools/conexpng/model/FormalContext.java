@@ -105,7 +105,7 @@ public class FormalContext extends de.tudresden.inf.tcs.fcalib.FormalContext<Str
         for (String s : this.getAttributes()) {
             TreeSet<String> set = new TreeSet<String>();
             for (FullObject<String, String> f : this.getObjects()) {
-                if (f.getDescription().getAttributes().contains(s) && (!dontConsideredObj.contains(f))) {
+                if (f.getDescription().getAttributes().contains(s)) {
                     set.add(f.getIdentifier());
                 }
             }
@@ -139,21 +139,27 @@ public class FormalContext extends de.tudresden.inf.tcs.fcalib.FormalContext<Str
          * contained in the list). The list then contains all concept extents
          * (and nothing else).
          */
+        boolean notcontained = false;
         for (String s : extentPerAttr.keySet()) {
+            if (notcontained)
+                break;
             for (String t : extentPerAttr.keySet()) {
                 if (!s.equals(t)) {
                     Set<String> result = this.intersection(extentPerAttr.get(s), extentPerAttr.get(t));
-                    if (extentPerAttr.values().contains(result)) {
-                        TreeSet<String> set = new TreeSet<String>();
-                        for (FullObject<String, String> f : this.getObjects()) {
-                            set.add(f.getIdentifier());
-                        }
-                        extentPerAttr.put(null, set);
+                    if (!extentPerAttr.values().contains(result)) {
+                        notcontained = true;
+                        break;
                     }
-                    break;
                 }
             }
-            break;
+        }
+        if (!notcontained) {
+            TreeSet<String> set = new TreeSet<String>();
+            for (FullObject<String, String> f : this.getObjects()) {
+                set.add(f.getIdentifier());
+            }
+            if (!extentPerAttr.values().contains(set))
+                extentPerAttr.put("", set);
         }
 
         /*
@@ -161,17 +167,20 @@ public class FormalContext extends de.tudresden.inf.tcs.fcalib.FormalContext<Str
          * corresponding intent A' to obtain a list of all formal concepts
          * (A,A') of (G,M, I).
          */
-
-        for (Set<String> e : extentPerAttr.values()) {
+        HashSet<Set<String>> extents=new HashSet<Set<String>>();
+        for(Set<String> e:extentPerAttr.values()){
+        	if(!extents.contains(e))
+        		extents.add(e);
+        }
+        for (Set<String> e : extents) {
             TreeSet<String> intents = new TreeSet<String>();
             int count = 0;
-
             Concept<String, FullObject<String, String>> c = new LatticeConcept();
-
+            if (e.isEmpty()) {
+                intents.addAll(getAttributes());
+            } else 
             for (FullObject<String, String> i : this.getObjects()) {
-                if (e.isEmpty()) {
-                    intents.addAll(i.getDescription().getAttributes());
-                } else if (e.contains(i.getIdentifier().toString())) {
+                if (e.contains(i.getIdentifier().toString())) {
                     TreeSet<String> prev = sort(i.getDescription().getAttributes());
                     if (count > 0) {
                         intents = intersection(prev, intents);
@@ -239,21 +248,27 @@ public class FormalContext extends de.tudresden.inf.tcs.fcalib.FormalContext<Str
          * contained in the list). The list then contains all concept extents
          * (and nothing else).
          */
+        boolean notcontained = false;
         for (String s : extentPerAttr.keySet()) {
+            if (notcontained)
+                break;
             for (String t : extentPerAttr.keySet()) {
                 if (!s.equals(t)) {
                     Set<String> result = this.intersection(extentPerAttr.get(s), extentPerAttr.get(t));
-                    if (extentPerAttr.values().contains(result)) {
-                        TreeSet<String> set = new TreeSet<String>();
-                        for (FullObject<String, String> f : this.getObjects()) {
-                            set.add(f.getIdentifier());
-                        }
-                        extentPerAttr.put(null, set);
+                    if (!extentPerAttr.values().contains(result)) {
+                        notcontained = true;
+                        break;
                     }
-                    break;
                 }
             }
-            break;
+        }
+        if (!notcontained) {
+            TreeSet<String> set = new TreeSet<String>();
+            for (FullObject<String, String> f : this.getObjects()) {
+                set.add(f.getIdentifier());
+            }
+            if (!extentPerAttr.values().contains(set))
+                extentPerAttr.put("", set);
         }
 
         /*
@@ -262,17 +277,21 @@ public class FormalContext extends de.tudresden.inf.tcs.fcalib.FormalContext<Str
          * (A,A') of (G,M, I).
          */
 
-        for (Set<String> e : extentPerAttr.values()) {
+        HashSet<Set<String>> extents=new HashSet<Set<String>>();
+        for(Set<String> e:extentPerAttr.values()){
+        	if(!extents.contains(e))
+        		extents.add(e);
+        }
+        for (Set<String> e : extents) {
             TreeSet<String> intents = new TreeSet<String>();
             int count = 0;
-
             Concept<String, FullObject<String, String>> c = new LatticeConcept();
-
+            if (e.isEmpty()) {
+                intents.addAll(getAttributes());
+            } else 
             for (FullObject<String, String> i : this.getObjects()) {
                 if (!dontConsideredObj.contains(i)) {
-                    if (e.isEmpty()) {
-                        intents.addAll(i.getDescription().getAttributes());
-                    } else if (e.contains(i.getIdentifier().toString())) {
+                    if (e.contains(i.getIdentifier().toString())) {
                         TreeSet<String> prev = sort(i.getDescription().getAttributes());
                         if (count > 0) {
                             intents = intersection(prev, intents);
@@ -751,13 +770,13 @@ public class FormalContext extends de.tudresden.inf.tcs.fcalib.FormalContext<Str
 
 
 
-	public ArrayList<String> getDontConsideredAttr() {
-		return dontConsideredAttr;
-	}
+    public ArrayList<String> getDontConsideredAttr() {
+        return dontConsideredAttr;
+    }
 
-	public ArrayList<FullObject<String, String>> getDontConsideredObj() {
-		return dontConsideredObj;
-	}
-    
-    
+    public ArrayList<FullObject<String, String>> getDontConsideredObj() {
+        return dontConsideredObj;
+    }
+
+
 }
