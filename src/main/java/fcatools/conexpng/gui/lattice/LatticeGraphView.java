@@ -31,6 +31,7 @@ import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
 import org.apache.fop.pdf.TempFileStreamCache;
 import org.apache.fop.svg.PDFTranscoder;
+import org.apache.xpath.axes.ChildIterator;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 
@@ -123,6 +124,7 @@ public class LatticeGraphView extends JSVGCanvas {
     public void paint(Graphics g0) {
 
         super.paint(g0);
+        
 
         // DOMImplementation impl = SVGDOMImplementation.getDOMImplementation();
         // String svgNS = SVGDOMImplementation.SVG_NAMESPACE_URI;

@@ -12,223 +12,251 @@ import java.util.TreeSet;
 
 public class Node extends JPanel implements LatticeGraphElement {
 
-    /**
+	/**
      *
      */
-    private static final long serialVersionUID = 4253192979583459657L;
-    private Set<String> objects;
-    private Set<String> attributes;
-    private int x;
-    private int y;
-    private List<Node> below;
-    private ListSet<Node> ideal;
-    private boolean isIdealVisibile;
-    private Label visibleObjects;
-    private Label visibleAttributes;
-    private boolean moveSubgraph;
-    private int level;
+	private static final long serialVersionUID = 4253192979583459657L;
+	private Set<String> objects;
+	private Set<String> attributes;
+	private int x;
+	private int y;
+	private List<Node> below;
+	private ListSet<Node> ideal;
+	private boolean isIdealVisibile;
+	private Label visibleObjects;
+	private Label visibleAttributes;
+	private boolean moveSubgraph;
+	private int level;
+	private boolean hitBorder;
 
-    /**
+	/**
+	 * 
+	 * @param extent
+	 * @param intent
+	 * @param x
+	 * @param y
+	 */
+	public Node(Set<String> extent, Set<String> intent, int x, int y) {
+		this.objects = extent;
+		this.attributes = intent;
+		this.x = x;
+		this.y = y;
+		this.setBounds(x, y, 15, 15);
+		this.below = new ArrayList<>();
+
+	}
+
+	/**
      *
-     * @param extent
-     * @param intent
-     * @param x
-     * @param y
      */
-    public Node(Set<String> extent, Set<String> intent, int x, int y) {
-        this.objects = extent;
-        this.attributes = intent;
-        this.x = x;
-        this.y = y;
-        this.setBounds(x, y, 15, 15);
-        this.below = new ArrayList<>();
+	public Node() {
+		this.objects = new TreeSet<>();
+		this.attributes = new TreeSet<>();
+		this.visibleObjects = new Label(new TreeSet<String>());
+		this.visibleAttributes = new Label(new TreeSet<String>());
+		this.ideal = new ListSet<>();
+		this.x = 0;
+		this.y = 0;
+		this.setBounds(x, y, 15, 15);
+		this.setBackground(Color.white);
+		this.below = new ArrayList<>();
+	}
 
-    }
+	@Override
+	public void paint(Graphics g) {
+	}
 
-    /**
-     *
-     */
-    public Node() {
-        this.objects = new TreeSet<>();
-        this.attributes = new TreeSet<>();
-        this.visibleObjects = new Label(new TreeSet<String>());
-        this.visibleAttributes = new Label(new TreeSet<String>());
-        this.ideal = new ListSet<>();
-        this.x = 0;
-        this.y = 0;
-        this.setBounds(x, y, 15, 15);
-        this.setBackground(Color.white);
-        this.below = new ArrayList<>();
-    }
+	/**
+	 * 
+	 * @return
+	 */
+	public int getX() {
+		return x;
+	}
 
-    @Override
-    public void paint(Graphics g) {
-    }
+	/**
+	 * 
+	 * @param x
+	 */
+	public void setX(int x) {
+		this.x = x;
+		this.setBounds(x, y, 15, 15);
+	}
 
-    /**
-     *
-     * @return
-     */
-    public int getX() {
-        return x;
-    }
+	/**
+	 * 
+	 * @return
+	 */
+	public int getY() {
+		return y;
+	}
 
-    /**
-     *
-     * @param x
-     */
-    public void setX(int x) {
-        this.x = x;
-        this.setBounds(x, y, 15, 15);
-    }
+	/**
+	 * 
+	 * @param y
+	 */
+	public void setY(int y) {
+		this.y = y;
+		this.setBounds(x, y, 15, 15);
+	}
 
-    /**
-     *
-     * @return
-     */
-    public int getY() {
-        return y;
-    }
+	/**
+	 * 
+	 * @param extent
+	 */
+	public void addObject(String extent) {
+		objects.add(extent);
+	}
 
-    /**
-     *
-     * @param y
-     */
-    public void setY(int y) {
-        this.y = y;
-        this.setBounds(x, y, 15, 15);
-    }
+	/**
+	 * 
+	 * @param set
+	 */
+	public void addAttribut(String set) {
+		attributes.add(set);
+	}
 
-    /**
-     *
-     * @param extent
-     */
-    public void addObject(String extent) {
-        objects.add(extent);
-    }
+	public void addBelowNode(Node n) {
+		below.add(n);
+	}
 
-    /**
-     *
-     * @param set
-     */
-    public void addAttribut(String set) {
-        attributes.add(set);
-    }
-
-    public void addBelowNode(Node n) {
-        below.add(n);
-    }
-
-    
-
-
-    public List<Node> getBelow() {
+	public List<Node> getBelow() {
 		return below;
 	}
 
 	public void update(int x, int y, boolean first) {
-        int updateX;
-        int updateY;
-        if(this.x + x >= 0) updateX = this.x + x;
-        else updateX = 0;
-        if(this.y + y >= 0) updateY = this.y + y;
-        else updateY = 0;
+		int updateX;
+		int updateY;
+		if (this.x + x >= 2) {
+			updateX = this.x + x;
+		} else {
+			hitBorder = true;
+			updateX = 1;
+		}
+		if (this.y + y >= 2)
+			updateY = this.y + y;
+		else{
+			updateY = 1;
+			hitBorder = true;
+		}
 
-        visibleAttributes.update(x, y, false);
-        visibleObjects.update(x, y, true);
-        if (moveSubgraph && first) {
-            for(Node n : ideal){
-                n.update(x, y, false);
-            }
-        }
+		for (Node n : ideal) {
+			if(!n.isUpdateXPosible(x) || !n.isUpdateYPosible(y)){
+				hitBorder = true;
+			}
+		}
 
-        this.setBounds(updateX, updateY, 15, 15);
-        this.x = updateX;
-        this.y = updateY;
+		if (!hitBorder) {
+			if (moveSubgraph && first) {
+				for (Node n : ideal) {
+					n.update(x, y, false);
+				}
+			}
+			
+			this.setBounds(updateX, updateY, 15, 15);
+			this.x = updateX;
+			this.y = updateY;
 
-        if (getParent() != null) {
-            getParent().repaint();
-        }
-    }
+			if (getParent() != null) {
+				getParent().repaint();
+			}
+		}
 
-    public ListSet<Node> getIdeal() {
+		hitBorder = false;
+	}
+	
+	public boolean isUpdateXPosible(int x){
+		if (this.x + x >= 2 && this.x + x < getParent().getWidth() ) {
+			return true;			
+		}
+		return false;
+	}
+	
+	public boolean isUpdateYPosible(int y){
+		if (this.y + y >= 2 && this.y + y < getParent().getHeight()) {
+			return true;			
+		}
+		return false;
+	}
+	
+	
+
+	public ListSet<Node> getIdeal() {
 		return ideal;
 	}
 
 	public void addObjects(Set<String> extent) {
-        objects.addAll(extent);
+		objects.addAll(extent);
 
-    }
+	}
 
-    public void addAttributs(Set<String> intent) {
-        attributes.addAll(intent);
+	public void addAttributs(Set<String> intent) {
+		attributes.addAll(intent);
 
-    }
+	}
 
-    public Set<String> getObjects() {
-        return objects;
-    }
+	public Set<String> getObjects() {
+		return objects;
+	}
 
-    public Set<String> getAttributes() {
-        return attributes;
-    }
+	public Set<String> getAttributes() {
+		return attributes;
+	}
 
-    public void setLevel(int level) {
-        this.level = level;
+	public void setLevel(int level) {
+		this.level = level;
 
-    }
+	}
 
-    public int getLevel(){
-        return level;
-    }
+	public int getLevel() {
+		return level;
+	}
 
-    public void setVisibleObject(String object){
-        visibleObjects.getSet().add(object);
-    }
+	public void setVisibleObject(String object) {
+		visibleObjects.getSet().add(object);
+	}
 
-    public Set<String> getVisibleObjects(){
-        return this.visibleObjects.getSet();
-    }
+	public Set<String> getVisibleObjects() {
+		return this.visibleObjects.getSet();
+	}
 
-    public void setVisibleAttribute(String attribute){
-        this.visibleAttributes.getSet().add(attribute);
-    }
+	public void setVisibleAttribute(String attribute) {
+		this.visibleAttributes.getSet().add(attribute);
+	}
 
-    public Set<String> getVisibleAttributes(){
-        return this.visibleAttributes.getSet();
+	public Set<String> getVisibleAttributes() {
+		return this.visibleAttributes.getSet();
 
-    }
+	}
 
-    public Label getObjectsLabel(){
-        return this.visibleObjects;
-    }
+	public Label getObjectsLabel() {
+		return this.visibleObjects;
+	}
 
-    public Label getAttributesLabel(){
-        return this.visibleAttributes;
-    }
+	public Label getAttributesLabel() {
+		return this.visibleAttributes;
+	}
 
-    public void moveSubgraph(boolean b){
-        this.moveSubgraph = b;
-    }
+	public void moveSubgraph(boolean b) {
+		this.moveSubgraph = b;
+	}
 
-    public void toggleIdealVisibility(){
-        this.isIdealVisibile = !this.isIdealVisibile;
-        for(Node n : ideal){
-            n.setPartOfAnIdeal(isIdealVisibile);
-        }
-        if (getParent() != null) {
-            getParent().repaint();
-        }
-    }
+	public void toggleIdealVisibility() {
+		this.isIdealVisibile = !this.isIdealVisibile;
+		for (Node n : ideal) {
+			n.setPartOfAnIdeal(isIdealVisibile);
+		}
+		if (getParent() != null) {
+			getParent().repaint();
+		}
+	}
 
-    public boolean isPartOfAnIdeal(){
-        return this.isIdealVisibile;
-    }
+	public boolean isPartOfAnIdeal() {
+		return this.isIdealVisibile;
+	}
 
-    public void setPartOfAnIdeal(boolean b){
-        this.isIdealVisibile = b;
-    }
-
-
+	public void setPartOfAnIdeal(boolean b) {
+		this.isIdealVisibile = b;
+	}
 
 }
