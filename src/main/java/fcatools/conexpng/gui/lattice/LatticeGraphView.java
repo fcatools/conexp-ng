@@ -14,6 +14,10 @@ import java.io.Writer;
 import java.net.MalformedURLException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.PriorityQueue;
+import java.util.Queue;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -54,48 +58,63 @@ public class LatticeGraphView extends JSVGCanvas {
 
     private void init() {
         this.removeAll();
-        ArrayList<Node> q = new ArrayList<>();
         for (Node n : graph.getNodes()) {
             this.add(n);
             n.addMouseMotionListener(new LatticeGraphNodeMouseMotionListener(n));
             n.addMouseListener(new NodeMouseClickListener(n));
-            // topological order
-            if (q.size() == 0) {
-                q.add(n);
-            } else {
-                for (int i = 0; i < q.size(); i++) {
-                    if (q.get(i).getLevel() > n.getLevel()) {
-                        q.add(i, n);
-                        break;
-                    }
-                    if (i + 1 == q.size()) {
-                        q.add(i + 1, n);
-                        break;
-                    }
-                }
-            }
         }
 
         // calc which obj/attr has to be shown
         Set<String> usedObj = new TreeSet<>();
         Set<String> usedAttr = new TreeSet<>();
-        for (int i = q.size() - 1; i >= 0; i--) {
-            Node n = q.get(i);
-            for (String s : n.getObjects()) {
-                if (!usedObj.contains(s)) {
-                    n.setVisibleObject(s);
-                    usedObj.add(s);
-                }
-            }
+        Node maxNode = new Node();
+        Node minNode;
+        if(graph.getNodes().size() == 0){
+        	minNode = new Node();
+        }else {
+        	minNode = graph.getNode(0);
         }
-        for (int i = 0; i < q.size(); i++) {
-            Node n = q.get(i);
-            for (String s : n.getAttributes()) {
-                if (!usedAttr.contains(s)) {
-                    n.setVisibleAttribute(s);
-                    usedAttr.add(s);
-                }
-            }
+        	
+        
+        for(Node u : graph.getNodes()){
+        	if(u.getIdeal().size() > maxNode.getIdeal().size()){
+        		maxNode = u;
+        	}
+        	else if(u.getIdeal().size() < minNode.getIdeal().size()){
+        		minNode = u;
+        	}
+        }
+        
+        //queue benutzen um über die below von oben nach unten die Attribute zu setzen.
+        Queue<Node> pq = new LinkedList<>();
+        pq.add(maxNode);
+        while(!pq.isEmpty()){
+        	Node n = pq.remove();
+        	for(String a : n.getAttributes()){
+        		if(!usedAttr.contains(a)){
+        			n.setVisibleAttribute(a);
+        			usedAttr.add(a);
+        		}
+        	}
+        	for(Node u : n.getBelow()){
+        		pq.add(u);
+        	}
+        }
+        
+        pq.add(minNode);
+        while(!pq.isEmpty()){
+        	Node n = pq.remove();
+        	for(String o : n.getObjects()){
+        		if(!usedObj.contains(o)){
+        			n.setVisibleObject(o);
+        			usedObj.add(o);
+        		}
+        	}
+        	for(Node u : graph.getNodes()){
+        		if(u.getBelow().contains(n)){
+        			pq.add(u);
+        		}
+        	}
         }
 
     }
@@ -168,7 +187,6 @@ public class LatticeGraphView extends JSVGCanvas {
             Set<String> s = n.getVisibleObjects();
             if ((!s.isEmpty()) && state.showObjectLabel) {
                 // beneath the node
-                // n.getObjectsLabel().paint(g0);
                 this.calcDrawPosition(g, s, true, n);
             }
             s = n.getVisibleAttributes();
