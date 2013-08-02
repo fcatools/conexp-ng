@@ -16,6 +16,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Observer;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
@@ -49,6 +50,7 @@ public class LatticeGraphView extends JSVGCanvas {
     private Conf state;
     private ArrayList<Node> lastIdeal;
     private boolean idealHighlighting;
+	private boolean move;
 
     public LatticeGraphView(LatticeGraph graph, Conf state) {
         this.graph = graph;
@@ -56,6 +58,8 @@ public class LatticeGraphView extends JSVGCanvas {
         this.lastIdeal = new ArrayList<Node>();
         this.init();
     }
+    
+   
 
     private void init() {
         this.removeAll();
@@ -142,20 +146,7 @@ public class LatticeGraphView extends JSVGCanvas {
 
         g.setColor(Color.BLACK);
         int radius = LatticeView.radius;
-//		if (graph.getEdges() != null && state.showEdges) {
-//			for (Edge e : graph.getEdges()) {
-//				g.setColor(Color.BLACK);
-//				if (e.getU().isPartOfAnIdeal() && e.getV().isPartOfAnIdeal()
-//						&& idealHighlighting) {
-//					g.setColor(Color.BLUE);
-//				} else if (!(e.getU().isPartOfAnIdeal() && e.getV()
-//						.isPartOfAnIdeal()) && idealHighlighting) {
-//					g.setColor(Color.LIGHT_GRAY);
-//				}
-//				g.drawLine(e.getU().getX() + radius, e.getU().getY() + radius,
-//						e.getV().getX() + radius, e.getV().getY() + radius);
-//			}
-//		}
+        
         for(Node n: graph.getNodes()){
             if (state.showEdges) {
                 for (Node u : n.getBelow()) {
@@ -186,15 +177,16 @@ public class LatticeGraphView extends JSVGCanvas {
                 g.fillOval(n.getX(), n.getY(), radius * 2, radius * 2);
             }
 
-            Set<String> s = n.getVisibleObjects();
-            if ((!s.isEmpty()) && state.showObjectLabel) {
-                // beneath the node
-                this.calcDrawPosition(g, s, true, n);
+
+            if((!n.getVisibleObjects().isEmpty()) && (!n.getVisibleAttributes().isEmpty()) && state.showObjectLabel && state.showAttributLabel){
+            	this.showBothLabels(g, n);
             }
-            s = n.getVisibleAttributes();
-            if ((!s.isEmpty()) && state.showAttributLabel) {
-                // upon the node
-                this.calcDrawPosition(g, s, false, n);
+            else if ((!n.getVisibleObjects().isEmpty()) && state.showObjectLabel) {
+            	this.showObjectLabels(g, n);
+            }
+
+            else if ((!n.getVisibleAttributes().isEmpty()) && state.showAttributLabel) {
+                this.showAttributeLabels(g, n);
             }
         }
         resetHighlighting();
@@ -205,56 +197,80 @@ public class LatticeGraphView extends JSVGCanvas {
         //
         // this.setSVGDocument(doc);
     }
-
-    private void calcDrawPosition(Graphics2D g, Set<String> elements,
-            boolean areObjects, Node node) {
-        int x = node.getX();
+    
+    private void showObjectLabels(Graphics2D g, Node node){
+    	int x = node.getX();
         int y = node.getY();
         
-        if(!node.getVisibleAttributes().isEmpty() && !node.getVisibleObjects().isEmpty()){
-        	g.setColor(Color.BLUE);
-        	g.fillArc(x, y, LatticeView.radius * 2, LatticeView.radius * 2, 0, 180);
-        	g.setColor(Color.BLACK);
-        	g.fillArc(x, y, LatticeView.radius * 2, LatticeView.radius * 2, 180, 180);
-            g.drawOval(x, y, LatticeView.radius * 2, LatticeView.radius * 2);
-        	
-        }else if(!node.getVisibleObjects().isEmpty()){
-        	g.setColor(Color.BLACK);
-        	g.fillOval(x, y, LatticeView.radius * 2, LatticeView.radius * 2);
-        	g.setColor(Color.WHITE);
-            g.fillArc(x, y, LatticeView.radius * 2, LatticeView.radius * 2, 0, 180);
-            g.setColor(Color.BLACK);
-            g.drawOval(x, y, LatticeView.radius * 2, LatticeView.radius * 2);
-        }else {
-        	g.setColor(Color.BLUE);
-        	g.fillOval(x, y, LatticeView.radius * 2, LatticeView.radius * 2);
-        	g.setColor(Color.WHITE);
-            g.fillArc(x, y, LatticeView.radius * 2, LatticeView.radius * 2, 180, 180);
-            g.setColor(Color.BLACK);
-            g.drawOval(x, y, LatticeView.radius * 2, LatticeView.radius * 2);
-        }
+    	g.setColor(Color.BLACK);
+    	g.fillOval(x, y, LatticeView.radius * 2, LatticeView.radius * 2);
+    	g.setColor(Color.WHITE);
+        g.fillArc(x, y, LatticeView.radius * 2, LatticeView.radius * 2, 0, 180);
+        g.setColor(Color.BLACK);
+        g.drawOval(x, y, LatticeView.radius * 2, LatticeView.radius * 2);
         
-        
-        if (areObjects) {
-            y += 4 * LatticeView.radius;
-            for (String s : elements) {
-                g.setColor(getBackground());
-                g.fillRect(x, y - 10, s.length() * 7, 10);
-                g.setColor(Color.MAGENTA);
-                g.drawString(s, x, y);
-                y += 15;
-            }
-        } else {
-            y -= LatticeView.radius;
-            for (String s : elements) {
-                g.setColor(getBackground());
-                g.fillRect(x, y - 10, s.length() * 7, 10);
-                g.setColor(Color.GREEN);
-                g.drawString(s, x, y);
-                y -= 15;
-            }
+        y += 4 * LatticeView.radius;
+        for (String s : node.getVisibleObjects()) {
+            g.setColor(getBackground());
+            g.fillRect(x, y - 10, s.length() * 7, 10);
+            g.setColor(Color.MAGENTA);
+            g.drawString(s, x, y);
+            y += 15;
         }
     }
+    
+    private void showAttributeLabels(Graphics2D g, Node node){
+    	int x = node.getX();
+        int y = node.getY();
+        
+    	g.setColor(Color.BLUE);
+    	g.fillOval(x, y, LatticeView.radius * 2, LatticeView.radius * 2);
+    	g.setColor(Color.WHITE);
+        g.fillArc(x, y, LatticeView.radius * 2, LatticeView.radius * 2, 180, 180);
+        g.setColor(Color.BLACK);
+        g.drawOval(x, y, LatticeView.radius * 2, LatticeView.radius * 2);
+        
+        y -= LatticeView.radius;
+        for (String s : node.getVisibleAttributes()) {
+            g.setColor(getBackground());
+            g.fillRect(x, y - 10, s.length() * 7, 10);
+            g.setColor(Color.GREEN);
+            g.drawString(s, x, y);
+            y -= 15;
+        }
+    }
+    
+    private void showBothLabels(Graphics2D g, Node node){
+    	int x = node.getX();
+        int y = node.getY(); 
+        
+    	g.setColor(Color.BLUE);
+    	g.fillArc(x, y, LatticeView.radius * 2, LatticeView.radius * 2, 0, 180);
+    	g.setColor(Color.BLACK);
+    	g.fillArc(x, y, LatticeView.radius * 2, LatticeView.radius * 2, 180, 180);
+        g.drawOval(x, y, LatticeView.radius * 2, LatticeView.radius * 2);
+        
+        y += 4 * LatticeView.radius;
+        for (String s : node.getVisibleObjects()) {
+            g.setColor(getBackground());
+            g.fillRect(x, y - 10, s.length() * 7, 10);
+            g.setColor(Color.MAGENTA);
+            g.drawString(s, x, y);
+            y += 15;
+        }
+        
+        y = node.getY();
+        y -= LatticeView.radius;
+        for (String s : node.getVisibleAttributes()) {
+            g.setColor(getBackground());
+            g.fillRect(x, y - 10, s.length() * 7, 10);
+            g.setColor(Color.GREEN);
+            g.drawString(s, x, y);
+            y -= 15;
+        }
+    }
+
+    
 
     public void exportLatticeAsPDF(String path) {
         DOMImplementation domImpl = GenericDOMImplementation
@@ -333,6 +349,7 @@ public class LatticeGraphView extends JSVGCanvas {
     public void setLatticeGraph(LatticeGraph g) {
         graph = g;
         init();
+        setMove(move);
     }
 
     private void resetHighlighting() {
@@ -342,6 +359,7 @@ public class LatticeGraphView extends JSVGCanvas {
     }
 
     public void setMove(boolean change) {
+    	move = change;
         for (Node n : graph.getNodes()) {
             n.moveSubgraph(change);
         }

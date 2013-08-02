@@ -2,6 +2,9 @@ package fcatools.conexpng.model;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
 import java.util.Set;
 
 import de.tudresden.inf.tcs.fcaapi.Concept;
@@ -54,26 +57,37 @@ public abstract class ILatticeAlgorithm {
 				extent.add(fo.getIdentifier());
 			}
 			n.getObjects().addAll(extent);
-			System.out.println(c.getIntent() + " : " + extent);
+//			System.out.println(c.getIntent() + " : " + extent);
 			graph.getNodes().add(n);
 		}
 
+		
+		List<Node> topNode = new ArrayList<>();
 		for (Node u : graph.getNodes()) {
+			topNode.add(u);
 			Set<String> uEx = u.getObjects();
-			int count = 0;
-
 			for (Node v : graph.getNodes()) {
 				Set<String> vEx = v.getObjects();
 				if (isLowerNeighbour(uEx, vEx)) {
 					v.addBelowNode(u);
-					graph.getEdges().add(new Edge(v, u));
-					count++;
+					topNode.remove(u);
 				}
-
 			}
-			u.setLevel(count);
-			u.update((int) (Math.random() * 500), count * 100, true);
 		}
+		Queue<Node> q = new LinkedList<>();
+		q.addAll(topNode);
+		while(!q.isEmpty()){
+			Node n = q.remove();
+			for(Node v : n.getBelow()){
+				if(v.getLevel() == 0 || v.getLevel() == n.getLevel()){
+					v.setLevel(n.getLevel() + 1);
+					v.update((int) (Math.random() * 500), 100*v.getLevel(), true);
+					q.add(v);
+				}
+			}
+		}
+		
+		
 	}
 	
 	public abstract void computeLatticeGraphPositions();
@@ -170,7 +184,6 @@ public abstract class ILatticeAlgorithm {
 				}
 			}
 		}
-		System.out.println("test");
 		for (int i = 1; i < q.size(); i++) {
 			Node u = q.get(i);
 			for (int j = i-1; j >= 0; j--) {
