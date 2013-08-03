@@ -66,6 +66,17 @@ public class LatticeGraphView extends JSVGCanvas {
 			this.add(n);
 			n.addMouseMotionListener(new LatticeGraphNodeMouseMotionListener(n));
 			n.addMouseListener(new NodeMouseClickListener(n));
+
+			this.add(n.getAttributesLabel());
+			n.getAttributesLabel().addMouseMotionListener(
+					new LatticeGraphNodeMouseMotionListener(n
+							.getAttributesLabel()));
+
+			this.add(n.getObjectsLabel());
+			n.getObjectsLabel()
+					.addMouseMotionListener(
+							new LatticeGraphNodeMouseMotionListener(n
+									.getObjectsLabel()));
 		}
 
 		// calc which obj/attr has to be shown
@@ -87,8 +98,6 @@ public class LatticeGraphView extends JSVGCanvas {
 			}
 		}
 
-		// queue benutzen um über die below von oben nach unten die Attribute zu
-		// setzen.
 		Queue<Node> pq = new LinkedList<>();
 		pq.add(maxNode);
 		while (!pq.isEmpty()) {
@@ -126,13 +135,6 @@ public class LatticeGraphView extends JSVGCanvas {
 	public void paint(Graphics g0) {
 
 		super.paint(g0);
-
-		// DOMImplementation impl = SVGDOMImplementation.getDOMImplementation();
-		// String svgNS = SVGDOMImplementation.SVG_NAMESPACE_URI;
-		// SVGDocument doc = (SVGDocument) impl.createDocument(svgNS, "svg",
-		// null);
-
-		// SVGGraphics2D g = new SVGGraphics2D(doc);
 
 		Graphics2D g = (Graphics2D) g0;
 
@@ -180,21 +182,26 @@ public class LatticeGraphView extends JSVGCanvas {
 				this.showBothLabels(g, n);
 			} else if ((!n.getVisibleObjects().isEmpty())
 					&& state.showObjectLabel) {
+				g.setColor(Color.BLACK);
+				g.drawLine(n.getObjectsLabel().getX()
+						+ n.getObjectsLabel().getBounds().width / 2, n
+						.getObjectsLabel().getY(), n.getX() + radius, n.getY()
+						+ radius);
 				this.showObjectLabels(g, n);
 			}
 
 			else if ((!n.getVisibleAttributes().isEmpty())
 					&& state.showAttributLabel) {
+				g.setColor(Color.BLACK);
+				g.drawLine(n.getAttributesLabel().getX()
+						+ n.getAttributesLabel().getBounds().width / 2, n
+						.getAttributesLabel().getY(), n.getX() + radius,
+						n.getY() + radius);
 				this.showAttributeLabels(g, n);
 			}
 		}
 		resetHighlighting();
 		lastIdeal.clear();
-
-		// Element root = doc.getDocumentElement();
-		// g.getRoot(root);
-		//
-		// this.setSVGDocument(doc);
 	}
 
 	private void showObjectLabels(Graphics2D g, Node node) {
@@ -208,14 +215,15 @@ public class LatticeGraphView extends JSVGCanvas {
 		g.setColor(Color.BLACK);
 		g.drawOval(x, y, LatticeView.radius * 2, LatticeView.radius * 2);
 
-		y += 4 * LatticeView.radius;
-		for (String s : node.getVisibleObjects()) {
-			g.setColor(getBackground());
-			g.fillRect(x, y - 10, s.length() * 7, 10);
-			g.setColor(Color.MAGENTA);
-			g.drawString(s, x, y);
-			y += 15;
-		}
+		node.getObjectsLabel().paint(g);
+		// y += 4 * LatticeView.radius;
+		// for (String s : node.getVisibleObjects()) {
+		// g.setColor(getBackground());
+		// g.fillRect(x, y - 10, s.length() * 7, 10);
+		// g.setColor(Color.MAGENTA);
+		// g.drawString(s, x, y);
+		// y += 15;
+		// }
 	}
 
 	private void showAttributeLabels(Graphics2D g, Node node) {
@@ -230,14 +238,16 @@ public class LatticeGraphView extends JSVGCanvas {
 		g.setColor(Color.BLACK);
 		g.drawOval(x, y, LatticeView.radius * 2, LatticeView.radius * 2);
 
-		y -= LatticeView.radius;
-		for (String s : node.getVisibleAttributes()) {
-			g.setColor(getBackground());
-			g.fillRect(x, y - 10, s.length() * 7, 10);
-			g.setColor(Color.GREEN);
-			g.drawString(s, x, y);
-			y -= 15;
-		}
+		node.getAttributesLabel().paint(g);
+
+		// y -= LatticeView.radius;
+		// for (String s : node.getVisibleAttributes()) {
+		// g.setColor(getBackground());
+		// g.fillRect(x, y - 10, s.length() * 7, 10);
+		// g.setColor(Color.GREEN);
+		// g.drawString(s, x, y);
+		// y -= 15;
+		// }
 	}
 
 	private void showBothLabels(Graphics2D g, Node node) {
@@ -251,26 +261,33 @@ public class LatticeGraphView extends JSVGCanvas {
 				180);
 		g.drawOval(x, y, LatticeView.radius * 2, LatticeView.radius * 2);
 
-		y += 4 * LatticeView.radius;
-		for (String s : node.getVisibleObjects()) {
-			g.setColor(getBackground());
-			g.fillRect(x, y - 10, s.length() * 7, 10);
-			g.setColor(Color.MAGENTA);
-			g.drawString(s, x, y);
-			y += 15;
-		}
+		node.getObjectsLabel().paint(g);
+		// y += 4 * LatticeView.radius;
+		// for (String s : node.getVisibleObjects()) {
+		// g.setColor(getBackground());
+		// g.fillRect(x, y - 10, s.length() * 7, 10);
+		// g.setColor(Color.MAGENTA);
+		// g.drawString(s, x, y);
+		// y += 15;
+		// }
 
-		y = node.getY();
-		y -= LatticeView.radius;
-		for (String s : node.getVisibleAttributes()) {
-			g.setColor(getBackground());
-			g.fillRect(x, y - 10, s.length() * 7, 10);
-			g.setColor(Color.GREEN);
-			g.drawString(s, x, y);
-			y -= 15;
-		}
+		node.getAttributesLabel().paint(g);
+		// y = node.getY();
+		// y -= LatticeView.radius;
+		// for (String s : node.getVisibleAttributes()) {
+		// g.setColor(getBackground());
+		// g.fillRect(x, y - 10, s.length() * 7, 10);
+		// g.setColor(Color.GREEN);
+		// g.drawString(s, x, y);
+		// y -= 15;
+		// }
 	}
 
+	/**
+	 * This method creats an pdf file of the lattice.
+	 * 
+	 * @param path
+	 */
 	public void exportLatticeAsPDF(String path) {
 		DOMImplementation domImpl = GenericDOMImplementation
 				.getDOMImplementation();
@@ -300,21 +317,25 @@ public class LatticeGraphView extends JSVGCanvas {
 			} else {
 				pdf_ostream = new FileOutputStream(path + ".pdf");
 			}
+
+			// calculating the pdf file size
 			int maxWidth = 0;
 			int maxHeight = 0;
-			for(Node n : graph.getNodes()){
-				if(maxWidth < n.getX()){
+			for (Node n : graph.getNodes()) {
+				if (maxWidth < n.getX()) {
 					maxWidth = n.getX();
 				}
-				if(maxHeight < n.getY()){
+				if (maxHeight < n.getY()) {
 					maxHeight = n.getY();
 				}
 			}
 			Rectangle r = new Rectangle(maxWidth + 30, maxHeight + 30);
 			TranscoderOutput output_pdf_file = new TranscoderOutput(pdf_ostream);
 			Transcoder transcoder = new PDFTranscoder();
-			transcoder.addTranscodingHint(PDFTranscoder.KEY_WIDTH, new Float(r.width));
-			transcoder.addTranscodingHint(PDFTranscoder.KEY_HEIGHT, new Float(r.height));
+			transcoder.addTranscodingHint(PDFTranscoder.KEY_WIDTH, new Float(
+					r.width));
+			transcoder.addTranscodingHint(PDFTranscoder.KEY_HEIGHT, new Float(
+					r.height));
 			transcoder.addTranscodingHint(PDFTranscoder.KEY_AOI, r);
 
 			transcoder.transcode(input_svg_image, output_pdf_file);
@@ -334,35 +355,6 @@ public class LatticeGraphView extends JSVGCanvas {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
-		// File outputFile = new File("out.pdf");
-		// OutputStream out = null;
-		// try {
-		// out = new java.io.FileOutputStream(outputFile);
-		// out = new java.io.BufferedOutputStream(out);
-		// PDFDocumentGraphics2D g2d = new PDFDocumentGraphics2D();
-		// g2d.setDeviceDPI(PDFDocumentGraphics2D.NORMAL_PDF_RESOLUTION);
-		// g2d.setGraphicContext(new GraphicContext());
-		// Dimension pageSize = new Dimension(595, 842); //A4
-		// g2d.setupDocument(out, pageSize.width, pageSize.height);
-		//
-		//
-		// //Works:
-		// //g2d.addLink(targetRect, tx,
-		// "http://www.apache.org",PDFLink.EXTERNAL);
-		// //Doesn't work
-		// //g2d.addLink(targetRect, tx, "[/XYZ 0 0 null]", PDFLink.INTERNAL);
-		// //Works:
-		// g2d.finish();
-		// } catch (FileNotFoundException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// } catch (IOException e) {
-		// // TODO Auto-generated catch block
-		// e.printStackTrace();
-		// } finally {
-		// IOUtils.closeQuietly(out);
-		// }
 	}
 
 	public void setLatticeGraph(LatticeGraph g) {

@@ -52,8 +52,8 @@ public class Node extends JPanel implements LatticeGraphElement {
 	public Node() {
 		this.objects = new TreeSet<>();
 		this.attributes = new TreeSet<>();
-		this.visibleObjects = new Label(new TreeSet<String>());
-		this.visibleAttributes = new Label(new TreeSet<String>());
+		this.visibleObjects = new Label(new TreeSet<String>(), this, true);
+		this.visibleAttributes = new Label(new TreeSet<String>(), this, false);
 		this.ideal = new ListSet<>();
 		this.x = 0;
 		this.y = 0;
@@ -156,6 +156,8 @@ public class Node extends JPanel implements LatticeGraphElement {
 			this.setBounds(updateX, updateY, 15, 15);
 			this.x = updateX;
 			this.y = updateY;
+			visibleAttributes.update(x, y, first);
+			visibleObjects.update(x, y, first);
 
 			if (getParent() != null) {
 				getParent().repaint();

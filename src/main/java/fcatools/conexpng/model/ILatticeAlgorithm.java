@@ -26,22 +26,21 @@ public abstract class ILatticeAlgorithm {
 	protected LatticeGraph graph;
 	protected Set<Concept<String, FullObject<String, String>>> lattConcepts;
 
-
 	/**
 	 * 
 	 * @param set
 	 * @return
 	 */
 	public LatticeGraph computeLatticeGraph(
-			Set<Concept<String, FullObject<String, String>>> set){
+			Set<Concept<String, FullObject<String, String>>> set) {
 		this.lattConcepts = set;
-		initGraphPositions();
+		initGraph();
 		computeAllIdeals();
 		computeLatticeGraphPositions();
 		return graph;
 	}
-	
-	private void initGraphPositions(){
+
+	public void initGraph() {
 		graph = new LatticeGraph();
 
 		Iterator<Concept<String, FullObject<String, String>>> iter = lattConcepts
@@ -57,11 +56,10 @@ public abstract class ILatticeAlgorithm {
 				extent.add(fo.getIdentifier());
 			}
 			n.getObjects().addAll(extent);
-//			System.out.println(c.getIntent() + " : " + extent);
+			// System.out.println(c.getIntent() + " : " + extent);
 			graph.getNodes().add(n);
 		}
 
-		
 		List<Node> topNode = new ArrayList<>();
 		for (Node u : graph.getNodes()) {
 			topNode.add(u);
@@ -76,20 +74,25 @@ public abstract class ILatticeAlgorithm {
 		}
 		Queue<Node> q = new LinkedList<>();
 		q.addAll(topNode);
-		while(!q.isEmpty()){
+		while (!q.isEmpty()) {
 			Node n = q.remove();
-			for(Node v : n.getBelow()){
-				if(v.getLevel() == 0 || v.getLevel() == n.getLevel()){
+			for (Node v : n.getBelow()) {
+				if (v.getLevel() == 0 || v.getLevel() == n.getLevel()) {
 					v.setLevel(n.getLevel() + 1);
-					v.update((int) (Math.random() * 500), 100*v.getLevel(), true);
+					v.update((int) (Math.random() * 500), 100 * v.getLevel(),
+							true);
+					v.getAttributesLabel().setXYWRTLabelType(v.getX(), v.getY());
+					v.getObjectsLabel().setXYWRTLabelType(v.getX(), v.getY());
 					q.add(v);
 				}
 			}
 		}
-		
-		
+
 	}
-	
+
+	/**
+	 * Computes the node positions of the graph.
+	 */
 	public abstract void computeLatticeGraphPositions();
 
 	/**
@@ -140,21 +143,22 @@ public abstract class ILatticeAlgorithm {
 		}
 		return true;
 	}
-	
-	private void removeAllDuplicates(){
+
+	private void removeAllDuplicates() {
 		ArrayList<Node> duplicates = new ArrayList<>();
-		for(int i = 0; i < graph.getNodes().size()-1; i++){
+		for (int i = 0; i < graph.getNodes().size() - 1; i++) {
 			Node u = graph.getNodes().get(i);
-			for(int j = i+1; j < graph.getNodes().size(); j++){
+			for (int j = i + 1; j < graph.getNodes().size(); j++) {
 				Node v = graph.getNodes().get(j);
-				if(u.getObjects().equals(v.getObjects()) && u.getAttributes().equals(v.getAttributes())){
+				if (u.getObjects().equals(v.getObjects())
+						&& u.getAttributes().equals(v.getAttributes())) {
 					duplicates.add(v);
 				}
 			}
-			
+
 		}
 		graph.getNodes().removeAll(duplicates);
-		for(Node n : graph.getNodes()){
+		for (Node n : graph.getNodes()) {
 			n.getBelow().removeAll(duplicates);
 		}
 	}
@@ -164,7 +168,7 @@ public abstract class ILatticeAlgorithm {
 	 */
 	public void computeAllIdeals() {
 		// sort the list of nodes from bottom too top
-		
+
 		ArrayList<Node> q = new ArrayList<>();
 		for (Node n : graph.getNodes()) {
 			if (q.size() == 0) {
@@ -186,9 +190,10 @@ public abstract class ILatticeAlgorithm {
 		}
 		for (int i = 1; i < q.size(); i++) {
 			Node u = q.get(i);
-			for (int j = i-1; j >= 0; j--) {
+			for (int j = i - 1; j >= 0; j--) {
 				Node v = q.get(j);
-				if(u.getObjects().containsAll(v.getObjects()) && v.getAttributes().containsAll(u.getAttributes())){
+				if (u.getObjects().containsAll(v.getObjects())
+						&& v.getAttributes().containsAll(u.getAttributes())) {
 					u.getIdeal().add(v);
 				}
 			}
