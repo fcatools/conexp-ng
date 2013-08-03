@@ -3,6 +3,7 @@ package fcatools.conexpng.gui.lattice;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -45,328 +46,346 @@ import fcatools.conexpng.Conf;
  */
 public class LatticeGraphView extends JSVGCanvas {
 
-    private static final long serialVersionUID = -8623872314193862285L;
-    private LatticeGraph graph;
-    private Conf state;
-    private ArrayList<Node> lastIdeal;
-    private boolean idealHighlighting;
+	private static final long serialVersionUID = -8623872314193862285L;
+	private LatticeGraph graph;
+	private Conf state;
+	private ArrayList<Node> lastIdeal;
+	private boolean idealHighlighting;
 	private boolean move;
 
-    public LatticeGraphView(LatticeGraph graph, Conf state) {
-        this.graph = graph;
-        this.state = state;
-        this.lastIdeal = new ArrayList<Node>();
-        this.init();
-    }
-    
-   
+	public LatticeGraphView(LatticeGraph graph, Conf state) {
+		this.graph = graph;
+		this.state = state;
+		this.lastIdeal = new ArrayList<Node>();
+		this.init();
+	}
 
-    private void init() {
-        this.removeAll();
-        for (Node n : graph.getNodes()) {
-            this.add(n);
-            n.addMouseMotionListener(new LatticeGraphNodeMouseMotionListener(n));
-            n.addMouseListener(new NodeMouseClickListener(n));
-        }
+	private void init() {
+		this.removeAll();
+		for (Node n : graph.getNodes()) {
+			this.add(n);
+			n.addMouseMotionListener(new LatticeGraphNodeMouseMotionListener(n));
+			n.addMouseListener(new NodeMouseClickListener(n));
+		}
 
-        // calc which obj/attr has to be shown
-        Set<String> usedObj = new TreeSet<>();
-        Set<String> usedAttr = new TreeSet<>();
-        Node maxNode = new Node();
-        Node minNode;
-        if(graph.getNodes().size() == 0){
-        	minNode = new Node();
-        }else {
-        	minNode = graph.getNode(0);
-        }
-        	
-        
-        for(Node u : graph.getNodes()){
-        	if(u.getIdeal().size() > maxNode.getIdeal().size()){
-        		maxNode = u;
-        	}
-        	else if(u.getIdeal().size() < minNode.getIdeal().size()){
-        		minNode = u;
-        	}
-        }
-        
-        //queue benutzen um über die below von oben nach unten die Attribute zu setzen.
-        Queue<Node> pq = new LinkedList<>();
-        pq.add(maxNode);
-        while(!pq.isEmpty()){
-        	Node n = pq.remove();
-        	for(String a : n.getAttributes()){
-        		if(!usedAttr.contains(a)){
-        			n.setVisibleAttribute(a);
-        			usedAttr.add(a);
-        		}
-        	}
-        	for(Node u : n.getBelow()){
-        		pq.add(u);
-        	}
-        }
-        
-        pq.add(minNode);
-        while(!pq.isEmpty()){
-        	Node n = pq.remove();
-        	for(String o : n.getObjects()){
-        		if(!usedObj.contains(o)){
-        			n.setVisibleObject(o);
-        			usedObj.add(o);
-        		}
-        	}
-        	for(Node u : graph.getNodes()){
-        		if(u.getBelow().contains(n)){
-        			pq.add(u);
-        		}
-        	}
-        }
+		// calc which obj/attr has to be shown
+		Set<String> usedObj = new TreeSet<>();
+		Set<String> usedAttr = new TreeSet<>();
+		Node maxNode = new Node();
+		Node minNode;
+		if (graph.getNodes().size() == 0) {
+			minNode = new Node();
+		} else {
+			minNode = graph.getNode(0);
+		}
 
-    }
+		for (Node u : graph.getNodes()) {
+			if (u.getIdeal().size() > maxNode.getIdeal().size()) {
+				maxNode = u;
+			} else if (u.getIdeal().size() < minNode.getIdeal().size()) {
+				minNode = u;
+			}
+		}
 
-    @Override
-    public void paint(Graphics g0) {
+		// queue benutzen um über die below von oben nach unten die Attribute zu
+		// setzen.
+		Queue<Node> pq = new LinkedList<>();
+		pq.add(maxNode);
+		while (!pq.isEmpty()) {
+			Node n = pq.remove();
+			for (String a : n.getAttributes()) {
+				if (!usedAttr.contains(a)) {
+					n.setVisibleAttribute(a);
+					usedAttr.add(a);
+				}
+			}
+			for (Node u : n.getBelow()) {
+				pq.add(u);
+			}
+		}
 
-        super.paint(g0);
-        
+		pq.add(minNode);
+		while (!pq.isEmpty()) {
+			Node n = pq.remove();
+			for (String o : n.getObjects()) {
+				if (!usedObj.contains(o)) {
+					n.setVisibleObject(o);
+					usedObj.add(o);
+				}
+			}
+			for (Node u : graph.getNodes()) {
+				if (u.getBelow().contains(n)) {
+					pq.add(u);
+				}
+			}
+		}
 
-        // DOMImplementation impl = SVGDOMImplementation.getDOMImplementation();
-        // String svgNS = SVGDOMImplementation.SVG_NAMESPACE_URI;
-        // SVGDocument doc = (SVGDocument) impl.createDocument(svgNS, "svg",
-        // null);
+	}
 
-        // SVGGraphics2D g = new SVGGraphics2D(doc);
+	@Override
+	public void paint(Graphics g0) {
 
-        Graphics2D g = (Graphics2D) g0;
+		super.paint(g0);
 
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                RenderingHints.VALUE_ANTIALIAS_ON);
-        g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
-                RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+		// DOMImplementation impl = SVGDOMImplementation.getDOMImplementation();
+		// String svgNS = SVGDOMImplementation.SVG_NAMESPACE_URI;
+		// SVGDocument doc = (SVGDocument) impl.createDocument(svgNS, "svg",
+		// null);
 
-        g.setColor(Color.BLACK);
-        int radius = LatticeView.radius;
-        
-        for(Node n: graph.getNodes()){
-            if (state.showEdges) {
-                for (Node u : n.getBelow()) {
-                    g.setColor(Color.BLACK);
-                    if (n.isPartOfAnIdeal() && u.isPartOfAnIdeal()
-                            && idealHighlighting) {
-                        g.setColor(Color.BLUE);
-                    } else if (!(n.isPartOfAnIdeal() && u.isPartOfAnIdeal())
-                            && idealHighlighting) {
-                        g.setColor(Color.LIGHT_GRAY);
-                    }
-                    g.drawLine(n.getX() + radius, n.getY() + radius, u.getX()
-                            + radius, u.getY() + radius);
-                }
-            }
-        }
-        for (Node n : graph.getNodes()) {
-            g.setColor(Color.WHITE);
-            g.fillOval(n.getX(), n.getY(), radius * 2, radius * 2);
-            g.setColor(Color.BLACK);
-            g.drawOval(n.getX(), n.getY(), radius * 2, radius * 2);
-            if (n.isPartOfAnIdeal() && idealHighlighting) {
-                lastIdeal.add(n);
-                g.setColor(Color.BLUE);
-                g.drawOval(n.getX(), n.getY(), radius * 2, radius * 2);
-            } else if ((!n.isPartOfAnIdeal()) && idealHighlighting) {
-                g.setColor(Color.LIGHT_GRAY);
-                g.fillOval(n.getX(), n.getY(), radius * 2, radius * 2);
-            }
+		// SVGGraphics2D g = new SVGGraphics2D(doc);
 
+		Graphics2D g = (Graphics2D) g0;
 
-            if((!n.getVisibleObjects().isEmpty()) && (!n.getVisibleAttributes().isEmpty()) && state.showObjectLabel && state.showAttributLabel){
-            	this.showBothLabels(g, n);
-            }
-            else if ((!n.getVisibleObjects().isEmpty()) && state.showObjectLabel) {
-            	this.showObjectLabels(g, n);
-            }
+		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+				RenderingHints.VALUE_ANTIALIAS_ON);
+		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+				RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-            else if ((!n.getVisibleAttributes().isEmpty()) && state.showAttributLabel) {
-                this.showAttributeLabels(g, n);
-            }
-        }
-        resetHighlighting();
-        lastIdeal.clear();
+		g.setColor(Color.BLACK);
+		int radius = LatticeView.radius;
 
-        // Element root = doc.getDocumentElement();
-        // g.getRoot(root);
-        //
-        // this.setSVGDocument(doc);
-    }
-    
-    private void showObjectLabels(Graphics2D g, Node node){
-    	int x = node.getX();
-        int y = node.getY();
-        
-    	g.setColor(Color.BLACK);
-    	g.fillOval(x, y, LatticeView.radius * 2, LatticeView.radius * 2);
-    	g.setColor(Color.WHITE);
-        g.fillArc(x, y, LatticeView.radius * 2, LatticeView.radius * 2, 0, 180);
-        g.setColor(Color.BLACK);
-        g.drawOval(x, y, LatticeView.radius * 2, LatticeView.radius * 2);
-        
-        y += 4 * LatticeView.radius;
-        for (String s : node.getVisibleObjects()) {
-            g.setColor(getBackground());
-            g.fillRect(x, y - 10, s.length() * 7, 10);
-            g.setColor(Color.MAGENTA);
-            g.drawString(s, x, y);
-            y += 15;
-        }
-    }
-    
-    private void showAttributeLabels(Graphics2D g, Node node){
-    	int x = node.getX();
-        int y = node.getY();
-        
-    	g.setColor(Color.BLUE);
-    	g.fillOval(x, y, LatticeView.radius * 2, LatticeView.radius * 2);
-    	g.setColor(Color.WHITE);
-        g.fillArc(x, y, LatticeView.radius * 2, LatticeView.radius * 2, 180, 180);
-        g.setColor(Color.BLACK);
-        g.drawOval(x, y, LatticeView.radius * 2, LatticeView.radius * 2);
-        
-        y -= LatticeView.radius;
-        for (String s : node.getVisibleAttributes()) {
-            g.setColor(getBackground());
-            g.fillRect(x, y - 10, s.length() * 7, 10);
-            g.setColor(Color.GREEN);
-            g.drawString(s, x, y);
-            y -= 15;
-        }
-    }
-    
-    private void showBothLabels(Graphics2D g, Node node){
-    	int x = node.getX();
-        int y = node.getY(); 
-        
-    	g.setColor(Color.BLUE);
-    	g.fillArc(x, y, LatticeView.radius * 2, LatticeView.radius * 2, 0, 180);
-    	g.setColor(Color.BLACK);
-    	g.fillArc(x, y, LatticeView.radius * 2, LatticeView.radius * 2, 180, 180);
-        g.drawOval(x, y, LatticeView.radius * 2, LatticeView.radius * 2);
-        
-        y += 4 * LatticeView.radius;
-        for (String s : node.getVisibleObjects()) {
-            g.setColor(getBackground());
-            g.fillRect(x, y - 10, s.length() * 7, 10);
-            g.setColor(Color.MAGENTA);
-            g.drawString(s, x, y);
-            y += 15;
-        }
-        
-        y = node.getY();
-        y -= LatticeView.radius;
-        for (String s : node.getVisibleAttributes()) {
-            g.setColor(getBackground());
-            g.fillRect(x, y - 10, s.length() * 7, 10);
-            g.setColor(Color.GREEN);
-            g.drawString(s, x, y);
-            y -= 15;
-        }
-    }
+		for (Node n : graph.getNodes()) {
+			if (state.showEdges) {
+				for (Node u : n.getBelow()) {
+					g.setColor(Color.BLACK);
+					if (n.isPartOfAnIdeal() && u.isPartOfAnIdeal()
+							&& idealHighlighting) {
+						g.setColor(Color.BLUE);
+					} else if (!(n.isPartOfAnIdeal() && u.isPartOfAnIdeal())
+							&& idealHighlighting) {
+						g.setColor(Color.LIGHT_GRAY);
+					}
+					g.drawLine(n.getX() + radius, n.getY() + radius, u.getX()
+							+ radius, u.getY() + radius);
+				}
+			}
+		}
+		for (Node n : graph.getNodes()) {
+			g.setColor(Color.WHITE);
+			g.fillOval(n.getX(), n.getY(), radius * 2, radius * 2);
+			g.setColor(Color.BLACK);
+			g.drawOval(n.getX(), n.getY(), radius * 2, radius * 2);
+			if (n.isPartOfAnIdeal() && idealHighlighting) {
+				lastIdeal.add(n);
+				g.setColor(Color.BLUE);
+				g.drawOval(n.getX(), n.getY(), radius * 2, radius * 2);
+			} else if ((!n.isPartOfAnIdeal()) && idealHighlighting) {
+				g.setColor(Color.LIGHT_GRAY);
+				g.fillOval(n.getX(), n.getY(), radius * 2, radius * 2);
+			}
 
-    
+			if ((!n.getVisibleObjects().isEmpty())
+					&& (!n.getVisibleAttributes().isEmpty())
+					&& state.showObjectLabel && state.showAttributLabel) {
+				this.showBothLabels(g, n);
+			} else if ((!n.getVisibleObjects().isEmpty())
+					&& state.showObjectLabel) {
+				this.showObjectLabels(g, n);
+			}
 
-    public void exportLatticeAsPDF(String path) {
-        DOMImplementation domImpl = GenericDOMImplementation
-                .getDOMImplementation();
+			else if ((!n.getVisibleAttributes().isEmpty())
+					&& state.showAttributLabel) {
+				this.showAttributeLabels(g, n);
+			}
+		}
+		resetHighlighting();
+		lastIdeal.clear();
 
-        String svgNS = SVGDOMImplementation.SVG_NAMESPACE_URI;
-        Document document = domImpl.createDocument(svgNS, "svg", null);
+		// Element root = doc.getDocumentElement();
+		// g.getRoot(root);
+		//
+		// this.setSVGDocument(doc);
+	}
 
-        SVGGraphics2D svgGenerator = new SVGGraphics2D(document);
-        this.paint(svgGenerator);
+	private void showObjectLabels(Graphics2D g, Node node) {
+		int x = node.getX();
+		int y = node.getY();
 
-        Writer out;
-        try {
-            out = new FileWriter(new File("test_batik.svg"));
-            svgGenerator.stream(out, true);
-        } catch (IOException ioEx) {
-            ioEx.printStackTrace();
-        }
+		g.setColor(Color.BLACK);
+		g.fillOval(x, y, LatticeView.radius * 2, LatticeView.radius * 2);
+		g.setColor(Color.WHITE);
+		g.fillArc(x, y, LatticeView.radius * 2, LatticeView.radius * 2, 0, 180);
+		g.setColor(Color.BLACK);
+		g.drawOval(x, y, LatticeView.radius * 2, LatticeView.radius * 2);
 
-        String svg_URI_input;
-        try {
-            svg_URI_input = Paths.get("test_batik.svg").toUri().toURL()
-                    .toString();
-            TranscoderInput input_svg_image = new TranscoderInput(svg_URI_input);
-            OutputStream pdf_ostream = new FileOutputStream("test.pdf");
-            TranscoderOutput output_pdf_file = new TranscoderOutput(pdf_ostream);
-            Transcoder transcoder = new PDFTranscoder();
-            transcoder.transcode(input_svg_image, output_pdf_file);
-            pdf_ostream.flush();
-            pdf_ostream.close();
+		y += 4 * LatticeView.radius;
+		for (String s : node.getVisibleObjects()) {
+			g.setColor(getBackground());
+			g.fillRect(x, y - 10, s.length() * 7, 10);
+			g.setColor(Color.MAGENTA);
+			g.drawString(s, x, y);
+			y += 15;
+		}
+	}
 
-        } catch (MalformedURLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (TranscoderException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+	private void showAttributeLabels(Graphics2D g, Node node) {
+		int x = node.getX();
+		int y = node.getY();
 
-        // File outputFile = new File("out.pdf");
-        // OutputStream out = null;
-        // try {
-        // out = new java.io.FileOutputStream(outputFile);
-        // out = new java.io.BufferedOutputStream(out);
-        // PDFDocumentGraphics2D g2d = new PDFDocumentGraphics2D();
-        // g2d.setDeviceDPI(PDFDocumentGraphics2D.NORMAL_PDF_RESOLUTION);
-        // g2d.setGraphicContext(new GraphicContext());
-        // Dimension pageSize = new Dimension(595, 842); //A4
-        // g2d.setupDocument(out, pageSize.width, pageSize.height);
-        //
-        //
-        // //Works:
-        // //g2d.addLink(targetRect, tx,
-        // "http://www.apache.org",PDFLink.EXTERNAL);
-        // //Doesn't work
-        // //g2d.addLink(targetRect, tx, "[/XYZ 0 0 null]", PDFLink.INTERNAL);
-        // //Works:
-        // g2d.finish();
-        // } catch (FileNotFoundException e) {
-        // // TODO Auto-generated catch block
-        // e.printStackTrace();
-        // } catch (IOException e) {
-        // // TODO Auto-generated catch block
-        // e.printStackTrace();
-        // } finally {
-        // IOUtils.closeQuietly(out);
-        // }
-    }
+		g.setColor(Color.BLUE);
+		g.fillOval(x, y, LatticeView.radius * 2, LatticeView.radius * 2);
+		g.setColor(Color.WHITE);
+		g.fillArc(x, y, LatticeView.radius * 2, LatticeView.radius * 2, 180,
+				180);
+		g.setColor(Color.BLACK);
+		g.drawOval(x, y, LatticeView.radius * 2, LatticeView.radius * 2);
 
-    public void setLatticeGraph(LatticeGraph g) {
-        graph = g;
-        init();
-        setMove(move);
-    }
+		y -= LatticeView.radius;
+		for (String s : node.getVisibleAttributes()) {
+			g.setColor(getBackground());
+			g.fillRect(x, y - 10, s.length() * 7, 10);
+			g.setColor(Color.GREEN);
+			g.drawString(s, x, y);
+			y -= 15;
+		}
+	}
 
-    private void resetHighlighting() {
-        for (Node n : lastIdeal) {
-            n.setPartOfAnIdeal(false);
-        }
-    }
+	private void showBothLabels(Graphics2D g, Node node) {
+		int x = node.getX();
+		int y = node.getY();
 
-    public void setMove(boolean change) {
-    	move = change;
-        for (Node n : graph.getNodes()) {
-            n.moveSubgraph(change);
-        }
-    }
+		g.setColor(Color.BLUE);
+		g.fillArc(x, y, LatticeView.radius * 2, LatticeView.radius * 2, 0, 180);
+		g.setColor(Color.BLACK);
+		g.fillArc(x, y, LatticeView.radius * 2, LatticeView.radius * 2, 180,
+				180);
+		g.drawOval(x, y, LatticeView.radius * 2, LatticeView.radius * 2);
 
-    public void idealHighlighting(boolean change) {
-        this.idealHighlighting = change;
-    }
+		y += 4 * LatticeView.radius;
+		for (String s : node.getVisibleObjects()) {
+			g.setColor(getBackground());
+			g.fillRect(x, y - 10, s.length() * 7, 10);
+			g.setColor(Color.MAGENTA);
+			g.drawString(s, x, y);
+			y += 15;
+		}
+
+		y = node.getY();
+		y -= LatticeView.radius;
+		for (String s : node.getVisibleAttributes()) {
+			g.setColor(getBackground());
+			g.fillRect(x, y - 10, s.length() * 7, 10);
+			g.setColor(Color.GREEN);
+			g.drawString(s, x, y);
+			y -= 15;
+		}
+	}
+
+	public void exportLatticeAsPDF(String path) {
+		DOMImplementation domImpl = GenericDOMImplementation
+				.getDOMImplementation();
+
+		String svgNS = SVGDOMImplementation.SVG_NAMESPACE_URI;
+		Document document = domImpl.createDocument(svgNS, "svg", null);
+
+		SVGGraphics2D svgGenerator = new SVGGraphics2D(document);
+		this.paint(svgGenerator);
+
+		Writer out;
+		try {
+			out = new FileWriter(new File("test_batik.svg"));
+			svgGenerator.stream(out, true);
+		} catch (IOException ioEx) {
+			ioEx.printStackTrace();
+		}
+
+		String svg_URI_input;
+		try {
+			svg_URI_input = Paths.get("test_batik.svg").toUri().toURL()
+					.toString();
+			TranscoderInput input_svg_image = new TranscoderInput(svg_URI_input);
+			OutputStream pdf_ostream;
+			if (path.contains(".pdf")) {
+				pdf_ostream = new FileOutputStream(path);
+			} else {
+				pdf_ostream = new FileOutputStream(path + ".pdf");
+			}
+			int maxWidth = 0;
+			int maxHeight = 0;
+			for(Node n : graph.getNodes()){
+				if(maxWidth < n.getX()){
+					maxWidth = n.getX();
+				}
+				if(maxHeight < n.getY()){
+					maxHeight = n.getY();
+				}
+			}
+			Rectangle r = new Rectangle(maxWidth + 30, maxHeight + 30);
+			TranscoderOutput output_pdf_file = new TranscoderOutput(pdf_ostream);
+			Transcoder transcoder = new PDFTranscoder();
+			transcoder.addTranscodingHint(PDFTranscoder.KEY_WIDTH, new Float(r.width));
+			transcoder.addTranscodingHint(PDFTranscoder.KEY_HEIGHT, new Float(r.height));
+			transcoder.addTranscodingHint(PDFTranscoder.KEY_AOI, r);
+
+			transcoder.transcode(input_svg_image, output_pdf_file);
+			pdf_ostream.flush();
+			pdf_ostream.close();
+
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (TranscoderException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		// File outputFile = new File("out.pdf");
+		// OutputStream out = null;
+		// try {
+		// out = new java.io.FileOutputStream(outputFile);
+		// out = new java.io.BufferedOutputStream(out);
+		// PDFDocumentGraphics2D g2d = new PDFDocumentGraphics2D();
+		// g2d.setDeviceDPI(PDFDocumentGraphics2D.NORMAL_PDF_RESOLUTION);
+		// g2d.setGraphicContext(new GraphicContext());
+		// Dimension pageSize = new Dimension(595, 842); //A4
+		// g2d.setupDocument(out, pageSize.width, pageSize.height);
+		//
+		//
+		// //Works:
+		// //g2d.addLink(targetRect, tx,
+		// "http://www.apache.org",PDFLink.EXTERNAL);
+		// //Doesn't work
+		// //g2d.addLink(targetRect, tx, "[/XYZ 0 0 null]", PDFLink.INTERNAL);
+		// //Works:
+		// g2d.finish();
+		// } catch (FileNotFoundException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// } catch (IOException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// } finally {
+		// IOUtils.closeQuietly(out);
+		// }
+	}
+
+	public void setLatticeGraph(LatticeGraph g) {
+		graph = g;
+		init();
+		setMove(move);
+	}
+
+	private void resetHighlighting() {
+		for (Node n : lastIdeal) {
+			n.setPartOfAnIdeal(false);
+		}
+	}
+
+	public void setMove(boolean change) {
+		move = change;
+		for (Node n : graph.getNodes()) {
+			n.moveSubgraph(change);
+		}
+	}
+
+	public void idealHighlighting(boolean change) {
+		this.idealHighlighting = change;
+	}
 
 }
