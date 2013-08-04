@@ -45,7 +45,7 @@ public class MyExpert extends AbstractExpert<String, String, FullObject<String, 
 
     @Override
     public void explorationFinished() {
-        showFinishDialog("Attribute Exploration is finished");
+        showMessageDialog(frame, "Attribute Exploration is finished", false);
     }
 
     @Override
@@ -70,10 +70,10 @@ public class MyExpert extends AbstractExpert<String, String, FullObject<String, 
     @Override
     public void counterExampleInvalid(FullObject<String, String> counterexample, int reason) {
         if (reason == COUNTEREXAMPLE_INVALID) {
-            showErrorDialog(counterexample.getIdentifier() + " doesn't respect the implication.");
+            showMessageDialog(frame, counterexample.getIdentifier() + " doesn't respect the implication.", true);
         }
         if (reason == COUNTEREXAMPLE_EXISTS) {
-            showErrorDialog(counterexample.getIdentifier() + " already exists.");
+            showMessageDialog(frame, counterexample.getIdentifier() + " already exists.", true);
         }
 
     }
@@ -174,42 +174,6 @@ public class MyExpert extends AbstractExpert<String, String, FullObject<String, 
             } else {
                 explorationFinished();
             }
-    }
-
-    private void showFinishDialog(String message) {
-        final WebOptionPane pane = new WebOptionPane();
-        final WebDialog dialog = new WebDialog(frame, "Information", true);
-        pane.setMessageType(WebOptionPane.INFORMATION_MESSAGE);
-        pane.setMessage(new WebLabel(message));
-        pane.addPropertyChangeListener(new PropertyChangeListener() {
-            public void propertyChange(PropertyChangeEvent e) {
-                if (dialog.isVisible() && (e.getSource() == pane)
-                        && (e.getPropertyName().equals(WebOptionPane.VALUE_PROPERTY))) {
-                    dialog.setVisible(false);
-                }
-            }
-        });
-        dialog.setContentPane(pane);
-        dialog.pack();
-        Util.centerDialogInsideMainFrame(frame, dialog);
-        dialog.setVisible(true);
-    }
-
-    private void showErrorDialog(String message) {
-        final WebOptionPane pane = new WebOptionPane(message, WebOptionPane.ERROR_MESSAGE);
-        final WebDialog dialog = new WebDialog(frame, "Error", true);
-        pane.addPropertyChangeListener(new PropertyChangeListener() {
-            public void propertyChange(PropertyChangeEvent e) {
-                if (dialog.isVisible() && (e.getSource() == pane)
-                        && (e.getPropertyName().equals(WebOptionPane.VALUE_PROPERTY))) {
-                    dialog.setVisible(false);
-                }
-            }
-        });
-        dialog.setContentPane(pane);
-        dialog.pack();
-        centerDialogInsideMainFrame(frame, dialog);
-        dialog.setVisible(true);
     }
 
     // ////////////////////////////////////////////////////////////////////////////

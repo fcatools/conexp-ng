@@ -13,9 +13,8 @@ import java.util.HashMap;
 
 public class BurmeisterReader {
 
-    public BurmeisterReader(Conf state) throws IllegalObjectException,
-            IOException {
-        FileInputStream fis = new FileInputStream(state.filePath);
+    public BurmeisterReader(Conf state, String path) throws IllegalObjectException, IOException {
+        FileInputStream fis = new FileInputStream(path);
         BufferedReader br = new BufferedReader(new InputStreamReader(fis));
         String line;
 
@@ -58,17 +57,14 @@ public class BurmeisterReader {
             for (int i = 0; i < objCount; i++) {
                 int j = 0;
                 FullObject<String, String> obj = context.getObjectAtIndex(i);
-                if (!(line.contains("X") || line.contains("x"))
-                        && !line.contains(".")) {
+                if (!(line.contains("X") || line.contains("x")) && !line.contains(".")) {
                     br.close();
                     throw new IOException("Attribute/Object count was wrong");
                 }
                 for (char c : line.toCharArray()) {
                     if (c != '.')
 
-                        context.addAttributeToObject(
-                                context.getAttributeAtIndex(j),
-                                obj.getIdentifier());
+                        context.addAttributeToObject(context.getAttributeAtIndex(j), obj.getIdentifier());
 
                     j++;
                 }
@@ -81,6 +77,10 @@ public class BurmeisterReader {
         }
 
         state.guiConf.columnWidths = new HashMap<>();
+
+        path = path.substring(0, path.lastIndexOf(System.getProperty("file.separator")) + 1) + "untitled.cex";
+
+        state.setNewFile(path);
         state.newContext(context);
     }
 }

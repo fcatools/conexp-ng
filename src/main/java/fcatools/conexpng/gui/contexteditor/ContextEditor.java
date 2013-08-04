@@ -1,6 +1,8 @@
 package fcatools.conexpng.gui.contexteditor;
 
 import com.alee.extended.panel.WebButtonGroup;
+import com.alee.laf.menu.WebPopupMenu;
+
 import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
 import de.tudresden.inf.tcs.fcalib.FullObject;
 import fcatools.conexpng.ContextChangeEvents;
@@ -52,9 +54,9 @@ public class ContextEditor extends View {
     private final ContextMatrix matrix;
     private final ContextMatrixModel matrixModel;
     // Context menus
-    final JPopupMenu cellPopupMenu;
-    final JPopupMenu objectCellPopupMenu;
-    final JPopupMenu attributeCellPopupMenu;
+    final WebPopupMenu cellPopupMenu;
+    final WebPopupMenu objectCellPopupMenu;
+    final WebPopupMenu attributeCellPopupMenu;
 
     // For remembering which header cell has been right-clicked
     // For movement inside the matrix
@@ -68,9 +70,9 @@ public class ContextEditor extends View {
         setLayout(new BorderLayout());
 
         // Initialize various components
-        cellPopupMenu = new JPopupMenu();
-        objectCellPopupMenu = new JPopupMenu();
-        attributeCellPopupMenu = new JPopupMenu();
+        cellPopupMenu = new WebPopupMenu();
+        objectCellPopupMenu = new WebPopupMenu();
+        attributeCellPopupMenu = new WebPopupMenu();
         matrixModel = new ContextMatrixModel(state);
         matrix = new ContextMatrix(matrixModel, state.guiConf.columnWidths);
         JScrollPane scrollPane = matrix.createStripedJScrollPane(getBackground());
@@ -273,11 +275,11 @@ public class ContextEditor extends View {
         // Inner cells context menu
         // ------------------------
         addMenuItem(cellPopupMenu, "Select all", am.get("selectAll"));
-        cellPopupMenu.add(new JPopupMenu.Separator());
+        cellPopupMenu.add(new WebPopupMenu.Separator());
         addMenuItem(cellPopupMenu, "Fill", am.get("fill"));
         addMenuItem(cellPopupMenu, "Clear", am.get("clear"));
         addMenuItem(cellPopupMenu, "Invert", am.get("invert"));
-        cellPopupMenu.add(new JPopupMenu.Separator());
+        cellPopupMenu.add(new WebPopupMenu.Separator());
         addMenuItem(cellPopupMenu, "Remove attribute(s)", am.get("removeSelectedAttributes"));
         addMenuItem(cellPopupMenu, "Remove object(s)", am.get("removeSelectedObjects"));
         // ------------------------

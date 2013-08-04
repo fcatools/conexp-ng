@@ -13,9 +13,9 @@ public class BurmeisterWriter {
 
     private final String EOL = System.getProperty("line.separator");
 
-    public BurmeisterWriter(Conf state) throws IOException {
+    public BurmeisterWriter(Conf state, String path) throws IOException {
 
-        FileOutputStream fos = new FileOutputStream(state.filePath);
+        FileOutputStream fos = new FileOutputStream(path);
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
         bw.append("B" + EOL);
         bw.append("no name" + EOL); // the name of the context
@@ -29,8 +29,7 @@ public class BurmeisterWriter {
         }
         for (FullObject<String, String> obj : state.context.getObjects()) {
             for (String attr : state.context.getAttributes()) {
-                bw.append(state.context.objectHasAttribute(obj, attr) ? "X"
-                        : ".");
+                bw.append(state.context.objectHasAttribute(obj, attr) ? "X" : ".");
             }
             bw.append(EOL);
         }

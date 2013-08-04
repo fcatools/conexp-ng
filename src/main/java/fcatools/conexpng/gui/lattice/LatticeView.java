@@ -5,14 +5,12 @@ import fcatools.conexpng.Conf;
 import fcatools.conexpng.Conf.ContextChangeEvent;
 import fcatools.conexpng.Conf.StatusMessage;
 import fcatools.conexpng.Util;
-import fcatools.conexpng.gui.MainToolbar;
 import fcatools.conexpng.gui.View;
 import fcatools.conexpng.model.ILatticeAlgorithm;
 import fcatools.conexpng.model.TestLatticeAlgorithm;
 
 import javax.swing.*;
 
-import com.alee.extended.filechooser.WebDirectoryChooser;
 import com.alee.laf.optionpane.WebOptionPane;
 import com.alee.laf.rootpane.WebDialog;
 
@@ -51,22 +49,22 @@ public class LatticeView extends View {
             @Override
             public void actionPerformed(ActionEvent e) {
                 final JFileChooser fc = new JFileChooser(state.filePath);
-            	final WebDialog dialog = new WebDialog();
-            	dialog.setContentPane(fc);
+                final WebDialog dialog = new WebDialog();
+                dialog.setContentPane(fc);
                 fc.setDialogType(JFileChooser.SAVE_DIALOG);
                 fc.addActionListener(new ActionListener() {
 
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						String command = (String) e.getActionCommand();
-						if(command.equals(JFileChooser.CANCEL_SELECTION)){
-							dialog.setVisible(false);
-							return;
-						}else if(command.equals(JFileChooser.APPROVE_SELECTION)){
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        String command = (String) e.getActionCommand();
+                        if(command.equals(JFileChooser.CANCEL_SELECTION)){
+                            dialog.setVisible(false);
+                            return;
+                        }else if(command.equals(JFileChooser.APPROVE_SELECTION)){
                             File file = fc.getSelectedFile();
                             String path = file.getAbsolutePath();
                             if(file.exists()){
-                            	WebOptionPane pane = new WebOptionPane(new JLabel("File already exists. Do you really want to overwrite "
+                                WebOptionPane pane = new WebOptionPane(new JLabel("File already exists. Do you really want to overwrite "
                                         + file.getName() + "?"), JOptionPane.YES_NO_OPTION);
                                 pane.setMessageType(WebOptionPane.QUESTION_MESSAGE);
                                 Object[] options = { "Yes", "No" };
@@ -78,17 +76,17 @@ public class LatticeView extends View {
                                 dialog2.setVisible(true);
                                 //TODO
                                 if(n.equals("Yes")){
-                                	((LatticeGraphView) view).exportLatticeAsPDF(path); 
-                                	dialog.setVisible(false);
+                                    ((LatticeGraphView) view).exportLatticeAsPDF(path);
+                                    dialog.setVisible(false);
                                 }else{
                                 }
                             }else {
-                                ((LatticeGraphView) view).exportLatticeAsPDF(path); 
+                                ((LatticeGraphView) view).exportLatticeAsPDF(path);
                                 dialog.setVisible(false);
                             }
-						}
-					}
-                	
+                        }
+                    }
+
                 });
                 dialog.pack();
                 dialog.setVisible(true);
@@ -154,6 +152,16 @@ public class LatticeView extends View {
                         .getName() == ContextChangeEvents.NEWCONTEXT)) {
             updateLater = true;
         }
+        if (evt instanceof ContextChangeEvent
+                && (((ContextChangeEvent) evt).getName() == ContextChangeEvents.LOADEDFILE)) {
+            if (state.lattice.missingEdges()) {
+                state.concepts = state.context.getConceptsWithoutConsideredElementa();
+                state.lattice.addEdges(state.concepts);
+            }
+            ((LatticeGraphView) view).setLatticeGraph(state.lattice);
+            if (state.lattice.isEmpty())
+                updateLater = true;
+        }
         if (isVisible() && updateLater) {
             updateLater = false;
             state.startCalculation(StatusMessage.CALCULATINGLATTICE);
@@ -161,8 +169,9 @@ public class LatticeView extends View {
 
                 @Override
                 protected Void doInBackground() throws Exception {
-                	state.concepts=state.context.getConcepts();
-                    ((LatticeGraphView) view).setLatticeGraph(alg.computeLatticeGraph(state.concepts));
+                    state.concepts=state.context.getConcepts();
+                    state.lattice=alg.computeLatticeGraph(state.concepts);
+                    ((LatticeGraphView) view).setLatticeGraph(state.lattice);
                     return null;
                 }
 
@@ -176,15 +185,8 @@ public class LatticeView extends View {
         }
         if (evt instanceof ContextChangeEvent
                 && (((ContextChangeEvent) evt).getName() == ContextChangeEvents.TEMPORARYCONTEXTCHANGED)) {
-        	state.concepts=state.context.getConceptsWithoutConsideredElementa();
-        	((LatticeGraphView) view).setLatticeGraph(alg.computeLatticeGraph(state.concepts));
-        }
-        if (evt instanceof ContextChangeEvent
-                && (((ContextChangeEvent) evt).getName() == ContextChangeEvents.LOADEDFILE)) {
-            if(state.lattice.missingEdges()){
-            	state.concepts=state.context.getConceptsWithoutConsideredElementa();
-            	state.lattice.addEdges(state.concepts);
-            	}
+            state.concepts=state.context.getConceptsWithoutConsideredElementa();
+            state.lattice=alg.computeLatticeGraph(state.concepts);
             ((LatticeGraphView) view).setLatticeGraph(state.lattice);
         }
         view.repaint();

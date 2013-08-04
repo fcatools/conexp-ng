@@ -92,6 +92,21 @@ public class FormalContext extends de.tudresden.inf.tcs.fcalib.FormalContext<Str
         objectsOfAttribute = new HashMap<>();
     }
 
+    public FormalContext(int objectsCount, int attributesCount) {
+        super();
+        objectsOfAttribute = new HashMap<>();
+        for (int i = 0; i < attributesCount; i++) {
+            addAttribute("attr"+i);
+        }
+        for (int i = 0; i < objectsCount; i++) {
+            try {
+                addObject(new FullObject<String, String>("obj"+i));
+            } catch (IllegalObjectException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     @Override
     public Set<Concept<String, FullObject<String, String>>> getConcepts() {
         ListSet<Concept<String, FullObject<String, String>>> conceptLattice = new ListSet<Concept<String, FullObject<String, String>>>();
@@ -169,8 +184,8 @@ public class FormalContext extends de.tudresden.inf.tcs.fcalib.FormalContext<Str
          */
         HashSet<Set<String>> extents=new HashSet<Set<String>>();
         for(Set<String> e:extentPerAttr.values()){
-        	if(!extents.contains(e))
-        		extents.add(e);
+            if(!extents.contains(e))
+                extents.add(e);
         }
         for (Set<String> e : extents) {
             TreeSet<String> intents = new TreeSet<String>();
@@ -178,7 +193,7 @@ public class FormalContext extends de.tudresden.inf.tcs.fcalib.FormalContext<Str
             Concept<String, FullObject<String, String>> c = new LatticeConcept();
             if (e.isEmpty()) {
                 intents.addAll(getAttributes());
-            } else 
+            } else
             for (FullObject<String, String> i : this.getObjects()) {
                 if (e.contains(i.getIdentifier().toString())) {
                     TreeSet<String> prev = sort(i.getDescription().getAttributes());
@@ -279,8 +294,8 @@ public class FormalContext extends de.tudresden.inf.tcs.fcalib.FormalContext<Str
 
         HashSet<Set<String>> extents=new HashSet<Set<String>>();
         for(Set<String> e:extentPerAttr.values()){
-        	if(!extents.contains(e))
-        		extents.add(e);
+            if(!extents.contains(e))
+                extents.add(e);
         }
         for (Set<String> e : extents) {
             TreeSet<String> intents = new TreeSet<String>();
@@ -288,7 +303,7 @@ public class FormalContext extends de.tudresden.inf.tcs.fcalib.FormalContext<Str
             Concept<String, FullObject<String, String>> c = new LatticeConcept();
             if (e.isEmpty()) {
                 intents.addAll(getAttributes());
-            } else 
+            } else
             for (FullObject<String, String> i : this.getObjects()) {
                 if (!dontConsideredObj.contains(i)) {
                     if (e.contains(i.getIdentifier().toString())) {

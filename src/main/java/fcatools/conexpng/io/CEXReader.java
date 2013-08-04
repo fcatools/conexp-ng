@@ -40,13 +40,13 @@ public class CEXReader {
     private Set<AssociationRule> associations;
     private Set<FCAImplication<String>> implications;
 
-    public CEXReader(Conf state) throws XMLStreamException, IllegalObjectException, IOException, NumberFormatException,
-            IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+    public CEXReader(Conf state, String path) throws XMLStreamException, IllegalObjectException, IOException,
+            NumberFormatException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException,
+            SecurityException {
         guistate = new GUIConf();
         InputStream in = null;
 
-        in = new FileInputStream(state.filePath);
-
+        in = new FileInputStream(path);
         XMLInputFactory factory = XMLInputFactory.newInstance();
         XMLEventReader parser = null;
 
@@ -101,6 +101,7 @@ public class CEXReader {
         state.implications = implications;
         state.lattice = lattice;
         state.context = context;
+        state.setNewFile(path);
         state.loadedFile();
     }
 

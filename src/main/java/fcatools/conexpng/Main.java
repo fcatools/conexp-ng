@@ -5,15 +5,12 @@ import com.google.common.collect.Sets;
 import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
 import de.tudresden.inf.tcs.fcalib.FullObject;
 import fcatools.conexpng.gui.MainFrame;
-import fcatools.conexpng.io.BurmeisterReader;
 import fcatools.conexpng.io.CEXReader;
 import fcatools.conexpng.model.FormalContext;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.*;
 import java.util.Properties;
 
@@ -30,91 +27,79 @@ public class Main {
     public static final String optionsFileName = new File(getSettingsDirectory(), "options.prop").getPath();
     private static Rectangle r;
     private static Exception exception = null;
-    private static boolean fileOpened=false;
+    private static boolean fileOpened = false;
 
-    public Main(){
-         // Disabled until there is a fix for #98
-       // WebLookAndFeel.install();
+    public Main() {
+        // Disabled until there is a fix for #98
+        WebLookAndFeel.install();
 
-       // Disable border around focused cells as it does not fit into the
-       // context editor concept
-       UIManager.put("Table.focusCellHighlightBorder", new EmptyBorder(0, 0, 0, 0));
-       // Disable changing foreground color of cells as it does not fit into
-       // the context editor concept
-       UIManager.put("Table.focusCellForeground", Color.black);
+        // Disable border around focused cells as it does not fit into the
+        // context editor concept
+        UIManager.put("Table.focusCellHighlightBorder", new EmptyBorder(0, 0, 0, 0));
+        // Disable changing foreground color of cells as it does not fit into
+        // the context editor concept
+        UIManager.put("Table.focusCellForeground", Color.black);
 
-       final Conf state = new Conf();
+        final Conf state = new Conf();
 
-       boolean firstStart = false;
-       File optionsFile = new File(optionsFileName);
-       if (optionsFile.exists()) {
-           try {
-               restoreOptions(state);
-           } catch (IOException ioe) {
-               ioe.printStackTrace();
-           }
-       } else {
-           showExample(state);
-           state.filePath = System.getProperty("user.home");
-           firstStart = true;
-       }
+        boolean firstStart = false;
+        File optionsFile = new File(optionsFileName);
+        if (optionsFile.exists()) {
+            try {
+                restoreOptions(state);
+            } catch (IOException ioe) {
+                ioe.printStackTrace();
+            }
+        } else {
+            showExample(state);
+            state.filePath = System.getProperty("user.home") + System.getProperty("file.separator") + "untitled.cex";
+            firstStart = true;
+        }
 
-       // Create main window and take care of correctly saving and restoring
-       // the last window location
-       final MainFrame f = new MainFrame(state);
-       f.setMinimumSize(new Dimension(1000, 660));
-       f.addWindowListener(new WindowAdapter() {
-           public void windowClosing(WindowEvent we) {
-               try {
-                   storeOptions(f, state);
-                   f.new CloseAction().actionPerformed(null);
-               } catch (Exception e) {
-                   e.printStackTrace();
-               }
-               System.exit(0);
-           }
-       });
-       if (exception != null) {
-           Util.handleIOExceptions(f, exception, state.filePath);
-       }
-       if (firstStart) {
-           f.setSize(1000, 660);
-           f.setLocationByPlatform(true);
-       } else
-           f.setBounds(r);
-       f.setVisible(true);
+        // Create main window and take care of correctly saving and restoring
+        // the last window location
+        final MainFrame f = new MainFrame(state);
+        f.setTitle("ConExp-NG - \"" + state.filePath + "\"");
+        f.setMinimumSize(new Dimension(1000, 660));
+        if (exception != null) {
+            Util.handleIOExceptions(f, exception, state.filePath);
+        }
+        if (firstStart) {
+            f.setSize(1000, 660);
+            f.setLocationByPlatform(true);
+        } else
+            f.setBounds(r);
+        f.setVisible(true);
 
-       // Force various GUI components to update
-       if (fileOpened)
-           state.loadedFile();
-       else
-           state.contextChanged();
-       state.saveConf();
+        // Force various GUI components to update
+        if (fileOpened)
+            state.loadedFile();
+        state.saveConf();
     }
 
     public static void main(String... args) {
-       new Main();
+        new Main();
     }
 
     private void showExample(Conf state) {
-        state.filePath = "untitled.cex";
-        state.context = new FormalContext();
-        state.context.addAttribute("female");
-        state.context.addAttribute("juvenile");
-        state.context.addAttribute("adult");
-        state.context.addAttribute("male");
+        FormalContext context = new FormalContext();
+        context.addAttribute("female");
+        context.addAttribute("juvenile");
+        context.addAttribute("adult");
+        context.addAttribute("male");
         try {
-            state.context.addObject(new FullObject<>("girl", Sets.newHashSet("female", "juvenile")));
-            state.context.addObject(new FullObject<>("woman", Sets.newHashSet("female", "adult")));
-            state.context.addObject(new FullObject<>("boy", Sets.newHashSet("male", "juvenile")));
-            state.context.addObject(new FullObject<>("man", Sets.newHashSet("male", "adult")));
+            context.addObject(new FullObject<>("girl", Sets.newHashSet("female", "juvenile")));
+            context.addObject(new FullObject<>("woman", Sets.newHashSet("female", "adult")));
+            context.addObject(new FullObject<>("boy", Sets.newHashSet("male", "juvenile")));
+            context.addObject(new FullObject<>("man", Sets.newHashSet("male", "adult")));
         } catch (IllegalObjectException e1) {
             e1.printStackTrace();
         }
+        state.newContext(context);
     }
 
     // Store location & size of UI & dir that was last opened from
-    private void storeOptions(Frame f, Conf state) throws Exception {
+    public static void storeOptions(Frame f, Conf state) throws Exception {
         File file = new File(optionsFileName);
         Properties p = new Properties();
         // restore the frame from 'full screen' first!
@@ -129,7 +114,10 @@ public class Main {
         p.setProperty("y", "" + y);
         p.setProperty("w", "" + w);
         p.setProperty("h", "" + h);
-        p.setProperty("lastOpened", state.filePath);
+        if (new File(state.filePath).exists())
+            p.setProperty("lastOpened", state.filePath);
+        else
+            p.setProperty("lastOpened", state.lastOpened.firstElement());
         for (int i = 0; i < 5; i++) {
             if (state.lastOpened.size() > i)
                 p.setProperty("lastOpened" + i, state.lastOpened.get(i));
@@ -162,20 +150,14 @@ public class Main {
         if (new File(lastOpened).isFile()) {
             state.filePath = lastOpened;
             try {
-                if (lastOpened.endsWith("cex"))
-
-                    new CEXReader(state);
-
-                else
-
-                    new BurmeisterReader(state);
+                new CEXReader(state, state.filePath);
                 fileOpened = true;
             } catch (Exception e) {
                 exception = e;
             }
         } else {
             showExample(state);
-            state.filePath = System.getProperty("user.home");
+            state.filePath = System.getProperty("user.home") + System.getProperty("file.separator") + "untitled.cex";
         }
         r = new Rectangle(x, y, w, h);
     }

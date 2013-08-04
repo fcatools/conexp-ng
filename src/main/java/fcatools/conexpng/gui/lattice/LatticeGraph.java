@@ -192,4 +192,8 @@ public class LatticeGraph {
         return null;
     }
 
+    public boolean isEmpty() {
+        return nodes.isEmpty();
+    }
+
 }
