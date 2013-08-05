@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
+import java.util.TreeSet;
 
 import de.tudresden.inf.tcs.fcaapi.Concept;
 import de.tudresden.inf.tcs.fcalib.FullObject;
@@ -36,6 +37,7 @@ public abstract class ILatticeAlgorithm {
 		this.lattConcepts = set;
 		initGraph();
 		computeAllIdeals();
+		computeVisibleObjectsAndAttributes();
 		computeLatticeGraphPositions();
 		return graph;
 	}
@@ -60,7 +62,7 @@ public abstract class ILatticeAlgorithm {
 		}
 
 		this.removeAllDuplicates();
-		
+
 		List<Node> topNode = new ArrayList<>();
 		for (Node u : graph.getNodes()) {
 			topNode.add(u);
@@ -83,14 +85,16 @@ public abstract class ILatticeAlgorithm {
 					v.setLevel(n.getLevel() + 1);
 					v.update((int) (Math.random() * 500), 100 * v.getLevel(),
 							true);
-					v.getAttributesLabel().setXYWRTLabelType(v.getX(), v.getY());
+					v.getAttributesLabel()
+							.setXYWRTLabelType(v.getX(), v.getY());
 					v.getObjectsLabel().setXYWRTLabelType(v.getX(), v.getY());
 					q.add(v);
 				}
 			}
 		}
-		for(Node n : graph.getNodes()){
-			System.out.println("Objekte = " + n.getObjects() + ", Attribute = " + n.getAttributes() + ", Level = " + n.getLevel());
+		for (Node n : graph.getNodes()) {
+			System.out.println("Objekte = " + n.getObjects() + ", Attribute = "
+					+ n.getAttributes() + ", Level = " + n.getLevel());
 		}
 		System.out.println("-------------------");
 
@@ -152,8 +156,8 @@ public abstract class ILatticeAlgorithm {
 
 	private void removeAllDuplicates() {
 		ArrayList<Node> duplicates = new ArrayList<>();
-		for(Node n : graph.getNodes()){
-			if(n.getObjects().isEmpty() && n.getAttributes().isEmpty()){
+		for (Node n : graph.getNodes()) {
+			if (n.getObjects().isEmpty() && n.getAttributes().isEmpty()) {
 				duplicates.add(n);
 			}
 		}
@@ -208,6 +212,58 @@ public abstract class ILatticeAlgorithm {
 				if (u.getObjects().containsAll(v.getObjects())
 						&& v.getAttributes().containsAll(u.getAttributes())) {
 					u.getIdeal().add(v);
+				}
+			}
+		}
+	}
+
+	public void computeVisibleObjectsAndAttributes() {
+		// calc which obj/attr has to be shown
+		Set<String> usedObj = new TreeSet<>();
+		Set<String> usedAttr = new TreeSet<>();
+		Node maxNode = new Node();
+		Node minNode;
+		if (graph.getNodes().size() == 0) {
+			minNode = new Node();
+		} else {
+			minNode = graph.getNode(0);
+		}
+
+		for (Node u : graph.getNodes()) {
+			if (u.getIdeal().size() >= maxNode.getIdeal().size()) {
+				maxNode = u;
+			} else if (u.getIdeal().size() <= minNode.getIdeal().size()) {
+				minNode = u;
+			}
+		}
+
+		Queue<Node> pq = new LinkedList<>();
+		pq.add(maxNode);
+		while (!pq.isEmpty()) {
+			Node n = pq.remove();
+			for (String a : n.getAttributes()) {
+				if (!usedAttr.contains(a)) {
+					n.setVisibleAttribute(a);
+					usedAttr.add(a);
+				}
+			}
+			for (Node u : n.getBelow()) {
+				pq.add(u);
+			}
+		}
+
+		pq.add(minNode);
+		while (!pq.isEmpty()) {
+			Node n = pq.remove();
+			for (String o : n.getObjects()) {
+				if (!usedObj.contains(o)) {
+					n.setVisibleObject(o);
+					usedObj.add(o);
+				}
+			}
+			for (Node u : graph.getNodes()) {
+				if (u.getBelow().contains(n)) {
+					pq.add(u);
 				}
 			}
 		}
