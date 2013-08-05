@@ -30,7 +30,6 @@ public class Main {
     private static boolean fileOpened = false;
 
     public Main() {
-        // Disabled until there is a fix for #98
         WebLookAndFeel.install();
 
         // Disable border around focused cells as it does not fit into the
