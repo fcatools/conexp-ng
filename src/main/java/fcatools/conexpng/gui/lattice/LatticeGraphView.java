@@ -342,6 +342,23 @@ public class LatticeGraphView extends JSVGCanvas {
 				if (maxHeight < n.getY()) {
 					maxHeight = n.getY();
 				}
+				if(state.showAttributLabel){
+					if(maxWidth < n.getAttributesLabel().getX()){
+						maxWidth = n.getAttributesLabel().getX();
+					}
+					if(maxHeight < n.getAttributesLabel().getY()){
+						maxHeight = n.getAttributesLabel().getY();
+					}
+				}
+				if(state.showObjectLabel){
+					if(maxWidth < n.getObjectsLabel().getX()){
+						maxWidth = n.getObjectsLabel().getX();
+					}
+					if(maxHeight < n.getObjectsLabel().getY()){
+						maxHeight = n.getObjectsLabel().getY();
+					}
+				}
+				
 			}
 			Rectangle r = new Rectangle(maxWidth + 30, maxHeight + 30);
 			TranscoderOutput output_pdf_file = new TranscoderOutput(pdf_ostream);
