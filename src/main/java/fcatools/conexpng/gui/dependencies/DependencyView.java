@@ -1,11 +1,15 @@
 package fcatools.conexpng.gui.dependencies;
 
+import com.alee.laf.panel.WebPanel;
+import com.alee.laf.scroll.WebScrollPane;
+import com.alee.laf.splitpane.WebSplitPane;
+import com.alee.laf.text.WebTextPane;
 import de.tudresden.inf.tcs.fcaapi.FCAImplication;
 import de.tudresden.inf.tcs.fcalib.ImplicationSet;
-import fcatools.conexpng.ContextChangeEvents;
 import fcatools.conexpng.Conf;
 import fcatools.conexpng.Conf.ContextChangeEvent;
 import fcatools.conexpng.Conf.StatusMessage;
+import fcatools.conexpng.ContextChangeEvents;
 import fcatools.conexpng.gui.View;
 import fcatools.conexpng.model.AssociationRule;
 
@@ -15,12 +19,6 @@ import javax.swing.event.ChangeListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
-
-import com.alee.laf.panel.WebPanel;
-import com.alee.laf.scroll.WebScrollPane;
-import com.alee.laf.splitpane.WebSplitPane;
-import com.alee.laf.text.WebTextPane;
-
 import java.awt.*;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
@@ -121,7 +119,7 @@ public class DependencyView extends View {
 
 		settings.add(new DependencySettings(state.guiConf), BorderLayout.NORTH);
 		settings.getComponent(0).addPropertyChangeListener(this);
-		settings.setMinimumSize(new Dimension(170, 400));
+		settings.setMinimumSize(new Dimension(190, 400));
 		toolbar = null;
 		super.init();
 		this.splitPane.setDividerLocation(state.guiConf.dependenciessettingssplitpos);
