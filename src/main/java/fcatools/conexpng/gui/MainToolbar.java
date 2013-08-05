@@ -2,34 +2,34 @@ package fcatools.conexpng.gui;
 
 import de.tudresden.inf.tcs.fcalib.FullObject;
 import de.tudresden.inf.tcs.fcalib.action.StartExplorationAction;
-import extra.Tetris;
-import extra.TetrisListener;
 import fcatools.conexpng.Conf;
 import fcatools.conexpng.Util;
+import fcatools.conexpng.gui.MainFrame.OverwritingFileDiaolog;
 import fcatools.conexpng.gui.MainFrame.UnsavedChangesDiaolog;
-import fcatools.conexpng.io.BurmeisterReader;
-import fcatools.conexpng.io.BurmeisterWriter;
+import fcatools.conexpng.io.CSVWriter;
+import fcatools.conexpng.io.CXTReader;
+import fcatools.conexpng.io.CXTWriter;
 import fcatools.conexpng.io.CEXReader;
 import fcatools.conexpng.io.CEXWriter;
 import fcatools.conexpng.io.CSVReader;
 import fcatools.conexpng.io.OALReader;
+import fcatools.conexpng.io.OALWriter;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import com.alee.laf.filechooser.WebFileChooser;
+import com.alee.extended.filefilter.FilesFilter;
 import com.alee.extended.panel.GridPanel;
 import com.alee.extended.panel.GroupPanel;
 import com.alee.extended.panel.WebButtonGroup;
 import com.alee.extended.panel.WebComponentPanel;
 import com.alee.laf.button.WebButton;
-import com.alee.laf.desktoppane.WebInternalFrame;
 import com.alee.laf.label.WebLabel;
 import com.alee.laf.list.WebList;
-import com.alee.laf.menu.WebMenuBar;
 import com.alee.laf.optionpane.WebOptionPane;
 import com.alee.laf.rootpane.WebDialog;
-import com.alee.laf.rootpane.WebFrame;
 import com.alee.laf.spinner.WebSpinner;
 import com.alee.laf.toolbar.ToolbarStyle;
 import com.alee.laf.toolbar.WebToolBar;
@@ -39,11 +39,9 @@ import com.alee.managers.popup.WebButtonPopup;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import javax.swing.filechooser.FileFilter;
 import static fcatools.conexpng.Util.loadIcon;
 
 public class MainToolbar extends WebToolBar {
@@ -56,12 +54,12 @@ public class MainToolbar extends WebToolBar {
 	private static WebButton undoButton;
 	private static WebButton saveButton;
 
-	public FileFilter cexFilter = new FileFilter() {
+	public FilesFilter cexFilter = new FilesFilter() {
 
 		@Override
 		public boolean accept(File pathname) {
 
-			return !pathname.isHidden() && (pathname.isDirectory() || pathname.getName().endsWith(".cex"));
+			return !pathname.isHidden() && !pathname.isDirectory() && pathname.getName().endsWith(".cex");
 		}
 
 		@Override
@@ -70,14 +68,15 @@ public class MainToolbar extends WebToolBar {
 		}
 	};
 
-	public FileFilter otherFilter = new FileFilter() {
+	public FilesFilter otherFilter = new FilesFilter() {
 
 		@Override
 		public boolean accept(File pathname) {
 
 			return !pathname.isHidden()
-					&& (pathname.isDirectory() || pathname.getName().endsWith(".cxt")
-							|| pathname.getName().endsWith(".oal") || pathname.getName().endsWith(".csv"));
+					&& !pathname.isDirectory()
+					&& (pathname.getName().endsWith(".cxt") || pathname.getName().endsWith(".oal") || pathname
+							.getName().endsWith(".csv"));
 		}
 
 		@Override
@@ -317,7 +316,7 @@ public class MainToolbar extends WebToolBar {
 
 					@Override
 					public void actionPerformed(ActionEvent arg0) {
-					
+
 					}
 				});
 			}
@@ -359,66 +358,67 @@ public class MainToolbar extends WebToolBar {
 
 		private void saveFile(String path) {
 			try {
-				if (cex && !path.contains("."))
-					path = path.concat(".cex");
-				if (path.endsWith(".cex")) {
-					new CEXWriter(MainToolbar.this.state, path);
-					MainToolbar.this.state.setNewFile(path);
-				} else
-					new BurmeisterWriter(MainToolbar.this.state, path);
+				if (!cex) {
+					if (!path.contains("."))
+						path = path.concat(".cxt");
+					if (path.endsWith("cxt"))
+						new CXTWriter(state, path);
+					else if (path.endsWith("oal"))
+						new OALWriter(state, path);
+					else if (path.endsWith("csv"))
+						new CSVWriter(state, path);
+				} else {
+					if (!path.contains("."))
+						path = path.concat(".cex");
 
+					new CEXWriter(state, path);
+					state.setNewFile(path);
+					state.unsavedChanges = false;
+					MainToolbar.saveButton.setEnabled(false);
+				}
 			} catch (Exception e1) {
 				Util.handleIOExceptions(mainFrame, e1, path);
 			}
-			state.setNewFile(path);
-			MainToolbar.this.state.unsavedChanges = false;
-			MainToolbar.saveButton.setEnabled(false);
+
 		}
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			if (state.filePath.endsWith("untitled.cex") || saveAs) {
-				final JFileChooser fc = new JFileChooser(state.filePath.substring(0,
+				final WebFileChooser fc = new WebFileChooser();
+				fc.setCurrentDirectory(state.filePath.substring(0,
 						state.filePath.lastIndexOf(System.getProperty("file.separator"))));
-				final JDialog dialog = new JDialog(mainFrame, "Save file as", true);
+				final WebDialog dialog = new WebDialog(mainFrame, "Save file as", true);
 				dialog.setContentPane(fc);
-				fc.setDialogType(JFileChooser.SAVE_DIALOG);
+				fc.setMultiSelectionEnabled(false);
+				fc.setAcceptAllFileFilterUsed(false);
+				fc.addChoosableFileFilter(cex ? cexFilter : otherFilter);
+				fc.setFileSelectionMode(WebFileChooser.FILES_ONLY);
+				fc.setDialogType(WebFileChooser.SAVE_DIALOG);
 				fc.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						String state = (String) e.getActionCommand();
-						if ((state.equals(JFileChooser.APPROVE_SELECTION) && fc.getSelectedFile() != null)) {
+						if ((state.equals(WebFileChooser.APPROVE_SELECTION) && fc.getSelectedFile() != null)) {
 							File file = fc.getSelectedFile();
 							String path = file.getAbsolutePath();
 							if (file.exists()) {
-								JOptionPane pane = new JOptionPane(new JLabel("Do you really want to overwrite "
-										+ file.getName() + "?"), JOptionPane.YES_NO_OPTION);
-								pane.setMessageType(JOptionPane.QUESTION_MESSAGE);
-								JDialog dialog2 = pane.createDialog(mainFrame, "Overwriting existing file?");
-								Object[] options = { "Yes", "No" };
-								pane.setOptions(options);
-								dialog2.pack();
-								dialog2.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-								// Util.centerDialogInsideMainFrame(mainFrame,
-								// dialog2);
-								dialog2.setVisible(true);
-								String n = (String) pane.getValue();
-								if (n != null)
-									if (n.equals("Yes")) {
-										saveFile(path);
-										dialog.setVisible(false);
-									}
+								OverwritingFileDiaolog ofd = mainFrame.new OverwritingFileDiaolog(file);
+								if (ofd.isYes()) {
+									saveFile(path);
+									dialog.setVisible(false);
+								}
 							} else {
 								saveFile(path);
 								dialog.setVisible(false);
 							}
-						} else if (state.equals(JFileChooser.CANCEL_SELECTION)) {
+						} else if (state.equals(WebFileChooser.CANCEL_SELECTION)) {
 							dialog.setVisible(false);
 							return;
 						}
 					}
 				});
 				dialog.pack();
-				// Util.centerDialogInsideMainFrame(mainFrame, dialog);
+				Util.centerDialogInsideMainFrame(mainFrame, dialog);
 				dialog.setVisible(true);
 
 				if (fc.getSelectedFile() == null)
@@ -449,22 +449,29 @@ public class MainToolbar extends WebToolBar {
 				} else if (ucd.isCancel())
 					return;
 			}
-			final JFileChooser fc = new JFileChooser(state.filePath);
-			final JDialog dialog = new JDialog(mainFrame, "Open file", true);
-			fc.setFileFilter(cex ? cexFilter : otherFilter);
-			dialog.setContentPane(fc);
-			fc.setDialogType(JFileChooser.OPEN_DIALOG);
+			final WebFileChooser fc = new WebFileChooser(state.filePath);
+			final WebDialog dialog = new WebDialog(mainFrame, "Open file", true);
+
+			fc.setDialogType(WebFileChooser.OPEN_DIALOG);
 			fc.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					String state = (String) e.getActionCommand();
-					if ((state.equals(JFileChooser.APPROVE_SELECTION) && fc.getSelectedFile() != null)
-							|| state.equals(JFileChooser.CANCEL_SELECTION)) {
+					if ((state.equals(WebFileChooser.APPROVE_SELECTION) && fc.getSelectedFile() != null)
+							|| state.equals(WebFileChooser.CANCEL_SELECTION)) {
 						dialog.setVisible(false);
 					}
 				}
 			});
+			fc.setMultiSelectionEnabled(false);
+			fc.setAcceptAllFileFilterUsed(false);
+			fc.addChoosableFileFilter(cex ? cexFilter : otherFilter);
+			fc.setFileSelectionMode(WebFileChooser.FILES_ONLY);
+			// Doesn't work...
+			fc.setCurrentDirectory(state.filePath.substring(0,
+					state.filePath.lastIndexOf(System.getProperty("file.separator"))));
+			dialog.setContentPane(fc);
 			dialog.pack();
-			// Util.centerDialogInsideMainFrame(mainFrame, dialog);
+			Util.centerDialogInsideMainFrame(mainFrame, dialog);
 			dialog.setVisible(true);
 
 			if (fc.getSelectedFile() != null) {
@@ -477,11 +484,11 @@ public class MainToolbar extends WebToolBar {
 					if (path.endsWith(".cex") && cex)
 						new CEXReader(state, path);
 					else if (!cex && path.endsWith(".cxt"))
-						new BurmeisterReader(state, path);
+						new CXTReader(state, path);
 					else if (!cex && path.endsWith(".oal"))
-						new OALReader();
+						new OALReader(state, path);
 					else if (!cex && path.endsWith(".csv"))
-						new CSVReader();
+						new CSVReader(state, path);
 					else {
 						Util.showMessageDialog(mainFrame, "This fileformat is unfortunality not supported", true);
 						return;

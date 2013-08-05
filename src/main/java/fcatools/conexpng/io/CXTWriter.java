@@ -9,11 +9,11 @@ import de.tudresden.inf.tcs.fcalib.FullObject;
 
 import fcatools.conexpng.Conf;
 
-public class BurmeisterWriter {
+public class CXTWriter {
 
     private final String EOL = System.getProperty("line.separator");
 
-    public BurmeisterWriter(Conf state, String path) throws IOException {
+    public CXTWriter(Conf state, String path) throws IOException {
 
         FileOutputStream fos = new FileOutputStream(path);
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
