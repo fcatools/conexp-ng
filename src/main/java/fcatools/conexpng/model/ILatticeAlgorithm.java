@@ -56,10 +56,11 @@ public abstract class ILatticeAlgorithm {
 				extent.add(fo.getIdentifier());
 			}
 			n.getObjects().addAll(extent);
-			// System.out.println(c.getIntent() + " : " + extent);
 			graph.getNodes().add(n);
 		}
 
+		this.removeAllDuplicates();
+		
 		List<Node> topNode = new ArrayList<>();
 		for (Node u : graph.getNodes()) {
 			topNode.add(u);
@@ -88,6 +89,10 @@ public abstract class ILatticeAlgorithm {
 				}
 			}
 		}
+		for(Node n : graph.getNodes()){
+			System.out.println("Objekte = " + n.getObjects() + ", Attribute = " + n.getAttributes() + ", Level = " + n.getLevel());
+		}
+		System.out.println("-------------------");
 
 	}
 
@@ -147,6 +152,13 @@ public abstract class ILatticeAlgorithm {
 
 	private void removeAllDuplicates() {
 		ArrayList<Node> duplicates = new ArrayList<>();
+		for(Node n : graph.getNodes()){
+			if(n.getObjects().isEmpty() && n.getAttributes().isEmpty()){
+				duplicates.add(n);
+			}
+		}
+		graph.getNodes().removeAll(duplicates);
+		duplicates.clear();
 		for (int i = 0; i < graph.getNodes().size() - 1; i++) {
 			Node u = graph.getNodes().get(i);
 			for (int j = i + 1; j < graph.getNodes().size(); j++) {
@@ -199,7 +211,6 @@ public abstract class ILatticeAlgorithm {
 				}
 			}
 		}
-		removeAllDuplicates();
 	}
 
 }

@@ -33,26 +33,6 @@ public class Label extends JPanel implements LatticeGraphElement {
 	}
 
 	public void paint(Graphics g) {
-		content = elementsToString();
-		g.setFont(font);
-		FontMetrics fm = g.getFontMetrics();
-		Rectangle r = fm.getStringBounds(content, g).getBounds();
-
-		g.setColor(Color.WHITE);
-		g.fillRect(r.x + x, r.y + y, r.width, r.height);
-
-		if (isObjectLabel) {
-			g.setColor(Color.MAGENTA);
-		} else {
-			g.setColor(Color.GREEN);
-		}
-		g.drawString(content, x, y);
-
-		g.setColor(Color.BLACK);
-		g.drawRect(r.x + x, r.y + y, r.width, r.height);
-
-		this.setBounds(r.x + x, r.y + y, r.width, r.height);
-
 	}
 
 	public void update(int x, int y, boolean first) {
