@@ -11,9 +11,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 
-public class BurmeisterReader {
+public class CXTReader {
 
-    public BurmeisterReader(Conf state, String path) throws IllegalObjectException, IOException {
+    public CXTReader(Conf state, String path) throws IllegalObjectException, IOException {
         FileInputStream fis = new FileInputStream(path);
         BufferedReader br = new BufferedReader(new InputStreamReader(fis));
         String line;

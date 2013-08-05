@@ -21,7 +21,7 @@ import com.alee.managers.hotkey.Hotkey;
 import com.alee.utils.CollectionUtils;
 import com.alee.utils.LafUtils;
 import com.alee.utils.SwingUtils;
-import com.alee.utils.swing.Timer;
+import com.alee.utils.swing.WebTimer;
 
 import javax.swing.*;
 import java.awt.*;
@@ -37,6 +37,7 @@ import java.util.List;
  * User: mgarin Date: 02.06.11 Time: 17:09
  */
 
+@SuppressWarnings("serial")
 public class Tetris extends JComponent
 {
     public static final int LINES_TO_CHANGE_STAGE = 10;
@@ -73,14 +74,14 @@ public class Tetris extends JComponent
     private Map<Point, Block> terrain = new HashMap<Point, Block> ();
 
     // Game time counter
-    private Timer pusher;
+    private WebTimer pusher;
 
     // Current falling figure
     private Figure currentFigure = null;
 
     // Keyboard events
     private Action action = null;
-    private Timer keyTimer;
+    private WebTimer keyTimer;
 
     // Next figure field
     private JComponent nextFigureField;
@@ -97,7 +98,7 @@ public class Tetris extends JComponent
 
         figuresQueue.add ( new Figure () );
 
-        keyTimer = new Timer ( "Tetris.keyTimer", 60, new ActionListener ()
+        keyTimer = new WebTimer ( "Tetris.keyTimer", 60, new ActionListener ()
         {
             public void actionPerformed ( ActionEvent e )
             {
@@ -113,7 +114,7 @@ public class Tetris extends JComponent
         } );
         keyTimer.setInitialDelay ( 0 );
 
-        pusher = new Timer ( "Tetris.gameTimer", getTickTime (), null )
+        pusher = new WebTimer ( "Tetris.gameTimer", getTickTime (), null )
         {
             public void start ()
             {
@@ -308,6 +309,7 @@ public class Tetris extends JComponent
         return TICK_TIME - stage * TICK_TIME_DECREASE;
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     private void performOneTick ()
     {
         // If there is no current falling figure adding next one

@@ -29,6 +29,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
+
 import static fcatools.conexpng.Util.loadIcon;
 
 // TODO: The code needs to be tidied up drastically
@@ -260,6 +262,51 @@ public class MainFrame extends WebFrame {
 
         public boolean canceled() {
             return canceled;
+        }
+    }
+
+    @SuppressWarnings("serial")
+    public class OverwritingFileDiaolog extends WebDialog {
+        private boolean yes;
+        private boolean no;
+
+        public OverwritingFileDiaolog(File file) {
+            super(MainFrame.this, "Overwriting existing file?", true);
+            Object[] options = { "Yes", "No" };
+            final WebOptionPane optionPane = new WebOptionPane("Do you really want to overwrite " + file.getName()
+                    + "?", WebOptionPane.QUESTION_MESSAGE, WebOptionPane.YES_NO_OPTION);
+            optionPane.setOptions(options);
+
+            setContentPane(optionPane);
+            optionPane.addPropertyChangeListener(new PropertyChangeListener() {
+                public void propertyChange(PropertyChangeEvent e) {
+                    if (isVisible() && (e.getSource() == optionPane)
+                            && (e.getPropertyName().equals(JOptionPane.VALUE_PROPERTY))) {
+                        setVisible(false);
+                    }
+                }
+            });
+            pack();
+            setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+            Util.centerDialogInsideMainFrame(MainFrame.this, this);
+            setVisible(true);
+            String n = (String) optionPane.getValue();
+            if (n.equals("Yes")) {
+                yes = true;
+                no = false;
+            } else if (n.equals("No")) {
+                no = true;
+                yes = false;
+            }
+
+        }
+
+        public boolean isYes() {
+            return yes;
+        }
+
+        public boolean isNo() {
+            return no;
         }
     }
 
