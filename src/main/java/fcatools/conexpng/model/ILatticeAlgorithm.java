@@ -68,6 +68,7 @@ public abstract class ILatticeAlgorithm {
 				Set<String> vEx = v.getObjects();
 				if (isLowerNeighbour(uEx, vEx)) {
 					v.addBelowNode(u);
+					graph.getEdges().add(new Edge(u, v));
 					topNode.remove(u);
 				}
 			}

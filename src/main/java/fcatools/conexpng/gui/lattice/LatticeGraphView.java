@@ -146,20 +146,34 @@ public class LatticeGraphView extends JSVGCanvas {
 		g.setColor(Color.BLACK);
 		int radius = LatticeView.radius;
 
-		for (Node n : graph.getNodes()) {
-			if (state.showEdges) {
-				for (Node u : n.getBelow()) {
-					g.setColor(Color.BLACK);
-					if (n.isPartOfAnIdeal() && u.isPartOfAnIdeal()
-							&& idealHighlighting) {
-						g.setColor(Color.BLUE);
-					} else if (!(n.isPartOfAnIdeal() && u.isPartOfAnIdeal())
-							&& idealHighlighting) {
-						g.setColor(Color.LIGHT_GRAY);
-					}
-					g.drawLine(n.getX() + radius, n.getY() + radius, u.getX()
-							+ radius, u.getY() + radius);
+//		for (Node n : graph.getNodes()) {
+//			if (state.showEdges) {
+//				for (Node u : n.getBelow()) {
+//					g.setColor(Color.BLACK);
+//					if (n.isPartOfAnIdeal() && u.isPartOfAnIdeal()
+//							&& idealHighlighting) {
+//						g.setColor(Color.BLUE);
+//					} else if (!(n.isPartOfAnIdeal() && u.isPartOfAnIdeal())
+//							&& idealHighlighting) {
+//						g.setColor(Color.LIGHT_GRAY);
+//					}
+//					g.drawLine(n.getX() + radius, n.getY() + radius, u.getX()
+//							+ radius, u.getY() + radius);
+//				}
+//			}
+//		}
+		if(!graph.getEdges().isEmpty() && state.showEdges){
+			for(Edge e : graph.getEdges()){
+				g.setColor(Color.BLACK);
+				if (e.getU().isPartOfAnIdeal() && e.getV().isPartOfAnIdeal()
+						&& idealHighlighting) {
+					g.setColor(Color.BLUE);
+				} else if (!(e.getU().isPartOfAnIdeal() && e.getV().isPartOfAnIdeal())
+						&& idealHighlighting) {
+					g.setColor(Color.LIGHT_GRAY);
 				}
+				g.drawLine(e.getU().getX() + radius, e.getU().getY() + radius, e.getV().getX()
+						+ radius, e.getV().getY() + radius);
 			}
 		}
 		for (Node n : graph.getNodes()) {
