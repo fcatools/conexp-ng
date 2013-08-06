@@ -103,16 +103,7 @@ public class LatticeGraphView extends JSVGCanvas {
             g.fillOval(x, y, radius * 2, radius * 2);
             g.setColor(Color.BLACK);
             g.drawOval(x, y, radius * 2, radius * 2);
-
-            // highlight an ideal if it selected
-            if (n.isPartOfAnIdeal() && idealHighlighting) {
-                lastIdeal.add(n);
-                g.setColor(Color.BLUE);
-                g.drawOval(x, y, radius * 2, radius * 2);
-            } else if ((!n.isPartOfAnIdeal()) && idealHighlighting) {
-                g.setColor(Color.LIGHT_GRAY);
-                g.fillOval(x, y, radius * 2, radius * 2);
-            }
+           
 
             // label drawing
             if ((!n.getVisibleObjects().isEmpty()) && state.showObjectLabel) {
@@ -139,12 +130,7 @@ public class LatticeGraphView extends JSVGCanvas {
                         r.width, r.height);
 
                 // draw filled node
-                g.setColor(Color.BLACK);
-                g.fillOval(x, y, LatticeView.radius * 2, LatticeView.radius * 2);
-                g.setColor(Color.WHITE);
-                g.fillArc(x, y, LatticeView.radius * 2, LatticeView.radius * 2, 0, 180);
-                g.setColor(Color.BLACK);
-                g.drawOval(x, y, LatticeView.radius * 2, LatticeView.radius * 2);
+                
             }
 
             if ((!n.getVisibleAttributes().isEmpty()) && state.showAttributLabel) {
@@ -171,12 +157,43 @@ public class LatticeGraphView extends JSVGCanvas {
                         r.y + n.getAttributesLabel().getY(), r.width, r.height);
 
                 // draw filled node
+                
+            }
+            if(!n.getVisibleAttributes().isEmpty() && !n.getVisibleObjects().isEmpty()){
+            	g.setColor(Color.BLACK);
+                 g.fillOval(x, y, LatticeView.radius * 2, LatticeView.radius * 2);
+                 g.setColor(Color.BLUE);
+                 g.fillArc(x, y, LatticeView.radius * 2, LatticeView.radius * 2, 0, 180);
+                 g.setColor(Color.BLACK);
+                 g.drawOval(x, y, LatticeView.radius * 2, LatticeView.radius * 2);
+              
+            }
+            else if(!n.getVisibleAttributes().isEmpty()){
                 g.setColor(Color.BLUE);
                 g.fillOval(x, y, LatticeView.radius * 2, LatticeView.radius * 2);
                 g.setColor(Color.WHITE);
                 g.fillArc(x, y, LatticeView.radius * 2, LatticeView.radius * 2, 180, 180);
                 g.setColor(Color.BLACK);
                 g.drawOval(x, y, LatticeView.radius * 2, LatticeView.radius * 2);
+            }
+            else if(!n.getVisibleObjects().isEmpty()){
+            	g.setColor(Color.BLACK);
+                g.fillOval(x, y, LatticeView.radius * 2, LatticeView.radius * 2);
+                g.setColor(Color.WHITE);
+                g.fillArc(x, y, LatticeView.radius * 2, LatticeView.radius * 2, 0, 180);
+                g.setColor(Color.BLACK);
+                g.drawOval(x, y, LatticeView.radius * 2, LatticeView.radius * 2);
+            }
+            
+            // highlight an ideal if it selected
+
+            if (n.isPartOfAnIdeal() && idealHighlighting) {
+                lastIdeal.add(n);
+                g.setColor(Color.BLUE);
+                g.drawOval(x, y, radius * 2, radius * 2);
+            } else if ((!n.isPartOfAnIdeal()) && idealHighlighting) {
+                g.setColor(Color.LIGHT_GRAY);
+                g.drawOval(x, y, radius * 2, radius * 2);
             }
         }
         resetHighlighting();

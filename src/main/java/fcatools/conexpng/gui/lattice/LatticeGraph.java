@@ -1,5 +1,6 @@
 package fcatools.conexpng.gui.lattice;
 
+import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -100,7 +101,7 @@ public class LatticeGraph {
     }
 
     public void addEdges(Set<Concept<String, FullObject<String, String>>> concepts) {
-        LatticeGraph temp = new TestLatticeAlgorithm().computeLatticeGraph(concepts);
+        LatticeGraph temp = new TestLatticeAlgorithm().computeLatticeGraph(concepts, new Rectangle());
         for (Edge e : temp.edges) {
             Node u = getNodeWithIntent(e.getU().getAttributes());
             Node v = getNodeWithIntent(e.getV().getAttributes());
