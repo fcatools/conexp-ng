@@ -186,6 +186,7 @@ public class LatticeView extends View {
         if (evt instanceof ContextChangeEvent
                 && (((ContextChangeEvent) evt).getName() == ContextChangeEvents.TEMPORARYCONTEXTCHANGED)) {
             state.concepts=state.context.getConceptsWithoutConsideredElementa();
+            
             state.lattice=alg.computeLatticeGraph(state.concepts);
             ((LatticeGraphView) view).setLatticeGraph(state.lattice);
         }

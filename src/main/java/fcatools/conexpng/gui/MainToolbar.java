@@ -5,7 +5,8 @@ import de.tudresden.inf.tcs.fcalib.action.StartExplorationAction;
 import fcatools.conexpng.Conf;
 import fcatools.conexpng.Util;
 import fcatools.conexpng.gui.MainFrame.OverwritingFileDiaolog;
-import fcatools.conexpng.gui.MainFrame.UnsavedChangesDiaolog;
+import fcatools.conexpng.gui.MainFrame.StillCalculatingDialog;
+import fcatools.conexpng.gui.MainFrame.UnsavedChangesDialog;
 import fcatools.conexpng.io.CSVWriter;
 import fcatools.conexpng.io.CXTReader;
 import fcatools.conexpng.io.CXTWriter;
@@ -33,12 +34,13 @@ import com.alee.laf.rootpane.WebDialog;
 import com.alee.laf.spinner.WebSpinner;
 import com.alee.laf.toolbar.ToolbarStyle;
 import com.alee.laf.toolbar.WebToolBar;
-import com.alee.managers.hotkey.Hotkey;
 import com.alee.managers.popup.PopupWay;
 import com.alee.managers.popup.WebButtonPopup;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
@@ -46,458 +48,528 @@ import static fcatools.conexpng.Util.loadIcon;
 
 public class MainToolbar extends WebToolBar {
 
-	private Conf state;
+    private Conf state;
 
-	private MainFrame mainFrame;
+    private MainFrame mainFrame;
 
-	private static WebButton redoButton;
-	private static WebButton undoButton;
-	private static WebButton saveButton;
+    private static WebButton redoButton;
+    private static WebButton undoButton;
+    private static WebButton saveButton;
 
-	public FilesFilter cexFilter = new FilesFilter() {
+    public FilesFilter cexFilter = new FilesFilter() {
 
-		@Override
-		public boolean accept(File pathname) {
+        @Override
+        public boolean accept(File pathname) {
 
-			return !pathname.isHidden() && !pathname.isDirectory() && pathname.getName().endsWith(".cex");
-		}
+            return !pathname.isHidden() && !pathname.isDirectory() && pathname.getName().endsWith(".cex");
+        }
 
-		@Override
-		public String getDescription() {
-			return "Cex-Files";
-		}
-	};
+        @Override
+        public String getDescription() {
+            return "Cex-Files";
+        }
+    };
 
-	public FilesFilter otherFilter = new FilesFilter() {
+    public FilesFilter otherFilter = new FilesFilter() {
 
-		@Override
-		public boolean accept(File pathname) {
+        @Override
+        public boolean accept(File pathname) {
 
-			return !pathname.isHidden()
-					&& !pathname.isDirectory()
-					&& (pathname.getName().endsWith(".cxt") || pathname.getName().endsWith(".oal") || pathname
-							.getName().endsWith(".csv"));
-		}
+            return !pathname.isHidden()
+                    && !pathname.isDirectory()
+                    && (pathname.getName().endsWith(".cxt") || pathname.getName().endsWith(".oal") || pathname
+                            .getName().endsWith(".csv"));
+        }
 
-		@Override
-		public String getDescription() {
-			return "Context-Files";
-		}
-	};
+        @Override
+        public String getDescription() {
+            return "Context-Files";
+        }
+    };
 
-	private static final long serialVersionUID = -3495670613141172867L;
+    private static final long serialVersionUID = -3495670613141172867L;
 
-	@SuppressWarnings("serial")
-	public MainToolbar(final MainFrame mainFrame, final Conf state) {
-		this.mainFrame = mainFrame;
-		this.state = state;
-		this.setFloatable(false);
+    @SuppressWarnings("serial")
+    public MainToolbar(final MainFrame mainFrame, final Conf state) {
+        this.mainFrame = mainFrame;
+        this.state = state;
+        this.setFloatable(false);
 
-		setToolbarStyle(ToolbarStyle.attached);
-		setFloatable(false);
-		add(new WebButton(loadIcon("icons/jlfgr/New24.gif")) {
-			{
-				setDrawFocus(false);
-				addHotkey(Hotkey.CTRL_N);
-				setToolTipText("New context...");
-				addActionListener(new ActionListener() {
+        setToolbarStyle(ToolbarStyle.attached);
+        setFloatable(false);
+        add(new WebButton(loadIcon("icons/jlfgr/New24.gif")) {
+            {
+                setDrawFocus(false);
+                setToolTipText("New context... (CTRL+N)");
+                addActionListener(new NewAction());
+            }
+        });
+        getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
+                KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK), "newContext");
+        getActionMap().put("newContext", new NewAction());
+        WebButton left = new WebButton(loadIcon("icons/jlfgr/Open24.gif")) {
+            {
+                setDrawFocus(false);
+                setToolTipText("Open a CEX-file (CTRL+O)");
+                addActionListener(new OpenAction(true));
+            }
+        };
+        getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
+                KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK), "openContext");
+        getActionMap().put("openContext", new OpenAction(true));
+        final WebButton right = new WebButton(loadIcon("icons/arrow_down.png"));
+        right.setDrawFocus(false);
+        right.setToolTipText("Open a previous CEX-file");
+        final WebButtonPopup popup = new WebButtonPopup(right, PopupWay.downRight);
 
-					@Override
-					public void actionPerformed(ActionEvent arg0) {
-						if (!state.canBeSaved()) {
-							final WebOptionPane pane = new WebOptionPane(
-									"Some calculations haven't finished now. Do you want to wait?");
-							Object[] options = { "I will wait", "I don't care" };
-							pane.setOptions(options);
-							pane.setMessageType(WebOptionPane.INFORMATION_MESSAGE);
-							final WebDialog dialog = new WebDialog(mainFrame, " Still calculating");
-							pane.addPropertyChangeListener(new PropertyChangeListener() {
-								public void propertyChange(PropertyChangeEvent e) {
-									if (dialog.isVisible() && (e.getSource() == pane)
-											&& (e.getPropertyName().equals(JOptionPane.VALUE_PROPERTY))) {
-										dialog.setVisible(false);
-									}
-								}
-							});
-							dialog.setModal(true);
-							dialog.setContentPane(pane);
-							dialog.pack();
-							Util.centerDialogInsideMainFrame(mainFrame, dialog);
-							dialog.setVisible(true);
-							String n = (String) pane.getValue();
-							if (n.equals("I will wait"))
-								return;
-						}
-						if (state.unsavedChanges) {
-							UnsavedChangesDiaolog ucd = mainFrame.new UnsavedChangesDiaolog();
-							if (ucd.isYes()) {
-								new SaveAction(false, true).actionPerformed(arg0);
-							} else if (ucd.isCancel())
-								return;
-						}
-						WebSpinner attr = new WebSpinner();
-						attr.setModel(new SpinnerNumberModel(1, 1, 100, 1));
-						attr.setValue(4);
-						WebSpinner obj = new WebSpinner();
-						obj.setModel(new SpinnerNumberModel(1, 1, 100, 1));
-						obj.setValue(4);
+        WebList list = new WebList(state.lastOpened);
+        list.setVisibleRowCount(4);
+        list.setEditable(false);
+        list.addListSelectionListener(new ListSelectionListener() {
+            public void valueChanged(ListSelectionEvent e) {
+                if (!e.getValueIsAdjusting() && !((WebList) e.getSource()).isSelectionEmpty()) {
+                    popup.hidePopup();
 
-						WebComponentPanel panel = new WebComponentPanel();
-						panel.addElement(new GridPanel(new WebLabel("#Attributes:"), attr));
-						panel.addElement(new GridPanel(new WebLabel("#Objects:"), obj));
-						final WebOptionPane pane = new WebOptionPane(panel, WebOptionPane.OK_OPTION);
-						pane.setMessageType(WebOptionPane.PLAIN_MESSAGE);
-						final WebDialog dialog = new WebDialog(mainFrame, "New Context", true);
-						pane.addPropertyChangeListener(new PropertyChangeListener() {
-							public void propertyChange(PropertyChangeEvent e) {
-								if (dialog.isVisible() && (e.getSource() == pane)
-										&& (e.getPropertyName().equals(WebOptionPane.VALUE_PROPERTY))) {
-									dialog.setVisible(false);
-								}
-							}
-						});
-						dialog.setContentPane(pane);
-						Object[] options = { "Okay" };
-						pane.setOptions(options);
-						dialog.pack();
-						Util.centerDialogInsideMainFrame(mainFrame, dialog);
-						dialog.setVisible(true);
-						state.init((int) obj.getValue(), (int) attr.getValue());
-					}
-				});
-			}
-		});
+                    state.setNewFile(String.copyValueOf(((String) ((WebList) e.getSource()).getSelectedValue())
+                            .toCharArray()));
+                    try {
+                        new CEXReader(state, state.filePath);
 
-		WebButton left = new WebButton(loadIcon("icons/jlfgr/Open24.gif")) {
-			{
-				setDrawFocus(false);
-				setToolTipText("Open a CEX-file");
-				addActionListener(new OpenAction(true));
-			}
-		};
+                    } catch (Exception e1) {
+                        Util.handleIOExceptions(MainToolbar.this.mainFrame, e1, state.filePath);
+                    }
+                    ((WebList) e.getSource()).clearSelection();
+                }
+            }
+        });
+        popup.setContent(new GroupPanel(list));
 
-		final WebButton right = new WebButton(loadIcon("icons/arrow_down.png"));
-		right.setDrawFocus(false);
-		right.setToolTipText("Open a previous CEX-file");
-		final WebButtonPopup popup = new WebButtonPopup(right, PopupWay.downRight);
+        add(new WebButtonGroup(true, left, right));
 
-		WebList list = new WebList(state.lastOpened);
-		list.setVisibleRowCount(4);
-		list.setEditable(false);
-		list.addListSelectionListener(new ListSelectionListener() {
-			public void valueChanged(ListSelectionEvent e) {
-				if (!e.getValueIsAdjusting() && !((WebList) e.getSource()).isSelectionEmpty()) {
-					popup.hidePopup();
+        addSeparator();
+        saveButton = new WebButton(loadIcon("icons/jlfgr/Save24.gif")) {
+            {
+                setDrawFocus(false);
+                setEnabled(false);
+                addActionListener(new SaveAction(false, true));
+                setToolTipText("Save the context in a CEX-file (CTRL*S)");
+            }
+        };
+        add(saveButton);
+        getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
+                KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK), "saveContext");
+        getActionMap().put("saveContext", new SaveAction(false, true));
+        add(new WebButton(loadIcon("icons/jlfgr/SaveAs24.gif")) {
+            {
+                setDrawFocus(false);
+                setToolTipText("Save as a CEX-file (CTRL+SHIFT+S)");
+                addActionListener(new SaveAction(true, true));
+            }
+        });
+        getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
+                KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK),
+                "saveAsContext");
+        getActionMap().put("saveAsContext", new SaveAction(true, true));
 
-					state.setNewFile(String.copyValueOf(((String) ((WebList) e.getSource()).getSelectedValue())
-							.toCharArray()));
-					try {
-						new CEXReader(state, state.filePath);
+        addSeparator();
+        add(new WebButton(loadIcon("icons/jlfgr/Import24.gif")) {
+            {
+                setDrawFocus(false);
+                addActionListener(new OpenAction(false));
+                setToolTipText("Import a context (CTRL+SHIFT+I)");
+            }
+        });
+        getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
+                KeyStroke.getKeyStroke(KeyEvent.VK_I, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK),
+                "importContext");
+        getActionMap().put("importContext", new OpenAction(false));
+        add(new WebButton(loadIcon("icons/jlfgr/Export24.gif")) {
+            {
+                setDrawFocus(false);
+                setToolTipText("Export this context (CTRL+SHIFT+E)");
+                addActionListener(new SaveAction(true, false));
+                setEnabled(true);
+            }
+        });
+        getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
+                KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK),
+                "exportContext");
+        getActionMap().put("exportContext", new SaveAction(true, false));
+        addSeparator();
+        undoButton = new WebButton(loadIcon("icons/jlfgr/Undo24.gif")) {
+            {
+                setEnabled(false);
+                setDrawFocus(false);
+                setToolTipText("Undo");
+                addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent arg0) {
+                        state.undo();
+                        getRedoButton().setEnabled(state.canRedo());
+                        getUndoButton().setEnabled(state.canUndo());
+                    }
+                });
+            }
+        };
+        getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
+                KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK), "undoContext");
+        getActionMap().put("undoContext", new AbstractAction() {
 
-					} catch (Exception e1) {
-						Util.handleIOExceptions(MainToolbar.this.mainFrame, e1, state.filePath);
-					}
-					((WebList) e.getSource()).clearSelection();
-				}
-			}
-		});
-		popup.setContent(new GroupPanel(list));
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                if (state.canUndo()) {
+                    state.undo();
+                    getRedoButton().setEnabled(state.canRedo());
+                    getUndoButton().setEnabled(state.canUndo());
+                }
+            }
+        });
 
-		add(new WebButtonGroup(true, left, right));
+        redoButton = new WebButton(loadIcon("icons/jlfgr/Redo24.gif")) {
+            {
+                setEnabled(false);
+                setDrawFocus(false);
+                setToolTipText("Redo");
+                addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent arg0) {
+                        state.redo();
+                        getRedoButton().setEnabled(state.canRedo());
+                        getUndoButton().setEnabled(state.canUndo());
+                    }
+                });
+            }
+        };
+        getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
+                KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_DOWN_MASK), "redoContext");
+        getActionMap().put("redoContext", new AbstractAction() {
 
-		addSeparator();
-		saveButton = new WebButton(loadIcon("icons/jlfgr/Save24.gif")) {
-			{
-				setDrawFocus(false);
-				setEnabled(false);
-				addActionListener(new SaveAction(false, true));
-				setToolTipText("Save the context in a CEX-file");
-			}
-		};
-		add(saveButton);
-		add(new WebButton(loadIcon("icons/jlfgr/SaveAs24.gif")) {
-			{
-				setDrawFocus(false);
-				setToolTipText("Save as a CEX-file");
-				addActionListener(new SaveAction(true, true));
-			}
-		});
-		addSeparator();
-		add(new WebButton(loadIcon("icons/jlfgr/Import24.gif")) {
-			{
-				setDrawFocus(false);
-				addActionListener(new OpenAction(false));
-				setToolTipText("Import a context");
-			}
-		});
-		add(new WebButton(loadIcon("icons/jlfgr/Export24.gif")) {
-			{
-				setDrawFocus(false);
-				setToolTipText("Export this context");
-				addActionListener(new SaveAction(true, false));
-				setEnabled(true);
-			}
-		});
-		addSeparator();
-		undoButton = new WebButton(loadIcon("icons/jlfgr/Undo24.gif")) {
-			{
-				setEnabled(false);
-				setDrawFocus(false);
-				setToolTipText("Undo");
-				addActionListener(new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent arg0) {
-						state.undo();
-						getRedoButton().setEnabled(state.canRedo());
-						getUndoButton().setEnabled(state.canUndo());
-					}
-				});
-			}
-		};
-		redoButton = new WebButton(loadIcon("icons/jlfgr/Redo24.gif")) {
-			{
-				setEnabled(false);
-				setDrawFocus(false);
-				setToolTipText("Redo");
-				addActionListener(new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent arg0) {
-						state.redo();
-						getRedoButton().setEnabled(state.canRedo());
-						getUndoButton().setEnabled(state.canUndo());
-					}
-				});
-			}
-		};
-		add(undoButton);
-		add(redoButton);
-		addSeparator();
-		add(new WebButton(loadIcon("icons/jlfgr/TipOfTheDay24.gif")) {
-			{
-				setDrawFocus(false);
-				setEnabled(true);
-				setToolTipText("Show the number of concepts");
-				addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                if (state.canRedo()) {
+                    state.redo();
+                    getRedoButton().setEnabled(state.canRedo());
+                    getUndoButton().setEnabled(state.canUndo());
+                }
+            }
+        });
+        add(undoButton);
+        add(redoButton);
+        addSeparator();
+        add(new WebButton(loadIcon("icons/jlfgr/TipOfTheDay24.gif")) {
+            {
+                setDrawFocus(false);
+                setEnabled(true);
+                setToolTipText("Show the number of concepts (CTRL+SHIFT+C)");
+                addActionListener(new ActionListener() {
 
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						Util.showMessageDialog(mainFrame, "The number of concepts is " + state.getNumberOfConcepts()
-								+ ".", false);
-					}
-				});
-			}
-		});
-		add(new WebButton(loadIcon("icons/jlfgr/Replace24.gif")) {
-			{
-				setToolTipText("Start Attribute Exploration");
-				setDrawFocus(false);
-				addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent arg0) {
-						MyExpert expert = new MyExpert(MainToolbar.this.mainFrame, state);
-						state.context.setExpert(expert);
-						expert.addExpertActionListener(state.context);
-						// Create an expert action for starting attribute
-						// exploration
-						StartExplorationAction<String, String, FullObject<String, String>> action = new StartExplorationAction<String, String, FullObject<String, String>>();
-						action.setContext(state.context);
-						// Fire the action, exploration starts...
-						expert.fireExpertAction(action);
-					}
-				});
-			}
-		});
-		addSeparator();
-		add(new WebButton(loadIcon("icons/jlfgr/About24.gif")) {
-			{
-				setDrawFocus(false);
-				setEnabled(true);
-				setToolTipText("About");
-				addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        Util.showMessageDialog(mainFrame, "The number of concepts is " + state.getNumberOfConcepts()
+                                + ".", false);
+                    }
+                });
+            }
+        });
+        getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
+                KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK),
+                "countContext");
+        getActionMap().put("countContext", new AbstractAction() {
 
-					@Override
-					public void actionPerformed(ActionEvent arg0) {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                Util.showMessageDialog(mainFrame, "The number of concepts is " + state.getNumberOfConcepts() + ".",
+                        false);
+            }
+        });
+        add(new WebButton(loadIcon("icons/jlfgr/Replace24.gif")) {
+            {
+                setToolTipText("Start Attribute Exploration (CTRL+SHIFT+A)");
+                setDrawFocus(false);
+                addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent arg0) {
+                        MyExpert expert = new MyExpert(MainToolbar.this.mainFrame, state);
+                        state.context.setExpert(expert);
+                        expert.addExpertActionListener(state.context);
+                        // Create an expert action for starting attribute
+                        // exploration
+                        StartExplorationAction<String, String, FullObject<String, String>> action = new StartExplorationAction<String, String, FullObject<String, String>>();
+                        action.setContext(state.context);
+                        // Fire the action, exploration starts...
+                        expert.fireExpertAction(action);
+                    }
+                });
+            }
+        });
+        getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
+                KeyStroke.getKeyStroke(KeyEvent.VK_A, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK),
+                "aexplorationContext");
+        getActionMap().put("aexplorationContext", new AbstractAction() {
 
-					}
-				});
-			}
-		});
-		add(new WebButton(loadIcon("icons/jlfgr/Help24.gif")) {
-			{
-				setDrawFocus(false);
-				addHotkey(Hotkey.ALT_F4);
-				setEnabled(true);
-				setToolTipText("Help");
-			}
-		});
-	}
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                MyExpert expert = new MyExpert(MainToolbar.this.mainFrame, state);
+                state.context.setExpert(expert);
+                expert.addExpertActionListener(state.context);
+                StartExplorationAction<String, String, FullObject<String, String>> action = new StartExplorationAction<String, String, FullObject<String, String>>();
+                action.setContext(state.context);
+                expert.fireExpertAction(action);
+            }
+        });
 
-	public static WebButton getSaveButton() {
-		return saveButton;
-	}
+        addSeparator();
+        add(new WebButton(loadIcon("icons/jlfgr/About24.gif")) {
+            {
+                setDrawFocus(false);
+                setEnabled(true);
+                setToolTipText("About");
+                addActionListener(new ActionListener() {
 
-	public static WebButton getUndoButton() {
-		return undoButton;
-	}
+                    @Override
+                    public void actionPerformed(ActionEvent arg0) {
 
-	public static WebButton getRedoButton() {
-		return redoButton;
-	}
+                    }
+                });
+            }
+        });
+        add(new WebButton(loadIcon("icons/jlfgr/Help24.gif")) {
+            {
+                setDrawFocus(false);
+                setEnabled(true);
+                setToolTipText("Help");
+            }
+        });
+        // getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
+        // KeyEvent.VK_F1, "helpContext");
+        // getActionMap().put("helpContext", new HelpAction());
+    }
 
-	// ////////////////////////////////////////////////////////////////////////
+    public static WebButton getSaveButton() {
+        return saveButton;
+    }
 
-	@SuppressWarnings("serial")
-	class SaveAction extends AbstractAction {
+    public static WebButton getUndoButton() {
+        return undoButton;
+    }
 
-		private boolean saveAs;
-		private boolean cex;
+    public static WebButton getRedoButton() {
+        return redoButton;
+    }
 
-		public SaveAction(boolean saveAs, boolean cex) {
-			this.saveAs = saveAs;
-			this.cex = cex;
-		}
+    // ////////////////////////////////////////////////////////////////////////
 
-		private void saveFile(String path) {
-			try {
-				if (!cex) {
-					if (!path.contains("."))
-						path = path.concat(".cxt");
-					if (path.endsWith("cxt"))
-						new CXTWriter(state, path);
-					else if (path.endsWith("oal"))
-						new OALWriter(state, path);
-					else if (path.endsWith("csv"))
-						new CSVWriter(state, path);
-				} else {
-					if (!path.contains("."))
-						path = path.concat(".cex");
+    @SuppressWarnings("serial")
+    class SaveAction extends AbstractAction {
 
-					new CEXWriter(state, path);
-					state.setNewFile(path);
-					state.unsavedChanges = false;
-					MainToolbar.saveButton.setEnabled(false);
-				}
-			} catch (Exception e1) {
-				Util.handleIOExceptions(mainFrame, e1, path);
-			}
+        private boolean saveAs;
+        private boolean cex;
 
-		}
+        public SaveAction(boolean saveAs, boolean cex) {
+            this.saveAs = saveAs;
+            this.cex = cex;
+        }
 
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			if (state.filePath.endsWith("untitled.cex") || saveAs) {
-				final WebFileChooser fc = new WebFileChooser();
-				fc.setCurrentDirectory(state.filePath.substring(0,
-						state.filePath.lastIndexOf(System.getProperty("file.separator"))));
-				final WebDialog dialog = new WebDialog(mainFrame, "Save file as", true);
-				dialog.setContentPane(fc);
-				fc.setMultiSelectionEnabled(false);
-				fc.setAcceptAllFileFilterUsed(false);
-				fc.addChoosableFileFilter(cex ? cexFilter : otherFilter);
-				fc.setFileSelectionMode(WebFileChooser.FILES_ONLY);
-				fc.setDialogType(WebFileChooser.SAVE_DIALOG);
-				fc.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						String state = (String) e.getActionCommand();
-						if ((state.equals(WebFileChooser.APPROVE_SELECTION) && fc.getSelectedFile() != null)) {
-							File file = fc.getSelectedFile();
-							String path = file.getAbsolutePath();
-							if (file.exists()) {
-								OverwritingFileDiaolog ofd = mainFrame.new OverwritingFileDiaolog(file);
-								if (ofd.isYes()) {
-									saveFile(path);
-									dialog.setVisible(false);
-								}
-							} else {
-								saveFile(path);
-								dialog.setVisible(false);
-							}
-						} else if (state.equals(WebFileChooser.CANCEL_SELECTION)) {
-							dialog.setVisible(false);
-							return;
-						}
-					}
-				});
-				dialog.pack();
-				Util.centerDialogInsideMainFrame(mainFrame, dialog);
-				dialog.setVisible(true);
+        private void saveFile(String path) {
+            try {
+                if (!cex) {
+                    if (!path.contains("."))
+                        path = path.concat(".cxt");
+                    if (path.endsWith("cxt"))
+                        new CXTWriter(state, path);
+                    else if (path.endsWith("oal"))
+                        new OALWriter(state, path);
+                    else if (path.endsWith("csv"))
+                        new CSVWriter(state, path);
+                } else {
+                    if (!path.contains("."))
+                        path = path.concat(".cex");
 
-				if (fc.getSelectedFile() == null)
-					return;
+                    new CEXWriter(state, path);
+                    state.setNewFile(path);
+                    state.unsavedChanges = false;
+                    MainToolbar.saveButton.setEnabled(false);
+                }
+            } catch (Exception e1) {
+                Util.handleIOExceptions(mainFrame, e1, path);
+            }
 
-			} else {
-				saveFile(MainToolbar.this.state.filePath);
-			}
-		}
+        }
 
-	}
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (state.filePath.endsWith("untitled.cex") || saveAs) {
+                final WebFileChooser fc = new WebFileChooser();
+                fc.setCurrentDirectory(state.filePath.substring(0,
+                        state.filePath.lastIndexOf(System.getProperty("file.separator"))));
+                final WebDialog dialog = new WebDialog(mainFrame, "Save file as", true);
+                dialog.setContentPane(fc);
+                fc.setMultiSelectionEnabled(false);
+                fc.setAcceptAllFileFilterUsed(false);
+                fc.addChoosableFileFilter(cex ? cexFilter : otherFilter);
+                fc.setFileSelectionMode(WebFileChooser.FILES_ONLY);
+                fc.setDialogType(WebFileChooser.SAVE_DIALOG);
+                fc.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        String state = (String) e.getActionCommand();
+                        if ((state.equals(WebFileChooser.APPROVE_SELECTION) && fc.getSelectedFile() != null)) {
+                            File file = fc.getSelectedFile();
+                            String path = file.getAbsolutePath();
+                            if (file.exists()) {
+                                OverwritingFileDiaolog ofd = mainFrame.new OverwritingFileDiaolog(file);
+                                if (ofd.isYes()) {
+                                    saveFile(path);
+                                    dialog.setVisible(false);
+                                }
+                            } else {
+                                saveFile(path);
+                                dialog.setVisible(false);
+                            }
+                        } else if (state.equals(WebFileChooser.CANCEL_SELECTION)) {
+                            dialog.setVisible(false);
+                            return;
+                        }
+                    }
+                });
+                dialog.pack();
+                Util.centerDialogInsideMainFrame(mainFrame, dialog);
+                dialog.setVisible(true);
 
-	@SuppressWarnings("serial")
-	class OpenAction extends AbstractAction {
+                if (fc.getSelectedFile() == null)
+                    return;
 
-		private boolean cex;
+            } else {
+                saveFile(MainToolbar.this.state.filePath);
+            }
+        }
 
-		public OpenAction(boolean cex) {
-			this.cex = cex;
-		}
+    }
 
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			if (state.unsavedChanges) {
-				UnsavedChangesDiaolog ucd = mainFrame.new UnsavedChangesDiaolog();
-				if (ucd.isYes()) {
-					new SaveAction(false, true).actionPerformed(e);
-				} else if (ucd.isCancel())
-					return;
-			}
-			final WebFileChooser fc = new WebFileChooser(state.filePath);
-			final WebDialog dialog = new WebDialog(mainFrame, "Open file", true);
+    @SuppressWarnings("serial")
+    class OpenAction extends AbstractAction {
 
-			fc.setDialogType(WebFileChooser.OPEN_DIALOG);
-			fc.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					String state = (String) e.getActionCommand();
-					if ((state.equals(WebFileChooser.APPROVE_SELECTION) && fc.getSelectedFile() != null)
-							|| state.equals(WebFileChooser.CANCEL_SELECTION)) {
-						dialog.setVisible(false);
-					}
-				}
-			});
-			fc.setMultiSelectionEnabled(false);
-			fc.setAcceptAllFileFilterUsed(false);
-			fc.addChoosableFileFilter(cex ? cexFilter : otherFilter);
-			fc.setFileSelectionMode(WebFileChooser.FILES_ONLY);
-			// Doesn't work...
-			fc.setCurrentDirectory(state.filePath.substring(0,
-					state.filePath.lastIndexOf(System.getProperty("file.separator"))));
-			dialog.setContentPane(fc);
-			dialog.pack();
-			Util.centerDialogInsideMainFrame(mainFrame, dialog);
-			dialog.setVisible(true);
+        private boolean cex;
 
-			if (fc.getSelectedFile() != null) {
-				File file = fc.getSelectedFile();
-				String path = file.getAbsolutePath();
+        public OpenAction(boolean cex) {
+            this.cex = cex;
+        }
 
-				try {
-					if (cex && !path.contains("."))
-						path = path.concat(".cex");
-					if (path.endsWith(".cex") && cex)
-						new CEXReader(state, path);
-					else if (!cex && path.endsWith(".cxt"))
-						new CXTReader(state, path);
-					else if (!cex && path.endsWith(".oal"))
-						new OALReader(state, path);
-					else if (!cex && path.endsWith(".csv"))
-						new CSVReader(state, path);
-					else {
-						Util.showMessageDialog(mainFrame, "This fileformat is unfortunality not supported", true);
-						return;
-					}
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            if (state.unsavedChanges) {
+                UnsavedChangesDialog ucd = mainFrame.new UnsavedChangesDialog();
+                if (ucd.isYes()) {
+                    new SaveAction(false, true).actionPerformed(e);
+                } else if (ucd.isCancel())
+                    return;
+            }
+            final WebFileChooser fc = new WebFileChooser(state.filePath);
+            final WebDialog dialog = new WebDialog(mainFrame, "Open a file", true);
 
-				} catch (Exception e1) {
-					Util.handleIOExceptions(mainFrame, e1, path);
-				}
-			}
-		}
-	}
+            fc.setDialogType(WebFileChooser.OPEN_DIALOG);
+            fc.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    String state = (String) e.getActionCommand();
+                    if ((state.equals(WebFileChooser.APPROVE_SELECTION) && fc.getSelectedFile() != null)
+                            || state.equals(WebFileChooser.CANCEL_SELECTION)) {
+                        dialog.setVisible(false);
+                    }
+                }
+            });
+            fc.setMultiSelectionEnabled(false);
+            fc.setAcceptAllFileFilterUsed(false);
+            fc.addChoosableFileFilter(cex ? cexFilter : otherFilter);
+            fc.setFileSelectionMode(WebFileChooser.FILES_ONLY);
+            // Doesn't work...
+            fc.setCurrentDirectory(state.filePath.substring(0,
+                    state.filePath.lastIndexOf(System.getProperty("file.separator"))));
+            dialog.setContentPane(fc);
+            dialog.pack();
+            Util.centerDialogInsideMainFrame(mainFrame, dialog);
+            dialog.setVisible(true);
+
+            if (fc.getSelectedFile() != null) {
+                File file = fc.getSelectedFile();
+                String path = file.getAbsolutePath();
+
+                try {
+                    if (cex && !path.contains("."))
+                        path = path.concat(".cex");
+                    if (path.endsWith(".cex") && cex)
+                        new CEXReader(state, path);
+                    else if (!cex && path.endsWith(".cxt"))
+                        new CXTReader(state, path);
+                    else if (!cex && path.endsWith(".oal"))
+                        new OALReader(state, path);
+                    else if (!cex && path.endsWith(".csv"))
+                        new CSVReader(state, path);
+                    else {
+                        Util.showMessageDialog(mainFrame, "This fileformat is unfortunality not supported", true);
+                        return;
+                    }
+
+                } catch (Exception e1) {
+                    Util.handleIOExceptions(mainFrame, e1, path);
+                }
+            }
+        }
+    }
+
+    @SuppressWarnings("serial")
+    public class HelpAction extends AbstractAction {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            // TODO Auto-generated method stub
+
+        }
+    }
+
+    @SuppressWarnings("serial")
+    public class NewAction extends AbstractAction {
+
+        @Override
+        public void actionPerformed(ActionEvent arg0) {
+            if (!state.canBeSaved()) {
+                StillCalculatingDialog scd = mainFrame.new StillCalculatingDialog();
+                if (scd.isYes())
+                    return;
+            }
+            if (state.unsavedChanges) {
+                UnsavedChangesDialog ucd = mainFrame.new UnsavedChangesDialog();
+                if (ucd.isYes()) {
+                    new SaveAction(false, true).actionPerformed(arg0);
+                } else if (ucd.isCancel())
+                    return;
+            }
+            WebSpinner attr = new WebSpinner();
+            attr.setModel(new SpinnerNumberModel(1, 1, 100, 1));
+            attr.setValue(4);
+            WebSpinner obj = new WebSpinner();
+            obj.setModel(new SpinnerNumberModel(1, 1, 100, 1));
+            obj.setValue(4);
+
+            WebComponentPanel panel = new WebComponentPanel();
+            panel.addElement(new GridPanel(new WebLabel("#Attributes:"), attr));
+            panel.addElement(new GridPanel(new WebLabel("#Objects:"), obj));
+            final WebOptionPane pane = new WebOptionPane(panel, WebOptionPane.OK_OPTION);
+            pane.setMessageType(WebOptionPane.PLAIN_MESSAGE);
+            final WebDialog dialog = new WebDialog(mainFrame, "New Context", true);
+            pane.addPropertyChangeListener(new PropertyChangeListener() {
+                public void propertyChange(PropertyChangeEvent e) {
+                    if (dialog.isVisible() && (e.getSource() == pane)
+                            && (e.getPropertyName().equals(WebOptionPane.VALUE_PROPERTY))) {
+                        dialog.setVisible(false);
+                    }
+                }
+            });
+            dialog.setContentPane(pane);
+            Object[] options = { "Okay" };
+            pane.setOptions(options);
+            dialog.pack();
+            Util.centerDialogInsideMainFrame(mainFrame, dialog);
+            dialog.setVisible(true);
+            state.init((int) obj.getValue(), (int) attr.getValue());
+        }
+
+    }
 }

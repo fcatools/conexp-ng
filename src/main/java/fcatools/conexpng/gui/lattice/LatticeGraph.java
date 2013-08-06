@@ -102,16 +102,15 @@ public class LatticeGraph {
     public void addEdges(Set<Concept<String, FullObject<String, String>>> concepts) {
         LatticeGraph temp = new TestLatticeAlgorithm().computeLatticeGraph(concepts);
         for (Edge e : temp.edges) {
-        	System.out.println(e);
             Node u = getNodeWithIntent(e.getU().getAttributes());
             Node v = getNodeWithIntent(e.getV().getAttributes());
             if (u != null && v != null && !u.equals(v)) {
                 u.getObjects().addAll(e.getU().getObjects());
                 v.getObjects().addAll(e.getV().getObjects());
-                u.getObjectsLabel().setSet(u.getVisibleObjects());
-                v.getObjectsLabel().setSet(v.getVisibleObjects());
-                u.getAttributesLabel().setSet(u.getVisibleAttributes());
-                v.getAttributesLabel().setSet(v.getVisibleAttributes());
+                u.setVisibleAttributes(e.getU().getVisibleAttributes());
+                v.setVisibleAttributes(e.getV().getVisibleAttributes());
+                u.setVisibleObjects(e.getU().getVisibleObjects());
+                v.setVisibleObjects(e.getV().getVisibleObjects());
                 u.setLevel(e.getU().getLevel());
                 v.setLevel(e.getV().getLevel());
                 u.addBelowNode(v);
@@ -121,20 +120,29 @@ public class LatticeGraph {
         computeAllIdeals();
     }
 
-    private void removeAllDuplicates() {
+    public void removeAllDuplicates() {
         ArrayList<Node> duplicates = new ArrayList<>();
+        for (Node n : getNodes()) {
+            if (n.getObjects().isEmpty() && n.getAttributes().isEmpty()) {
+                duplicates.add(n);
+            }
+        }
+        getNodes().removeAll(duplicates);
+        duplicates.clear();
         for (int i = 0; i < getNodes().size() - 1; i++) {
             Node u = getNodes().get(i);
             for (int j = i + 1; j < getNodes().size(); j++) {
                 Node v = getNodes().get(j);
                 if (u.getObjects().equals(v.getObjects()) && u.getAttributes().equals(v.getAttributes())) {
                     duplicates.add(v);
-                    u.getBelow().remove(v);
                 }
             }
 
         }
         getNodes().removeAll(duplicates);
+        for (Node n : getNodes()) {
+            n.getBelow().removeAll(duplicates);
+        }
     }
 
     /**
@@ -160,19 +168,7 @@ public class LatticeGraph {
                     }
                 }
             }
-            String s = "";
-            String a = "";
-
-            for (int i = 0; i < q.size(); i++) {
-                Node u = q.get(i);
-                s = s + " " + u.getObjects();
-                a = a + " " + u.getAttributes();
-            }
-            // System.out.println(s);
-            // System.out.println(a);
-            // System.out.println("/");
         }
-        // System.out.println("test");
         for (int i = 1; i < q.size(); i++) {
             Node u = q.get(i);
             for (int j = i - 1; j >= 0; j--) {
@@ -182,7 +178,6 @@ public class LatticeGraph {
                 }
             }
         }
-        removeAllDuplicates();
     }
 
     private Node getNodeWithIntent(Set<String> attributes) {

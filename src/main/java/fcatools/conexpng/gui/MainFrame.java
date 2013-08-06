@@ -1,7 +1,9 @@
 package fcatools.conexpng.gui;
 
 import com.alee.laf.label.WebLabel;
+import com.alee.laf.menu.WebMenu;
 import com.alee.laf.menu.WebMenuBar;
+import com.alee.laf.menu.WebMenuItem;
 import com.alee.laf.optionpane.WebOptionPane;
 import com.alee.laf.panel.WebPanel;
 import com.alee.laf.rootpane.WebDialog;
@@ -17,7 +19,13 @@ import fcatools.conexpng.Util;
 import fcatools.conexpng.gui.contexteditor.ContextEditor;
 import fcatools.conexpng.gui.dependencies.DependencyView;
 import fcatools.conexpng.gui.lattice.LatticeView;
-import javax.swing.*;
+
+import javax.swing.AbstractAction;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JComponent;
+import javax.swing.KeyStroke;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
@@ -86,7 +94,7 @@ public class MainFrame extends WebFrame {
             }
         };
         tabPane.setTabbedPaneStyle(TabbedPaneStyle.attached);
-        tabPane.setTabPlacement(JTabbedPane.TOP);
+        tabPane.setTabPlacement(WebTabbedPane.TOP);
         WebPanel tabPanel = new WebPanel();
         tabPanel.setPreferredSize(new Dimension(105, 30));
         tabPanel.add(tabPane);
@@ -126,7 +134,7 @@ public class MainFrame extends WebFrame {
 
         tabPane.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
-                JTabbedPane sourceTabbedPane = (JTabbedPane) e.getSource();
+                WebTabbedPane sourceTabbedPane = (WebTabbedPane) e.getSource();
                 int index = sourceTabbedPane.getSelectedIndex();
                 switch (index) {
                 case 0:
@@ -250,8 +258,13 @@ public class MainFrame extends WebFrame {
 
         @Override
         public void actionPerformed(ActionEvent arg0) {
+            if (!state.canBeSaved()) {
+                StillCalculatingDialog scd = new StillCalculatingDialog();
+                if (scd.isYes())
+                    return;
+            }
             if (state.unsavedChanges) {
-                UnsavedChangesDiaolog usd = new UnsavedChangesDiaolog();
+                UnsavedChangesDialog usd = new UnsavedChangesDialog();
                 if (usd.isYes()) {
                     new MainToolbar(MainFrame.this, state).new SaveAction(false, true).actionPerformed(arg0);
                 } else if (usd.isCancel()) {
@@ -262,6 +275,50 @@ public class MainFrame extends WebFrame {
 
         public boolean canceled() {
             return canceled;
+        }
+    }
+
+    @SuppressWarnings("serial")
+    public class StillCalculatingDialog extends WebDialog {
+        private boolean yes;
+        private boolean no;
+
+        public StillCalculatingDialog() {
+            super(MainFrame.this, "Still calculating", true);
+            final WebOptionPane pane = new WebOptionPane("Some calculations haven't finished now. Do you want to wait?");
+            Object[] options = { "I will wait", "I don't care" };
+            pane.setOptions(options);
+            pane.setMessageType(WebOptionPane.INFORMATION_MESSAGE);
+            pane.addPropertyChangeListener(new PropertyChangeListener() {
+                public void propertyChange(PropertyChangeEvent e) {
+                    if (isVisible() && (e.getSource() == pane)
+                            && (e.getPropertyName().equals(WebOptionPane.VALUE_PROPERTY))) {
+                        setVisible(false);
+                    }
+                }
+            });
+            setModal(true);
+            setContentPane(pane);
+            pack();
+            setDefaultCloseOperation(WebDialog.DO_NOTHING_ON_CLOSE);
+            Util.centerDialogInsideMainFrame(MainFrame.this, this);
+            setVisible(true);
+            String n = (String) pane.getValue();
+            if (n.equals("I will wait")) {
+                yes = true;
+                no = false;
+            } else {
+                no = true;
+                yes = false;
+            }
+        }
+
+        public boolean isYes() {
+            return yes;
+        }
+
+        public boolean isNo() {
+            return no;
         }
     }
 
@@ -281,13 +338,13 @@ public class MainFrame extends WebFrame {
             optionPane.addPropertyChangeListener(new PropertyChangeListener() {
                 public void propertyChange(PropertyChangeEvent e) {
                     if (isVisible() && (e.getSource() == optionPane)
-                            && (e.getPropertyName().equals(JOptionPane.VALUE_PROPERTY))) {
+                            && (e.getPropertyName().equals(WebOptionPane.VALUE_PROPERTY))) {
                         setVisible(false);
                     }
                 }
             });
             pack();
-            setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+            setDefaultCloseOperation(WebDialog.DO_NOTHING_ON_CLOSE);
             Util.centerDialogInsideMainFrame(MainFrame.this, this);
             setVisible(true);
             String n = (String) optionPane.getValue();
@@ -311,12 +368,12 @@ public class MainFrame extends WebFrame {
     }
 
     @SuppressWarnings("serial")
-    public class UnsavedChangesDiaolog extends WebDialog {
+    public class UnsavedChangesDialog extends WebDialog {
         private boolean cancel;
         private boolean yes;
         private boolean no;
 
-        public UnsavedChangesDiaolog() {
+        public UnsavedChangesDialog() {
             super(MainFrame.this, "Context was modified", true);
             Object[] options = { "Yes", "No", "Cancel" };
             final WebOptionPane optionPane = new WebOptionPane("Do want to save the changes you made to the context?",
@@ -327,7 +384,7 @@ public class MainFrame extends WebFrame {
             optionPane.addPropertyChangeListener(new PropertyChangeListener() {
                 public void propertyChange(PropertyChangeEvent e) {
                     if (isVisible() && (e.getSource() == optionPane)
-                            && (e.getPropertyName().equals(JOptionPane.VALUE_PROPERTY))) {
+                            && (e.getPropertyName().equals(WebOptionPane.VALUE_PROPERTY))) {
                         setVisible(false);
                     }
                 }
@@ -385,9 +442,9 @@ public class MainFrame extends WebFrame {
             tetrisFrame.add(tetris);
 
             WebMenuBar tetrisMenu = new WebMenuBar();
-            tetrisMenu.add(new JMenu("Game") {
+            tetrisMenu.add(new WebMenu("Game") {
                 {
-                    add(new JMenuItem("New game", loadIcon("icons/extra/new.png")) {
+                    add(new WebMenuItem("New game", loadIcon("icons/extra/new.png")) {
                         {
                             setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F2, 0));
                             addActionListener(new ActionListener() {
@@ -397,7 +454,7 @@ public class MainFrame extends WebFrame {
                             });
                         }
                     });
-                    add(new JMenuItem("Unpause game", loadIcon("icons/extra/unpause.png")) {
+                    add(new WebMenuItem("Unpause game", loadIcon("icons/extra/unpause.png")) {
                         {
                             tetris.addTetrisListener(new TetrisListener() {
                                 public void newGameStarted() {
@@ -435,7 +492,7 @@ public class MainFrame extends WebFrame {
                         }
                     });
                     addSeparator();
-                    add(new JMenuItem("Close", loadIcon("icons/extra/exit.png")) {
+                    add(new WebMenuItem("Close", loadIcon("icons/extra/exit.png")) {
                         {
                             setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F4, KeyEvent.SHIFT_MASK));
                             addActionListener(new ActionListener() {
@@ -448,7 +505,7 @@ public class MainFrame extends WebFrame {
                     });
                 }
             });
-            tetrisMenu.add(new JMenu("About"));
+            tetrisMenu.add(new WebMenu("About"));
             tetrisFrame.setJMenuBar(tetrisMenu);
             tetrisFrame.pack();
             tetrisFrame.setLocation(25 + 100 + 25, 25);
