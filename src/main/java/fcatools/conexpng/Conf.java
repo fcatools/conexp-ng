@@ -58,7 +58,7 @@ public class Conf extends UndoManager {
     public int getNumberOfConcepts() {
         if (concepts == null) {
             // TODO: in Swingworker with statusmessage
-            concepts = context.getConceptsWithoutConsideredElementa();
+            concepts = context.getConceptsWithoutConsideredElements();
         }
         return concepts.size();
     }

@@ -215,7 +215,7 @@ public class FormalContext extends de.tudresden.inf.tcs.fcalib.FormalContext<Str
         return conceptLattice;
     }
 
-    public Set<Concept<String, FullObject<String, String>>> getConceptsWithoutConsideredElementa() {
+    public Set<Concept<String, FullObject<String, String>>> getConceptsWithoutConsideredElements() {
         ListSet<Concept<String, FullObject<String, String>>> conceptLattice = new ListSet<Concept<String, FullObject<String, String>>>();
 
         HashMap<String, Set<String>> extentPerAttr = new HashMap<String, Set<String>>();

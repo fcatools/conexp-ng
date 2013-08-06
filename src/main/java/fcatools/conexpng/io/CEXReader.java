@@ -18,6 +18,7 @@ import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
+import de.tudresden.inf.tcs.fcaapi.Concept;
 import de.tudresden.inf.tcs.fcaapi.FCAImplication;
 import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
 import de.tudresden.inf.tcs.fcalib.FullObject;
@@ -30,20 +31,22 @@ import fcatools.conexpng.gui.lattice.LatticeGraph;
 import fcatools.conexpng.gui.lattice.Node;
 import fcatools.conexpng.model.AssociationRule;
 import fcatools.conexpng.model.FormalContext;
+import fcatools.conexpng.model.LatticeConcept;
 
 public class CEXReader {
 
     private FormalContext context;
     private LatticeGraph lattice;
-    private boolean ourCEX;
     private GUIConf guistate;
     private Set<AssociationRule> associations;
     private Set<FCAImplication<String>> implications;
+    private Set<Concept<String, FullObject<String, String>>> concepts;
 
     public CEXReader(Conf state, String path) throws XMLStreamException, IllegalObjectException, IOException,
             NumberFormatException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException,
             SecurityException {
         guistate = new GUIConf();
+        concepts = new ListSet<>();
         InputStream in = null;
 
         in = new FileInputStream(path);
@@ -68,9 +71,6 @@ public class CEXReader {
                 break;
             case XMLStreamConstants.START_ELEMENT:
                 StartElement element = event.asStartElement();
-                if (name(element, "Version"))
-                    ourCEX = element.asStartElement().getAttributeByName(new QName("MajorNumber")).toString()
-                            .equals("1") ? true : false;
                 if (name(element, "Attributes"))
                     addAttributes(parser);
                 if (name(element, "Objects"))
@@ -95,7 +95,7 @@ public class CEXReader {
         if (guistate.columnWidths == null) {
             guistate.columnWidths = new HashMap<>();
         }
-
+        state.concepts = concepts;
         state.guiConf = guistate;
         state.associations = associations;
         state.implications = implications;
@@ -398,11 +398,10 @@ public class CEXReader {
                     if (y < miny)
                         miny = y;
                 }
-                Node n = new Node();
-                n.setX((int) x);
-                n.setY((int) y);
-
                 if (name(element, "Intent")) {
+                    Node n = new Node();
+                    n.setX((int) x);
+                    n.setY((int) y);
                     event = parser.nextEvent();
                     while (!(event.isEndElement() && name(event.asEndElement(), "Intent"))) {
                         if (event.isStartElement()) {
@@ -413,8 +412,33 @@ public class CEXReader {
                         event = parser.nextEvent();
                     }
                     nodes.add(n);
-                }
+                    event = parser.nextEvent();
+                    if (element.isStartElement()) {
+                        element = event.asStartElement();
 
+                        if (name(element, "Extent")) {
+
+                            event = parser.nextEvent();
+                            while (!(event.isEndElement() && name(event.asEndElement(), "Extent"))) {
+
+                                if (event.isStartElement()) {
+                                    int i = Integer.parseInt(event.asStartElement()
+                                            .getAttributeByName(new QName("ObjectIdentifier")).getValue());
+                                    n.addObject(context.getObjectAtIndex(i).getIdentifier());
+                                }
+                                event = parser.nextEvent();
+                            }
+                        }
+                    }
+                    Concept<String, FullObject<String, String>> concept = new LatticeConcept();
+                    for (String attr : n.getAttributes()) {
+                        concept.getIntent().add(attr);
+                    }
+                    for (String obj : n.getObjects()) {
+                        concept.getExtent().add(context.getObject(obj));
+                    }
+                    concepts.add(concept);
+                }
                 break;
             }
             case XMLStreamConstants.END_ELEMENT:
