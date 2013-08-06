@@ -23,6 +23,8 @@ public class CEXWriter {
 
     private HashMap<String, String> attrIds = new HashMap<>();
 
+    private HashMap<String, String> objIds = new HashMap<>();
+
     public CEXWriter(Conf state, String path) throws XMLStreamException, FileNotFoundException {
         this.state = state;
         XMLEventWriter writer = null;
@@ -91,13 +93,22 @@ public class CEXWriter {
                 writer.add(eventFactory.createEndElement("", "", "HasAttribute"));
             }
             writer.add(eventFactory.createEndElement("", "", "Intent"));
+
+            writer.add(eventFactory.createStartElement("", "", "Extent"));
+            for (String obj : n.getObjects()) {
+                writer.add(eventFactory.createStartElement("", "", "Object"));
+                writer.add(eventFactory.createAttribute("ObjectIdentifier", "" + objIds.get(obj)));
+                writer.add(eventFactory.createEndElement("", "", "Object"));
+            }
+            writer.add(eventFactory.createEndElement("", "", "Extent"));
+
             writer.add(eventFactory.createEndElement("", "", "LineDiagramFigure"));
         }
         writer.add(eventFactory.createEndElement("", "", "ConceptFigures"));
 
         writer.add(eventFactory.createStartElement("", "", "LineDiagramSettings"));
         createSettingsElement(writer, "AttributeLabelsDisplayMode", "AllAttribsMultiLabelsStrategy");
-        createSettingsElement(writer, "ObjectLabelsDisplayMode", "AllObjectsLabelsStrategy");
+        createSettingsElement(writer, "ObjectLabelsDisplayMode", "AllObjectsMultiLabelsStrategy");
         createSettingsElement(writer, "LabelFontSize", "12");
         createSettingsElement(writer, "ShowCollisions", "false");
         createSettingsElement(writer, "MaxNodeRadius", "8");
@@ -301,8 +312,9 @@ public class CEXWriter {
     private void addObjects(XMLEventWriter writer) throws XMLStreamException {
         writer.add(eventFactory.createStartElement("", "", "Objects"));
 
-        for (FullObject<String, String> obj : state.context.getObjects()) {
-
+        for (int i = 0; i < state.context.getObjectCount(); i++) {
+            FullObject<String, String> obj = state.context.getObjectAtIndex(i);
+            objIds.put(obj.getIdentifier(), "" + i);
             writer.add(eventFactory.createStartElement("", "", "Object"));
             writer.add(eventFactory.createStartElement("", "", "Name"));
             writer.add(eventFactory.createCharacters(obj.getIdentifier()));

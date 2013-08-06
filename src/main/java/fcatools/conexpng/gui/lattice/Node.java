@@ -112,7 +112,7 @@ public class Node extends JPanel implements LatticeGraphElement {
      *
      * @param set
      */
-    public void addAttribut(String set) {
+    public void addAttribute(String set) {
         attributes.add(set);
     }
 

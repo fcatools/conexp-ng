@@ -57,15 +57,16 @@ public class LatticeView extends View {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         String command = (String) e.getActionCommand();
-                        if(command.equals(JFileChooser.CANCEL_SELECTION)){
+                        if (command.equals(JFileChooser.CANCEL_SELECTION)) {
                             dialog.setVisible(false);
                             return;
-                        }else if(command.equals(JFileChooser.APPROVE_SELECTION)){
+                        } else if (command.equals(JFileChooser.APPROVE_SELECTION)) {
                             File file = fc.getSelectedFile();
                             String path = file.getAbsolutePath();
-                            if(file.exists()){
-                                WebOptionPane pane = new WebOptionPane(new JLabel("File already exists. Do you really want to overwrite "
-                                        + file.getName() + "?"), JOptionPane.YES_NO_OPTION);
+                            if (file.exists()) {
+                                WebOptionPane pane = new WebOptionPane(
+                                        new JLabel("File already exists. Do you really want to overwrite "
+                                                + file.getName() + "?"), JOptionPane.YES_NO_OPTION);
                                 pane.setMessageType(WebOptionPane.QUESTION_MESSAGE);
                                 Object[] options = { "Yes", "No" };
                                 pane.setOptions(options);
@@ -74,13 +75,13 @@ public class LatticeView extends View {
                                 dialog2.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
                                 String n = (String) pane.getValue();
                                 dialog2.setVisible(true);
-                                //TODO
-                                if(n.equals("Yes")){
+                                // TODO
+                                if (n.equals("Yes")) {
                                     ((LatticeGraphView) view).exportLatticeAsPDF(path);
                                     dialog.setVisible(false);
-                                }else{
+                                } else {
                                 }
-                            }else {
+                            } else {
                                 ((LatticeGraphView) view).exportLatticeAsPDF(path);
                                 dialog.setVisible(false);
                             }
@@ -155,7 +156,8 @@ public class LatticeView extends View {
         if (evt instanceof ContextChangeEvent
                 && (((ContextChangeEvent) evt).getName() == ContextChangeEvents.LOADEDFILE)) {
             if (state.lattice.missingEdges()) {
-                state.concepts = state.context.getConceptsWithoutConsideredElementa();
+                if (state.concepts.isEmpty())
+                    state.concepts = state.context.getConceptsWithoutConsideredElements();
                 state.lattice.addEdges(state.concepts);
             }
             ((LatticeGraphView) view).setLatticeGraph(state.lattice);
@@ -169,8 +171,8 @@ public class LatticeView extends View {
 
                 @Override
                 protected Void doInBackground() throws Exception {
-                    state.concepts=state.context.getConcepts();
-                    state.lattice=alg.computeLatticeGraph(state.concepts);
+                    state.concepts = state.context.getConcepts();
+                    state.lattice = alg.computeLatticeGraph(state.concepts);
                     ((LatticeGraphView) view).setLatticeGraph(state.lattice);
                     return null;
                 }
@@ -185,9 +187,9 @@ public class LatticeView extends View {
         }
         if (evt instanceof ContextChangeEvent
                 && (((ContextChangeEvent) evt).getName() == ContextChangeEvents.TEMPORARYCONTEXTCHANGED)) {
-            state.concepts=state.context.getConceptsWithoutConsideredElementa();
-            
-            state.lattice=alg.computeLatticeGraph(state.concepts);
+            state.concepts = state.context.getConceptsWithoutConsideredElements();
+
+            state.lattice = alg.computeLatticeGraph(state.concepts);
             ((LatticeGraphView) view).setLatticeGraph(state.lattice);
         }
         view.repaint();
