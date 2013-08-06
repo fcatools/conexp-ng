@@ -38,7 +38,7 @@ public class LatticeView extends View {
         super(state);
 
         alg = new TestLatticeAlgorithm();
-        LatticeGraph graph = alg.computeLatticeGraph(new ListSet<Concept<String, FullObject<String, String>>>());
+        LatticeGraph graph = alg.computeLatticeGraph(new ListSet<Concept<String, FullObject<String, String>>>(), new Rectangle());
         view = new LatticeGraphView(graph, state);
         settings = new AccordionMenu(state);
         settings.setMinimumSize(new Dimension(170, 400));
@@ -171,8 +171,8 @@ public class LatticeView extends View {
 
                 @Override
                 protected Void doInBackground() throws Exception {
-                    state.concepts = state.context.getConcepts();
-                    state.lattice = alg.computeLatticeGraph(state.concepts);
+                    state.concepts=state.context.getConcepts();
+                    state.lattice=alg.computeLatticeGraph(state.concepts, view.getBounds());
                     ((LatticeGraphView) view).setLatticeGraph(state.lattice);
                     return null;
                 }
@@ -187,9 +187,8 @@ public class LatticeView extends View {
         }
         if (evt instanceof ContextChangeEvent
                 && (((ContextChangeEvent) evt).getName() == ContextChangeEvents.TEMPORARYCONTEXTCHANGED)) {
-            state.concepts = state.context.getConceptsWithoutConsideredElements();
-
-            state.lattice = alg.computeLatticeGraph(state.concepts);
+            state.concepts=state.context.getConceptsWithoutConsideredElements();
+            state.lattice=alg.computeLatticeGraph(state.concepts, view.getBounds());
             ((LatticeGraphView) view).setLatticeGraph(state.lattice);
         }
         view.repaint();

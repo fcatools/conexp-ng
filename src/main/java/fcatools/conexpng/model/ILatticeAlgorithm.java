@@ -1,5 +1,6 @@
 package fcatools.conexpng.model;
 
+import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -24,15 +25,20 @@ public abstract class ILatticeAlgorithm {
 
     protected LatticeGraph graph;
     protected Set<Concept<String, FullObject<String, String>>> lattConcepts;
+    protected int screenWidth;
+    protected int screenHeight;
 
     /**
      *
      * @param set
+     * @param bounds 
      * @return
      */
     public LatticeGraph computeLatticeGraph(
-            Set<Concept<String, FullObject<String, String>>> set) {
+            Set<Concept<String, FullObject<String, String>>> set, Rectangle bounds) {
         this.lattConcepts = set;
+        this.screenWidth = bounds.width;
+        this.screenHeight = bounds.height;
         initGraph();
         graph.computeAllIdeals();
         computeVisibleObjectsAndAttributes();
