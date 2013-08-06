@@ -264,6 +264,7 @@ public class Node extends JPanel implements LatticeGraphElement {
     }
 
     public void toggleIdealVisibility() {
+    	((LatticeGraphView) getParent()).resetHighlighting();
         this.isIdealVisibile = !this.isIdealVisibile;
         for (Node n : ideal) {
             n.setPartOfAnIdeal(isIdealVisibile);

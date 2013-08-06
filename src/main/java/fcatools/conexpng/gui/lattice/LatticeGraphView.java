@@ -90,6 +90,12 @@ public class LatticeGraphView extends JSVGCanvas {
 
         g.setColor(Color.BLACK);
         int radius = LatticeView.radius;
+        
+        for(Node n : graph.getNodes()){
+        	if(n.isPartOfAnIdeal() && !lastIdeal.contains(n)){
+        		lastIdeal.clear();
+        	}
+        }
 
         if (!graph.getEdges().isEmpty() && state.showEdges) {
             for (Edge e : graph.getEdges()) {
@@ -204,8 +210,6 @@ public class LatticeGraphView extends JSVGCanvas {
                 g.drawOval(x, y, radius * 2, radius * 2);
             }
         }
-        resetHighlighting();
-        lastIdeal.clear();
     }
 
     /**
@@ -300,7 +304,7 @@ public class LatticeGraphView extends JSVGCanvas {
         setMove(move);
     }
 
-    private void resetHighlighting() {
+    public void resetHighlighting() {
         for (Node n : lastIdeal) {
             n.setPartOfAnIdeal(false);
         }
