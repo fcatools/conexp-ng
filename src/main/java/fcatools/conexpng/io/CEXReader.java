@@ -408,7 +408,7 @@ public class CEXReader {
                         if (event.isStartElement()) {
                             int i = Integer.parseInt(event.asStartElement()
                                     .getAttributeByName(new QName("AttributeIdentifier")).getValue());
-                            n.addAttribut(context.getAttributeAtIndex(i));
+                            n.addAttribute(context.getAttributeAtIndex(i));
                         }
                         event = parser.nextEvent();
                     }

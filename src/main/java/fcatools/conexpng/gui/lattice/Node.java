@@ -22,6 +22,7 @@ public class Node extends JPanel implements LatticeGraphElement {
     private int y;
     private List<Node> below;
     private ListSet<Node> ideal;
+    private ListSet<Node> filter;
     private boolean isIdealVisibile;
     private Label visibleObjects;
     private Label visibleAttributes;
@@ -60,6 +61,7 @@ public class Node extends JPanel implements LatticeGraphElement {
         this.setBounds(x, y, 15, 15);
         this.setBackground(Color.white);
         this.below = new ArrayList<>();
+        this.filter = new ListSet<>();
     }
 
     @Override
@@ -112,7 +114,7 @@ public class Node extends JPanel implements LatticeGraphElement {
      *
      * @param set
      */
-    public void addAttribut(String set) {
+    public void addAttribute(String set) {
         attributes.add(set);
     }
 
@@ -176,6 +178,16 @@ public class Node extends JPanel implements LatticeGraphElement {
 
     public boolean isUpdateYPosible(int y) {
         if (this.y + y >= 2 && this.y + y < getParent().getHeight()) {
+        	for(Node n : this.ideal){
+        		if(this.y + y > n.getY() - 3){
+        			return false;
+        		}
+        	}
+        	for(Node n : this.filter){
+        		if(this.y + y < n.getY() + 3){
+        			return false;
+        		}
+        	}
             return true;
         }
         return false;
@@ -267,6 +279,10 @@ public class Node extends JPanel implements LatticeGraphElement {
 
     public void setPartOfAnIdeal(boolean b) {
         this.isIdealVisibile = b;
+    }
+    
+    public ListSet<Node> getFilter(){
+    	return this.filter;
     }
 
 }

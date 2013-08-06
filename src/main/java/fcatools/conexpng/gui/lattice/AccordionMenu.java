@@ -39,7 +39,7 @@ public class AccordionMenu extends WebAccordion {
         this.addPane(2, "Attributes", getAttributePanel());
     }
 
-    private WebPanel getLatticePanel() {
+    private WebScrollPane getLatticePanel() {
         WebPanel panel = new WebPanel(new BorderLayout());
         panel.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -85,7 +85,7 @@ public class AccordionMenu extends WebAccordion {
         gbc.gridx = 1;
         panel.add(showEdges, gbc);
 
-        return panel;
+        return new WebScrollPane(panel);
     }
 
     // this methode places object's radiobuttons

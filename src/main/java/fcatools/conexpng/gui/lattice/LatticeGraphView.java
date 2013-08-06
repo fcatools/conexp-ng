@@ -1,10 +1,13 @@
 package fcatools.conexpng.gui.lattice;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.io.File;
@@ -17,6 +20,11 @@ import java.io.Writer;
 import java.net.MalformedURLException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+
+import javax.swing.BorderFactory;
+import javax.swing.border.Border;
+import javax.swing.border.EmptyBorder;
+
 import org.apache.batik.dom.GenericDOMImplementation;
 import org.apache.batik.dom.svg.SVGDOMImplementation;
 import org.apache.batik.svggen.SVGGraphics2D;
@@ -47,6 +55,7 @@ public class LatticeGraphView extends JSVGCanvas {
     private static Font font = new Font("Monospaced", Font.PLAIN, 12);
 
     public LatticeGraphView(LatticeGraph graph, Conf state) {
+    	
         this.graph = graph;
         this.state = state;
         this.lastIdeal = new ArrayList<Node>();
@@ -119,11 +128,10 @@ public class LatticeGraphView extends JSVGCanvas {
                 g.setColor(Color.WHITE);
                 g.fillRect(r.x + n.getObjectsLabel().getX(), r.y + n.getObjectsLabel().getY(), r.width, r.height);
 
-                g.setColor(Color.MAGENTA);
+                g.setColor(Color.BLACK);
 
                 g.drawString(content, n.getObjectsLabel().getX(), n.getObjectsLabel().getY());
 
-                g.setColor(Color.BLACK);
                 g.drawRect(r.x + n.getObjectsLabel().getX(), r.y + n.getObjectsLabel().getY(), r.width, r.height);
 
                 n.getObjectsLabel().setBounds(r.x + n.getObjectsLabel().getX(), r.y + n.getObjectsLabel().getY(),
@@ -146,7 +154,7 @@ public class LatticeGraphView extends JSVGCanvas {
                 g.setColor(Color.WHITE);
                 g.fillRect(r.x + n.getAttributesLabel().getX(), r.y + n.getAttributesLabel().getY(), r.width, r.height);
 
-                g.setColor(Color.GREEN);
+                g.setColor(Color.BLUE);
 
                 g.drawString(content, n.getAttributesLabel().getX(), n.getAttributesLabel().getY());
 
@@ -215,15 +223,13 @@ public class LatticeGraphView extends JSVGCanvas {
         this.paint(svgGenerator);
 
         Writer out;
-        try {
-            out = new FileWriter(new File("test_batik.svg"));
-            svgGenerator.stream(out, true);
-        } catch (IOException ioEx) {
-            ioEx.printStackTrace();
-        }
-
         String svg_URI_input;
         try {
+        	File temp = new File("test_batik.svg");
+            out = new FileWriter(temp);
+            svgGenerator.stream(out, true);
+            
+
             svg_URI_input = Paths.get("test_batik.svg").toUri().toURL().toString();
             TranscoderInput input_svg_image = new TranscoderInput(svg_URI_input);
             OutputStream pdf_ostream;
@@ -271,6 +277,7 @@ public class LatticeGraphView extends JSVGCanvas {
             transcoder.transcode(input_svg_image, output_pdf_file);
             pdf_ostream.flush();
             pdf_ostream.close();
+            temp.delete();
 
         } catch (MalformedURLException e) {
             // TODO Auto-generated catch block
