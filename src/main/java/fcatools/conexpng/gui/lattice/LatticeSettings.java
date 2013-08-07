@@ -18,7 +18,7 @@ import de.tudresden.inf.tcs.fcalib.FullObject;
 import fcatools.conexpng.Conf;
 import fcatools.conexpng.model.FormalContext;
 
-public class AccordionMenu extends WebAccordion {
+public class LatticeSettings extends WebAccordion {
 
     /**
      *
@@ -29,7 +29,7 @@ public class AccordionMenu extends WebAccordion {
     private  List<WebCheckBox> attributeCheckBoxes;
     private List<WebCheckBox> objectCheckBoxes;
 
-    public AccordionMenu(Conf state) {
+    public LatticeSettings(Conf state) {
         this.state = state;
         this.context = state.context;
         this.attributeCheckBoxes = new ArrayList<>();
@@ -100,10 +100,11 @@ public class AccordionMenu extends WebAccordion {
         gbo.gridy = 2;
         final WebRadioButton noneObjects = new WebRadioButton();
         noneObjects.setText("none");
-        noneObjects.setSelected(true);
 
         final WebRadioButton labelsObjects = new WebRadioButton();
         labelsObjects.setText("labels");
+        labelsObjects.setSelected(true);
+        state.showObjectLabel = true;
 
         noneObjects.addActionListener(new ActionListener() {
             @Override
@@ -142,9 +143,11 @@ public class AccordionMenu extends WebAccordion {
         gba.gridy = 2;
         final WebRadioButton noneAttributes = new WebRadioButton();
         noneAttributes.setText("none");
-        noneAttributes.setSelected(true);
         final WebRadioButton labelsAttributes = new WebRadioButton();
         labelsAttributes.setText("labels");
+        labelsAttributes.setSelected(true);
+        state.showAttributLabel = true;
+
 
         noneAttributes.addActionListener(new ActionListener() {
             @Override

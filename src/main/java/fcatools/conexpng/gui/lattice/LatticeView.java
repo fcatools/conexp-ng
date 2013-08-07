@@ -41,7 +41,7 @@ public class LatticeView extends View {
         LatticeGraph graph = alg.computeLatticeGraph(new ListSet<Concept<String, FullObject<String, String>>>(),
                 new Rectangle());
         view = new LatticeGraphView(graph, state);
-        settings = new AccordionMenu(state);
+        settings = new LatticeSettings(state);
         settings.setMinimumSize(new Dimension(170, 400));
 
         JButton export = Util.createButton("Export as .PDF", "export", "conexp/cameraFlash.gif");
@@ -192,7 +192,7 @@ public class LatticeView extends View {
                 };
             }.execute();
 
-            ((AccordionMenu) settings).update();
+            ((LatticeSettings) settings).update();
 
         }
         if (evt instanceof ContextChangeEvent
