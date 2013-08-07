@@ -1,16 +1,14 @@
 package fcatools.conexpng.gui.lattice;
 
 import java.awt.BasicStroke;
-import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.Stroke;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -22,10 +20,6 @@ import java.net.MalformedURLException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
-import javax.swing.BorderFactory;
-import javax.swing.border.Border;
-import javax.swing.border.EmptyBorder;
-
 import org.apache.batik.dom.GenericDOMImplementation;
 import org.apache.batik.dom.svg.SVGDOMImplementation;
 import org.apache.batik.svggen.SVGGraphics2D;
@@ -36,7 +30,6 @@ import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
 import org.apache.batik.transcoder.image.JPEGTranscoder;
 import org.apache.batik.transcoder.image.PNGTranscoder;
-import org.apache.batik.transcoder.svg2svg.SVGTranscoder;
 import org.apache.fop.svg.PDFTranscoder;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
@@ -57,6 +50,8 @@ public class LatticeGraphView extends JSVGCanvas {
 	private boolean idealHighlighting;
 	private boolean move;
 	private static Font font = new Font("Monospaced", Font.PLAIN, 12);
+	private Stroke drawingStroke = new BasicStroke(1, BasicStroke.CAP_BUTT,
+			BasicStroke.JOIN_BEVEL, 0, new float[] { 9 }, 0);
 
 	public LatticeGraphView(LatticeGraph graph, Conf state) {
 
@@ -134,10 +129,15 @@ public class LatticeGraphView extends JSVGCanvas {
 			// label drawing
 			if ((!n.getVisibleObjects().isEmpty()) && state.showObjectLabel) {
 				g.setColor(Color.BLACK);
+
+				// dashed line
+				g.setStroke(drawingStroke);
 				g.drawLine(n.getObjectsLabel().getX()
 						+ n.getObjectsLabel().getBounds().width / 2, n
 						.getObjectsLabel().getY(), x + radius, y + radius);
+				g.setStroke(new BasicStroke());
 
+				// draw the label
 				String content = n.getObjectsLabel().elementsToString();
 				g.setFont(font);
 				FontMetrics fm = g.getFontMetrics();
@@ -158,16 +158,17 @@ public class LatticeGraphView extends JSVGCanvas {
 				n.getObjectsLabel().setBounds(r.x + n.getObjectsLabel().getX(),
 						r.y + n.getObjectsLabel().getY(), r.width, r.height);
 
-				// draw filled node
-
 			}
 
+			// analog like objects
 			if ((!n.getVisibleAttributes().isEmpty())
 					&& state.showAttributLabel) {
 				g.setColor(Color.BLACK);
+				g.setStroke(drawingStroke);
 				g.drawLine(n.getAttributesLabel().getX()
 						+ n.getAttributesLabel().getBounds().width / 2, n
 						.getAttributesLabel().getY(), x + radius, y + radius);
+				g.setStroke(new BasicStroke());
 
 				String content = n.getAttributesLabel().elementsToString();
 				g.setFont(font);
@@ -294,8 +295,7 @@ public class LatticeGraphView extends JSVGCanvas {
 				out = new FileWriter(temp);
 				svgGenerator.stream(out, true);
 
-				svg_URI_input = Paths.get("test_batik.svg").toUri()
-						.toString();
+				svg_URI_input = Paths.get("test_batik.svg").toUri().toString();
 				TranscoderInput input_svg_image = new TranscoderInput(
 						svg_URI_input);
 				OutputStream ostream;
