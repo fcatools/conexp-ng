@@ -77,12 +77,12 @@ public class LatticeView extends View {
                                 dialog2.setVisible(true);
                                 // TODO
                                 if (n.equals("Yes")) {
-                                    ((LatticeGraphView) view).exportLatticeAsPDF(path);
+                                    ((LatticeGraphView) view).exportLattice(path);
                                     dialog.setVisible(false);
                                 } else {
                                 }
                             } else {
-                                ((LatticeGraphView) view).exportLatticeAsPDF(path);
+                                ((LatticeGraphView) view).exportLattice(path);
                                 dialog.setVisible(false);
                             }
                         }
