@@ -4,7 +4,7 @@ import de.tudresden.inf.tcs.fcalib.FullObject;
 import de.tudresden.inf.tcs.fcalib.action.StartExplorationAction;
 import fcatools.conexpng.Conf;
 import fcatools.conexpng.Util;
-import fcatools.conexpng.gui.MainFrame.OverwritingFileDiaolog;
+import fcatools.conexpng.gui.MainFrame.OverwritingFileDialog;
 import fcatools.conexpng.gui.MainFrame.StillCalculatingDialog;
 import fcatools.conexpng.gui.MainFrame.UnsavedChangesDialog;
 import fcatools.conexpng.io.CSVWriter;
@@ -129,11 +129,15 @@ public class MainToolbar extends WebToolBar {
             public void valueChanged(ListSelectionEvent e) {
                 if (!e.getValueIsAdjusting() && !((WebList) e.getSource()).isSelectionEmpty()) {
                     popup.hidePopup();
-
-                    state.setNewFile(String.copyValueOf(((String) ((WebList) e.getSource()).getSelectedValue())
-                            .toCharArray()));
+                    if (!state.canBeSaved()) {
+                        StillCalculatingDialog scd = mainFrame.new StillCalculatingDialog();
+                        if (scd.isYes())
+                            return;
+                    }
+                    String path = String.copyValueOf(((String) ((WebList) e.getSource()).getSelectedValue())
+                            .toCharArray());
                     try {
-                        new CEXReader(state, state.filePath);
+                        new CEXReader(state, path);
 
                     } catch (Exception e1) {
                         Util.handleIOExceptions(MainToolbar.this.mainFrame, e1, state.filePath);
@@ -288,7 +292,8 @@ public class MainToolbar extends WebToolBar {
                 setDrawFocus(false);
                 addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent arg0) {
-                        MyExpert expert = new MyExpert(MainToolbar.this.mainFrame, state);
+                        AttributeExplorationExpert expert = new AttributeExplorationExpert(MainToolbar.this.mainFrame,
+                                state);
                         state.context.setExpert(expert);
                         expert.addExpertActionListener(state.context);
                         // Create an expert action for starting attribute
@@ -308,7 +313,7 @@ public class MainToolbar extends WebToolBar {
 
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                MyExpert expert = new MyExpert(MainToolbar.this.mainFrame, state);
+                AttributeExplorationExpert expert = new AttributeExplorationExpert(MainToolbar.this.mainFrame, state);
                 state.context.setExpert(expert);
                 expert.addExpertActionListener(state.context);
                 StartExplorationAction<String, String, FullObject<String, String>> action = new StartExplorationAction<String, String, FullObject<String, String>>();
@@ -397,6 +402,11 @@ public class MainToolbar extends WebToolBar {
 
         @Override
         public void actionPerformed(ActionEvent e) {
+            if (!state.canBeSaved()) {
+                StillCalculatingDialog scd = mainFrame.new StillCalculatingDialog();
+                if (scd.isYes())
+                    return;
+            }
             if (state.filePath.endsWith("untitled.cex") || saveAs) {
                 final WebFileChooser fc = new WebFileChooser();
                 fc.setCurrentDirectory(state.filePath.substring(0,
@@ -415,7 +425,7 @@ public class MainToolbar extends WebToolBar {
                             File file = fc.getSelectedFile();
                             String path = file.getAbsolutePath();
                             if (file.exists()) {
-                                OverwritingFileDiaolog ofd = mainFrame.new OverwritingFileDiaolog(file);
+                                OverwritingFileDialog ofd = mainFrame.new OverwritingFileDialog(file);
                                 if (ofd.isYes()) {
                                     saveFile(path);
                                     dialog.setVisible(false);
@@ -455,6 +465,11 @@ public class MainToolbar extends WebToolBar {
 
         @Override
         public void actionPerformed(ActionEvent e) {
+            if (!state.canBeSaved()) {
+                StillCalculatingDialog scd = mainFrame.new StillCalculatingDialog();
+                if (scd.isYes())
+                    return;
+            }
             if (state.unsavedChanges) {
                 UnsavedChangesDialog ucd = mainFrame.new UnsavedChangesDialog();
                 if (ucd.isYes()) {

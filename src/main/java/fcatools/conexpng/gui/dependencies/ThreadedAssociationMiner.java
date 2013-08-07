@@ -126,7 +126,6 @@ public class ThreadedAssociationMiner extends AbstractAssociationMiner implement
     private void checkIfSetsKMinus1AreClosed(Set<SortedSet<String>> levelKm1, Set<SortedSet<String>> levelK) {
         Set<SortedSet<String>> closed = new ListSet<>();
         boolean isClosed = true;
-        // is the empty set closed?
         if (levelKm1.isEmpty()) {
             SortedSet<String> emptySet = new TreeSet<>();
             int supportcount = context.supportCount(emptySet);
@@ -299,7 +298,6 @@ public class ThreadedAssociationMiner extends AbstractAssociationMiner implement
         rules = new TreeSet<AssociationRule>();
         FC = new ListSet<>();
         apriori();
-        System.out.println(FC);
         Gen_LB();
     }
 }

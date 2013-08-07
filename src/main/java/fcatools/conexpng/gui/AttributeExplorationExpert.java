@@ -31,13 +31,13 @@ import java.util.Set;
 import static fcatools.conexpng.Util.*;
 import static javax.swing.KeyStroke.getKeyStroke;
 
-public class MyExpert extends AbstractExpert<String, String, FullObject<String, String>> {
+public class AttributeExplorationExpert extends AbstractExpert<String, String, FullObject<String, String>> {
 
     private WebFrame frame;
     private Conf state;
     private FormalContext context;
 
-    public MyExpert(WebFrame mainFrame, Conf state) {
+    public AttributeExplorationExpert(WebFrame mainFrame, Conf state) {
         this.state = state;
         this.context = state.context;
         this.frame = mainFrame;

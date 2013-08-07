@@ -38,7 +38,8 @@ public class LatticeView extends View {
         super(state);
 
         alg = new TestLatticeAlgorithm();
-        LatticeGraph graph = alg.computeLatticeGraph(new ListSet<Concept<String, FullObject<String, String>>>(), new Rectangle());
+        LatticeGraph graph = alg.computeLatticeGraph(new ListSet<Concept<String, FullObject<String, String>>>(),
+                new Rectangle());
         view = new LatticeGraphView(graph, state);
         settings = new AccordionMenu(state);
         settings.setMinimumSize(new Dimension(170, 400));
@@ -143,7 +144,8 @@ public class LatticeView extends View {
             }
         });
     }
-
+    
+    boolean loadedfile = false;
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         // TODO: I would not use ContextChangeEvents for communicating between
@@ -153,16 +155,24 @@ public class LatticeView extends View {
                         .getName() == ContextChangeEvents.NEWCONTEXT)) {
             updateLater = true;
         }
+        
         if (evt instanceof ContextChangeEvent
                 && (((ContextChangeEvent) evt).getName() == ContextChangeEvents.LOADEDFILE)) {
+
+            if (state.lattice.isEmpty())
+                updateLater = true;
+            else
+                loadedfile = true;
+        }
+        if (isVisible() && loadedfile) {
+            loadedfile=false;
             if (state.lattice.missingEdges()) {
                 if (state.concepts.isEmpty())
                     state.concepts = state.context.getConceptsWithoutConsideredElements();
+                System.out.println(state.concepts);
                 state.lattice.addEdges(state.concepts);
             }
             ((LatticeGraphView) view).setLatticeGraph(state.lattice);
-            if (state.lattice.isEmpty())
-                updateLater = true;
         }
         if (isVisible() && updateLater) {
             updateLater = false;
@@ -171,8 +181,8 @@ public class LatticeView extends View {
 
                 @Override
                 protected Void doInBackground() throws Exception {
-                    state.concepts=state.context.getConcepts();
-                    state.lattice=alg.computeLatticeGraph(state.concepts, view.getBounds());
+                    state.concepts = state.context.getConcepts();
+                    state.lattice = alg.computeLatticeGraph(state.concepts, view.getBounds());
                     ((LatticeGraphView) view).setLatticeGraph(state.lattice);
                     return null;
                 }
@@ -187,8 +197,8 @@ public class LatticeView extends View {
         }
         if (evt instanceof ContextChangeEvent
                 && (((ContextChangeEvent) evt).getName() == ContextChangeEvents.TEMPORARYCONTEXTCHANGED)) {
-            state.concepts=state.context.getConceptsWithoutConsideredElements();
-            state.lattice=alg.computeLatticeGraph(state.concepts, view.getBounds());
+            state.concepts = state.context.getConceptsWithoutConsideredElements();
+            state.lattice = alg.computeLatticeGraph(state.concepts, view.getBounds());
             ((LatticeGraphView) view).setLatticeGraph(state.lattice);
         }
         view.repaint();
