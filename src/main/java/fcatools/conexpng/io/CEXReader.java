@@ -413,7 +413,7 @@ public class CEXReader {
                     }
                     nodes.add(n);
                     event = parser.nextEvent();
-                    if (element.isStartElement()) {
+                    if (event.isStartElement()) {
                         element = event.asStartElement();
 
                         if (name(element, "Extent")) {
@@ -429,15 +429,16 @@ public class CEXReader {
                                 event = parser.nextEvent();
                             }
                         }
+                        Concept<String, FullObject<String, String>> concept = new LatticeConcept();
+                        for (String attr : n.getAttributes()) {
+                            concept.getIntent().add(attr);
+                        }
+                        for (String obj : n.getObjects()) {
+                            concept.getExtent().add(context.getObject(obj));
+                        }
+                        concepts.add(concept);
                     }
-                    Concept<String, FullObject<String, String>> concept = new LatticeConcept();
-                    for (String attr : n.getAttributes()) {
-                        concept.getIntent().add(attr);
-                    }
-                    for (String obj : n.getObjects()) {
-                        concept.getExtent().add(context.getObject(obj));
-                    }
-                    concepts.add(concept);
+
                 }
                 break;
             }

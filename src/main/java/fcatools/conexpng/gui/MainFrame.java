@@ -323,11 +323,11 @@ public class MainFrame extends WebFrame {
     }
 
     @SuppressWarnings("serial")
-    public class OverwritingFileDiaolog extends WebDialog {
+    public class OverwritingFileDialog extends WebDialog {
         private boolean yes;
         private boolean no;
 
-        public OverwritingFileDiaolog(File file) {
+        public OverwritingFileDialog(File file) {
             super(MainFrame.this, "Overwriting existing file?", true);
             Object[] options = { "Yes", "No" };
             final WebOptionPane optionPane = new WebOptionPane("Do you really want to overwrite " + file.getName()

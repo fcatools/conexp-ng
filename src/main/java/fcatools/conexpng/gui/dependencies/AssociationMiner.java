@@ -124,7 +124,6 @@ public class AssociationMiner extends AbstractAssociationMiner {
             Set<SortedSet<String>> levelK) {
         Set<SortedSet<String>> closed = new ListSet<>();
         boolean isClosed = true;
-        // is the empty set closed?
         if (levelKm1.isEmpty()) {
             SortedSet<String> emptySet = new TreeSet<>();
             int supportcount = context.supportCount(emptySet);
