@@ -428,15 +428,16 @@ public class CEXReader {
                                 }
                                 event = parser.nextEvent();
                             }
+                            Concept<String, FullObject<String, String>> concept = new LatticeConcept();
+                            for (String attr : n.getAttributes()) {
+                                concept.getIntent().add(attr);
+                            }
+                            for (String obj : n.getObjects()) {
+                                concept.getExtent().add(context.getObject(obj));
+                            }
+                            concepts.add(concept);
                         }
-                        Concept<String, FullObject<String, String>> concept = new LatticeConcept();
-                        for (String attr : n.getAttributes()) {
-                            concept.getIntent().add(attr);
-                        }
-                        for (String obj : n.getObjects()) {
-                            concept.getExtent().add(context.getObject(obj));
-                        }
-                        concepts.add(concept);
+                        
                     }
 
                 }

@@ -140,7 +140,7 @@ public class MainToolbar extends WebToolBar {
                         new CEXReader(state, path);
 
                     } catch (Exception e1) {
-                        Util.handleIOExceptions(MainToolbar.this.mainFrame, e1, state.filePath);
+                        Util.handleIOExceptions(MainToolbar.this.mainFrame, e1, path);
                     }
                     ((WebList) e.getSource()).clearSelection();
                 }
@@ -156,7 +156,7 @@ public class MainToolbar extends WebToolBar {
                 setDrawFocus(false);
                 setEnabled(false);
                 addActionListener(new SaveAction(false, true));
-                setToolTipText("Save the context in a CEX-file (CTRL*S)");
+                setToolTipText("Save the context in a CEX-file (CTRL+S)");
             }
         };
         add(saveButton);
@@ -332,7 +332,14 @@ public class MainToolbar extends WebToolBar {
 
                     @Override
                     public void actionPerformed(ActionEvent arg0) {
-
+                        Util.showMessageDialog(
+                                mainFrame,
+                                "ConExp-NG is a simple GUI-centric tool for the study & research of Formal Concept Analysis (FCA)\n"
+                                        + "that allows you to create formal contexts, draw concept lattices and explore dependencies between attributes.\n"
+                                        + "ConExp-NG, whose name stands for Concept Explorer Next Generation, is not an entirely original creation\n"
+                                        + "but a modern reimplementation of a similar tool by the name of Concept Explorer with a focus on usability,\n"
+                                        + "maintainability and extensibility. The documentation is located at: https://github.com/fcatools/conexp-ng/wiki.",
+                                false);
                     }
                 });
             }
@@ -517,11 +524,6 @@ public class MainToolbar extends WebToolBar {
                         new OALReader(state, path);
                     else if (!cex && path.endsWith(".csv"))
                         new CSVReader(state, path);
-                    else {
-                        Util.showMessageDialog(mainFrame, "This fileformat is unfortunality not supported", true);
-                        return;
-                    }
-
                 } catch (Exception e1) {
                     Util.handleIOExceptions(mainFrame, e1, path);
                 }

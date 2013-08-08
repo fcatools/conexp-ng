@@ -215,7 +215,6 @@ public class LatticeSettings extends WebAccordion {
         gbc.gridx = 0;
         gbc.gridy = 0;
         for (FullObject<String, String> s : context.getObjects()) {
-        	System.out.println(s);
             gbc.gridy++;
             final WebCheckBox box = new WebCheckBox(s.getIdentifier());
             final FullObject<String, String> temp = s;
@@ -241,7 +240,7 @@ public class LatticeSettings extends WebAccordion {
     }
 
     public void update(Conf state) {
-    	this.context = state.context;
+        this.context = state.context;
         this.removePane(1);
         objectCheckBoxes.clear();
         this.addPane(1, "Objects", getObjectPanel());

@@ -34,7 +34,6 @@ public class MainStatusBar extends WebPanel implements PropertyChangeListener {
             WebProgressBar progressbar = new WebProgressBar();
             progressbar.setIndeterminate(true);
             panel.add(progressbar, BorderLayout.EAST);
-            removeAll();
             MainStatusBar.this.add(panel, BorderLayout.EAST);
             revalidate();
             getParent().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));

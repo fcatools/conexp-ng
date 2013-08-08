@@ -115,6 +115,14 @@ public class LatticeGraph {
                 u.setLevel(e.getU().getLevel());
                 v.setLevel(e.getV().getLevel());
                 u.addBelowNode(v);
+                if(u.getAttributesLabel().getX()==0 && u.getAttributesLabel().getY()==0)
+                    u.getAttributesLabel().setXY(e.getU().getAttributesLabel().getX(), e.getU().getAttributesLabel().getY());
+                if(v.getAttributesLabel().getX()==0 && v.getAttributesLabel().getY()==0)
+                    v.getAttributesLabel().setXY(e.getV().getAttributesLabel().getX(), e.getV().getAttributesLabel().getY());
+                if(u.getObjectsLabel().getX()==0 && u.getObjectsLabel().getY()==0)
+                    u.getObjectsLabel().setXY(e.getU().getObjectsLabel().getX(), e.getU().getObjectsLabel().getY());
+                if(v.getObjectsLabel().getX()==0 && v.getObjectsLabel().getY()==0)
+                    v.getObjectsLabel().setXY(e.getV().getObjectsLabel().getX(), e.getV().getObjectsLabel().getY());
                 edges.add(new Edge(u, v));
             }
         }

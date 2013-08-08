@@ -1,11 +1,11 @@
 package fcatools.conexpng.gui.lattice;
 
-import fcatools.conexpng.ContextChangeEvents;
 import fcatools.conexpng.Conf;
 import fcatools.conexpng.Conf.ContextChangeEvent;
 import fcatools.conexpng.Conf.StatusMessage;
 import fcatools.conexpng.Util;
 import fcatools.conexpng.gui.View;
+import fcatools.conexpng.model.FormalContext.ConceptCalculator;
 import fcatools.conexpng.model.ILatticeAlgorithm;
 import fcatools.conexpng.model.TestLatticeAlgorithm;
 
@@ -144,67 +144,137 @@ public class LatticeView extends View {
             }
         });
     }
-    
+
     boolean loadedfile = false;
+    ConceptsLatticeWorker clw;
+
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        // TODO: I would not use ContextChangeEvents for communicating between
-        // the Latticeview and the AccordionMenue
-        if (evt instanceof ContextChangeEvent
-                && (((ContextChangeEvent) evt).getName() == ContextChangeEvents.CONTEXTCHANGED || ((ContextChangeEvent) evt)
-                        .getName() == ContextChangeEvents.NEWCONTEXT)) {
-            updateLater = true;
-        }
-        
-        if (evt instanceof ContextChangeEvent
-                && (((ContextChangeEvent) evt).getName() == ContextChangeEvents.LOADEDFILE)) {
-
-            if (state.lattice.isEmpty())
+        if (evt instanceof ContextChangeEvent) {
+            ContextChangeEvent cce = (ContextChangeEvent) evt;
+            switch (cce.getName()) {
+            case CANCELCALCULATIONS: {
+                if (clw != null)
+                    clw.cancel(true);
+                break;
+            }
+            case CONTEXTCHANGED: {
                 updateLater = true;
-            else
-                loadedfile = true;
+                break;
+            }
+            case NEWCONTEXT: {
+                updateLater = true;
+                break;
+            }
+            case LOADEDFILE: {
+                if (state.lattice.isEmpty())
+                    updateLater = true;
+                else
+                    loadedfile = true;
+                break;
+            }
+            case TEMPORARYCONTEXTCHANGED: {
+                if (clw != null && !clw.isDone()) {
+                    clw.cancel(true);
+                }
+                clw = new ConceptsLatticeWorker();
+                clw.execute();
+                break;
+            }
+            default:
+                break;
+            }
         }
+
         if (isVisible() && loadedfile) {
-            loadedfile=false;
+            loadedfile = false;
+            updateLater = false;
             if (state.lattice.missingEdges()) {
                 if (state.concepts.isEmpty())
-                    state.concepts = state.context.getConceptsWithoutConsideredElements();
-                System.out.println(state.concepts);
-                state.lattice.addEdges(state.concepts);
+                    new ConceptsWorker().execute();
+                else
+                    state.lattice.addEdges(state.concepts);
             }
             ((LatticeSettings) settings).update(state);
-
             ((LatticeGraphView) view).setLatticeGraph(state.lattice);
-
-
         }
         if (isVisible() && updateLater) {
             updateLater = false;
-            state.startCalculation(StatusMessage.CALCULATINGLATTICE);
-            new SwingWorker<Void, Object>() {
-
-                @Override
-                protected Void doInBackground() throws Exception {
-                    state.concepts = state.context.getConcepts();
-                    state.lattice = alg.computeLatticeGraph(state.concepts, view.getBounds());
-                    ((LatticeGraphView) view).setLatticeGraph(state.lattice);
-                    return null;
-                }
-
-                protected void done() {
-                    state.endCalculation(StatusMessage.CALCULATINGLATTICE);
-                };
-            }.execute();
-
-            ((LatticeSettings) settings).update(state);
-
-        }
-        if (evt instanceof ContextChangeEvent
-                && (((ContextChangeEvent) evt).getName() == ContextChangeEvents.TEMPORARYCONTEXTCHANGED)) {
-            state.concepts = state.context.getConceptsWithoutConsideredElements();
-            state.lattice = alg.computeLatticeGraph(state.concepts, view.getBounds());
-            ((LatticeGraphView) view).setLatticeGraph(state.lattice);
+            if (clw != null && !clw.isDone()) {
+                clw.cancel(true);
+            }
+            clw = new ConceptsLatticeWorker();
+            clw.execute();
         }
         view.repaint();
     }
+
+    private class ConceptsWorker extends SwingWorker<Void, Void> {
+        ConceptCalculator cc;
+
+        @Override
+        protected Void doInBackground() throws Exception {
+
+            ((LatticeGraphView) view).setLatticeGraph(state.lattice);
+            state.startCalculation(StatusMessage.CALCULATINGCONCEPTS);
+            cc = state.context.new ConceptCalculator();
+            Thread t = new Thread(cc);
+            t.setPriority(Thread.MIN_PRIORITY);
+            t.start();
+            while (t.isAlive()) {
+                if (isCancelled()) {
+                    t.interrupt();
+                    t.join();
+                    return null;
+                }
+            }
+            return null;
+        }
+
+        protected void done() {
+            state.endCalculation(StatusMessage.CALCULATINGCONCEPTS);
+            if (!isCancelled()) {
+                state.concepts = cc.getConceptLattice();
+                state.lattice.addEdges(state.concepts);
+            }
+            super.done();
+        };
+    }
+
+    private class ConceptsLatticeWorker extends SwingWorker<Void, Void> {
+
+        ConceptCalculator cc;
+
+        @Override
+        protected Void doInBackground() throws Exception {
+            state.startCalculation(StatusMessage.CALCULATINGCONCEPTS);
+            cc = state.context.new ConceptCalculator();
+            Thread t = new Thread(cc);
+            t.setPriority(Thread.MIN_PRIORITY);
+            t.start();
+            while (t.isAlive()) {
+                if (isCancelled()) {
+                    t.interrupt();
+                    t.join();
+                    return null;
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void done() {
+            state.endCalculation(StatusMessage.CALCULATINGCONCEPTS);
+            if (!isCancelled()) {
+                state.concepts = cc.getConceptLattice();
+                state.startCalculation(StatusMessage.CALCULATINGLATTICE);
+                state.lattice = alg.computeLatticeGraph(state.concepts, view.getBounds());
+                ((LatticeGraphView) view).setLatticeGraph(state.lattice);
+                ((LatticeSettings) settings).update(state);
+                state.endCalculation(StatusMessage.CALCULATINGLATTICE);
+            }
+            super.done();
+        }
+    }
+
 }

@@ -28,6 +28,7 @@ import javax.swing.JComponent;
 import javax.swing.KeyStroke;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -59,6 +60,8 @@ public class MainFrame extends WebFrame {
 
     @SuppressWarnings({ "serial" })
     public MainFrame(final Conf state) {
+        Image img = Toolkit.getDefaultToolkit().getImage("src/main/resources/icons/logo.png");
+        setIconImage(img);
         setDefaultCloseOperation(WebFrame.DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent we) {

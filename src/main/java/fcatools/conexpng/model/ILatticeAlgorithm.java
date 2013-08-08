@@ -31,7 +31,7 @@ public abstract class ILatticeAlgorithm {
     /**
      *
      * @param set
-     * @param bounds 
+     * @param bounds
      * @return
      */
     public LatticeGraph computeLatticeGraph(
@@ -96,11 +96,11 @@ public abstract class ILatticeAlgorithm {
                 }
             }
         }
-        for (Node n : graph.getNodes()) {
-            System.out.println("Objekte = " + n.getObjects() + ", Attribute = "
-                    + n.getAttributes() + ", Level = " + n.getLevel());
-        }
-        System.out.println("-------------------");
+//        for (Node n : graph.getNodes()) {
+//            System.out.println("Objekte = " + n.getObjects() + ", Attribute = "
+//                    + n.getAttributes() + ", Level = " + n.getLevel());
+//        }
+//        System.out.println("-------------------");
 
     }
 

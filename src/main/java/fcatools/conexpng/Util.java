@@ -89,7 +89,7 @@ public class Util {
         Object[] options = { "Okay" };
         pane.setOptions(options);
         pane.setMessageType(error ? WebOptionPane.ERROR_MESSAGE : WebOptionPane.INFORMATION_MESSAGE);
-        final WebDialog dialog = new WebDialog(parent, "Error");
+        final WebDialog dialog = new WebDialog(parent, error? "Error":"Message");
         pane.addPropertyChangeListener(new PropertyChangeListener() {
             public void propertyChange(PropertyChangeEvent e) {
                 if (dialog.isVisible() && (e.getSource() == pane)

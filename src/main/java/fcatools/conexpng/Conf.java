@@ -8,11 +8,11 @@ import fcatools.conexpng.gui.MainToolbar;
 import fcatools.conexpng.gui.lattice.LatticeGraph;
 import fcatools.conexpng.model.AssociationRule;
 import fcatools.conexpng.model.FormalContext;
-
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
@@ -56,9 +56,10 @@ public class Conf extends UndoManager {
 	}
 
 	public int getNumberOfConcepts() {
-		if (concepts == null) {
-			// TODO: in Swingworker with statusmessage
+		if (concepts.isEmpty()) {
+			startCalculation(StatusMessage.CALCULATINGCONCEPTS);
 			concepts = context.getConceptsWithoutConsideredElements();
+			endCalculation(StatusMessage.CALCULATINGCONCEPTS);
 		}
 		return concepts.size();
 	}
@@ -67,7 +68,7 @@ public class Conf extends UndoManager {
 		context = new FormalContext(rows, columns);
 		associations = new TreeSet<AssociationRule>();
 		implications = new TreeSet<FCAImplication<String>>();
-		concepts = new TreeSet<Concept<String, FullObject<String, String>>>();
+		concepts = new HashSet<Concept<String, FullObject<String, String>>>();
 		guiConf = new GUIConf();
 		lattice = new LatticeGraph();
 		filePath = filePath.substring(0, filePath.lastIndexOf(System.getProperty("file.separator")) + 1)
@@ -193,7 +194,7 @@ public class Conf extends UndoManager {
 	}
 
 	public boolean canBeSaved() {
-		return starts == stops;
+		return starts <= stops;
 	}
 
 	public void loadedFile() {
