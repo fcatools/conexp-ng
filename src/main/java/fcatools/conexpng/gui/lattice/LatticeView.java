@@ -172,7 +172,11 @@ public class LatticeView extends View {
                 System.out.println(state.concepts);
                 state.lattice.addEdges(state.concepts);
             }
+            ((LatticeSettings) settings).update(state);
+
             ((LatticeGraphView) view).setLatticeGraph(state.lattice);
+
+
         }
         if (isVisible() && updateLater) {
             updateLater = false;
@@ -192,7 +196,7 @@ public class LatticeView extends View {
                 };
             }.execute();
 
-            ((LatticeSettings) settings).update();
+            ((LatticeSettings) settings).update(state);
 
         }
         if (evt instanceof ContextChangeEvent
