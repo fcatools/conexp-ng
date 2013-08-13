@@ -8,7 +8,6 @@ import de.tudresden.inf.tcs.fcaapi.FCAImplication;
 import fcatools.conexpng.Conf;
 import fcatools.conexpng.Conf.ContextChangeEvent;
 import fcatools.conexpng.Conf.StatusMessage;
-import fcatools.conexpng.ContextChangeEvents;
 import fcatools.conexpng.gui.View;
 import fcatools.conexpng.model.AssociationRule;
 import fcatools.conexpng.model.FormalContext.StemBaseCalculator;
@@ -50,8 +49,6 @@ public class DependencyView extends View {
 
     private final String EOL = System.getProperty("line.separator");
 
-    private boolean updateLater = false;
-
     public DependencyView(final Conf state) {
         super(state);
 
@@ -69,8 +66,6 @@ public class DependencyView extends View {
         StyleConstants.setFontSize(header, 12);
 
         implpane.setEditable(false);
-        // only for the Splitpanes height
-        // implpane.setPreferredSize(new Dimension(300, 200));
         assopane.setEditable(false);
 
         final WebScrollPane scroll2 = new WebScrollPane(assopane);
@@ -140,8 +135,89 @@ public class DependencyView extends View {
         });
     }
 
+    public SimpleAttributeSet dependencyStyle(double support, double confidence) {
+        if (confidence == 1.0) {
+            return support > 0 ? attrs[NON_ZERO_SUPPORT_EXACT_RULE] : attrs[ZERO_SUPPORT_EXACT_RULE];
+        }
+        return attrs[INEXACT_RULE];
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        if (evt instanceof ContextChangeEvent) {
+            switch (((ContextChangeEvent) evt).getName()) {
+            case CANCELCALCULATIONS: {
+                if (associationWorker != null && !associationWorker.isDone())
+                    associationWorker.cancel(true);
+                if (implicationWorker != null && !implicationWorker.isDone())
+                    implicationWorker.cancel(true);
+                return;
+            }
+            case NEWCONTEXT: {
+                updateAssociationsLater = true;
+                updateImplicationsLater = true;
+                ((DependencySettings) settings.getComponent(0)).setGuiConf(state.guiConf);
+                break;
+            }
+            case CONTEXTCHANGED: {
+                updateAssociationsLater = true;
+                updateImplicationsLater = true;
+                break;
+            }
+            case LOADEDFILE: {
+                if (!state.associations.isEmpty())
+                    writeAssociations(state.guiConf.assoscrollpos);
+                else
+                    updateAssociationsLater = true;
+                if (!state.implications.isEmpty())
+                    writeImplications(state.guiConf.implscrollpos);
+                else
+                    updateImplicationsLater = true;
+                ((DependencySettings) settings.getComponent(0)).setGuiConf(state.guiConf);
+                break;
+            }
+            default:
+                break;
+            }
+        }
+        if (isVisible() && updateAssociationsLater) {
+            updateAssociationsLater = false;
+            state.associations = new TreeSet<AssociationRule>();
+            updateAssociations();
+        }
+        if (isVisible() && updateImplicationsLater) {
+            updateImplicationsLater = false;
+            state.implications = new HashSet<FCAImplication<String>>();
+            updateImplications();
+        }
+
+        if (evt.getPropertyName().equals("ConfidenceChanged")) {
+            writeAssociations(0);
+        } else if (evt.getPropertyName().equals("MinimalSupportChanged")) {
+            updateAssociations();
+        } else if (evt.getPropertyName().equals("ToggleSortingOrder")) {
+            writeAssociations(0);
+            writeImplications(0);
+        }
+    }
+
+    // Associations
+    // ///////////////////////////////////////////////////////////////////
+
+    private boolean updateAssociationsLater = false;
+
+    private AssociationWorker associationWorker;
+
+    private void updateAssociations() {
+        if (associationWorker != null && !associationWorker.isDone()) {
+            associationWorker.cancel(true);
+        }
+        associationWorker = new AssociationWorker();
+        associationWorker.execute();
+    }
+
     private void writeAssociations(final int assoscrollpos) {
-        if (state.associations!= null)
+        if (!state.associations.isEmpty())
             SwingUtilities.invokeLater(new Runnable() {
 
                 @Override
@@ -186,7 +262,7 @@ public class DependencyView extends View {
                                 buf.append(EOL);
 
                                 assopane.getDocument().insertString(assopane.getDocument().getLength(), buf.toString(),
-                                        implicationStyle(asso.getSupport(), asso.getConfidence()));
+                                        dependencyStyle(asso.getSupport(), asso.getConfidence()));
                             }
                         }
                         ((WebScrollPane) ((WebSplitPane) view).getBottomComponent()).getVerticalScrollBar().setValue(
@@ -200,8 +276,39 @@ public class DependencyView extends View {
             });
     }
 
+    private class AssociationWorker extends SwingWorker<Void, Void> {
+        ThreadedAssociationMiner tam;
+
+        protected Void doInBackground() throws Exception {
+            state.startCalculation(StatusMessage.CALCULATINGASSOCIATIONS);
+            tam = new ThreadedAssociationMiner(state.context, state.guiConf.support, 0);
+            Thread t = new Thread(tam);
+            t.setPriority(Thread.MIN_PRIORITY);
+            t.start();
+            while (t.isAlive()) {
+                if (isCancelled()) {
+                    t.interrupt();
+                    t.join();
+                    return null;
+                }
+            }
+            return null;
+        }
+
+        protected void done() {
+            state.endCalculation(StatusMessage.CALCULATINGASSOCIATIONS);
+            if (!isCancelled()) {
+                state.associations = tam.getResult();
+                writeAssociations(0);
+            }
+        };
+    }
+
+    // Implications
+    // ////////////////////////////////////////////////////////////////////////////////////////
+
     private void writeImplications(final int implscrollpos) {
-        if (state.implications != null)
+        if (!state.implications.isEmpty())
             SwingUtilities.invokeLater(new Runnable() {
 
                 @Override
@@ -234,9 +341,8 @@ public class DependencyView extends View {
                             buf.append(impl.getPremise() + FOLLOW + impl.getConclusion() + END_MARK);
                             buf.append(EOL);
                             i++;
-
                             implpane.getDocument().insertString(implpane.getDocument().getLength(), buf.toString(),
-                                    implicationStyle(support, 1));
+                                    dependencyStyle(support, 1));
                         }
                         ((WebScrollPane) ((WebSplitPane) view).getTopComponent()).getVerticalScrollBar().setValue(
                                 implscrollpos);
@@ -248,77 +354,24 @@ public class DependencyView extends View {
             });
     }
 
-    public SimpleAttributeSet implicationStyle(double support, double confidence) {
-        if (confidence == 1.0) {
-            return support > 0 ? attrs[NON_ZERO_SUPPORT_EXACT_RULE] : attrs[ZERO_SUPPORT_EXACT_RULE];
-        }
-        return attrs[INEXACT_RULE];
-    }
-
-    private AssociationWorker associationWorker;
     private ImplicationWorker implicationWorker;
 
-    private void updateAssociations(final boolean withImplications) {
-        if (withImplications) {
-            if (implicationWorker != null && !implicationWorker.isDone()) {
-                implicationWorker.cancel(true);
-            }
-            implicationWorker = new ImplicationWorker();
-            implicationWorker.execute();
-        }
-        if (associationWorker != null && !associationWorker.isDone()) {
-            associationWorker.cancel(true);
-        }
-        associationWorker = new AssociationWorker();
-        associationWorker.execute();
-    }
+    private boolean updateImplicationsLater = false;
 
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        if (evt instanceof ContextChangeEvent) {
-            ContextChangeEvent cce = (ContextChangeEvent) evt;
-            if (cce.getName() == ContextChangeEvents.CANCELCALCULATIONS) {
-                if (associationWorker != null)
-                    associationWorker.cancel(true);
-                if (implicationWorker != null)
-                    implicationWorker.cancel(true);
-            }
-            if (cce.getName() == ContextChangeEvents.NEWCONTEXT || cce.getName() == ContextChangeEvents.CONTEXTCHANGED)
-                updateLater = true;
-
-            if (cce.getName() == ContextChangeEvents.LOADEDFILE) {
-                if (state.associations != null) {
-                    writeAssociations(state.guiConf.assoscrollpos);
-                    writeImplications(state.guiConf.implscrollpos);
-                    updateLater = false;
-                } else
-                    updateLater = true;
-            }
+    private void updateImplications() {
+        if (implicationWorker != null && !implicationWorker.isDone()) {
+            implicationWorker.cancel(true);
         }
-        if (isVisible() && updateLater) {
-
-            updateLater = false;
-            state.associations = new TreeSet<AssociationRule>();
-            state.implications = new HashSet<FCAImplication<String>>();
-            updateAssociations(true);
-            return;
-        }
-        if (evt.getPropertyName().equals("ConfidenceChanged")) {
-            writeAssociations(0);
-        } else if (evt.getPropertyName().equals("MinimalSupportChanged")) {
-            updateAssociations(false);
-        } else if (evt.getPropertyName().equals("ToggleSortingOrder")) {
-            writeAssociations(0);
-            writeImplications(0);
-        }
-
+        implicationWorker = new ImplicationWorker();
+        implicationWorker.execute();
     }
 
     private class ImplicationWorker extends SwingWorker<Void, Void> {
+        private StemBaseCalculator sbc;
 
         protected Void doInBackground() throws Exception {
             state.startCalculation(StatusMessage.CALCULATINGIMPLICATIONS);
-            StemBaseCalculator sbc = state.context.new StemBaseCalculator();
+            sbc = state.context.new StemBaseCalculator();
             Thread t = new Thread(sbc);
             t.setPriority(Thread.MIN_PRIORITY);
             t.start();
@@ -326,53 +379,18 @@ public class DependencyView extends View {
                 if (isCancelled()) {
                     t.interrupt();
                     t.join();
-                    System.out.println("canceledImplications");
-                    break;
+                    return null;
                 }
             }
+            return null;
+        }
+
+        protected void done() {
+            state.endCalculation(StatusMessage.CALCULATINGIMPLICATIONS);
             if (!isCancelled()) {
                 state.implications = sbc.getResult();
-            }
-            return null;
-        }
-
-        protected void done() {
-            if (!isCancelled()) {
                 writeImplications(0);
             }
-            state.endCalculation(StatusMessage.CALCULATINGIMPLICATIONS);
         };
     }
-
-    private class AssociationWorker extends SwingWorker<Void, Void> {
-
-        protected Void doInBackground() throws Exception {
-            state.startCalculation(StatusMessage.CALCULATINGASSOCIATIONS);
-
-            ThreadedAssociationMiner tam = new ThreadedAssociationMiner(state.context, state.guiConf.support, 0);
-            Thread t = new Thread(tam);
-            t.setPriority(Thread.MIN_PRIORITY);
-            t.start();
-            while (t.isAlive()) {
-                if (isCancelled()) {
-                    t.interrupt();
-                    t.join();
-                    System.out.println("canceledAssociations");
-                    break;
-                }
-            }
-            if (!isCancelled()) {
-                state.associations = tam.getResult();
-            }
-            return null;
-        }
-
-        protected void done() {
-            if (!isCancelled()) {
-                writeAssociations(0);
-            }
-            state.endCalculation(StatusMessage.CALCULATINGASSOCIATIONS);
-        };
-    }
-
 }

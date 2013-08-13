@@ -121,7 +121,6 @@ public class MainToolbar extends WebToolBar {
         right.setDrawFocus(false);
         right.setToolTipText("Open a previous CEX-file");
         final WebButtonPopup popup = new WebButtonPopup(right, PopupWay.downRight);
-
         WebList list = new WebList(state.lastOpened);
         list.setVisibleRowCount(4);
         list.setEditable(false);
@@ -147,7 +146,15 @@ public class MainToolbar extends WebToolBar {
             }
         });
         popup.setContent(new GroupPanel(list));
-
+        right.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (popup.isShowing()) {
+                    popup.hidePopup();
+                } else {
+                    popup.showPopup(right);
+                }
+            }
+        });
         add(new WebButtonGroup(true, left, right));
 
         addSeparator();
@@ -501,7 +508,6 @@ public class MainToolbar extends WebToolBar {
             fc.setAcceptAllFileFilterUsed(false);
             fc.addChoosableFileFilter(cex ? cexFilter : otherFilter);
             fc.setFileSelectionMode(WebFileChooser.FILES_ONLY);
-            // Doesn't work...
             fc.setCurrentDirectory(state.filePath.substring(0,
                     state.filePath.lastIndexOf(System.getProperty("file.separator"))));
             dialog.setContentPane(fc);

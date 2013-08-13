@@ -47,6 +47,8 @@ public class CEXReader {
             SecurityException {
         guistate = new GUIConf();
         concepts = new ListSet<>();
+        associations=new TreeSet<>();
+        implications=new HashSet<>();
         InputStream in = null;
 
         in = new FileInputStream(path);
@@ -106,7 +108,6 @@ public class CEXReader {
     }
 
     private void addImplications(XMLEventReader parser) throws XMLStreamException, IOException {
-        implications = new HashSet<>();
         while (parser.hasNext()) {
             XMLEvent event = parser.nextEvent();
             switch (event.getEventType()) {
@@ -146,7 +147,6 @@ public class CEXReader {
     }
 
     private void addAssociations(XMLEventReader parser) throws XMLStreamException, IOException {
-        associations = new TreeSet<>();
         while (parser.hasNext()) {
             XMLEvent event = parser.nextEvent();
             switch (event.getEventType()) {
@@ -261,8 +261,6 @@ public class CEXReader {
                 if (name(element, "ConceptFigures")) {
                     getNodes(parser);
                 }
-                // TODO? other labels of conexp like attributelabels or
-                // objectlabels
                 if (name(element, "UpConceptLabels")) {
                     getAttributeLabels(parser);
                 }
@@ -437,7 +435,7 @@ public class CEXReader {
                             }
                             concepts.add(concept);
                         }
-                        
+
                     }
 
                 }

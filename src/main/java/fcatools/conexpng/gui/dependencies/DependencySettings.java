@@ -62,16 +62,14 @@ public class DependencySettings extends JPanel {
             g.fillArc(0, 5, 140, 140, 90, degree);
             g.setColor(green.darker().darker());
             g.drawString("#With support = " + current, 0, 180);
-
-            // g.setColor(Color.BLACK);
-            // Shape circ = new Ellipse2D.Double(0, 5, 140, 140);
-            // g.draw(circ);
-
         }
-
     };
 
     private GUIConf state;
+
+    public void setGuiConf(GUIConf guiConf) {
+        state = guiConf;
+    }
 
     public DependencySettings(GUIConf state) {
         this.state = state;
