@@ -119,7 +119,7 @@ public class MainFrame extends WebFrame {
 
         contextView = new ContextEditor(state);
         contextView.setVisible(false);
-        latticeView = new LatticeView(state);
+        latticeView = new LatticeView(state, this);
         latticeView.setVisible(false);
         associationView = new DependencyView(state);
         associationView.setVisible(false);

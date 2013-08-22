@@ -4,13 +4,16 @@ import fcatools.conexpng.Conf;
 import fcatools.conexpng.Conf.ContextChangeEvent;
 import fcatools.conexpng.Conf.StatusMessage;
 import fcatools.conexpng.Util;
+import fcatools.conexpng.gui.MainFrame;
 import fcatools.conexpng.gui.View;
+import fcatools.conexpng.gui.MainFrame.OverwritingFileDialog;
 import fcatools.conexpng.model.FormalContext.ConceptCalculator;
 import fcatools.conexpng.model.ILatticeAlgorithm;
 import fcatools.conexpng.model.TestLatticeAlgorithm;
 
 import javax.swing.*;
 
+import com.alee.laf.filechooser.WebFileChooser;
 import com.alee.laf.optionpane.WebOptionPane;
 import com.alee.laf.rootpane.WebDialog;
 
@@ -31,11 +34,13 @@ public class LatticeView extends View {
 
     public static int radius = 7;
     private ILatticeAlgorithm alg;
+    private MainFrame mainFrame;
 
     private boolean updateLater;
 
-    public LatticeView(final Conf state) {
+    public LatticeView(final Conf state, MainFrame mainframe) {
         super(state);
+        this.mainFrame = mainframe;
 
         alg = new TestLatticeAlgorithm();
         LatticeGraph graph = alg.computeLatticeGraph(new ListSet<Concept<String, FullObject<String, String>>>(),
@@ -44,54 +49,48 @@ public class LatticeView extends View {
         settings = new LatticeSettings(state);
         settings.setMinimumSize(new Dimension(170, 400));
 
-        JButton export = Util.createButton("Export as .PDF", "export", "conexp/cameraFlash.gif");
+        JButton export = Util.createButton("Export", "export", "conexp/cameraFlash.gif");
         export.addActionListener(new ActionListener() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                final JFileChooser fc = new JFileChooser(state.filePath);
-                final WebDialog dialog = new WebDialog();
+                final WebFileChooser fc = new WebFileChooser();
+                fc.setCurrentDirectory(state.filePath.substring(0,
+                        state.filePath.lastIndexOf(System.getProperty("file.separator"))));
+                final WebDialog dialog = new WebDialog(mainFrame, "Save file as", true);
                 dialog.setContentPane(fc);
-                fc.setDialogType(JFileChooser.SAVE_DIALOG);
+                fc.setMultiSelectionEnabled(false);
+                fc.setAcceptAllFileFilterUsed(false);
+                fc.setFileSelectionMode(WebFileChooser.FILES_ONLY);
+                fc.setDialogType(WebFileChooser.SAVE_DIALOG);
                 fc.addActionListener(new ActionListener() {
-
-                    @Override
                     public void actionPerformed(ActionEvent e) {
-                        String command = (String) e.getActionCommand();
-                        if (command.equals(JFileChooser.CANCEL_SELECTION)) {
-                            dialog.setVisible(false);
-                            return;
-                        } else if (command.equals(JFileChooser.APPROVE_SELECTION)) {
+                        String state = (String) e.getActionCommand();
+                        if ((state.equals(WebFileChooser.APPROVE_SELECTION) && fc.getSelectedFile() != null)) {
                             File file = fc.getSelectedFile();
                             String path = file.getAbsolutePath();
                             if (file.exists()) {
-                                WebOptionPane pane = new WebOptionPane(
-                                        new JLabel("File already exists. Do you really want to overwrite "
-                                                + file.getName() + "?"), JOptionPane.YES_NO_OPTION);
-                                pane.setMessageType(WebOptionPane.QUESTION_MESSAGE);
-                                Object[] options = { "Yes", "No" };
-                                pane.setOptions(options);
-                                JDialog dialog2 = pane.createDialog("Overwriting existing file?");
-                                dialog2.pack();
-                                dialog2.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-                                String n = (String) pane.getValue();
-                                dialog2.setVisible(true);
-                                // TODO
-                                if (n.equals("Yes")) {
-                                    ((LatticeGraphView) view).exportLattice(path);
+                                OverwritingFileDialog ofd = mainFrame.new OverwritingFileDialog(file);
+                                if (ofd.isYes()) {
+                                	((LatticeGraphView) view).exportLattice(path);
                                     dialog.setVisible(false);
-                                } else {
                                 }
                             } else {
-                                ((LatticeGraphView) view).exportLattice(path);
+                            	((LatticeGraphView) view).exportLattice(path);
                                 dialog.setVisible(false);
                             }
+                        } else if (state.equals(WebFileChooser.CANCEL_SELECTION)) {
+                            dialog.setVisible(false);
+                            return;
                         }
                     }
-
                 });
                 dialog.pack();
+                Util.centerDialogInsideMainFrame(mainFrame, dialog);
                 dialog.setVisible(true);
+
+                if (fc.getSelectedFile() == null)
+                    return;
 
             }
         });
