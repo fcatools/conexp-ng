@@ -170,6 +170,9 @@ public class Node extends JPanel implements LatticeGraphElement {
     }
 
     public boolean isUpdateXPosible(int x) {
+    	if(this.x > getParent().getWidth()){
+    		return true;
+    	}
         if (this.x + x >= 2 && this.x + x < getParent().getWidth()) {
             return true;
         }
@@ -177,6 +180,9 @@ public class Node extends JPanel implements LatticeGraphElement {
     }
 
     public boolean isUpdateYPosible(int y) {
+    	if(this.y > getParent().getHeight()){
+    		return true;
+    	}
         if (this.y + y >= 2 && this.y + y < getParent().getHeight()) {
         	for(Node n : this.ideal){
         		if(this.y + y > n.getY() - 3){
