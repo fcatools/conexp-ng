@@ -33,5 +33,9 @@ public class GUIConf {
 
     // Latticeview
     public int latticesettingssplitpos = 170;
+	public boolean showObjectLabel = false;
+	public boolean showAttributLabel = false;
+	public boolean showEdges = true;
+	public boolean idealHighlighting = false;
 
 }

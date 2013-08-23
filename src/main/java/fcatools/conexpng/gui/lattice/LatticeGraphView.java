@@ -102,7 +102,7 @@ public class LatticeGraphView extends JSVGCanvas {
 			}
 		}
 
-		if (!graph.getEdges().isEmpty() && state.showEdges) {
+		if (!graph.getEdges().isEmpty() && state.guiConf.showEdges) {
 			for (Edge e : graph.getEdges()) {
 				g.setColor(Color.BLACK);
 				if (e.getU().isPartOfAnIdeal() && e.getV().isPartOfAnIdeal()
@@ -127,7 +127,7 @@ public class LatticeGraphView extends JSVGCanvas {
 			g.drawOval(x, y, radius * 2, radius * 2);
 
 			// label drawing
-			if ((!n.getVisibleObjects().isEmpty()) && state.showObjectLabel) {
+			if ((!n.getVisibleObjects().isEmpty()) && state.guiConf.showObjectLabel) {
 				g.setColor(Color.BLACK);
 
 				// dashed line
@@ -162,7 +162,7 @@ public class LatticeGraphView extends JSVGCanvas {
 
 			// analog like objects
 			if ((!n.getVisibleAttributes().isEmpty())
-					&& state.showAttributLabel) {
+					&& state.guiConf.showAttributLabel) {
 				g.setColor(Color.BLACK);
 				g.setStroke(drawingStroke);
 				g.drawLine(n.getAttributesLabel().getX()
@@ -265,7 +265,7 @@ public class LatticeGraphView extends JSVGCanvas {
 				if (maxHeight < n.getY()) {
 					maxHeight = n.getY();
 				}
-				if (state.showAttributLabel) {
+				if (state.guiConf.showAttributLabel) {
 					if (maxWidth < n.getAttributesLabel().getX()) {
 						maxWidth = n.getAttributesLabel().getX();
 					}
@@ -273,7 +273,7 @@ public class LatticeGraphView extends JSVGCanvas {
 						maxHeight = n.getAttributesLabel().getY();
 					}
 				}
-				if (state.showObjectLabel) {
+				if (state.guiConf.showObjectLabel) {
 					if (maxWidth < n.getObjectsLabel().getX()) {
 						maxWidth = n.getObjectsLabel().getX();
 					}

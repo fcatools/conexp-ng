@@ -43,10 +43,7 @@ public class Conf extends UndoManager {
 	public Set<Concept<String, FullObject<String, String>>> concepts;
 	public GUIConf guiConf;
 	// TODO: @Jan this should be moved to the guiConf
-	public boolean showObjectLabel = false;
-	public boolean showAttributLabel = false;
-	public boolean showEdges = true;
-	public boolean idealHighlighting = false;
+
 
 	private PropertyChangeSupport propertyChangeSupport;
 

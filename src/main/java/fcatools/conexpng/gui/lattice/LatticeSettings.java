@@ -64,7 +64,7 @@ public class LatticeSettings extends WebAccordion {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                state.showEdges = false;
+            	state.guiConf.showEdges = false;
                 noneEdges.setSelected(true);
                 showEdges.setSelected(false);
                 state.showLabelsChanged();
@@ -74,7 +74,7 @@ public class LatticeSettings extends WebAccordion {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                state.showEdges = true;
+                state.guiConf.showEdges = true;
                 showEdges.setSelected(true);
                 noneEdges.setSelected(false);
                 state.showLabelsChanged();
@@ -104,12 +104,12 @@ public class LatticeSettings extends WebAccordion {
         final WebRadioButton labelsObjects = new WebRadioButton();
         labelsObjects.setText("labels");
         labelsObjects.setSelected(true);
-        state.showObjectLabel = true;
+        state.guiConf.showObjectLabel = true;
 
         noneObjects.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                state.showObjectLabel = false;
+            	state.guiConf.showObjectLabel = false;
                 noneObjects.setSelected(true);
                 labelsObjects.setSelected(false);
                 state.showLabelsChanged();
@@ -119,7 +119,7 @@ public class LatticeSettings extends WebAccordion {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                state.showObjectLabel = true;
+            	state.guiConf.showObjectLabel = true;
                 labelsObjects.setSelected(true);
                 noneObjects.setSelected(false);
                 state.showLabelsChanged();
@@ -146,13 +146,13 @@ public class LatticeSettings extends WebAccordion {
         final WebRadioButton labelsAttributes = new WebRadioButton();
         labelsAttributes.setText("labels");
         labelsAttributes.setSelected(true);
-        state.showAttributLabel = true;
+        state.guiConf.showAttributLabel = true;
 
 
         noneAttributes.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                state.showAttributLabel = false;
+            	state.guiConf.showAttributLabel = false;
                 noneAttributes.setSelected(true);
                 labelsAttributes.setSelected(false);
                 state.showLabelsChanged();
@@ -162,7 +162,7 @@ public class LatticeSettings extends WebAccordion {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                state.showAttributLabel = true;
+            	state.guiConf.showAttributLabel = true;
                 labelsAttributes.setSelected(true);
                 noneAttributes.setSelected(false);
                 state.showLabelsChanged();
