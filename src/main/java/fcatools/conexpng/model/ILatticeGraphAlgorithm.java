@@ -4,6 +4,6 @@ import fcatools.conexpng.gui.lattice.LatticeGraph;
 
 public interface ILatticeGraphAlgorithm {
 	
-	public abstract LatticeGraph computeLatticeGraphPositions(LatticeGraph graph);
+	public abstract LatticeGraph computeLatticeGraphPositions(LatticeGraph graph, int screenWidth, int screenHeight);
 
 }

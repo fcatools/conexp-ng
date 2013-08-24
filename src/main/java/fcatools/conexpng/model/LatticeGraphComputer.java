@@ -27,6 +27,7 @@ public class LatticeGraphComputer {
     private LatticeGraph graph;
     private Set<Concept<String, FullObject<String, String>>> lattConcepts;
     private HashMap<String ,ILatticeGraphAlgorithm> algorithms;
+    private ILatticeGraphAlgorithm usedAlgorithm;
     private int screenWidth;
     private int screenHeight;
 
@@ -38,19 +39,28 @@ public class LatticeGraphComputer {
      */
     public LatticeGraphComputer(){
     	algorithms = new HashMap<>();
-    	algorithms.put("Test", new TestLatticeAlgorithm());   	
+    	algorithms.put("Test", new TestLatticeAlgorithm());
+    	usedAlgorithm = algorithms.get("Test");
+    }
+    
+    public void chooseAlgorithm(String name){
+    	if(!algorithms.containsKey(name)){
+    		System.err.println("The chosen algorithm don't exists!");
+    	}else{
+        	usedAlgorithm = algorithms.get(name);
+    	}
     }
     
     
     public LatticeGraph computeLatticeGraph(
-            Set<Concept<String, FullObject<String, String>>> set, Rectangle bounds) {
-        this.lattConcepts = set;
+            Set<Concept<String, FullObject<String, String>>> concepts, Rectangle bounds) {
+        this.lattConcepts = concepts;
         this.screenWidth = bounds.width;
         this.screenHeight = bounds.height;
         initGraph();
         graph.computeAllIdeals();
         computeVisibleObjectsAndAttributes();
-        this.graph = algorithms.get("Test").computeLatticeGraphPositions(graph);
+        this.graph = usedAlgorithm.computeLatticeGraphPositions(graph, screenWidth, screenHeight);
         return graph;
     }
 
@@ -107,12 +117,6 @@ public class LatticeGraphComputer {
 
     }
 
-    /**
-     * Computes the node positions of the graph.
-     */
-    public void computeLatticeGraphPositions(){
-    	
-    }
 
     /**
      *
