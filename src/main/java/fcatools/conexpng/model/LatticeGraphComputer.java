@@ -220,5 +220,9 @@ public class LatticeGraphComputer {
             }
         }
     }
+    
+    public void addAlgorithm(String name, ILatticeGraphAlgorithm alg){
+    	this.algorithms.put(name, alg);
+    }
 
 }
