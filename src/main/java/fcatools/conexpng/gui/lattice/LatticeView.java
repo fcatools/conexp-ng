@@ -9,12 +9,9 @@ import fcatools.conexpng.gui.View;
 import fcatools.conexpng.gui.MainFrame.OverwritingFileDialog;
 import fcatools.conexpng.model.FormalContext.ConceptCalculator;
 import fcatools.conexpng.model.LatticeGraphComputer;
-import fcatools.conexpng.model.TestLatticeAlgorithm;
-
 import javax.swing.*;
 
 import com.alee.laf.filechooser.WebFileChooser;
-import com.alee.laf.optionpane.WebOptionPane;
 import com.alee.laf.rootpane.WebDialog;
 
 import de.tudresden.inf.tcs.fcaapi.Concept;
@@ -28,6 +25,7 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.beans.PropertyChangeEvent;
 import java.io.File;
+import java.util.HashSet;
 
 public class LatticeView extends View {
     private static final long serialVersionUID = 1660117627650529212L;
@@ -41,11 +39,12 @@ public class LatticeView extends View {
     public LatticeView(final Conf state, MainFrame mainframe) {
         super(state);
         this.mainFrame = mainframe;
-
         alg = new LatticeGraphComputer();
-        LatticeGraph graph = alg.computeLatticeGraph(new ListSet<Concept<String, FullObject<String, String>>>(),
-                new Rectangle());
-        view = new LatticeGraphView(graph, state);
+        if (state.lattice.isEmpty()) {
+            state.lattice = alg.computeLatticeGraph(new ListSet<Concept<String, FullObject<String, String>>>(),
+                    new Rectangle());
+        }
+        view = new LatticeGraphView(state);
         settings = new LatticeSettings(state);
         settings.setMinimumSize(new Dimension(170, 400));
 
@@ -72,11 +71,11 @@ public class LatticeView extends View {
                             if (file.exists()) {
                                 OverwritingFileDialog ofd = mainFrame.new OverwritingFileDialog(file);
                                 if (ofd.isYes()) {
-                                	((LatticeGraphView) view).exportLattice(path);
+                                    ((LatticeGraphView) view).exportLattice(path);
                                     dialog.setVisible(false);
                                 }
                             } else {
-                            	((LatticeGraphView) view).exportLattice(path);
+                                ((LatticeGraphView) view).exportLattice(path);
                                 dialog.setVisible(false);
                             }
                         } else if (state.equals(WebFileChooser.CANCEL_SELECTION)) {
@@ -158,10 +157,16 @@ public class LatticeView extends View {
                 break;
             }
             case CONTEXTCHANGED: {
+                state.concepts = new HashSet<>();
+                state.lattice = new LatticeGraph();
+                view.repaint();
                 updateLater = true;
                 break;
             }
             case NEWCONTEXT: {
+                state.concepts = new HashSet<>();
+                state.lattice = new LatticeGraph();
+                view.repaint();
                 updateLater = true;
                 break;
             }
@@ -191,11 +196,12 @@ public class LatticeView extends View {
             if (state.lattice.missingEdges()) {
                 if (state.concepts.isEmpty())
                     new ConceptsWorker().execute();
-                else
+                else {
                     state.lattice.addEdges(state.concepts);
+                    ((LatticeGraphView) view).updateLatticeGraph();
+                }
             }
             ((LatticeSettings) settings).update(state);
-            ((LatticeGraphView) view).setLatticeGraph(state.lattice);
         }
         if (isVisible() && updateLater) {
             updateLater = false;
@@ -213,8 +219,6 @@ public class LatticeView extends View {
 
         @Override
         protected Void doInBackground() throws Exception {
-
-            ((LatticeGraphView) view).setLatticeGraph(state.lattice);
             state.startCalculation(StatusMessage.CALCULATINGCONCEPTS);
             cc = state.context.new ConceptCalculator();
             Thread t = new Thread(cc);
@@ -235,6 +239,7 @@ public class LatticeView extends View {
             if (!isCancelled()) {
                 state.concepts = cc.getConceptLattice();
                 state.lattice.addEdges(state.concepts);
+                ((LatticeGraphView) view).updateLatticeGraph();
             }
             super.done();
         };
@@ -268,7 +273,7 @@ public class LatticeView extends View {
                 state.concepts = cc.getConceptLattice();
                 state.startCalculation(StatusMessage.CALCULATINGLATTICE);
                 state.lattice = alg.computeLatticeGraph(state.concepts, view.getBounds());
-                ((LatticeGraphView) view).setLatticeGraph(state.lattice);
+                ((LatticeGraphView) view).updateLatticeGraph();
                 ((LatticeSettings) settings).update(state);
                 state.endCalculation(StatusMessage.CALCULATINGLATTICE);
             }

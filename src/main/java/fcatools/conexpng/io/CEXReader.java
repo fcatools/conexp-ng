@@ -78,7 +78,7 @@ public class CEXReader {
                 if (name(element, "Objects"))
                     addObjects(parser);
                 if (name(element, "Lattice"))
-                    addLatice(parser);
+                    addLattice(parser);
                 if (name(element, "Settings"))
                     addGuiState(parser);
                 if (name(element, "Implications"))
@@ -223,7 +223,7 @@ public class CEXReader {
         }
     }
 
-    private void addLatice(XMLEventReader parser) throws XMLStreamException {
+    private void addLattice(XMLEventReader parser) throws XMLStreamException {
         lattice = new LatticeGraph();
         while (parser.hasNext()) {
             XMLEvent event = parser.nextEvent();

@@ -1,6 +1,5 @@
 package fcatools.conexpng.gui.lattice;
 
-import java.awt.Font;
 import java.awt.Graphics;
 import java.util.Set;
 
@@ -15,14 +14,11 @@ public class Label extends JPanel implements LatticeGraphElement {
     private int x;
     private int y;
     private Set<String> set;
-    private String content;
-    private Node node;
     private boolean isObjectLabel;
-    private static Font font = new Font("Monospaced", Font.PLAIN, 12);
+    // private static Font font = new Font("Monospaced", Font.PLAIN, 12);
 
     public Label(Set<String> set, Node node, boolean isObjectLabel) {
         this.set = set;
-        this.node = node;
         this.isObjectLabel = isObjectLabel;
         this.setBounds(x, y, 15, 15);
 

@@ -154,12 +154,20 @@ public class DependencyView extends View {
                 return;
             }
             case NEWCONTEXT: {
+                state.associations = new TreeSet<>();
+                state.implications = new HashSet<>();
+                implpane.clear();
+                assopane.clear();
                 updateAssociationsLater = true;
                 updateImplicationsLater = true;
                 ((DependencySettings) settings.getComponent(0)).setGuiConf(state.guiConf);
                 break;
             }
             case CONTEXTCHANGED: {
+                state.associations = new TreeSet<>();
+                state.implications = new HashSet<>();
+                implpane.clear();
+                assopane.clear();
                 updateAssociationsLater = true;
                 updateImplicationsLater = true;
                 break;
