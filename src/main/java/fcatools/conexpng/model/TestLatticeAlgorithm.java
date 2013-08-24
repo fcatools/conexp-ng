@@ -1,6 +1,8 @@
 package fcatools.conexpng.model;
 
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Set;
 
 import de.tudresden.inf.tcs.fcaapi.Concept;
@@ -10,12 +12,12 @@ import fcatools.conexpng.gui.lattice.Edge;
 import fcatools.conexpng.gui.lattice.LatticeGraph;
 import fcatools.conexpng.gui.lattice.Node;
 
-public class TestLatticeAlgorithm extends ILatticeAlgorithm {
+public class TestLatticeAlgorithm implements ILatticeGraphAlgorithm {
 
 
 	@Override
-	public void computeLatticeGraphPositions() {
-		return;
+	public LatticeGraph computeLatticeGraphPositions(LatticeGraph graph) {
+		return graph;
 	}
 
 }

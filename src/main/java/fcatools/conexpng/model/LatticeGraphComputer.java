@@ -2,6 +2,7 @@ package fcatools.conexpng.model;
 
 import java.awt.Rectangle;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,12 +22,13 @@ import fcatools.conexpng.gui.lattice.Node;
  * @author Jan
  *
  */
-public abstract class ILatticeAlgorithm {
+public class LatticeGraphComputer {
 
-    protected LatticeGraph graph;
-    protected Set<Concept<String, FullObject<String, String>>> lattConcepts;
-    protected int screenWidth;
-    protected int screenHeight;
+    private LatticeGraph graph;
+    private Set<Concept<String, FullObject<String, String>>> lattConcepts;
+    private HashMap<String ,ILatticeGraphAlgorithm> algorithms;
+    private int screenWidth;
+    private int screenHeight;
 
     /**
      *
@@ -34,6 +36,12 @@ public abstract class ILatticeAlgorithm {
      * @param bounds
      * @return
      */
+    public LatticeGraphComputer(){
+    	algorithms = new HashMap<>();
+    	algorithms.put("Test", new TestLatticeAlgorithm());   	
+    }
+    
+    
     public LatticeGraph computeLatticeGraph(
             Set<Concept<String, FullObject<String, String>>> set, Rectangle bounds) {
         this.lattConcepts = set;
@@ -42,7 +50,7 @@ public abstract class ILatticeAlgorithm {
         initGraph();
         graph.computeAllIdeals();
         computeVisibleObjectsAndAttributes();
-        computeLatticeGraphPositions();
+        this.graph = algorithms.get("Test").computeLatticeGraphPositions(graph);
         return graph;
     }
 
@@ -96,18 +104,15 @@ public abstract class ILatticeAlgorithm {
                 }
             }
         }
-//        for (Node n : graph.getNodes()) {
-//            System.out.println("Objekte = " + n.getObjects() + ", Attribute = "
-//                    + n.getAttributes() + ", Level = " + n.getLevel());
-//        }
-//        System.out.println("-------------------");
 
     }
 
     /**
      * Computes the node positions of the graph.
      */
-    public abstract void computeLatticeGraphPositions();
+    public void computeLatticeGraphPositions(){
+    	
+    }
 
     /**
      *

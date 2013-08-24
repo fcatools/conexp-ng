@@ -7,10 +7,11 @@ import java.util.Set;
 
 import de.tudresden.inf.tcs.fcaapi.Concept;
 import de.tudresden.inf.tcs.fcalib.FullObject;
+import fcatools.conexpng.model.LatticeGraphComputer;
 import fcatools.conexpng.model.TestLatticeAlgorithm;
 
 /**
- *
+ * This class implemented the graph model for the lattice. 
  * @author Jan
  *
  */
@@ -101,7 +102,7 @@ public class LatticeGraph {
     }
 
     public void addEdges(Set<Concept<String, FullObject<String, String>>> concepts) {
-        LatticeGraph temp = new TestLatticeAlgorithm().computeLatticeGraph(concepts, new Rectangle());
+        LatticeGraph temp = new LatticeGraphComputer().computeLatticeGraph(concepts, new Rectangle());
         for (Edge e : temp.edges) {
             Node u = getNodeWithIntent(e.getU().getAttributes());
             Node v = getNodeWithIntent(e.getV().getAttributes());

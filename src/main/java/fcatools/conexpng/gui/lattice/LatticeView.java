@@ -8,7 +8,7 @@ import fcatools.conexpng.gui.MainFrame;
 import fcatools.conexpng.gui.View;
 import fcatools.conexpng.gui.MainFrame.OverwritingFileDialog;
 import fcatools.conexpng.model.FormalContext.ConceptCalculator;
-import fcatools.conexpng.model.ILatticeAlgorithm;
+import fcatools.conexpng.model.LatticeGraphComputer;
 import fcatools.conexpng.model.TestLatticeAlgorithm;
 
 import javax.swing.*;
@@ -33,7 +33,7 @@ public class LatticeView extends View {
     private static final long serialVersionUID = 1660117627650529212L;
 
     public static int radius = 7;
-    private ILatticeAlgorithm alg;
+    private LatticeGraphComputer alg;
     private MainFrame mainFrame;
 
     private boolean updateLater;
@@ -42,7 +42,7 @@ public class LatticeView extends View {
         super(state);
         this.mainFrame = mainframe;
 
-        alg = new TestLatticeAlgorithm();
+        alg = new LatticeGraphComputer();
         LatticeGraph graph = alg.computeLatticeGraph(new ListSet<Concept<String, FullObject<String, String>>>(),
                 new Rectangle());
         view = new LatticeGraphView(graph, state);
