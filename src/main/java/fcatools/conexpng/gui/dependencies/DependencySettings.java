@@ -4,7 +4,6 @@ import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import com.alee.laf.button.WebButton;
 import com.alee.laf.label.WebLabel;
 import com.alee.laf.panel.WebPanel;
 import com.alee.laf.radiobutton.WebRadioButton;
@@ -138,8 +137,6 @@ public class DependencySettings extends JPanel {
         add(lexicalSorting, gbc);
         gbc.gridy = 9;
         add(supportSorting, gbc);
-        gbc.gridy = 10;
-        add(new WebButton("Store as default"), gbc);
         confSlider.addChangeListener(new SliderListener(false));
         minSupSlider.addChangeListener(new SliderListener(true));
         confField.addKeyListener(new TextFieldAction(false));
