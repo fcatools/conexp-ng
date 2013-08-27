@@ -8,9 +8,10 @@ public class NodeMouseClickListener implements MouseListener {
 	private Node node;
 	private boolean clicked = false;
 
-	public NodeMouseClickListener(Node n){
+	public NodeMouseClickListener(Node n) {
 		this.node = n;
 	}
+
 	@Override
 	public void mouseClicked(MouseEvent arg0) {
 	}
@@ -29,10 +30,9 @@ public class NodeMouseClickListener implements MouseListener {
 
 	@Override
 	public void mousePressed(MouseEvent arg0) {
-		if(!node.isPartOfAnIdeal()){
+		if (!node.isPartOfAnIdeal()) {
 			node.toggleIdealVisibility();
-		}
-		else if(!clicked){
+		} else if (!clicked) {
 			node.toggleIdealVisibility();
 		}
 
@@ -40,7 +40,6 @@ public class NodeMouseClickListener implements MouseListener {
 
 	@Override
 	public void mouseReleased(MouseEvent arg0) {
-
 
 	}
 
