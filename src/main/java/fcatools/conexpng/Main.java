@@ -5,6 +5,7 @@ import com.google.common.collect.Sets;
 import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
 import de.tudresden.inf.tcs.fcalib.FullObject;
 import fcatools.conexpng.gui.MainFrame;
+import fcatools.conexpng.gui.lattice.LatticeGraph;
 import fcatools.conexpng.io.CEXReader;
 import fcatools.conexpng.model.FormalContext;
 
@@ -98,6 +99,7 @@ public class Main {
 			e1.printStackTrace();
 		}
 		state.newContext(context);
+        state.lattice = new LatticeGraph();
 	}
 
 	// Store location & size of UI & dir that was last opened from
