@@ -31,7 +31,6 @@ public class Label extends JPanel implements LatticeGraphElement {
         int updateX = this.x + x;
         int updateY = this.y + y;
 
-        this.setBounds(updateX, updateY, getBounds().width, getBounds().height);
         this.x = updateX;
         this.y = updateY;
 
