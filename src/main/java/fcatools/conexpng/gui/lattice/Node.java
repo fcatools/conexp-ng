@@ -180,8 +180,10 @@ public class Node extends JPanel implements LatticeGraphElement {
 			this.setBounds(updateX, updateY, 15, 15);
 			this.x = updateX;
 			this.y = updateY;
-			visibleAttributes.update(x, y, first);
-			visibleObjects.update(x, y, first);
+			// places the object label right above and the attribute
+	        // label below the node
+			visibleAttributes.update(x + 10, y + 33, first);
+			visibleObjects.update(x + 10, y - 10, first);
 
 			if (getParent() != null) {
 				getParent().repaint();
