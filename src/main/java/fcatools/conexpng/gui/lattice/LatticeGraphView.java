@@ -233,6 +233,12 @@ public class LatticeGraphView extends JSVGCanvas {
 				g.setColor(Color.LIGHT_GRAY);
 				g.drawOval(x, y, radius * 2, radius * 2);
 			}
+			
+			// highlight the node if it is the node that was clicked on.
+			if (n.isClickedOn() && idealHighlighting) {
+				g.setColor(Color.RED);
+				g.drawOval(x - 1, y - 1, radius * 2 + 2, radius * 2 + 2);
+			}
 		}
 	}
 
@@ -361,6 +367,7 @@ public class LatticeGraphView extends JSVGCanvas {
 	public void resetHighlighting() {
 		for (Node n : lastIdeal) {
 			n.setPartOfAnIdeal(false);
+			n.setClickedOn(false);
 		}
 	}
 

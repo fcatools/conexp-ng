@@ -32,6 +32,8 @@ public class Node extends JPanel implements LatticeGraphElement {
 	private ListSet<Node> ideal;
 	private ListSet<Node> filter;
 	private boolean isIdealVisibile;
+	// true if this node was clicked on
+	private boolean clickedOn;
 	private Label visibleObjects;
 	private Label visibleAttributes;
 	// true, if this node and his subgraph are moveable.
@@ -298,12 +300,34 @@ public class Node extends JPanel implements LatticeGraphElement {
 	public void toggleIdealVisibility() {
 		((LatticeGraphView) getParent()).resetHighlighting();
 		this.isIdealVisibile = !this.isIdealVisibile;
+		// this node was clicked on, necessary for red highlight circle
+		this.setClickedOn(true);
 		for (Node n : ideal) {
 			n.setPartOfAnIdeal(isIdealVisibile);
 		}
 		if (getParent() != null) {
 			getParent().repaint();
 		}
+	}
+	
+	/**
+	 * Returns true if this is the node that was clicked on.
+	 * Needed to highlight the node red.
+	 * 
+	 * @return true if this is the node that was clicked on
+	 */
+	public boolean isClickedOn() {
+		return this.clickedOn;
+	}
+	
+	/**
+	 * Set to true if this node was clicked on.
+	 * Results in a red circle around the node to highlight it.
+	 * 
+	 * @param b
+	 */
+	public void setClickedOn(boolean b) {
+		this.clickedOn = b;
 	}
 
 	public boolean isPartOfAnIdeal() {
