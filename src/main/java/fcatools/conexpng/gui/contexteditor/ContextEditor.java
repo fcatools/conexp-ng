@@ -47,7 +47,6 @@ public class ContextEditor extends View {
     private static final long serialVersionUID = 1660117627650529212L;
 
     // Choose correct modifier key (STRG or CMD) based on platform
-    @SuppressWarnings("unused")
     private static final int MASK = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
 
     // Our JTable customisation and its respective data model
@@ -342,7 +341,6 @@ public class ContextEditor extends View {
     // Actions
     // //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    @SuppressWarnings("UnusedDeclaration")
     class CombineActions extends AbstractAction {
         Action first, second;
 
