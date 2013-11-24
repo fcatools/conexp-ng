@@ -247,6 +247,9 @@ public class LatticeView extends View {
 					t.join();
 					return null;
 				}
+				// sleep here to avoid high cpu usage for checking if
+                // the thread is cancelled, one second shall be enough
+                Thread.sleep(1000);
 			}
 			return null;
 		}
@@ -279,6 +282,9 @@ public class LatticeView extends View {
 					t.join();
 					return null;
 				}
+				// sleep here to avoid high cpu usage for checking if
+                // the thread is cancelled, one second shall be enough
+                Thread.sleep(1000);
 			}
 			return null;
 		}
