@@ -27,7 +27,7 @@ public class MainStatusBar extends WebPanel implements PropertyChangeListener {
         private WebLabel label = null;
 
         @Override
-        protected Void doInBackground() {
+        protected Void doInBackground() throws InterruptedException {
             WebPanel panel = new WebPanel(new BorderLayout());
             label = new WebLabel("");
             panel.add(label, BorderLayout.CENTER);
@@ -38,6 +38,10 @@ public class MainStatusBar extends WebPanel implements PropertyChangeListener {
             revalidate();
             getParent().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             while (!isCancelled()) {
+            	// sleep here to avoid high cpu usage for updating
+            	// the status bar text, one second interval shall
+            	// be enough
+				Thread.sleep(1000);
                 label.setText(text);
             }
             return null;
