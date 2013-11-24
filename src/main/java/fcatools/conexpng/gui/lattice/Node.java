@@ -151,14 +151,14 @@ public class Node extends JPanel implements LatticeGraphElement {
 	public void update(int x, int y, boolean first) {
 		int updateX;
 		int updateY;
-		if (this.x + x >= 2) {
-			updateX = this.x + x;
+		if (x >= 2) {
+			updateX = x;
 		} else {
 			hitBorder = true;
 			updateX = 1;
 		}
-		if (this.y + y >= 2)
-			updateY = this.y + y;
+		if (y >= 2)
+			updateY = y;
 		else {
 			updateY = 1;
 			hitBorder = true;
@@ -195,7 +195,7 @@ public class Node extends JPanel implements LatticeGraphElement {
 		if (this.x > getParent().getWidth()) {
 			return true;
 		}
-		if (this.x + x >= 2 && this.x + x < getParent().getWidth()) {
+		if (x >= 2 && x < getParent().getWidth()) {
 			return true;
 		}
 		return false;
@@ -205,14 +205,14 @@ public class Node extends JPanel implements LatticeGraphElement {
 		if (this.y > getParent().getHeight()) {
 			return true;
 		}
-		if (this.y + y >= 2 && this.y + y < getParent().getHeight()) {
+		if (y >= 2 && y < getParent().getHeight()) {
 			for (Node n : this.ideal) {
-				if (this.y + y > n.getY() - 3) {
+				if (y > n.getY() - 3) {
 					return false;
 				}
 			}
 			for (Node n : this.filter) {
-				if (this.y + y < n.getY() + 3) {
+				if (y < n.getY() + 3) {
 					return false;
 				}
 			}

@@ -65,19 +65,18 @@ public class LatticeGraphView extends JSVGCanvas {
 		this.removeAll();
 		for (Node n : state.lattice.getNodes()) {
 			this.add(n);
-			n.addMouseMotionListener(new LatticeGraphNodeMouseMotionListener(n));
-			n.addMouseListener(new NodeMouseClickListener(n));
+			// add mouse listeners to enable drag support
+			NodeMouseListener nml = new NodeMouseListener();
+			n.addMouseListener(nml);
+			n.addMouseMotionListener(nml);
 
 			this.add(n.getAttributesLabel());
-			n.getAttributesLabel().addMouseMotionListener(
-					new LatticeGraphNodeMouseMotionListener(n
-							.getAttributesLabel()));
+			n.getAttributesLabel().addMouseListener(nml);
+			n.getAttributesLabel().addMouseMotionListener(nml);
 
 			this.add(n.getObjectsLabel());
-			n.getObjectsLabel()
-					.addMouseMotionListener(
-							new LatticeGraphNodeMouseMotionListener(n
-									.getObjectsLabel()));
+			n.getObjectsLabel().addMouseListener(nml);
+			n.getObjectsLabel().addMouseMotionListener(nml);
 		}
 
 	}
