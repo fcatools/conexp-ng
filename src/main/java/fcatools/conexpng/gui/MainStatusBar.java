@@ -1,103 +1,55 @@
 package fcatools.conexpng.gui;
 
 import java.awt.BorderLayout;
-import java.awt.Cursor;
 import java.awt.Dimension;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-import javax.swing.SwingWorker;
-
 import com.alee.laf.label.WebLabel;
 import com.alee.laf.panel.WebPanel;
 import com.alee.laf.progressbar.WebProgressBar;
-import fcatools.conexpng.Conf;
-import fcatools.conexpng.Conf.StatusBarMessage;
 
+/**
+ * Main status bar of this program. Displays progress information
+ * on calculations.
+ * 
+ * @author Torsten Casselt
+ */
 @SuppressWarnings("serial")
 public class MainStatusBar extends WebPanel implements PropertyChangeListener {
 
+	private WebLabel label;
+	private WebProgressBar progressBar;
+	
+	/**
+	 * Creates the status bar with progress bar.
+	 */
     public MainStatusBar() {
         setLayout(new BorderLayout());
         setPreferredSize(new Dimension(100, 20));
+        WebPanel panel = new WebPanel(new BorderLayout());
+        label = new WebLabel("");
+        panel.add(label, BorderLayout.CENTER);
+        progressBar = new WebProgressBar();
+        progressBar.setValue(0);
+        panel.add(progressBar, BorderLayout.EAST);
+        add(panel, BorderLayout.EAST);
+        setVisible(false);
     }
-
-    private class StatusBar extends SwingWorker<Void, Void> {
-
-        private WebLabel label = null;
-
-        @Override
-        protected Void doInBackground() throws InterruptedException {
-            WebPanel panel = new WebPanel(new BorderLayout());
-            label = new WebLabel("");
-            panel.add(label, BorderLayout.CENTER);
-            WebProgressBar progressbar = new WebProgressBar();
-            progressbar.setIndeterminate(true);
-            panel.add(progressbar, BorderLayout.EAST);
-            MainStatusBar.this.add(panel, BorderLayout.EAST);
-            revalidate();
-            getParent().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-            while (!isCancelled()) {
-            	// sleep here to avoid high cpu usage for updating
-            	// the status bar text, one second interval shall
-            	// be enough
-				Thread.sleep(1000);
-                label.setText(text);
-            }
-            return null;
-        }
-
-        @Override
-        protected void done() {
-            super.done();
-            getParent().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-            MainStatusBar.this.removeAll();
-            MainStatusBar.this.add(new WebLabel(""));
-            revalidate();
-
-        }
-
+    
+    /**
+     * Sets the progress bar message.
+     * 
+     * @param message message to set
+     */
+    public void setProgressBarMessage(String message) {
+    	label.setText(message);
     }
-
-    private StatusBar bar;
-    private String text = "";
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        if (evt instanceof StatusBarMessage) {
-            StatusBarMessage status = (StatusBarMessage) evt;
-            if ((int) status.getNewValue() == Conf.START) {
-                if (bar == null || bar.isDone()) {
-                    bar = new StatusBar();
-                    bar.execute();
-                    // if the calculationtime is too short, we will get an
-                    // InterruptedException while building the statusBar
-                    // To avoid this, we will sleep some time
-                    try {
-                        Thread.sleep(500);
-                    } catch (InterruptedException e) {
-                    }
-                }
-                if (text.isEmpty()) {
-                    text = status.getPropertyName();
-                } else {
-                    if (!text.contains(status.toString()))
-                        ;
-                    text += ", " + status.getPropertyName();
-                }
-            } else if ((int) status.getNewValue() == Conf.STOP) {
-
-                text = text.replace(status.getPropertyName(), "");
-                text = text.replace(", , ", ", ");
-                if (text.endsWith(", "))
-                    text = text.substring(0, text.lastIndexOf(','));
-                if (text.startsWith(", "))
-                    text = text.substring(2);
-                if (text.trim().isEmpty() && bar != null) {
-                    bar.cancel(false);
-                }
-            }
-
+    	if ("progress".equals(evt.getPropertyName())) {
+            progressBar.setValue((Integer)evt.getNewValue());
         }
     }
 }

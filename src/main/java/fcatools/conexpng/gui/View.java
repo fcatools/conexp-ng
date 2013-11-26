@@ -48,6 +48,33 @@ public abstract class View extends WebPanel implements PropertyChangeListener {
         splitPane.setContinuousLayout(true);
         add(splitPane);
     }
+    
+    /**
+     * Returns the state.
+     * 
+     * @return
+     */
+    public Conf getState() {
+    	return state;
+    }
+    
+    /**
+     * Returns the view.
+     * 
+     * @return
+     */
+    public JComponent getView() {
+    	return view;
+    }
+    
+    /**
+     * Returns the settings.
+     * 
+     * @return
+     */
+    public JComponent getSettings() {
+    	return settings;
+    }
 
     @Override
     public void setVisible(boolean aFlag) {

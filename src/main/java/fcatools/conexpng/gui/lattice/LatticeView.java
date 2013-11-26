@@ -1,24 +1,7 @@
 package fcatools.conexpng.gui.lattice;
 
-import fcatools.conexpng.Conf;
-import fcatools.conexpng.Conf.ContextChangeEvent;
-import fcatools.conexpng.Conf.StatusMessage;
-import fcatools.conexpng.Util;
-import fcatools.conexpng.gui.MainFrame;
-import fcatools.conexpng.gui.View;
-import fcatools.conexpng.gui.MainFrame.OverwritingFileDialog;
-import fcatools.conexpng.model.FormalContext.ConceptCalculator;
-import fcatools.conexpng.model.LatticeGraphComputer;
-import javax.swing.*;
-
-import com.alee.laf.filechooser.WebFileChooser;
-import com.alee.laf.rootpane.WebDialog;
-
-import de.tudresden.inf.tcs.fcaapi.Concept;
-import de.tudresden.inf.tcs.fcalib.FullObject;
-import de.tudresden.inf.tcs.fcalib.utils.ListSet;
-
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
@@ -26,6 +9,24 @@ import java.awt.event.ComponentListener;
 import java.beans.PropertyChangeEvent;
 import java.io.File;
 import java.util.HashSet;
+
+import javax.swing.JButton;
+import javax.swing.JToggleButton;
+
+import com.alee.laf.filechooser.WebFileChooser;
+import com.alee.laf.rootpane.WebDialog;
+
+import de.tudresden.inf.tcs.fcaapi.Concept;
+import de.tudresden.inf.tcs.fcalib.FullObject;
+import de.tudresden.inf.tcs.fcalib.utils.ListSet;
+import fcatools.conexpng.Conf;
+import fcatools.conexpng.Conf.ContextChangeEvent;
+import fcatools.conexpng.Util;
+import fcatools.conexpng.gui.MainFrame;
+import fcatools.conexpng.gui.MainFrame.OverwritingFileDialog;
+import fcatools.conexpng.gui.View;
+import fcatools.conexpng.gui.workers.ConceptCalculator;
+import fcatools.conexpng.model.LatticeGraphComputer;
 
 /**
  * This class implements the lattice tab. It contains the lattice graph view and
@@ -159,9 +160,18 @@ public class LatticeView extends View {
 			}
 		});
 	}
+	
+	/**
+	 * Returns the used lattice graph algorithm.
+	 * 
+	 * @return lattice graph algorithm
+	 */
+	public LatticeGraphComputer getAlg() {
+		return alg;
+	}
 
 	boolean loadedfile = false;
-	ConceptsLatticeWorker clw;
+	ConceptCalculator cc;
 
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
@@ -169,8 +179,8 @@ public class LatticeView extends View {
 			ContextChangeEvent cce = (ContextChangeEvent) evt;
 			switch (cce.getName()) {
 			case CANCELCALCULATIONS: {
-				if (clw != null)
-					clw.cancel(true);
+				if (cc != null)
+					cc.cancel(true);
 				break;
 			}
 			case CONTEXTCHANGED: {
@@ -195,11 +205,12 @@ public class LatticeView extends View {
 				break;
 			}
 			case TEMPORARYCONTEXTCHANGED: {
-				if (clw != null && !clw.isDone()) {
-					clw.cancel(true);
+				if (cc != null && !cc.isDone()) {
+					cc.cancel(true);
 				}
-				clw = new ConceptsLatticeWorker();
-				clw.execute();
+				cc = new ConceptCalculator(this, true);
+				cc.addPropertyChangeListener(state.getStatusBar());
+				cc.execute();
 				break;
 			}
 			default:
@@ -211,9 +222,11 @@ public class LatticeView extends View {
 			loadedfile = false;
 			updateLater = false;
 			if (state.lattice.missingEdges()) {
-				if (state.concepts.isEmpty())
-					new ConceptsWorker().execute();
-				else {
+				if (state.concepts.isEmpty()) {
+					ConceptCalculator coca = new ConceptCalculator(this, false);
+					coca.addPropertyChangeListener(state.getStatusBar());
+					coca.execute();
+				} else {
 					state.lattice.addEdges(state.concepts);
 					((LatticeGraphView) view).updateLatticeGraph();
 				}
@@ -222,87 +235,13 @@ public class LatticeView extends View {
 		}
 		if (isVisible() && updateLater) {
 			updateLater = false;
-			if (clw != null && !clw.isDone()) {
-				clw.cancel(true);
+			if (cc != null && !cc.isDone()) {
+				cc.cancel(true);
 			}
-			clw = new ConceptsLatticeWorker();
-			clw.execute();
+			cc = new ConceptCalculator(this, true);
+			cc.addPropertyChangeListener(state.getStatusBar());
+			cc.execute();
 		}
 		view.repaint();
 	}
-
-	private class ConceptsWorker extends SwingWorker<Void, Void> {
-		ConceptCalculator cc;
-
-		@Override
-		protected Void doInBackground() throws Exception {
-			state.startCalculation(StatusMessage.CALCULATINGCONCEPTS);
-			cc = state.context.new ConceptCalculator();
-			Thread t = new Thread(cc);
-			t.setPriority(Thread.MIN_PRIORITY);
-			t.start();
-			while (t.isAlive()) {
-				if (isCancelled()) {
-					t.interrupt();
-					t.join();
-					return null;
-				}
-				// sleep here to avoid high cpu usage for checking if
-                // the thread is cancelled, one second shall be enough
-                Thread.sleep(1000);
-			}
-			return null;
-		}
-
-		protected void done() {
-			state.endCalculation(StatusMessage.CALCULATINGCONCEPTS);
-			if (!isCancelled()) {
-				state.concepts = cc.getConceptLattice();
-				state.lattice.addEdges(state.concepts);
-				((LatticeGraphView) view).updateLatticeGraph();
-			}
-			super.done();
-		};
-	}
-
-	private class ConceptsLatticeWorker extends SwingWorker<Void, Void> {
-
-		ConceptCalculator cc;
-
-		@Override
-		protected Void doInBackground() throws Exception {
-			state.startCalculation(StatusMessage.CALCULATINGCONCEPTS);
-			cc = state.context.new ConceptCalculator();
-			Thread t = new Thread(cc);
-			t.setPriority(Thread.MIN_PRIORITY);
-			t.start();
-			while (t.isAlive()) {
-				if (isCancelled()) {
-					t.interrupt();
-					t.join();
-					return null;
-				}
-				// sleep here to avoid high cpu usage for checking if
-                // the thread is cancelled, one second shall be enough
-                Thread.sleep(1000);
-			}
-			return null;
-		}
-
-		@Override
-		protected void done() {
-			state.endCalculation(StatusMessage.CALCULATINGCONCEPTS);
-			if (!isCancelled()) {
-				state.concepts = cc.getConceptLattice();
-				state.startCalculation(StatusMessage.CALCULATINGLATTICE);
-				state.lattice = alg.computeLatticeGraph(state.concepts,
-						view.getBounds());
-				((LatticeGraphView) view).updateLatticeGraph();
-				((LatticeSettings) settings).update(state);
-				state.endCalculation(StatusMessage.CALCULATINGLATTICE);
-			}
-			super.done();
-		}
-	}
-
 }

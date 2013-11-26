@@ -57,6 +57,7 @@ public class MainFrame extends WebFrame {
     private View latticeView;
     private View associationView;
     private Conf state;
+    private MainStatusBar statusBar;
 
     @SuppressWarnings({ "serial" })
     public MainFrame(final Conf state) {
@@ -129,9 +130,9 @@ public class MainFrame extends WebFrame {
         addTab(tabPane, associationView, "icons/tabs/dependencies_editor.png", "Dependencies",
                 "Calculate Dependencies (CTRL + D)", 2);
 
-        MainStatusBar statusBar = new MainStatusBar();
+        statusBar = new MainStatusBar();
         statusBar.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, new Color(140, 140, 140)));
-        state.addPropertyChangeListener(statusBar);
+        state.setStatusBar(statusBar);
         mainPanel.add(statusBar, BorderLayout.SOUTH);
         add(mainPanel);
 
