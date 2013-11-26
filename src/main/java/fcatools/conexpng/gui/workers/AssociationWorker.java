@@ -20,8 +20,9 @@ import fcatools.conexpng.model.FormalContext;
  * frequent and closed itemsets. Then the base is calculated with Gen-LB from
  * Stumme et al 2001
  * 
- * originally written by David Bormann and put into a SwingWorker
- * by Torsten Casselt
+ * originally written by David Bormann and put into a SwingWorker by Torsten
+ * Casselt
+ * 
  * @author Torsten Casselt
  */
 public class AssociationWorker extends AbstractAssociationWorker {
@@ -31,17 +32,17 @@ public class AssociationWorker extends AbstractAssociationWorker {
 	private Conf state;
 	private DependencyView view;
 
-	public AssociationWorker(FormalContext context) {
-		super(context);
+	public AssociationWorker(FormalContext context, Long progressBarId) {
+		super(context, progressBarId);
 	}
 
 	public AssociationWorker(DependencyView view, Conf state, double minsup,
-			double conf) {
-		super(state.context);
+			double conf, Long progressBarId) {
+		super(state.context, progressBarId);
 		this.view = view;
 		this.state = view.getState();
 		this.statusBar = state.getStatusBar();
-		this.statusBar.setIndeterminate(true);
+		this.statusBar.setIndeterminate(progressBarId, true);
 		this.context = state.context;
 		setMinsup(minsup);
 		setConfidence(conf);
@@ -334,5 +335,6 @@ public class AssociationWorker extends AbstractAssociationWorker {
 			state.associations = rules;
 			view.writeAssociations(0);
 		}
+		super.done();
 	};
 }

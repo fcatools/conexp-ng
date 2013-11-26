@@ -4,7 +4,7 @@ import de.tudresden.inf.tcs.fcaapi.Concept;
 import de.tudresden.inf.tcs.fcaapi.FCAImplication;
 import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
 import de.tudresden.inf.tcs.fcalib.FullObject;
-import fcatools.conexpng.gui.MainStatusBar;
+import fcatools.conexpng.gui.StatusBar;
 import fcatools.conexpng.gui.MainToolbar;
 import fcatools.conexpng.gui.lattice.LatticeGraph;
 import fcatools.conexpng.model.AssociationRule;
@@ -43,7 +43,7 @@ public class Conf extends UndoManager {
     public LatticeGraph lattice;
     public Set<Concept<String, FullObject<String, String>>> concepts;
     public GUIConf guiConf;
-    private MainStatusBar statusBar;
+    private StatusBar statusBar;
 
     private PropertyChangeSupport propertyChangeSupport;
 
@@ -91,7 +91,7 @@ public class Conf extends UndoManager {
      * 
      * @return status bar of this program
      */
-    public MainStatusBar getStatusBar() {
+    public StatusBar getStatusBar() {
     	return statusBar;
     }
     
@@ -100,7 +100,7 @@ public class Conf extends UndoManager {
      * 
      * @param statusBar
      */
-    public void setStatusBar(MainStatusBar statusBar) {
+    public void setStatusBar(StatusBar statusBar) {
     	this.statusBar = statusBar;
     }
 

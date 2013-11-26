@@ -24,6 +24,7 @@ import fcatools.conexpng.Conf.ContextChangeEvent;
 import fcatools.conexpng.Util;
 import fcatools.conexpng.gui.MainFrame;
 import fcatools.conexpng.gui.MainFrame.OverwritingFileDialog;
+import fcatools.conexpng.gui.StatusBarPropertyChangeListener;
 import fcatools.conexpng.gui.View;
 import fcatools.conexpng.gui.workers.ConceptWorker;
 import fcatools.conexpng.model.LatticeGraphComputer;
@@ -160,7 +161,7 @@ public class LatticeView extends View {
 			}
 		});
 	}
-	
+
 	/**
 	 * Returns the used lattice graph algorithm.
 	 * 
@@ -208,8 +209,10 @@ public class LatticeView extends View {
 				if (cc != null && !cc.isDone()) {
 					cc.cancel(true);
 				}
-				cc = new ConceptWorker(this, true);
-				cc.addPropertyChangeListener(state.getStatusBar());
+				Long progressBarId = state.getStatusBar().startCalculation();
+				cc = new ConceptWorker(this, true, progressBarId);
+				cc.addPropertyChangeListener(new StatusBarPropertyChangeListener(
+						progressBarId, state.getStatusBar()));
 				cc.execute();
 				break;
 			}
@@ -223,8 +226,12 @@ public class LatticeView extends View {
 			updateLater = false;
 			if (state.lattice.missingEdges()) {
 				if (state.concepts.isEmpty()) {
-					ConceptWorker coca = new ConceptWorker(this, false);
-					coca.addPropertyChangeListener(state.getStatusBar());
+					Long progressBarId = state.getStatusBar()
+							.startCalculation();
+					ConceptWorker coca = new ConceptWorker(this, false,
+							progressBarId);
+					coca.addPropertyChangeListener(new StatusBarPropertyChangeListener(
+							progressBarId, state.getStatusBar()));
 					coca.execute();
 				} else {
 					state.lattice.addEdges(state.concepts);
@@ -238,8 +245,10 @@ public class LatticeView extends View {
 			if (cc != null && !cc.isDone()) {
 				cc.cancel(true);
 			}
-			cc = new ConceptWorker(this, true);
-			cc.addPropertyChangeListener(state.getStatusBar());
+			Long progressBarId = state.getStatusBar().startCalculation();
+			cc = new ConceptWorker(this, true, progressBarId);
+			cc.addPropertyChangeListener(new StatusBarPropertyChangeListener(
+					progressBarId, state.getStatusBar()));
 			cc.execute();
 		}
 		view.repaint();
