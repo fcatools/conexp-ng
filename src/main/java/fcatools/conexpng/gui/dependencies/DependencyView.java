@@ -1,29 +1,38 @@
 package fcatools.conexpng.gui.dependencies;
 
-import com.alee.laf.panel.WebPanel;
-import com.alee.laf.scroll.WebScrollPane;
-import com.alee.laf.splitpane.WebSplitPane;
-import com.alee.laf.text.WebTextPane;
-import de.tudresden.inf.tcs.fcaapi.FCAImplication;
-import fcatools.conexpng.Conf;
-import fcatools.conexpng.Conf.ContextChangeEvent;
-import fcatools.conexpng.Conf.StatusMessage;
-import fcatools.conexpng.gui.View;
-import fcatools.conexpng.model.AssociationRule;
-import fcatools.conexpng.model.FormalContext.StemBaseCalculator;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
+import java.beans.PropertyChangeEvent;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.TreeSet;
 
-import javax.swing.*;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
-import java.awt.*;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
-import java.beans.PropertyChangeEvent;
-import java.math.BigDecimal;
-import java.util.*;
+
+import com.alee.laf.panel.WebPanel;
+import com.alee.laf.scroll.WebScrollPane;
+import com.alee.laf.splitpane.WebSplitPane;
+import com.alee.laf.text.WebTextPane;
+
+import de.tudresden.inf.tcs.fcaapi.FCAImplication;
+import fcatools.conexpng.Conf;
+import fcatools.conexpng.Conf.ContextChangeEvent;
+import fcatools.conexpng.gui.View;
+import fcatools.conexpng.gui.workers.AssociationWorker;
+import fcatools.conexpng.gui.workers.ImplicationWorker;
+import fcatools.conexpng.model.AssociationRule;
 
 public class DependencyView extends View {
 
@@ -220,16 +229,19 @@ public class DependencyView extends View {
         if (associationWorker != null && !associationWorker.isDone()) {
             associationWorker.cancel(true);
         }
-        associationWorker = new AssociationWorker();
+        associationWorker = new AssociationWorker(this, state, state.guiConf.support, 0);
+        associationWorker.addPropertyChangeListener(state.getStatusBar());
         associationWorker.execute();
     }
 
-    private void writeAssociations(final int assoscrollpos) {
+    public void writeAssociations(final int assoscrollpos) {
         if (!state.associations.isEmpty())
             SwingUtilities.invokeLater(new Runnable() {
 
                 @Override
                 public void run() {
+                    System.out.println("really done");
+
                     int i = 0;
                     StringBuffer buf;
                     assopane.setText("");
@@ -284,42 +296,11 @@ public class DependencyView extends View {
             });
     }
 
-    private class AssociationWorker extends SwingWorker<Void, Void> {
-        ThreadedAssociationMiner tam;
-
-        protected Void doInBackground() throws Exception {
-            state.startCalculation(StatusMessage.CALCULATINGASSOCIATIONS);
-            tam = new ThreadedAssociationMiner(state.context, state.guiConf.support, 0);
-            Thread t = new Thread(tam);
-            t.setPriority(Thread.MIN_PRIORITY);
-            t.start();
-            while (t.isAlive()) {
-                if (isCancelled()) {
-                    t.interrupt();
-                    t.join();
-                    return null;
-                }
-                // sleep here to avoid high cpu usage for checking if
-                // the thread is cancelled, one second shall be enough
-                Thread.sleep(1000);
-            }
-            return null;
-        }
-
-        protected void done() {
-            state.endCalculation(StatusMessage.CALCULATINGASSOCIATIONS);
-            if (!isCancelled()) {
-                state.associations = tam.getResult();
-                writeAssociations(0);
-            }
-        };
-    }
-
     // Implications
     // ////////////////////////////////////////////////////////////////////////////////////////
 
-    private void writeImplications(final int implscrollpos) {
-        if (!state.implications.isEmpty())
+    public void writeImplications(final int implscrollpos) {
+        if (!state.implications.isEmpty()) {
             SwingUtilities.invokeLater(new Runnable() {
 
                 @Override
@@ -363,6 +344,7 @@ public class DependencyView extends View {
                     }
                 }
             });
+        }
     }
 
     private ImplicationWorker implicationWorker;
@@ -373,38 +355,8 @@ public class DependencyView extends View {
         if (implicationWorker != null && !implicationWorker.isDone()) {
             implicationWorker.cancel(true);
         }
-        implicationWorker = new ImplicationWorker();
+        implicationWorker = new ImplicationWorker(this);
+        implicationWorker.addPropertyChangeListener(state.getStatusBar());
         implicationWorker.execute();
-    }
-
-    private class ImplicationWorker extends SwingWorker<Void, Void> {
-        private StemBaseCalculator sbc;
-
-        protected Void doInBackground() throws Exception {
-            state.startCalculation(StatusMessage.CALCULATINGIMPLICATIONS);
-            sbc = state.context.new StemBaseCalculator();
-            Thread t = new Thread(sbc);
-            t.setPriority(Thread.MIN_PRIORITY);
-            t.start();
-            while (t.isAlive()) {
-                if (isCancelled()) {
-                    t.interrupt();
-                    t.join();
-                    return null;
-                }
-                // sleep here to avoid high cpu usage for checking if
-                // the thread is cancelled, one second shall be enough
-                Thread.sleep(1000);
-            }
-            return null;
-        }
-
-        protected void done() {
-            state.endCalculation(StatusMessage.CALCULATINGIMPLICATIONS);
-            if (!isCancelled()) {
-                state.implications = sbc.getResult();
-                writeImplications(0);
-            }
-        };
     }
 }

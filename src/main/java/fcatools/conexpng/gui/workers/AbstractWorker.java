@@ -7,6 +7,13 @@ import javax.swing.SwingWorker;
 
 import fcatools.conexpng.gui.MainStatusBar;
 
+/**
+ * Abstract worker for every SwingWorker to inherit from.
+ * Basic operations necessary for progress bar usage etc. are
+ * already implemented.
+ * 
+ * @author Torsten Casselt
+ */
 public abstract class AbstractWorker extends SwingWorker<Void, Void> {
 
 	protected MainStatusBar statusBar;

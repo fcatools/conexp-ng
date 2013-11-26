@@ -38,6 +38,15 @@ public class MainStatusBar extends WebPanel implements PropertyChangeListener {
     }
     
     /**
+     * Sets the progress bar of the status bar indeterminate.
+     * 
+     * @param indeterminate true if indeterminate, false if not
+     */
+    public void setIndeterminate(boolean indeterminate) {
+    	progressBar.setIndeterminate(indeterminate);
+    }
+    
+    /**
      * Sets the progress bar message.
      * 
      * @param message message to set

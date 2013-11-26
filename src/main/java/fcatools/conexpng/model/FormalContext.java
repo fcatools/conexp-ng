@@ -1,5 +1,17 @@
 package fcatools.conexpng.model;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
+import org.paukov.combinatorics.Factory;
+import org.paukov.combinatorics.Generator;
+import org.paukov.combinatorics.ICombinatoricsVector;
+
 import de.tudresden.inf.tcs.fcaapi.Concept;
 import de.tudresden.inf.tcs.fcaapi.FCAImplication;
 import de.tudresden.inf.tcs.fcaapi.exception.IllegalAttributeException;
@@ -9,12 +21,6 @@ import de.tudresden.inf.tcs.fcalib.FullObject;
 import de.tudresden.inf.tcs.fcalib.Implication;
 import de.tudresden.inf.tcs.fcalib.ImplicationSet;
 import de.tudresden.inf.tcs.fcalib.utils.ListSet;
-import fcatools.conexpng.gui.dependencies.AssociationMiner;
-import org.paukov.combinatorics.Factory;
-import org.paukov.combinatorics.Generator;
-import org.paukov.combinatorics.ICombinatoricsVector;
-
-import java.util.*;
 
 /**
  * A specialization of FormalContext<String,String> with the aim to remove the
@@ -358,49 +364,6 @@ public class FormalContext extends de.tudresden.inf.tcs.fcalib.FormalContext<Str
 
     }
 
-    public class StemBaseCalculator implements Runnable {
-        // de.tudresden.inf.tcs.fcalib.ImplicationSet<String> doesn't return the
-        // implications, so we need this result-variable, maybe we should modify
-        // ImplicationSet
-        IndexedSet<FCAImplication<String>> result;
-
-        public IndexedSet<FCAImplication<String>> getResult() {
-            return result;
-        }
-
-        @Override
-        public void run() {
-            result = new ListSet<>();
-
-            ImplicationSet<String> impl = new ImplicationSet<>(FormalContext.this);
-
-            // Next-Closure
-
-            Set<String> A = new ListSet<>();
-
-            while (!A.equals(getAttributes())) {
-                if (Thread.interrupted())
-                    return;
-                A = impl.nextClosure(A);
-                if (A == null)
-                    break;
-                if (!A.equals(doublePrime(A))) {
-                    Implication<String> im = new Implication<>(A, doublePrime(A));
-                    impl.add(im);
-                    result.add(im);
-                }
-            }
-            // remove redundant items in the conclusion
-            for (FCAImplication<String> fcaImplication : result) {
-                if (Thread.interrupted())
-                    return;
-                fcaImplication.getConclusion().removeAll(fcaImplication.getPremise());
-            }
-
-        }
-
-    }
-
     @Override
     public Set<FCAImplication<String>> getStemBase() {
         // de.tudresden.inf.tcs.fcalib.ImplicationSet<String> doesn't return the
@@ -435,10 +398,6 @@ public class FormalContext extends de.tudresden.inf.tcs.fcalib.FormalContext<Str
     @Override
     public Set<FCAImplication<String>> getDuquenneGuiguesBase() {
         return getStemBase();
-    }
-
-    public Set<AssociationRule> getLuxenburgerBase(double minsup, double conf) {
-        return new AssociationMiner(this, minsup, conf).computeAssociationRules();
     }
 
     public void clarifyObjects() {

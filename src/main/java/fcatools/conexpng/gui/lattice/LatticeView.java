@@ -25,7 +25,7 @@ import fcatools.conexpng.Util;
 import fcatools.conexpng.gui.MainFrame;
 import fcatools.conexpng.gui.MainFrame.OverwritingFileDialog;
 import fcatools.conexpng.gui.View;
-import fcatools.conexpng.gui.workers.ConceptCalculator;
+import fcatools.conexpng.gui.workers.ConceptWorker;
 import fcatools.conexpng.model.LatticeGraphComputer;
 
 /**
@@ -171,7 +171,7 @@ public class LatticeView extends View {
 	}
 
 	boolean loadedfile = false;
-	ConceptCalculator cc;
+	ConceptWorker cc;
 
 	@Override
 	public void propertyChange(PropertyChangeEvent evt) {
@@ -208,7 +208,7 @@ public class LatticeView extends View {
 				if (cc != null && !cc.isDone()) {
 					cc.cancel(true);
 				}
-				cc = new ConceptCalculator(this, true);
+				cc = new ConceptWorker(this, true);
 				cc.addPropertyChangeListener(state.getStatusBar());
 				cc.execute();
 				break;
@@ -223,7 +223,7 @@ public class LatticeView extends View {
 			updateLater = false;
 			if (state.lattice.missingEdges()) {
 				if (state.concepts.isEmpty()) {
-					ConceptCalculator coca = new ConceptCalculator(this, false);
+					ConceptWorker coca = new ConceptWorker(this, false);
 					coca.addPropertyChangeListener(state.getStatusBar());
 					coca.execute();
 				} else {
@@ -238,7 +238,7 @@ public class LatticeView extends View {
 			if (cc != null && !cc.isDone()) {
 				cc.cancel(true);
 			}
-			cc = new ConceptCalculator(this, true);
+			cc = new ConceptWorker(this, true);
 			cc.addPropertyChangeListener(state.getStatusBar());
 			cc.execute();
 		}

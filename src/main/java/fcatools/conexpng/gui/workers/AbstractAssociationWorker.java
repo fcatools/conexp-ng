@@ -1,17 +1,18 @@
-package fcatools.conexpng.model;
+package fcatools.conexpng.gui.workers;
 
 import java.util.Set;
 
-public abstract class AbstractAssociationMiner {
+import fcatools.conexpng.model.AssociationRule;
+import fcatools.conexpng.model.FormalContext;
+
+public abstract class AbstractAssociationWorker extends AbstractWorker {
 
     protected double minsup;
     protected double confidence;
     protected Set<AssociationRule> rules;
     protected FormalContext context;
 
-    public abstract Set<AssociationRule> computeAssociationRules();
-
-    public AbstractAssociationMiner(FormalContext context) {
+    public AbstractAssociationWorker(FormalContext context) {
         this.context = context;
     }
 

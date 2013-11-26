@@ -1,24 +1,21 @@
 package fcatools.conexpng.gui;
 
-import com.alee.laf.label.WebLabel;
-import com.alee.laf.menu.WebMenu;
-import com.alee.laf.menu.WebMenuBar;
-import com.alee.laf.menu.WebMenuItem;
-import com.alee.laf.optionpane.WebOptionPane;
-import com.alee.laf.panel.WebPanel;
-import com.alee.laf.rootpane.WebDialog;
-import com.alee.laf.rootpane.WebFrame;
-import com.alee.laf.tabbedpane.TabbedPaneStyle;
-import com.alee.laf.tabbedpane.WebTabbedPane;
+import static fcatools.conexpng.Util.loadIcon;
 
-import extra.Tetris;
-import extra.TetrisListener;
-import fcatools.conexpng.Conf;
-import fcatools.conexpng.Main;
-import fcatools.conexpng.Util;
-import fcatools.conexpng.gui.contexteditor.ContextEditor;
-import fcatools.conexpng.gui.dependencies.DependencyView;
-import fcatools.conexpng.gui.lattice.LatticeView;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Image;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.io.File;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
@@ -29,18 +26,20 @@ import javax.swing.KeyStroke;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.io.File;
+import com.alee.laf.label.WebLabel;
+import com.alee.laf.optionpane.WebOptionPane;
+import com.alee.laf.panel.WebPanel;
+import com.alee.laf.rootpane.WebDialog;
+import com.alee.laf.rootpane.WebFrame;
+import com.alee.laf.tabbedpane.TabbedPaneStyle;
+import com.alee.laf.tabbedpane.WebTabbedPane;
 
-import static fcatools.conexpng.Util.loadIcon;
+import fcatools.conexpng.Conf;
+import fcatools.conexpng.Main;
+import fcatools.conexpng.Util;
+import fcatools.conexpng.gui.contexteditor.ContextEditor;
+import fcatools.conexpng.gui.dependencies.DependencyView;
+import fcatools.conexpng.gui.lattice.LatticeView;
 
 // TODO: The code needs to be tidied up drastically
 public class MainFrame extends WebFrame {
@@ -166,10 +165,6 @@ public class MainFrame extends WebFrame {
             break;
         }
         add(new MainToolbar(this, state), BorderLayout.PAGE_START);
-
-        tabPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
-                KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_DOWN_MASK), "extra");
-        tabPane.getActionMap().put("extra", new ExtraAction());
     }
 
     public void showContextEditor() {
@@ -425,96 +420,6 @@ public class MainFrame extends WebFrame {
             return cancel;
         }
 
-    }
-
-    @SuppressWarnings("serial")
-    public class ExtraAction extends AbstractAction {
-
-        @Override
-        public void actionPerformed(ActionEvent arg0) {
-            final Tetris tetris = new Tetris();
-            tetris.setUseInternalHotkeys(false);
-
-            final WebFrame tetrisFrame = new WebFrame("Tetris frame") {
-                public void setVisible(boolean aFlag) {
-                    if (!aFlag) {
-                        tetris.pauseGame();
-                    }
-                    super.setVisible(aFlag);
-                }
-            };
-            tetrisFrame.add(tetris);
-
-            WebMenuBar tetrisMenu = new WebMenuBar();
-            tetrisMenu.add(new WebMenu("Game") {
-                {
-                    add(new WebMenuItem("New game", loadIcon("icons/extra/new.png")) {
-                        {
-                            setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F2, 0));
-                            addActionListener(new ActionListener() {
-                                public void actionPerformed(ActionEvent e) {
-                                    tetris.newGame();
-                                }
-                            });
-                        }
-                    });
-                    add(new WebMenuItem("Unpause game", loadIcon("icons/extra/unpause.png")) {
-                        {
-                            tetris.addTetrisListener(new TetrisListener() {
-                                public void newGameStarted() {
-                                    setEnabled(true);
-                                    setIcon(loadIcon("icons/extra/pause.png"));
-                                    setText("Pause game");
-                                }
-
-                                public void gamePaused() {
-                                    setIcon(loadIcon("icons/extra/unpause.png"));
-                                    setText("Unpause game");
-                                }
-
-                                public void gameUnpaused() {
-                                    setIcon(loadIcon("icons/extra/pause.png"));
-                                    setText("Pause game");
-                                }
-
-                                public void gameOver() {
-                                    setEnabled(false);
-                                    setIcon(loadIcon("icons/extra/pause.png"));
-                                    setText("Pause game");
-                                }
-                            });
-                            setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, 0));
-                            addActionListener(new ActionListener() {
-                                public void actionPerformed(ActionEvent e) {
-                                    if (tetris.isPaused()) {
-                                        tetris.unpauseGame();
-                                    } else {
-                                        tetris.pauseGame();
-                                    }
-                                }
-                            });
-                        }
-                    });
-                    addSeparator();
-                    add(new WebMenuItem("Close", loadIcon("icons/extra/exit.png")) {
-                        {
-                            setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F4, KeyEvent.SHIFT_MASK));
-                            addActionListener(new ActionListener() {
-                                public void actionPerformed(ActionEvent e) {
-                                    tetris.pauseGame();
-                                    tetrisFrame.dispose();
-                                }
-                            });
-                        }
-                    });
-                }
-            });
-            tetrisMenu.add(new WebMenu("About"));
-            tetrisFrame.setJMenuBar(tetrisMenu);
-            tetrisFrame.pack();
-            tetrisFrame.setLocation(25 + 100 + 25, 25);
-            tetrisFrame.setVisible(true);
-        }
     }
 
 }

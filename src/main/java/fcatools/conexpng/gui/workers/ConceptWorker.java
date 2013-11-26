@@ -21,23 +21,25 @@ import fcatools.conexpng.model.LatticeConcept;
  * 
  * @author Torsten Casselt
  */
-public class ConceptCalculator extends AbstractWorker {
+public class ConceptWorker extends AbstractWorker {
 
 	private Conf state;
 	private FormalContext context;
 	private boolean lattice;
 	private LatticeView view;
-	
+	private ListSet<Concept<String, FullObject<String, String>>> conceptLattice;
+
 	/**
-	 * Creates the concept calculator.
+	 * Creates the concept worker.
 	 * 
 	 * @param view needed to fetch information to work with from
 	 * @param lattice true if the lattice shall be computed, false if only the concepts
 	 */
-	public ConceptCalculator(LatticeView view, boolean lattice) {
+	public ConceptWorker(LatticeView view, boolean lattice) {
 		this.view = view;
 		this.state = view.getState();
 		this.statusBar = state.getStatusBar();
+		this.statusBar.setIndeterminate(false);
 		this.context = state.context;
 		this.lattice = lattice;
 	}
@@ -45,7 +47,6 @@ public class ConceptCalculator extends AbstractWorker {
 	@Override
 	protected Void doInBackground() throws Exception {
 
-		ListSet<Concept<String, FullObject<String, String>>> conceptLattice;
         conceptLattice = new ListSet<Concept<String, FullObject<String, String>>>();
         HashMap<String, Set<String>> extentPerAttr = new HashMap<String, Set<String>>();
         int progress = 0;
@@ -175,7 +176,15 @@ public class ConceptCalculator extends AbstractWorker {
             }
             conceptLattice.add(c);
         }
-        state.endCalculation(StatusMessage.CALCULATINGCONCEPTS);
+        return null;
+	}
+	
+	/*
+	 * executed in EDT so no computations here.
+	 */
+	@Override
+	protected void done() {
+		state.endCalculation(StatusMessage.CALCULATINGCONCEPTS);
 		// if not cancelled finish the operation
 		if (!isCancelled()) {
 			state.concepts = conceptLattice;
@@ -195,6 +204,6 @@ public class ConceptCalculator extends AbstractWorker {
 				state.endCalculation(StatusMessage.CALCULATINGLATTICE);
 			}
 		}
-        return null;
+		super.done();
 	}
 }
