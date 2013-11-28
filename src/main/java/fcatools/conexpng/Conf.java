@@ -1,14 +1,5 @@
 package fcatools.conexpng;
 
-import de.tudresden.inf.tcs.fcaapi.Concept;
-import de.tudresden.inf.tcs.fcaapi.FCAImplication;
-import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
-import de.tudresden.inf.tcs.fcalib.FullObject;
-import fcatools.conexpng.gui.StatusBar;
-import fcatools.conexpng.gui.MainToolbar;
-import fcatools.conexpng.gui.lattice.LatticeGraph;
-import fcatools.conexpng.model.AssociationRule;
-import fcatools.conexpng.model.FormalContext;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -22,6 +13,16 @@ import javax.swing.undo.AbstractUndoableEdit;
 import javax.swing.undo.UndoManager;
 import javax.swing.undo.UndoableEdit;
 
+import de.tudresden.inf.tcs.fcaapi.Concept;
+import de.tudresden.inf.tcs.fcaapi.FCAImplication;
+import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
+import de.tudresden.inf.tcs.fcalib.FullObject;
+import fcatools.conexpng.gui.MainToolbar;
+import fcatools.conexpng.gui.StatusBar;
+import fcatools.conexpng.gui.lattice.LatticeGraph;
+import fcatools.conexpng.model.AssociationRule;
+import fcatools.conexpng.model.FormalContext;
+
 /**
  * Contains context, lattice, implications, filePath, snapshots etc.
  * <p>
@@ -30,270 +31,287 @@ import javax.swing.undo.UndoableEdit;
  * central place for the program's state as opposed to have it scattered
  * throughout different classes. If you want you can see this class as the
  * "Model" in an MVC context.
- *
+ * 
  */
 public class Conf extends UndoManager {
-    private static final long serialVersionUID = 1L;
-    public String filePath;
-    public Vector<String> lastOpened = new Vector<>(5);
-    public FormalContext context;
-    public Set<AssociationRule> associations;
-    public Set<FCAImplication<String>> implications;
-    public boolean unsavedChanges = false;
-    public LatticeGraph lattice;
-    public Set<Concept<String, FullObject<String, String>>> concepts;
-    public GUIConf guiConf;
-    private StatusBar statusBar;
+	private static final long serialVersionUID = 1L;
+	public String filePath;
+	public Vector<String> lastOpened = new Vector<>(5);
+	public FormalContext context;
+	public Set<AssociationRule> associations;
+	public Set<FCAImplication<String>> implications;
+	public boolean unsavedChanges = false;
+	public LatticeGraph lattice;
+	public Set<Concept<String, FullObject<String, String>>> concepts;
+	public GUIConf guiConf;
+	private StatusBar statusBar;
 
-    private PropertyChangeSupport propertyChangeSupport;
+	private PropertyChangeSupport propertyChangeSupport;
 
-    public Conf() {
-        propertyChangeSupport = new PropertyChangeSupport(this);
-        guiConf = new GUIConf();
-    }
+	public Conf() {
+		propertyChangeSupport = new PropertyChangeSupport(this);
+		guiConf = new GUIConf();
+	}
 
-    public int getNumberOfConcepts() {
-        if (concepts.isEmpty()) {
-            startCalculation(StatusMessage.CALCULATINGCONCEPTS);
-            concepts = context.getConceptsWithoutConsideredElements();
-            endCalculation(StatusMessage.CALCULATINGCONCEPTS);
-        }
-        return concepts.size();
-    }
+	public int getNumberOfConcepts() {
+		if (concepts.isEmpty()) {
+			startCalculation(StatusMessage.CALCULATINGCONCEPTS);
+			concepts = context.getConceptsWithoutConsideredElements();
+			endCalculation(StatusMessage.CALCULATINGCONCEPTS);
+		}
+		return concepts.size();
+	}
 
-    public void init(int rows, int columns) {
-        context = new FormalContext(rows, columns);
-        associations = new TreeSet<AssociationRule>();
-        implications = new TreeSet<FCAImplication<String>>();
-        concepts = new HashSet<Concept<String, FullObject<String, String>>>();
-        guiConf = new GUIConf();
-        lattice = new LatticeGraph();
-        filePath = filePath.substring(0, filePath.lastIndexOf(System.getProperty("file.separator")) + 1)
-                + "untitled.cex";
-        newContext(context);
-    }
+	public void init(int rows, int columns) {
+		context = new FormalContext(rows, columns);
+		associations = new TreeSet<AssociationRule>();
+		implications = new TreeSet<FCAImplication<String>>();
+		concepts = new HashSet<Concept<String, FullObject<String, String>>>();
+		guiConf = new GUIConf();
+		lattice = new LatticeGraph();
+		filePath = filePath.substring(0,
+				filePath.lastIndexOf(System.getProperty("file.separator")) + 1)
+				+ "untitled.cex";
+		newContext(context);
+	}
 
-    public void setNewFile(String filepath) {
-        if (filePath.equals(filepath))
-            return;
-        lastOpened.remove(filepath);
-        lastOpened.remove(filePath);
-        if (new File(filePath).exists()) {
-            lastOpened.add(0, this.filePath);
-            if (lastOpened.size() > 5)
-                lastOpened.remove(5);
-        }
-        filePath = filepath;
-    }
-    
-    /**
-     * Returns the status bar of this program.
-     * 
-     * @return status bar of this program
-     */
-    public StatusBar getStatusBar() {
-    	return statusBar;
-    }
-    
-    /**
-     * Sets the status bar of this program.
-     * 
-     * @param statusBar
-     */
-    public void setStatusBar(StatusBar statusBar) {
-    	this.statusBar = statusBar;
-    }
+	public void setNewFile(String filepath) {
+		if (filePath.equals(filepath))
+			return;
+		lastOpened.remove(filepath);
+		lastOpened.remove(filePath);
+		if (new File(filePath).exists()) {
+			lastOpened.add(0, this.filePath);
+			if (lastOpened.size() > 5)
+				lastOpened.remove(5);
+		}
+		filePath = filepath;
+	}
 
-    // Redo-Undo-Behavior
-    // ///////////////////////////////////////////////////////////
-    private Conf lastConf;
-    private boolean undoRedoInProgress;
+	/**
+	 * Returns the status bar of this program.
+	 * 
+	 * @return status bar of this program
+	 */
+	public StatusBar getStatusBar() {
+		return statusBar;
+	}
 
-    public void saveConf() {
-        lastConf = copy(this);
-    }
+	/**
+	 * Sets the status bar of this program.
+	 * 
+	 * @param statusBar
+	 */
+	public void setStatusBar(StatusBar statusBar) {
+		this.statusBar = statusBar;
+	}
 
-    public Conf copy(Conf conf) {
-        Conf copy = new Conf();
-        copy.context = new FormalContext();
-        copy.context.addAttributes(conf.context.getAttributes());
-        try {
-            copy.context.addObjects(conf.context.getObjects());
-        } catch (IllegalObjectException e) {
-            // should never happens
-        }
-        return copy;
-    }
+	// Redo-Undo-Behavior
+	// ///////////////////////////////////////////////////////////
+	private Conf lastConf;
+	private boolean undoRedoInProgress;
 
-    @SuppressWarnings("serial")
-    public void makeRedoable() {
-        if (!undoRedoInProgress) {
-            UndoableEdit undoableEdit = new AbstractUndoableEdit() {
-                final Conf curConf = copy(Conf.this);
-                final Conf lastConf = copy(Conf.this.lastConf);
+	public void saveConf() {
+		lastConf = copy(this);
+	}
 
-                // Method that is called when we must redo the undone action
-                public void redo() throws javax.swing.undo.CannotRedoException {
-                    super.redo();
-                    context = curConf.context;
-                    undoRedoInProgress = true;
-                    newContext(context);
-                    undoRedoInProgress = false;
-                    MainToolbar.getRedoButton().setEnabled(canRedo());
-                    MainToolbar.getUndoButton().setEnabled(canUndo());
-                }
+	public Conf copy(Conf conf) {
+		Conf copy = new Conf();
+		copy.context = new FormalContext();
+		copy.context.addAttributes(conf.context.getAttributes());
+		try {
+			copy.context.addObjects(conf.context.getObjects());
+		} catch (IllegalObjectException e) {
+			// should never happens
+		}
+		return copy;
+	}
 
-                public void undo() throws javax.swing.undo.CannotUndoException {
-                    super.undo();
-                    context = lastConf.context;
+	@SuppressWarnings("serial")
+	public void makeRedoable() {
+		if (!undoRedoInProgress) {
+			UndoableEdit undoableEdit = new AbstractUndoableEdit() {
+				final Conf curConf = copy(Conf.this);
+				final Conf lastConf = copy(Conf.this.lastConf);
 
-                    undoRedoInProgress = true;
-                    newContext(context);
-                    undoRedoInProgress = false;
-                    MainToolbar.getRedoButton().setEnabled(canRedo());
-                    MainToolbar.getUndoButton().setEnabled(canUndo());
-                }
-            };
+				// Method that is called when we must redo the undone action
+				public void redo() throws javax.swing.undo.CannotRedoException {
+					super.redo();
+					context = curConf.context;
+					undoRedoInProgress = true;
+					newContext(context);
+					undoRedoInProgress = false;
+					MainToolbar.getRedoButton().setEnabled(canRedo());
+					MainToolbar.getUndoButton().setEnabled(canUndo());
+				}
 
-            // Add this undoable edit to the undo manager
-            addEdit(undoableEdit);
-            MainToolbar.getRedoButton().setEnabled(canRedo());
-            MainToolbar.getUndoButton().setEnabled(canUndo());
-        }
-        lastConf = copy(this);
+				public void undo() throws javax.swing.undo.CannotUndoException {
+					super.undo();
+					context = lastConf.context;
 
-    }
+					undoRedoInProgress = true;
+					newContext(context);
+					undoRedoInProgress = false;
+					MainToolbar.getRedoButton().setEnabled(canRedo());
+					MainToolbar.getUndoButton().setEnabled(canUndo());
+				}
+			};
 
-    // Communication
-    // /////////////////////////////////////////////////////////////77
+			// Add this undoable edit to the undo manager
+			addEdit(undoableEdit);
+			MainToolbar.getRedoButton().setEnabled(canRedo());
+			MainToolbar.getUndoButton().setEnabled(canUndo());
+		}
+		lastConf = copy(this);
 
-    public void contextChanged() {
-        this.context.clearConsidered();
-        firePropertyChange(ContextChangeEvents.CONTEXTCHANGED, null, context);
-    }
+	}
 
-    public void newContext(FormalContext context) {
-        cancelCalculations();
-        this.context = context;
-        this.context.clearConsidered();
-        firePropertyChange(ContextChangeEvents.NEWCONTEXT, null, context);
-    }
+	// Communication
+	// /////////////////////////////////////////////////////////////77
 
-    public void attributeNameChanged(String oldName, String newName) {
-        firePropertyChange(ContextChangeEvents.ATTRIBUTENAMECHANGED, oldName, newName);
-    }
+	public void contextChanged() {
+		this.context.clearConsidered();
+		firePropertyChange(ContextChangeEvents.CONTEXTCHANGED, null, context);
+	}
 
-    public void showLabelsChanged() {
-        firePropertyChange(ContextChangeEvents.LABELSCHANGED, null, null);
-    }
+	public void newContext(FormalContext context) {
+		cancelCalculations();
+		this.context = context;
+		this.context.clearConsidered();
+		firePropertyChange(ContextChangeEvents.NEWCONTEXT, null, context);
+	}
 
-    public void temporaryContextChanged() {
-        firePropertyChange(ContextChangeEvents.TEMPORARYCONTEXTCHANGED, null, null);
-    }
+	public void attributeNameChanged(String oldName, String newName) {
+		firePropertyChange(ContextChangeEvents.ATTRIBUTENAMECHANGED, oldName,
+				newName);
+	}
 
-    private int starts = 0;
-    private int stops = 0;
+	public void showLabelsChanged() {
+		firePropertyChange(ContextChangeEvents.LABELSCHANGED, null, null);
+	}
 
-    public void startCalculation(StatusMessage status) {
-        starts++;
-        fireStatusBarPropertyChange(status, START);
-    }
+	public void temporaryContextChanged() {
+		firePropertyChange(ContextChangeEvents.TEMPORARYCONTEXTCHANGED, null,
+				null);
+	}
 
-    public void endCalculation(StatusMessage status) {
-        stops++;
-        fireStatusBarPropertyChange(status, STOP);
-    }
+	private int starts = 0;
+	private int stops = 0;
 
-    public void cancelCalculations() {
-        firePropertyChange(ContextChangeEvents.CANCELCALCULATIONS, null, null);
-    }
+	public void startCalculation(StatusMessage status) {
+		starts++;
+		fireStatusBarPropertyChange(status, START);
+	}
 
-    public boolean canBeSaved() {
-        return starts <= stops;
-    }
+	public void endCalculation(StatusMessage status) {
+		stops++;
+		fireStatusBarPropertyChange(status, STOP);
+	}
 
-    public void loadedFile() {
-        cancelCalculations();
-        propertyChangeSupport.firePropertyChange(new PropertyChangeEvent(this, "filepath", filePath, filePath));
-        firePropertyChange(ContextChangeEvents.LOADEDFILE, null, lattice);
-    }
+	public void cancelCalculations() {
+		firePropertyChange(ContextChangeEvents.CANCELCALCULATIONS, null, null);
+	}
 
-    @SuppressWarnings("serial")
-    public class ContextChangeEvent extends PropertyChangeEvent {
+	public boolean canBeSaved() {
+		return starts <= stops;
+	}
 
-        private ContextChangeEvents cce;
+	public void loadedFile() {
+		cancelCalculations();
+		propertyChangeSupport.firePropertyChange(new PropertyChangeEvent(this,
+				"filepath", filePath, filePath));
+		firePropertyChange(ContextChangeEvents.LOADEDFILE, null, lattice);
+	}
 
-        public ContextChangeEvent(Object source, String propertyName, Object oldValue, Object newValue) {
-            super(source, propertyName, oldValue, newValue);
-        }
+	@SuppressWarnings("serial")
+	public class ContextChangeEvent extends PropertyChangeEvent {
 
-        public ContextChangeEvent(Object source, ContextChangeEvents cce, Object oldValue, Object newValue) {
-            this(source, cce.toString(), oldValue, newValue);
-            this.cce = cce;
-        }
+		private ContextChangeEvents cce;
 
-        public ContextChangeEvents getName() {
-            return cce;
-        }
-    }
+		public ContextChangeEvent(Object source, String propertyName,
+				Object oldValue, Object newValue) {
+			super(source, propertyName, oldValue, newValue);
+		}
 
-    public void addPropertyChangeListener(PropertyChangeListener listener) {
-        propertyChangeSupport.addPropertyChangeListener(listener);
-    }
+		public ContextChangeEvent(Object source, ContextChangeEvents cce,
+				Object oldValue, Object newValue) {
+			this(source, cce.toString(), oldValue, newValue);
+			this.cce = cce;
+		}
 
-    public void removePropertyChangeListener(PropertyChangeListener listener) {
-        propertyChangeSupport.removePropertyChangeListener(listener);
-    }
+		public ContextChangeEvents getName() {
+			return cce;
+		}
+	}
 
-    private void firePropertyChange(ContextChangeEvents cce, Object oldValue, Object newValue) {
-        if (propertyChangeSupport.getPropertyChangeListeners().length != 0) {
-            if (cce != ContextChangeEvents.LOADEDFILE) {
-                unsavedChanges = true;
-                MainToolbar.getSaveButton().setEnabled(true);
-            }
-            propertyChangeSupport.firePropertyChange(new ContextChangeEvent(this, cce, oldValue, newValue));
-        }
-    }
+	public void addPropertyChangeListener(PropertyChangeListener listener) {
+		propertyChangeSupport.addPropertyChangeListener(listener);
+	}
 
-    public static final int START = 1;
+	public void removePropertyChangeListener(PropertyChangeListener listener) {
+		propertyChangeSupport.removePropertyChangeListener(listener);
+	}
 
-    public static final int STOP = 2;
+	private void firePropertyChange(ContextChangeEvents cce, Object oldValue,
+			Object newValue) {
+		if (propertyChangeSupport.getPropertyChangeListeners().length != 0) {
+			if (cce != ContextChangeEvents.LOADEDFILE) {
+				unsavedChanges = true;
+				MainToolbar.getSaveButton().setEnabled(true);
+			}
+			propertyChangeSupport.firePropertyChange(new ContextChangeEvent(
+					this, cce, oldValue, newValue));
+		}
+	}
 
-    public enum StatusMessage {
+	public static final int START = 1;
 
-        LOADINGFILE("Loading the context"), SAVINGFILE("Saving the context"), CALCULATINGASSOCIATIONS(
-                "Calculating the associations"), CALCULATINGIMPLICATIONS("Calculating the implications"), CALCULATINGCONCEPTS(
-                "Calculating the concepts"), CALCULATINGLATTICE("Calculating the lattice");
+	public static final int STOP = 2;
 
-        private StatusMessage(String name) {
-            this.name = name;
-        }
+	public enum StatusMessage {
 
-        private final String name;
+		LOADINGFILE("Loading the context"), SAVINGFILE("Saving the context"), CALCULATINGASSOCIATIONS(
+				"Calculating the associations"), CALCULATINGIMPLICATIONS(
+				"Calculating the implications"), CALCULATINGCONCEPTS(
+				"Calculating the concepts"), CALCULATINGLATTICE(
+				"Calculating the lattice"), CLARIFYINGOBJECTS(
+				"Clarifying objects"), CLARIFYINGATTRIBUTES(
+				"Clarifying attributes"), CLARIFYING("Clarifying…"), REDUCINGOBJECTS(
+				"Reducing objects"), REDUCINGATTRIBUTES("Reducing attributes"), REDUCING(
+				"Reducing…");
 
-        public String toString() {
-            return name;
-        }
-    }
+		private StatusMessage(String name) {
+			this.name = name;
+		}
 
-    public class StatusBarMessage extends PropertyChangeEvent {
+		private final String name;
 
-        private static final long serialVersionUID = 1L;
+		public String toString() {
+			return name;
+		}
+	}
 
-        public StatusBarMessage(Object source, String propertyName, Object oldValue, Object newValue) {
-            super(source, propertyName, oldValue, newValue);
-        }
+	public class StatusBarMessage extends PropertyChangeEvent {
 
-        public StatusBarMessage(Object source, StatusMessage status, Object oldValue, Object newValue) {
-            this(source, status.toString(), oldValue, newValue);
-        }
-    }
+		private static final long serialVersionUID = 1L;
 
-    private void fireStatusBarPropertyChange(StatusMessage status, int newValue) {
-        if (status != StatusMessage.LOADINGFILE && newValue != START) {
-            unsavedChanges = true;
-            MainToolbar.getSaveButton().setEnabled(true);
-        }
-        propertyChangeSupport.firePropertyChange(new StatusBarMessage(this, status, 0, newValue));
-    }
+		public StatusBarMessage(Object source, String propertyName,
+				Object oldValue, Object newValue) {
+			super(source, propertyName, oldValue, newValue);
+		}
+
+		public StatusBarMessage(Object source, StatusMessage status,
+				Object oldValue, Object newValue) {
+			this(source, status.toString(), oldValue, newValue);
+		}
+	}
+
+	private void fireStatusBarPropertyChange(StatusMessage status, int newValue) {
+		if (status != StatusMessage.LOADINGFILE && newValue != START) {
+			unsavedChanges = true;
+			MainToolbar.getSaveButton().setEnabled(true);
+		}
+		propertyChangeSupport.firePropertyChange(new StatusBarMessage(this,
+				status, 0, newValue));
+	}
 }
