@@ -15,12 +15,12 @@ public class OALWriter {
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
 
         for (FullObject<String, String> obj : state.context.getObjects()) {
-            bw.append(obj.getIdentifier()+":");
-            int i=0;
+            bw.append(obj.getIdentifier() + ":");
+            int i = 0;
             for (String attr : obj.getDescription().getAttributes()) {
                 bw.append(attr);
                 i++;
-                if(i<obj.getDescription().getAttributes().size())
+                if (i < obj.getDescription().getAttributes().size())
                     bw.append(";");
             }
             bw.newLine();

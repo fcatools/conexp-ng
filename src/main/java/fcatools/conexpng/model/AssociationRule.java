@@ -17,8 +17,7 @@ public class AssociationRule implements Comparable<AssociationRule> {
         consequent = new TreeSet<>();
     }
 
-    public AssociationRule(Set<String> premise, Set<String> consequent,
-            double sup, double conf) {
+    public AssociationRule(Set<String> premise, Set<String> consequent, double sup, double conf) {
         this();
         this.premise.addAll(premise);
         this.consequent.addAll(consequent);
@@ -61,8 +60,7 @@ public class AssociationRule implements Comparable<AssociationRule> {
     }
 
     public boolean equals(AssociationRule ass) {
-        return premise.equals(ass.getPremise())
-                && consequent.equals(ass.getConsequent());
+        return premise.equals(ass.getPremise()) && consequent.equals(ass.getConsequent());
     }
 
     public String toString() {

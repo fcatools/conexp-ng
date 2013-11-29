@@ -222,7 +222,7 @@ public class AttributeExplorationExpert extends AbstractExpert<String, String, F
                     int j = matrix.columnAtPoint(e.getPoint());
                     int clicks = e.getClickCount();
                     if (clicks >= 2 && clicks % 2 == 0 && SwingUtilities.isLeftMouseButton(e)) { // Double
-                                                                                                    // Click
+                                                                                                 // Click
                         if (i > 0 && j > 0) {
                             invokeAction(MiniContextEditor.this, new ToggleAction(i, j));
                         } else if (i == 1 && j == 0)

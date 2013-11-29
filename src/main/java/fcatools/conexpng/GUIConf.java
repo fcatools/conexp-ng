@@ -10,9 +10,9 @@ import java.util.Map;
  * toString()-method 2. a method to parse such a string and build an object of
  * that datastructure 3. modify the {@link CEXReader} and use this parse-method
  * in it
- *
+ * 
  * @author DavidBormann
- *
+ * 
  */
 public class GUIConf {
 

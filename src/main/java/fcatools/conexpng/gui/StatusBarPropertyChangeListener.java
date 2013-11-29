@@ -10,29 +10,27 @@ import java.beans.PropertyChangeListener;
  */
 public class StatusBarPropertyChangeListener implements PropertyChangeListener {
 
-	private Long progressBarId;
-	private StatusBar statusBar;
+    private Long progressBarId;
+    private StatusBar statusBar;
 
-	/**
-	 * Creates a listener.
-	 * 
-	 * @param progressBarId
-	 *            id of progress bar to update on change
-	 * @param statusBar
-	 *            status bar to access progress bar
-	 */
-	public StatusBarPropertyChangeListener(Long progressBarId,
-			StatusBar statusBar) {
-		this.progressBarId = progressBarId;
-		this.statusBar = statusBar;
-	}
+    /**
+     * Creates a listener.
+     * 
+     * @param progressBarId
+     *            id of progress bar to update on change
+     * @param statusBar
+     *            status bar to access progress bar
+     */
+    public StatusBarPropertyChangeListener(Long progressBarId, StatusBar statusBar) {
+        this.progressBarId = progressBarId;
+        this.statusBar = statusBar;
+    }
 
-	@Override
-	public void propertyChange(PropertyChangeEvent evt) {
-		if ("progress".equals(evt.getPropertyName())) {
-			statusBar.setProgressBarValue(progressBarId,
-					(Integer) evt.getNewValue());
-		}
-	}
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        if ("progress".equals(evt.getPropertyName())) {
+            statusBar.setProgressBarValue(progressBarId, (Integer) evt.getNewValue());
+        }
+    }
 
 }

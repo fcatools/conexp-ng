@@ -7,34 +7,34 @@ import fcatools.conexpng.model.FormalContext;
 
 public abstract class AbstractAssociationWorker extends AbstractWorker {
 
-	protected double minsup;
-	protected double confidence;
-	protected Set<AssociationRule> rules;
-	protected FormalContext context;
+    protected double minsup;
+    protected double confidence;
+    protected Set<AssociationRule> rules;
+    protected FormalContext context;
 
-	public AbstractAssociationWorker(FormalContext context, Long progressBarId) {
-		super(progressBarId);
-		this.context = context;
-	}
+    public AbstractAssociationWorker(FormalContext context, Long progressBarId) {
+        super(progressBarId);
+        this.context = context;
+    }
 
-	public Set<AssociationRule> getRules() {
-		return rules;
-	}
+    public Set<AssociationRule> getRules() {
+        return rules;
+    }
 
-	public double getMinsup() {
-		return minsup;
-	}
+    public double getMinsup() {
+        return minsup;
+    }
 
-	public void setMinsup(double minsup) {
-		this.minsup = minsup;
-	}
+    public void setMinsup(double minsup) {
+        this.minsup = minsup;
+    }
 
-	public double getConfidence() {
-		return confidence;
-	}
+    public double getConfidence() {
+        return confidence;
+    }
 
-	public void setConfidence(double confidence) {
-		this.confidence = confidence;
-	}
+    public void setConfidence(double confidence) {
+        this.confidence = confidence;
+    }
 
 }

@@ -30,11 +30,11 @@ public class CSVReader {
             Set<String> attrForObj = new TreeSet<>();
             for (int i = 1; i < obj.length; i++) {
                 if (obj[i].equals("1"))
-                    attrForObj.add(context.getAttributeAtIndex(i-1));
+                    attrForObj.add(context.getAttributeAtIndex(i - 1));
             }
             context.addObject(new FullObject<String, String>(obj[0], attrForObj));
         }
-        
+
         br.close();
         state.guiConf.columnWidths = new HashMap<>();
         path = path.substring(0, path.lastIndexOf(System.getProperty("file.separator")) + 1) + "untitled.cex";

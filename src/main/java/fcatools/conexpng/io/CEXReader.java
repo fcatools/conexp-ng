@@ -47,8 +47,8 @@ public class CEXReader {
             SecurityException {
         guistate = new GUIConf();
         concepts = new ListSet<>();
-        associations=new TreeSet<>();
-        implications=new HashSet<>();
+        associations = new TreeSet<>();
+        implications = new HashSet<>();
         InputStream in = null;
 
         in = new FileInputStream(path);
