@@ -101,7 +101,7 @@ public class LatticeGraph {
     }
 
     public void addEdges(Set<Concept<String, FullObject<String, String>>> concepts) {
-        LatticeGraph temp = new LatticeGraphComputer().computeLatticeGraph(concepts, new Rectangle());
+        LatticeGraph temp = new LatticeGraphComputer().computeLatticeGraph(concepts, new Rectangle(800, 600));
         for (Edge e : temp.edges) {
             Node u = getNodeWithIntent(e.getU().getAttributes());
             Node v = getNodeWithIntent(e.getV().getAttributes());

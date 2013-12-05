@@ -6,13 +6,17 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.io.File;
 import java.util.HashSet;
 
 import javax.swing.JButton;
 import javax.swing.JToggleButton;
+import javax.swing.Timer;
 
+import com.alee.laf.button.WebButton;
 import com.alee.laf.filechooser.WebFileChooser;
 import com.alee.laf.rootpane.WebDialog;
 
@@ -39,6 +43,7 @@ public class LatticeView extends View {
     private static final long serialVersionUID = 1660117627650529212L;
 
     public static int radius = 7;
+    public static double zoomFactor = 1;
     private LatticeGraphComputer alg;
     private MainFrame mainFrame;
 
@@ -50,9 +55,13 @@ public class LatticeView extends View {
         alg = new LatticeGraphComputer();
         if (state.lattice.isEmpty()) {
             state.lattice = alg.computeLatticeGraph(new ListSet<Concept<String, FullObject<String, String>>>(),
-                    new Rectangle());
+                    new Rectangle(800, 600));
         }
         view = new LatticeGraphView(state);
+        LatticeViewInteractions interactions = new LatticeViewInteractions();
+        view.addMouseListener(interactions);
+        view.addMouseMotionListener(interactions);
+        view.addMouseWheelListener(interactions);
         settings = new LatticeSettings(state);
         settings.setMinimumSize(new Dimension(170, 400));
 
@@ -128,6 +137,192 @@ public class LatticeView extends View {
             }
         });
         toolbar.add(showIdeal);
+
+        WebButton centerGraph = Util.createButton("Center Graph", "centerGraph",
+                "icons/lattice-view/transform-scale.png");
+        centerGraph.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                ((LatticeGraphView) view).setOffset(0, 0);
+                ((LatticeGraphView) view).repaint();
+            }
+        });
+        toolbar.add(centerGraph);
+
+        WebButton panUp = Util.createButton("Pan Up", "panUp", "icons/lattice-view/draw-triangle3.png");
+        panUp.addMouseListener(new MouseAdapter() {
+            Timer timer;
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                timer.stop();
+            }
+            @Override
+            public void mousePressed(MouseEvent e) {
+                // timer used to fire the event as long as the mouse button is
+                // pressed
+                timer = new Timer(0, new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent arg0) {
+                        LatticeGraphView v = ((LatticeGraphView) view);
+                        int offsetX = (int) v.getOffset().getX();
+                        int offsetY = (int) v.getOffset().getY();
+                        v.setOffset(offsetX, offsetY - 1);
+                        v.repaint();
+                    }
+                });
+                timer.start();
+            }
+        });
+        toolbar.add(panUp);
+
+        WebButton panDown = Util.createButton("Pan Down", "panDown", "icons/lattice-view/draw-triangle4.png");
+        panDown.addMouseListener(new MouseAdapter() {
+            Timer timer;
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                timer.stop();
+            }
+            @Override
+            public void mousePressed(MouseEvent e) {
+                // timer used to fire the event as long as the mouse button is
+                // pressed
+                timer = new Timer(0, new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent arg0) {
+                        LatticeGraphView v = ((LatticeGraphView) view);
+                        int offsetX = (int) v.getOffset().getX();
+                        int offsetY = (int) v.getOffset().getY();
+                        v.setOffset(offsetX, offsetY + 1);
+                        v.repaint();
+                    }
+                });
+                timer.start();
+            }
+        });
+        toolbar.add(panDown);
+
+        WebButton panLeft = Util.createButton("Pan Left", "panLeft", "icons/lattice-view/draw-triangle1.png");
+        panLeft.addMouseListener(new MouseAdapter() {
+            Timer timer;
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                timer.stop();
+            }
+            @Override
+            public void mousePressed(MouseEvent e) {
+                // timer used to fire the event as long as the mouse button is
+                // pressed
+                timer = new Timer(0, new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent arg0) {
+                        LatticeGraphView v = ((LatticeGraphView) view);
+                        int offsetX = (int) v.getOffset().getX();
+                        int offsetY = (int) v.getOffset().getY();
+                        v.setOffset(offsetX - 1, offsetY);
+                        v.repaint();
+                    }
+                });
+                timer.start();
+            }
+        });
+        toolbar.add(panLeft);
+
+        WebButton panRight = Util.createButton("Pan Right", "panRight", "icons/lattice-view/draw-triangle2.png");
+        panRight.addMouseListener(new MouseAdapter() {
+            Timer timer;
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                timer.stop();
+            }
+            @Override
+            public void mousePressed(MouseEvent e) {
+                // timer used to fire the event as long as the mouse button is
+                // pressed
+                timer = new Timer(0, new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent arg0) {
+                        LatticeGraphView v = ((LatticeGraphView) view);
+                        int offsetX = (int) v.getOffset().getX();
+                        int offsetY = (int) v.getOffset().getY();
+                        v.setOffset(offsetX + 1, offsetY);
+                        v.repaint();
+                    }
+                });
+                timer.start();
+            }
+        });
+        toolbar.add(panRight);
+
+        WebButton zoomOriginal = Util.createButton("Original Zoom", "zoomOriginal",
+                "icons/lattice-view/zoom-original.png");
+        zoomOriginal.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                LatticeView.zoomFactor = 1;
+                ((LatticeGraphView) view).repaint();
+            }
+        });
+        toolbar.add(zoomOriginal);
+
+        WebButton zoomIn = Util.createButton("Zoom In", "zoomIn", "icons/lattice-view/zoom-in-2.png");
+        zoomIn.addMouseListener(new MouseAdapter() {
+            Timer timer;
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                timer.stop();
+            }
+            @Override
+            public void mousePressed(MouseEvent e) {
+                // timer used to fire the event as long as the mouse button is
+                // pressed
+                timer = new Timer(0, new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent arg0) {
+                        LatticeView.zoomFactor += 0.01;
+                        // reset zoom factor to 0 if too low
+                        if (LatticeView.zoomFactor < 0) {
+                            LatticeView.zoomFactor = 0;
+                        }
+                        ((LatticeGraphView) view).repaint();
+                    }
+                });
+                timer.start();
+            }
+        });
+        toolbar.add(zoomIn);
+
+        WebButton zoomOut = Util.createButton("Zoom Out", "zoomOut", "icons/lattice-view/zoom-out-2.png");
+        zoomOut.addMouseListener(new MouseAdapter() {
+            Timer timer;
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                timer.stop();
+            }
+            @Override
+            public void mousePressed(MouseEvent e) {
+                // timer used to fire the event as long as the mouse button is
+                // pressed
+                timer = new Timer(0, new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent arg0) {
+                        LatticeView.zoomFactor -= 0.01;
+                        // reset zoom factor to 0 if too low
+                        if (LatticeView.zoomFactor < 0) {
+                            LatticeView.zoomFactor = 0;
+                        }
+                        ((LatticeGraphView) view).repaint();
+                    }
+                });
+                timer.start();
+            }
+        });
+        toolbar.add(zoomOut);
 
         super.init();
         splitPane.setDividerLocation(state.guiConf.latticesettingssplitpos);

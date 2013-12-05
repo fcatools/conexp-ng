@@ -1,16 +1,19 @@
 package fcatools.conexpng.gui;
 
+import static javax.swing.JSplitPane.HORIZONTAL_SPLIT;
+
+import java.awt.BorderLayout;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
+import javax.swing.JComponent;
+import javax.swing.border.EmptyBorder;
+
 import com.alee.laf.panel.WebPanel;
 import com.alee.laf.splitpane.WebSplitPane;
 import com.alee.laf.toolbar.WebToolBar;
-import fcatools.conexpng.Conf;
 
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import java.awt.*;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import static javax.swing.JSplitPane.HORIZONTAL_SPLIT;
+import fcatools.conexpng.Conf;
 
 public abstract class View extends WebPanel implements PropertyChangeListener {
 
