@@ -143,7 +143,7 @@ public class LatticeView extends View {
         centerGraph.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                ((LatticeGraphView) view).setOffset(0, 0);
+                LatticeGraphView.setOffset(0, 0);
                 ((LatticeGraphView) view).repaint();
             }
         });
@@ -165,9 +165,9 @@ public class LatticeView extends View {
                     @Override
                     public void actionPerformed(ActionEvent arg0) {
                         LatticeGraphView v = ((LatticeGraphView) view);
-                        int offsetX = (int) v.getOffset().getX();
-                        int offsetY = (int) v.getOffset().getY();
-                        v.setOffset(offsetX, offsetY - 1);
+                        int offsetX = (int) LatticeGraphView.getOffset().getX();
+                        int offsetY = (int) LatticeGraphView.getOffset().getY();
+                        LatticeGraphView.setOffset(offsetX, offsetY - 1);
                         v.repaint();
                     }
                 });
@@ -192,9 +192,9 @@ public class LatticeView extends View {
                     @Override
                     public void actionPerformed(ActionEvent arg0) {
                         LatticeGraphView v = ((LatticeGraphView) view);
-                        int offsetX = (int) v.getOffset().getX();
-                        int offsetY = (int) v.getOffset().getY();
-                        v.setOffset(offsetX, offsetY + 1);
+                        int offsetX = (int) LatticeGraphView.getOffset().getX();
+                        int offsetY = (int) LatticeGraphView.getOffset().getY();
+                        LatticeGraphView.setOffset(offsetX, offsetY + 1);
                         v.repaint();
                     }
                 });
@@ -219,9 +219,9 @@ public class LatticeView extends View {
                     @Override
                     public void actionPerformed(ActionEvent arg0) {
                         LatticeGraphView v = ((LatticeGraphView) view);
-                        int offsetX = (int) v.getOffset().getX();
-                        int offsetY = (int) v.getOffset().getY();
-                        v.setOffset(offsetX - 1, offsetY);
+                        int offsetX = (int) LatticeGraphView.getOffset().getX();
+                        int offsetY = (int) LatticeGraphView.getOffset().getY();
+                        LatticeGraphView.setOffset(offsetX - 1, offsetY);
                         v.repaint();
                     }
                 });
@@ -246,9 +246,9 @@ public class LatticeView extends View {
                     @Override
                     public void actionPerformed(ActionEvent arg0) {
                         LatticeGraphView v = ((LatticeGraphView) view);
-                        int offsetX = (int) v.getOffset().getX();
-                        int offsetY = (int) v.getOffset().getY();
-                        v.setOffset(offsetX + 1, offsetY);
+                        int offsetX = (int) LatticeGraphView.getOffset().getX();
+                        int offsetY = (int) LatticeGraphView.getOffset().getY();
+                        LatticeGraphView.setOffset(offsetX + 1, offsetY);
                         v.repaint();
                     }
                 });

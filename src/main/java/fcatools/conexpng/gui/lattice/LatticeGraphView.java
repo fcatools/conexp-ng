@@ -2,6 +2,7 @@ package fcatools.conexpng.gui.lattice;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
@@ -10,6 +11,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
+import java.awt.geom.AffineTransform;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -20,6 +22,8 @@ import java.io.Writer;
 import java.net.MalformedURLException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+
+import javax.swing.SwingUtilities;
 
 import org.apache.batik.dom.GenericDOMImplementation;
 import org.apache.batik.dom.svg.SVGDOMImplementation;
@@ -56,7 +60,7 @@ public class LatticeGraphView extends JSVGCanvas {
     private static Font font = new Font("Monospaced", Font.PLAIN, 12);
     private Stroke drawingStroke = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0,
             new float[] { 9 }, 0);
-    private Point offset = new Point(0, 0);
+    private static Point offset = new Point(0, 0);
 
     public LatticeGraphView(Conf state) {
         this.state = state;
@@ -67,18 +71,8 @@ public class LatticeGraphView extends JSVGCanvas {
         this.removeAll();
         for (Node n : state.lattice.getNodes()) {
             this.add(n);
-            // add mouse listeners to enable drag support
-            NodeMouseListener nml = new NodeMouseListener();
-            n.addMouseListener(nml);
-            n.addMouseMotionListener(nml);
-
             this.add(n.getAttributesLabel());
-            n.getAttributesLabel().addMouseListener(nml);
-            n.getAttributesLabel().addMouseMotionListener(nml);
-
             this.add(n.getObjectsLabel());
-            n.getObjectsLabel().addMouseListener(nml);
-            n.getObjectsLabel().addMouseMotionListener(nml);
         }
 
     }
@@ -88,7 +82,7 @@ public class LatticeGraphView extends JSVGCanvas {
      * 
      * @return the view's offset
      */
-    public Point getOffset() {
+    public static Point getOffset() {
         return offset;
     }
 
@@ -98,8 +92,24 @@ public class LatticeGraphView extends JSVGCanvas {
      * @param x
      * @param y
      */
-    public void setOffset(double x, double y) {
+    public static void setOffset(double x, double y) {
         offset.setLocation(x, y);
+    }
+
+    /**
+     * Returns element at given position.
+     * 
+     * @param point
+     *            position the element is expected
+     * @return element at given position
+     */
+    public LatticeGraphElement getLatticeGraphElementAt(Point point) {
+        for (Component c : this.getComponents()) {
+            if (c.contains(SwingUtilities.convertPoint(this, point, c))) {
+                return (LatticeGraphElement) c;
+            }
+        }
+        return null;
     }
 
     @Override
@@ -107,13 +117,17 @@ public class LatticeGraphView extends JSVGCanvas {
         super.paint(g0);
 
         Graphics2D g = (Graphics2D) g0;
+        // zoom and pan view
+        AffineTransform trans = new AffineTransform();
+        trans.scale(LatticeView.zoomFactor, LatticeView.zoomFactor);
+        trans.translate(offset.getX(), offset.getY());
+        g.transform(trans);
 
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
         g.setColor(Color.BLACK);
         int radius = LatticeView.radius;
-        double zoom = LatticeView.zoomFactor;
 
         for (Node n : state.lattice.getNodes()) {
             if (n.isPartOfAnIdeal() && !lastIdeal.contains(n)) {
@@ -129,14 +143,13 @@ public class LatticeGraphView extends JSVGCanvas {
                 } else if (!(e.getU().isPartOfAnIdeal() && e.getV().isPartOfAnIdeal()) && idealHighlighting) {
                     g.setColor(Color.LIGHT_GRAY);
                 }
-                g.drawLine((int) (e.getU().getX() * zoom + radius + offset.getX()), (int) (e.getU().getY() * zoom
-                        + radius + offset.getY()), (int) (e.getV().getX() * zoom + radius + offset.getX()), (int) (e
-                        .getV().getY() * zoom + radius + offset.getY()));
+                g.drawLine(e.getU().getX() + radius, e.getU().getY() + radius, e.getV().getX() + radius, e.getV()
+                        .getY() + radius);
             }
         }
         for (Node n : state.lattice.getNodes()) {
-            int x = (int) (n.getX() * zoom + offset.getX());
-            int y = (int) (n.getY() * zoom + offset.getY());
+            int x = n.getX();
+            int y = n.getY();
 
             // draw a normal node
             g.setColor(Color.WHITE);
@@ -150,9 +163,8 @@ public class LatticeGraphView extends JSVGCanvas {
 
                 // dashed line
                 g.setStroke(drawingStroke);
-                g.drawLine(
-                        (int) (n.getObjectsLabel().getX() * zoom + offset.getX() + n.getObjectsLabel().getBounds().width / 2),
-                        (int) (n.getObjectsLabel().getY() * zoom + offset.getY()), x + radius, y + radius);
+                g.drawLine(n.getObjectsLabel().getX() + n.getObjectsLabel().getBounds().width / 2, n.getObjectsLabel()
+                        .getY() + n.getObjectsLabel().getBounds().height / 2, x + radius, y + radius);
                 g.setStroke(new BasicStroke());
 
                 // draw the label
@@ -162,19 +174,16 @@ public class LatticeGraphView extends JSVGCanvas {
                 Rectangle r = fm.getStringBounds(content, g).getBounds();
 
                 g.setColor(Color.WHITE);
-                g.fillRect((int) (r.x + n.getObjectsLabel().getX() * zoom + offset.getX()), (int) (r.y
-                        + n.getObjectsLabel().getY() * zoom + offset.getY()), r.width, r.height);
+                g.fillRect(n.getObjectsLabel().getX(), n.getObjectsLabel().getY(), r.width, r.height);
 
                 g.setColor(Color.BLACK);
 
-                g.drawString(content, (int) (n.getObjectsLabel().getX() * zoom + offset.getX()), (int) (n
-                        .getObjectsLabel().getY() * zoom + offset.getY()));
+                g.drawString(content, n.getObjectsLabel().getX(), n.getObjectsLabel().getY() - r.y);
 
-                g.drawRect((int) (r.x + n.getObjectsLabel().getX() * zoom + offset.getX()), (int) (r.y
-                        + n.getObjectsLabel().getY() * zoom + offset.getY()), r.width, r.height);
+                g.drawRect(n.getObjectsLabel().getX(), n.getObjectsLabel().getY(), r.width, r.height);
 
-                n.getObjectsLabel().setBounds((int) (r.x + n.getObjectsLabel().getX() * zoom + offset.getX()),
-                        (int) (r.y + n.getObjectsLabel().getY() * zoom + offset.getX()),
+                n.getObjectsLabel()
+                        .setBounds(n.getObjectsLabel().getX(), n.getObjectsLabel().getY(),
                         r.width, r.height);
 
             }
@@ -183,8 +192,8 @@ public class LatticeGraphView extends JSVGCanvas {
             if ((!n.getVisibleAttributes().isEmpty()) && state.guiConf.showAttributLabel) {
                 g.setColor(Color.BLACK);
                 g.setStroke(drawingStroke);
-                g.drawLine((int) (n.getAttributesLabel().getX() * zoom + offset.getX() + n.getAttributesLabel()
-                        .getBounds().width / 2), (int) (n.getAttributesLabel().getY() * zoom + offset.getY()), x
+                g.drawLine(n.getAttributesLabel().getX() + n.getAttributesLabel().getBounds().width / 2, n
+                        .getAttributesLabel().getY(), x
                         + radius, y + radius);
                 g.setStroke(new BasicStroke());
 
@@ -194,20 +203,17 @@ public class LatticeGraphView extends JSVGCanvas {
                 Rectangle r = fm.getStringBounds(content, g).getBounds();
 
                 g.setColor(Color.WHITE);
-                g.fillRect((int) (r.x + n.getAttributesLabel().getX() * zoom + offset.getX()), (int) (r.y
-                        + n.getAttributesLabel().getY() * zoom + offset.getY()), r.width, r.height);
+                g.fillRect(n.getAttributesLabel().getX(), n.getAttributesLabel().getY(), r.width, r.height);
 
                 g.setColor(Color.BLUE);
 
-                g.drawString(content, (int) (n.getAttributesLabel().getX() * zoom + offset.getX()), (int) (n
-                        .getAttributesLabel().getY() * zoom + offset.getY()));
+                g.drawString(content, n.getAttributesLabel().getX(), n.getAttributesLabel().getY() - r.y);
 
                 g.setColor(Color.BLACK);
-                g.drawRect((int) (r.x + n.getAttributesLabel().getX() * zoom + offset.getX()), (int) (r.y
-                        + n.getAttributesLabel().getY() * zoom + offset.getY()), r.width, r.height);
+                g.drawRect(n.getAttributesLabel().getX(), n.getAttributesLabel().getY(), r.width, r.height);
 
-                n.getAttributesLabel().setBounds((int) (r.x + n.getAttributesLabel().getX() * zoom + offset.getX()),
-                        (int) (r.y + n.getAttributesLabel().getY() * zoom + offset.getY()), r.width, r.height);
+                n.getAttributesLabel().setBounds(n.getAttributesLabel().getX(), n.getAttributesLabel().getY(), r.width,
+                        r.height);
 
                 // draw filled node
 

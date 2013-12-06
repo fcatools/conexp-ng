@@ -1,27 +1,35 @@
 package fcatools.conexpng.gui.lattice;
 
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.NoninvertibleTransformException;
+import java.awt.geom.Point2D;
 
 import javax.swing.Timer;
 
 /**
- * Listener for interactions in lattice view like pan or zoom.
+ * Listener for interactions in lattice view like pan, zoom or movement of
+ * labels/nodes.
  * 
  * @author Torsten Casselt
  */
 public class LatticeViewInteractions extends MouseAdapter {
 
-    private int dragBeginX;
-    private int dragBeginY;
+    private int dragBeginX, originalElementPosX;
+    private int dragBeginY, originalElementPosY;
     private Timer timer;
+    private boolean clicked = false;
+    private LatticeGraphElement clickedOn;
 
     /**
      * {@inheritDoc}
      */
     public void mousePressed(final MouseEvent e) {
+        final LatticeGraphView view = (LatticeGraphView) e.getSource();
         // zoom if ctrl is pressed
         if (e.isControlDown()) {
             // timer used to fire the event as long as the mouse button is
@@ -39,7 +47,7 @@ public class LatticeViewInteractions extends MouseAdapter {
                         LatticeView.zoomFactor = 0;
                     }
                     // repaint
-                    ((LatticeGraphView) e.getSource()).repaint();
+                    view.repaint();
                 }
             });
             timer.start();
@@ -48,6 +56,37 @@ public class LatticeViewInteractions extends MouseAdapter {
         // save mouse position for dragging
         dragBeginX = (int) (LatticeGraphView.getOffset().getX() - e.getX());
         dragBeginY = (int) (LatticeGraphView.getOffset().getY() - e.getY());
+        // check if clicked on label or node
+        Point2D point = e.getPoint();
+        // remove zoom and offset to reach the model
+        AffineTransform trans = new AffineTransform();
+        trans.scale(LatticeView.zoomFactor, LatticeView.zoomFactor);
+        trans.translate(LatticeGraphView.getOffset().getX(), LatticeGraphView.getOffset().getY());
+        try {
+            trans.inverseTransform(point, point);
+        } catch (NoninvertibleTransformException e1) {
+            e1.printStackTrace();
+        }
+        // get element clicked on
+        clickedOn = view.getLatticeGraphElementAt((Point) point);
+        if (clickedOn != null) {
+            // handle node clicked on
+            if (e.getSource() instanceof Node) {
+                Node node = (Node) e.getSource();
+                if (!node.isPartOfAnIdeal()) {
+                    node.toggleIdealVisibility();
+                } else if (!clicked) {
+                    node.toggleIdealVisibility();
+                }
+            }
+            // save mouse position for dragging without
+            // jumping of dragged component
+            dragBeginX = e.getX();
+            dragBeginY = e.getY();
+            // save original element position
+            originalElementPosX = clickedOn.getX();
+            originalElementPosY = clickedOn.getY();
+        }
     }
 
     /**
@@ -57,6 +96,7 @@ public class LatticeViewInteractions extends MouseAdapter {
         if (timer != null) {
             timer.stop();
         }
+        clickedOn = null;
     }
 
     /**
@@ -65,9 +105,15 @@ public class LatticeViewInteractions extends MouseAdapter {
      * @since 1.6
      */
     public void mouseDragged(MouseEvent e) {
-        // move lattice view
-        LatticeGraphView view = (LatticeGraphView) e.getSource();
-        LatticeGraphView.setOffset(dragBeginX + e.getX(), dragBeginY + e.getY());
-        view.repaint();
+        if (clickedOn != null) {
+            // update position of the element with respect to drag start point
+            clickedOn.update((int) (originalElementPosX + (e.getX() - dragBeginX) / LatticeView.zoomFactor),
+                    (int) (originalElementPosY + (e.getY() - dragBeginY) / LatticeView.zoomFactor), true);
+        } else {
+            // move lattice view
+            LatticeGraphView view = (LatticeGraphView) e.getSource();
+            LatticeGraphView.setOffset(dragBeginX + e.getX(), dragBeginY + e.getY());
+            view.repaint();
+        }
     }
 }
