@@ -46,9 +46,8 @@ public class LatticeViewInteractions extends MouseAdapter {
 
         }
         // save mouse position for dragging
-        LatticeGraphView view = (LatticeGraphView) e.getSource();
-        dragBeginX = (int) (view.getOffset().getX() - e.getX());
-        dragBeginY = (int) (view.getOffset().getY() - e.getY());
+        dragBeginX = (int) (LatticeGraphView.getOffset().getX() - e.getX());
+        dragBeginY = (int) (LatticeGraphView.getOffset().getY() - e.getY());
     }
 
     /**
@@ -68,7 +67,7 @@ public class LatticeViewInteractions extends MouseAdapter {
     public void mouseDragged(MouseEvent e) {
         // move lattice view
         LatticeGraphView view = (LatticeGraphView) e.getSource();
-        view.setOffset(dragBeginX + e.getX(), dragBeginY + e.getY());
+        LatticeGraphView.setOffset(dragBeginX + e.getX(), dragBeginY + e.getY());
         view.repaint();
     }
 }

@@ -7,7 +7,7 @@ import javax.swing.event.MouseInputAdapter;
 /**
  * Listener for mouse events on objects in lattice view.
  * 
- * @author blu2lz
+ * @author Torsten Casselt
  */
 public class NodeMouseListener extends MouseInputAdapter {
 
