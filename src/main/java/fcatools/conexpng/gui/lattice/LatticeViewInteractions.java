@@ -71,8 +71,8 @@ public class LatticeViewInteractions extends MouseAdapter {
         clickedOn = view.getLatticeGraphElementAt((Point) point);
         if (clickedOn != null) {
             // handle node clicked on
-            if (e.getSource() instanceof Node) {
-                Node node = (Node) e.getSource();
+            if (clickedOn instanceof Node) {
+                Node node = (Node) clickedOn;
                 if (!node.isPartOfAnIdeal()) {
                     node.toggleIdealVisibility();
                 } else if (!clicked) {
