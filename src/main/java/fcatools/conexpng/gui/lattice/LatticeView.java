@@ -138,16 +138,16 @@ public class LatticeView extends View {
         });
         toolbar.add(showIdeal);
 
-        WebButton centerGraph = Util.createButton("Center Graph", "centerGraph",
+        WebButton resetGraphPositionButton = Util.createButton("Reset Graph Position", "resetGraphPosition",
                 "icons/lattice-view/transform-scale.png");
-        centerGraph.addActionListener(new ActionListener() {
+        resetGraphPositionButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 LatticeGraphView.setOffset(0, 0);
                 ((LatticeGraphView) view).repaint();
             }
         });
-        toolbar.add(centerGraph);
+        toolbar.add(resetGraphPositionButton);
 
         WebButton panUp = Util.createButton("Pan Up", "panUp", "icons/lattice-view/draw-triangle3.png");
         panUp.addMouseListener(new MouseAdapter() {
