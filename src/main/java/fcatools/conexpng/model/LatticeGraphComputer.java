@@ -115,8 +115,7 @@ public class LatticeGraphComputer {
                 if (v.getLevel() == 0 || v.getLevel() == n.getLevel()) {
                     v.setLevel(n.getLevel() + 1);
                     v.update((int) (Math.random() * 500), 100 * v.getLevel(), true);
-                    v.getAttributesLabel().setXYWRTLabelType(v.getX(), v.getY());
-                    v.getObjectsLabel().setXYWRTLabelType(v.getX(), v.getY());
+                    v.positionLabels();
                     q.add(v);
                 }
             }

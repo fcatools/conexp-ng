@@ -164,7 +164,7 @@ public class LatticeGraphView extends JSVGCanvas {
                 // dashed line
                 g.setStroke(drawingStroke);
                 g.drawLine(n.getObjectsLabel().getX() + n.getObjectsLabel().getBounds().width / 2, n.getObjectsLabel()
-                        .getY() + n.getObjectsLabel().getBounds().height / 2, x + radius, y + radius);
+                        .getY(), x + radius, y + radius);
                 g.setStroke(new BasicStroke());
 
                 // draw the label
@@ -183,7 +183,7 @@ public class LatticeGraphView extends JSVGCanvas {
                 g.drawRect(n.getObjectsLabel().getX(), n.getObjectsLabel().getY(), r.width, r.height);
 
                 n.getObjectsLabel()
-                        .setBounds(n.getObjectsLabel().getX(), n.getObjectsLabel().getY(),
+.setBounds(n.getObjectsLabel().getX(), n.getObjectsLabel().getY() - r.y,
                         r.width, r.height);
 
             }
@@ -212,7 +212,8 @@ public class LatticeGraphView extends JSVGCanvas {
                 g.setColor(Color.BLACK);
                 g.drawRect(n.getAttributesLabel().getX(), n.getAttributesLabel().getY(), r.width, r.height);
 
-                n.getAttributesLabel().setBounds(n.getAttributesLabel().getX(), n.getAttributesLabel().getY(), r.width,
+                n.getAttributesLabel().setBounds(n.getAttributesLabel().getX(), n.getAttributesLabel().getY() - r.y,
+                        r.width,
                         r.height);
 
                 // draw filled node

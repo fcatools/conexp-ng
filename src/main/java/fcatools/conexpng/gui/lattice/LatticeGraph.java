@@ -160,7 +160,7 @@ public class LatticeGraph {
      *
      */
     public void computeAllIdeals() {
-        // sort the list of nodes from bottom too top
+        // sort the list of nodes from bottom to top
 
         ArrayList<Node> q = new ArrayList<>();
         for (Node n : getNodes()) {
@@ -179,6 +179,7 @@ public class LatticeGraph {
                     }
                 }
             }
+            n.positionLabels();
         }
         for (int i = 1; i < q.size(); i++) {
             Node u = q.get(i);

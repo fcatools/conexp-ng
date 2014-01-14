@@ -1,14 +1,15 @@
 package fcatools.conexpng.gui.lattice;
 
-import javax.swing.*;
-
-import de.tudresden.inf.tcs.fcalib.utils.ListSet;
-
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+
+import javax.swing.JPanel;
+
+import de.tudresden.inf.tcs.fcalib.utils.ListSet;
 
 /**
  * This class implementes the nodes of the lattice graph. It is the model for
@@ -56,6 +57,7 @@ public class Node extends JPanel implements LatticeGraphElement {
         this.x = x;
         this.y = y;
         this.setBounds(x, y, 15, 15);
+        positionLabels();
         this.below = new ArrayList<>();
 
     }
@@ -66,8 +68,8 @@ public class Node extends JPanel implements LatticeGraphElement {
     public Node() {
         this.objects = new TreeSet<>();
         this.attributes = new TreeSet<>();
-        this.visibleObjects = new Label(new TreeSet<String>(), this, true);
-        this.visibleAttributes = new Label(new TreeSet<String>(), this, false);
+        this.visibleObjects = new Label(new TreeSet<String>(), this);
+        this.visibleAttributes = new Label(new TreeSet<String>(), this);
         this.ideal = new ListSet<>();
         this.x = 0;
         this.y = 0;
@@ -140,6 +142,16 @@ public class Node extends JPanel implements LatticeGraphElement {
     }
 
     /**
+     * Positions attribute and object labels.
+     */
+    public void positionLabels() {
+        // places the object label below and the attribute
+        // label above the node
+        visibleAttributes.update(x + (int) (LatticeView.radius * 1.5), (int) (y - LatticeView.radius * 5), false);
+        visibleObjects.update(x + (int) (LatticeView.radius * 1.5), y + LatticeView.radius * 5, false);
+    }
+
+    /**
      * Updated the node position
      * 
      * @param x
@@ -182,10 +194,7 @@ public class Node extends JPanel implements LatticeGraphElement {
             this.setBounds(updateX, updateY, 15, 15);
             this.x = updateX;
             this.y = updateY;
-            // places the object label above and the attribute
-            // label below the node
-            visibleAttributes.update(x + (int) (LatticeView.radius * 1.5), y + LatticeView.radius * 5, first);
-            visibleObjects.update(x + (int) (LatticeView.radius * 1.5), y - (int) (LatticeView.radius * 1.5), first);
+            positionLabels();
 
             if (getParent() != null) {
                 getParent().repaint();

@@ -14,13 +14,11 @@ public class Label extends JPanel implements LatticeGraphElement {
     private int x;
     private int y;
     private Set<String> set;
-    private boolean isObjectLabel;
 
     // private static Font font = new Font("Monospaced", Font.PLAIN, 12);
 
-    public Label(Set<String> set, Node node, boolean isObjectLabel) {
+    public Label(Set<String> set, Node node) {
         this.set = set;
-        this.isObjectLabel = isObjectLabel;
         this.setBounds(x, y, 15, 15);
 
     }
@@ -40,23 +38,6 @@ public class Label extends JPanel implements LatticeGraphElement {
     public void setXY(int x, int y) {
         this.x = x;
         this.y = y;
-        setBounds(x, y, 15, 15);
-    }
-
-    /**
-     * Set x and y coordiantes with respect to the label type.
-     * 
-     * @param x
-     * @param y
-     */
-    public void setXYWRTLabelType(int x, int y) {
-        if (isObjectLabel) {
-            this.x = x;
-            this.y = y + 5 * LatticeView.radius;
-        } else {
-            this.x = x;
-            this.y = y - LatticeView.radius;
-        }
         setBounds(x, y, 15, 15);
     }
 
