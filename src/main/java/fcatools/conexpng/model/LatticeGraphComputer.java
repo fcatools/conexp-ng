@@ -16,6 +16,8 @@ import de.tudresden.inf.tcs.fcalib.utils.ListSet;
 import fcatools.conexpng.gui.lattice.Edge;
 import fcatools.conexpng.gui.lattice.LatticeGraph;
 import fcatools.conexpng.gui.lattice.Node;
+import fcatools.conexpng.gui.lattice.algorithms.ILatticeGraphAlgorithm;
+import fcatools.conexpng.gui.lattice.algorithms.TrivialLatticeGraphAlgorithm;
 
 /**
  * This class representing the conncetion between the view and the lattice
@@ -40,7 +42,7 @@ public class LatticeGraphComputer {
      */
     public LatticeGraphComputer() {
         algorithms = new HashMap<>();
-        algorithms.put("Test", new TestLatticeAlgorithm());
+        algorithms.put("Test", new TrivialLatticeGraphAlgorithm());
         usedAlgorithm = algorithms.get("Test");
     }
 

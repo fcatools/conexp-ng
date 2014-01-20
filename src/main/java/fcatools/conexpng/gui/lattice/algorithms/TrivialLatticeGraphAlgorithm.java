@@ -1,8 +1,8 @@
-package fcatools.conexpng.model;
+package fcatools.conexpng.gui.lattice.algorithms;
 
 import fcatools.conexpng.gui.lattice.LatticeGraph;
 
-public class TestLatticeAlgorithm implements ILatticeGraphAlgorithm {
+public class TrivialLatticeGraphAlgorithm implements ILatticeGraphAlgorithm {
 
     @Override
     public LatticeGraph computeLatticeGraphPositions(LatticeGraph graph, int screenWidth, int screenHeight) {

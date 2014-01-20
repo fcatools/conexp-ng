@@ -1,4 +1,4 @@
-package fcatools.conexpng.model;
+package fcatools.conexpng.gui.lattice.algorithms;
 
 import fcatools.conexpng.gui.lattice.LatticeGraph;
 
