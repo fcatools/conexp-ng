@@ -1,4 +1,4 @@
-package fcatools.conexpng.model;
+package fcatools.conexpng.gui.lattice;
 
 import java.awt.Rectangle;
 import java.util.ArrayList;
@@ -13,9 +13,6 @@ import java.util.TreeSet;
 import de.tudresden.inf.tcs.fcaapi.Concept;
 import de.tudresden.inf.tcs.fcalib.FullObject;
 import de.tudresden.inf.tcs.fcalib.utils.ListSet;
-import fcatools.conexpng.gui.lattice.Edge;
-import fcatools.conexpng.gui.lattice.LatticeGraph;
-import fcatools.conexpng.gui.lattice.Node;
 import fcatools.conexpng.gui.lattice.algorithms.ILatticeGraphAlgorithm;
 import fcatools.conexpng.gui.lattice.algorithms.TrivialLatticeGraphAlgorithm;
 

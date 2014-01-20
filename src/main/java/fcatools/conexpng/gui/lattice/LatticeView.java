@@ -31,7 +31,6 @@ import fcatools.conexpng.gui.MainFrame.OverwritingFileDialog;
 import fcatools.conexpng.gui.StatusBarPropertyChangeListener;
 import fcatools.conexpng.gui.View;
 import fcatools.conexpng.gui.workers.ConceptWorker;
-import fcatools.conexpng.model.LatticeGraphComputer;
 
 /**
  * This class implements the lattice tab. It contains the lattice graph view and

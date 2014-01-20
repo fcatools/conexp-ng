@@ -7,7 +7,6 @@ import java.util.Set;
 
 import de.tudresden.inf.tcs.fcaapi.Concept;
 import de.tudresden.inf.tcs.fcalib.FullObject;
-import fcatools.conexpng.model.LatticeGraphComputer;
 
 /**
  * This class implemented the graph model for the lattice. It contains a list of
