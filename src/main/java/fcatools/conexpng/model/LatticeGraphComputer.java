@@ -42,13 +42,13 @@ public class LatticeGraphComputer {
      */
     public LatticeGraphComputer() {
         algorithms = new HashMap<>();
-        algorithms.put("Test", new TrivialLatticeGraphAlgorithm());
-        usedAlgorithm = algorithms.get("Test");
+        algorithms.put("Trivial", new TrivialLatticeGraphAlgorithm());
+        usedAlgorithm = algorithms.get("Trivial");
     }
 
     public void chooseAlgorithm(String name) {
         if (!algorithms.containsKey(name)) {
-            System.err.println("The chosen algorithm don't exists!");
+            System.err.println("The chosen algorithm doesn't exists!");
         } else {
             usedAlgorithm = algorithms.get(name);
         }
