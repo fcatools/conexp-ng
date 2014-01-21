@@ -62,15 +62,6 @@ public abstract class View extends WebPanel implements PropertyChangeListener {
     }
 
     /**
-     * Returns the view.
-     * 
-     * @return
-     */
-    public JComponent getView() {
-        return view;
-    }
-
-    /**
      * Returns the settings.
      * 
      * @return

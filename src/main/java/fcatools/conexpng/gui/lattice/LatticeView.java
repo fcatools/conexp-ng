@@ -19,6 +19,7 @@ import javax.swing.Timer;
 import com.alee.laf.button.WebButton;
 import com.alee.laf.filechooser.WebFileChooser;
 import com.alee.laf.rootpane.WebDialog;
+import com.alee.laf.scroll.WebScrollPane;
 
 import de.tudresden.inf.tcs.fcaapi.Concept;
 import de.tudresden.inf.tcs.fcalib.FullObject;
@@ -45,6 +46,7 @@ public class LatticeView extends View {
     public static double zoomFactor = 1;
     private LatticeGraphComputer alg;
     private MainFrame mainFrame;
+    private LatticeGraphView latticeGraphView;
 
     private boolean updateLater;
 
@@ -56,11 +58,12 @@ public class LatticeView extends View {
             state.lattice = alg.computeLatticeGraph(new ListSet<Concept<String, FullObject<String, String>>>(),
                     new Rectangle(800, 600));
         }
-        view = new LatticeGraphView(state);
+        latticeGraphView = new LatticeGraphView(state);
+        view = new WebScrollPane(latticeGraphView);
         LatticeViewInteractions interactions = new LatticeViewInteractions();
-        view.addMouseListener(interactions);
-        view.addMouseMotionListener(interactions);
-        view.addMouseWheelListener(interactions);
+        latticeGraphView.addMouseListener(interactions);
+        latticeGraphView.addMouseMotionListener(interactions);
+        latticeGraphView.addMouseWheelListener(interactions);
         settings = new LatticeSettings(state);
         settings.setMinimumSize(new Dimension(170, 400));
 
@@ -87,11 +90,11 @@ public class LatticeView extends View {
                             if (file.exists()) {
                                 OverwritingFileDialog ofd = mainFrame.new OverwritingFileDialog(file);
                                 if (ofd.isYes()) {
-                                    ((LatticeGraphView) view).exportLattice(path);
+                                    latticeGraphView.exportLattice(path);
                                     dialog.setVisible(false);
                                 }
                             } else {
-                                ((LatticeGraphView) view).exportLattice(path);
+                                latticeGraphView.exportLattice(path);
                                 dialog.setVisible(false);
                             }
                         } else if (state.equals(WebFileChooser.CANCEL_SELECTION)) {
@@ -118,7 +121,7 @@ public class LatticeView extends View {
             @Override
             public void actionPerformed(ActionEvent e) {
                 last = !last;
-                ((LatticeGraphView) view).setMove(last);
+                latticeGraphView.setMove(last);
 
             }
         });
@@ -131,8 +134,8 @@ public class LatticeView extends View {
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 last = !last;
-                ((LatticeGraphView) view).idealHighlighting(last);
-                ((LatticeGraphView) view).repaint();
+                latticeGraphView.idealHighlighting(last);
+                latticeGraphView.repaint();
             }
         });
         toolbar.add(showIdeal);
@@ -143,7 +146,7 @@ public class LatticeView extends View {
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 LatticeGraphView.setOffset(0, 0);
-                ((LatticeGraphView) view).repaint();
+                latticeGraphView.repaint();
             }
         });
         toolbar.add(resetGraphPositionButton);
@@ -163,7 +166,7 @@ public class LatticeView extends View {
                 timer = new Timer(0, new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent arg0) {
-                        LatticeGraphView v = ((LatticeGraphView) view);
+                        LatticeGraphView v = latticeGraphView;
                         int offsetX = (int) LatticeGraphView.getOffset().getX();
                         int offsetY = (int) LatticeGraphView.getOffset().getY();
                         LatticeGraphView.setOffset(offsetX, offsetY - 1);
@@ -190,7 +193,7 @@ public class LatticeView extends View {
                 timer = new Timer(0, new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent arg0) {
-                        LatticeGraphView v = ((LatticeGraphView) view);
+                        LatticeGraphView v = latticeGraphView;
                         int offsetX = (int) LatticeGraphView.getOffset().getX();
                         int offsetY = (int) LatticeGraphView.getOffset().getY();
                         LatticeGraphView.setOffset(offsetX, offsetY + 1);
@@ -217,7 +220,7 @@ public class LatticeView extends View {
                 timer = new Timer(0, new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent arg0) {
-                        LatticeGraphView v = ((LatticeGraphView) view);
+                        LatticeGraphView v = latticeGraphView;
                         int offsetX = (int) LatticeGraphView.getOffset().getX();
                         int offsetY = (int) LatticeGraphView.getOffset().getY();
                         LatticeGraphView.setOffset(offsetX - 1, offsetY);
@@ -244,7 +247,7 @@ public class LatticeView extends View {
                 timer = new Timer(0, new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent arg0) {
-                        LatticeGraphView v = ((LatticeGraphView) view);
+                        LatticeGraphView v = latticeGraphView;
                         int offsetX = (int) LatticeGraphView.getOffset().getX();
                         int offsetY = (int) LatticeGraphView.getOffset().getY();
                         LatticeGraphView.setOffset(offsetX + 1, offsetY);
@@ -262,7 +265,7 @@ public class LatticeView extends View {
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 LatticeView.zoomFactor = 1;
-                ((LatticeGraphView) view).repaint();
+                latticeGraphView.repaint();
             }
         });
         toolbar.add(zoomOriginal);
@@ -287,7 +290,7 @@ public class LatticeView extends View {
                         if (LatticeView.zoomFactor < 0) {
                             LatticeView.zoomFactor = 0;
                         }
-                        ((LatticeGraphView) view).repaint();
+                        latticeGraphView.repaint();
                     }
                 });
                 timer.start();
@@ -315,7 +318,7 @@ public class LatticeView extends View {
                         if (LatticeView.zoomFactor < 0) {
                             LatticeView.zoomFactor = 0;
                         }
-                        ((LatticeGraphView) view).repaint();
+                        latticeGraphView.repaint();
                     }
                 });
                 timer.start();
@@ -370,14 +373,14 @@ public class LatticeView extends View {
             case CONTEXTCHANGED: {
                 state.concepts = new HashSet<>();
                 state.lattice = new LatticeGraph();
-                view.repaint();
+                latticeGraphView.repaint();
                 updateLater = true;
                 break;
             }
             case NEWCONTEXT: {
                 state.concepts = new HashSet<>();
                 state.lattice = new LatticeGraph();
-                view.repaint();
+                latticeGraphView.repaint();
                 updateLater = true;
                 break;
             }
@@ -415,7 +418,7 @@ public class LatticeView extends View {
                     coca.execute();
                 } else {
                     state.lattice.addEdges(state.concepts);
-                    ((LatticeGraphView) view).updateLatticeGraph();
+                    updateLatticeGraph();
                 }
             }
             ((LatticeSettings) settings).update(state);
@@ -430,6 +433,13 @@ public class LatticeView extends View {
             cc.addPropertyChangeListener(new StatusBarPropertyChangeListener(progressBarId, state.getStatusBar()));
             cc.execute();
         }
-        view.repaint();
+        latticeGraphView.repaint();
+    }
+
+    /**
+     * Updates lattice graph.
+     */
+    public void updateLatticeGraph() {
+        latticeGraphView.updateLatticeGraph();
     }
 }
