@@ -186,8 +186,11 @@ public class Node extends JPanel implements LatticeGraphElement {
 
         if (!hitBorder) {
             if (moveSubgraph && first) {
+                // calculate offset the node is moved, then move subgraph
+                int offsetX = (int) ((x - this.x) / LatticeView.zoomFactor);
+                int offsetY = (int) ((y - this.y) / LatticeView.zoomFactor);
                 for (Node n : ideal) {
-                    n.update(x, y, false);
+                    n.update(n.x + offsetX, n.y + offsetY, false);
                 }
             }
 
