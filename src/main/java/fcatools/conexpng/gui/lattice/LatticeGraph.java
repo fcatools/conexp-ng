@@ -113,7 +113,8 @@ public class LatticeGraph {
                 v.setVisibleObjects(e.getV().getVisibleObjects());
                 u.setLevel(e.getU().getLevel());
                 v.setLevel(e.getV().getLevel());
-                u.addBelowNode(v);
+                u.addChildNode(v);
+                v.addParentNode(u);
                 if (u.getAttributesLabel().getX() == 0 && u.getAttributesLabel().getY() == 0)
                     u.getAttributesLabel().setXY(e.getU().getAttributesLabel().getX(),
                             e.getU().getAttributesLabel().getY());
@@ -151,7 +152,7 @@ public class LatticeGraph {
         }
         getNodes().removeAll(duplicates);
         for (Node n : getNodes()) {
-            n.getBelow().removeAll(duplicates);
+            n.getChildNodes().removeAll(duplicates);
         }
     }
 

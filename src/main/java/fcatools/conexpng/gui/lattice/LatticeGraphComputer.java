@@ -100,7 +100,8 @@ public class LatticeGraphComputer {
             for (Node v : graph.getNodes()) {
                 Set<String> vEx = v.getObjects();
                 if (isLowerNeighbour(uEx, vEx)) {
-                    v.addBelowNode(u);
+                    v.addChildNode(u);
+                    u.addParentNode(v);
                     graph.getEdges().add(new Edge(u, v));
                     topNode.remove(u);
                 }
@@ -110,7 +111,7 @@ public class LatticeGraphComputer {
         q.addAll(topNode);
         while (!q.isEmpty()) {
             Node n = q.remove();
-            for (Node v : n.getBelow()) {
+            for (Node v : n.getChildNodes()) {
                 if (v.getLevel() == 0 || v.getLevel() == n.getLevel()) {
                     v.setLevel(n.getLevel() + 1);
                     v.update((int) (Math.random() * 500), 100 * v.getLevel());
@@ -201,7 +202,7 @@ public class LatticeGraphComputer {
                     usedAttr.add(a);
                 }
             }
-            for (Node u : n.getBelow()) {
+            for (Node u : n.getChildNodes()) {
                 pq.add(u);
             }
         }
@@ -216,7 +217,7 @@ public class LatticeGraphComputer {
                 }
             }
             for (Node u : graph.getNodes()) {
-                if (u.getBelow().contains(n)) {
+                if (u.getChildNodes().contains(n)) {
                     pq.add(u);
                 }
             }

@@ -28,8 +28,10 @@ public class Node extends JPanel implements LatticeGraphElement {
     private Set<String> attributes;
     private int x;
     private int y;
-    // list of nodes which are below neighbors
-    private List<Node> below;
+    // list of parent nodes
+    private List<Node> parents = new ArrayList<Node>();
+    // list of child nodes
+    private List<Node> children = new ArrayList<Node>();
     private ListSet<Node> ideal;
     private ListSet<Node> filter;
     private boolean isIdealVisibile;
@@ -59,8 +61,6 @@ public class Node extends JPanel implements LatticeGraphElement {
         this.y = y;
         this.setBounds(x, y, 15, 15);
         positionLabels();
-        this.below = new ArrayList<>();
-
     }
 
     /**
@@ -76,7 +76,6 @@ public class Node extends JPanel implements LatticeGraphElement {
         this.y = 0;
         this.setBounds(x, y, 15, 15);
         this.setBackground(Color.white);
-        this.below = new ArrayList<>();
         this.filter = new ListSet<>();
     }
 
@@ -134,12 +133,42 @@ public class Node extends JPanel implements LatticeGraphElement {
         attributes.add(set);
     }
 
-    public void addBelowNode(Node n) {
-        below.add(n);
+    /**
+     * Adds a parent node to this node.
+     * 
+     * @param n
+     *            node to add as a parent
+     */
+    public void addParentNode(Node n) {
+        parents.add(n);
     }
 
-    public List<Node> getBelow() {
-        return below;
+    /**
+     * Returns this node's parent nodes.
+     * 
+     * @return this node's parent nodes
+     */
+    public List<Node> getParentNodes() {
+        return parents;
+    }
+
+    /**
+     * Adds a child node to this node.
+     * 
+     * @param n
+     *            node to add as a child
+     */
+    public void addChildNode(Node n) {
+        children.add(n);
+    }
+
+    /**
+     * Returns this node's child nodes.
+     * 
+     * @return this node's child nodes
+     */
+    public List<Node> getChildNodes() {
+        return children;
     }
 
     /**
@@ -166,22 +195,27 @@ public class Node extends JPanel implements LatticeGraphElement {
         if (isUpdatePossible(y)) {
             // move subgraph
             if (moveSubgraph) {
+                // calculate offset the node is moved
+                int offsetX = (int) ((x - this.x) / LatticeView.zoomFactor);
+                int offsetY = (int) ((y - this.y) / LatticeView.zoomFactor);
                 // check if subgraph can be moved with respect to node order
                 for (Node n : ideal) {
-                    if (!n.isUpdatePossible(y)) {
+                    if (!n.isUpdatePossible(n.y + offsetY)) {
                         structureSafeMove = false;
                     }
                 }
                 if (structureSafeMove) {
-                    // calculate offset the node is moved, then move subgraph
-                    int offsetX = (int) ((x - this.x) / LatticeView.zoomFactor);
-                    int offsetY = (int) ((y - this.y) / LatticeView.zoomFactor);
+                    // move subgraph
                     for (Node n : ideal) {
                         n.updatePosition(n.x + offsetX, n.y + offsetY);
                     }
+                    // move node
+                    updatePosition(x, y);
                 }
+            } else {
+                // move node
+                updatePosition(x, y);
             }
-            updatePosition(x, y);
             structureSafeMove = true;
 
             if (getParent() != null) {
@@ -214,13 +248,20 @@ public class Node extends JPanel implements LatticeGraphElement {
      * @return true if update is possible, false if not
      */
     public boolean isUpdatePossible(int y) {
+        // check if parents are still below this node after position update
+        for (Node n : getParentNodes()) {
+            if (n.getY() - LatticeView.radius * 2 < y) {
+                return false;
+            }
+        }
+        // check if children are still above this node after position update
+        for (Node n : getChildNodes()) {
+            if (n.getY() + LatticeView.radius * 2 > y) {
+                return false;
+            }
+        }
         return true;
-        /*
-         * if (y >= 2 && y < getParent().getHeight()) { for (Node n :
-         * this.ideal) { if (y > n.getY() - 3) { return false; } } for (Node n :
-         * this.filter) { if (y < n.getY() + 3) { return false; } } return true;
-         * } return false;
-         */}
+    }
 
     public ListSet<Node> getIdeal() {
         return ideal;
