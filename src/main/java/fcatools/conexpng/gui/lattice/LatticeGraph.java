@@ -94,8 +94,8 @@ public class LatticeGraph {
         for (Node n : nodes) {
             n.setX(n.getX() + d);
             n.setY(n.getY() + e);
-            n.getObjectsLabel().update(d, e, false);
-            n.getAttributesLabel().update(d, e, false);
+            n.getObjectsLabel().update(d, e);
+            n.getAttributesLabel().update(d, e);
         }
     }
 

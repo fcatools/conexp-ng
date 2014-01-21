@@ -108,7 +108,7 @@ public class LatticeViewInteractions extends MouseAdapter {
         if (clickedOn != null) {
             // update position of the element with respect to drag start point
             clickedOn.update((int) (originalElementPosX + (e.getX() - dragBeginX) / LatticeView.zoomFactor),
-                    (int) (originalElementPosY + (e.getY() - dragBeginY) / LatticeView.zoomFactor), true);
+                    (int) (originalElementPosY + (e.getY() - dragBeginY) / LatticeView.zoomFactor));
         } else {
             // move lattice view
             LatticeGraphView view = (LatticeGraphView) e.getSource();

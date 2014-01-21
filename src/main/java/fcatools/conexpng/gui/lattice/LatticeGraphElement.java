@@ -9,7 +9,7 @@ import java.awt.Rectangle;
  */
 public interface LatticeGraphElement {
 
-    public abstract void update(int x, int y, boolean first);
+    public abstract void update(int x, int y);
 
     public abstract int getX();
 

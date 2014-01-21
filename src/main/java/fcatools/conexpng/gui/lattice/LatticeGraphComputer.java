@@ -113,7 +113,7 @@ public class LatticeGraphComputer {
             for (Node v : n.getBelow()) {
                 if (v.getLevel() == 0 || v.getLevel() == n.getLevel()) {
                     v.setLevel(n.getLevel() + 1);
-                    v.update((int) (Math.random() * 500), 100 * v.getLevel(), true);
+                    v.update((int) (Math.random() * 500), 100 * v.getLevel());
                     v.positionLabels();
                     q.add(v);
                 }

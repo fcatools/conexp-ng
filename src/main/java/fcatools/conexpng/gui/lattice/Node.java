@@ -37,12 +37,13 @@ public class Node extends JPanel implements LatticeGraphElement {
     private boolean clickedOn;
     private Label visibleObjects;
     private Label visibleAttributes;
-    // true, if this node and his subgraph are moveable.
+    // true if this node and its subgraph shall be moved.
     private boolean moveSubgraph;
     // level of the node in the graph
     private int level;
-    // true if the node hit the viewport's borders
-    private boolean hitBorder;
+    // allow node position change only if lattice structure is maintained
+    // meaning the top-down-order of the nodes is maintained
+    private boolean structureSafeMove = true;
 
     /**
      * 
@@ -147,95 +148,79 @@ public class Node extends JPanel implements LatticeGraphElement {
     public void positionLabels() {
         // places the object label below and the attribute
         // label above the node
-        visibleAttributes.update(x + (int) (LatticeView.radius * 1.5), (int) (y - LatticeView.radius * 5), false);
-        visibleObjects.update(x + (int) (LatticeView.radius * 1.5), y + LatticeView.radius * 5, false);
+        visibleAttributes.update(x + (int) (LatticeView.radius * 1.5), (int) (y - LatticeView.radius * 5));
+        visibleObjects.update(x + (int) (LatticeView.radius * 1.5), y + LatticeView.radius * 5);
     }
 
     /**
-     * Updated the node position
+     * Update the node and associated label positions. Maintains correct
+     * top-down-order of nodes. Moves subgraph if selected.
      * 
      * @param x
-     *            , value of which x has to be translated
+     *            position the node shall be moved to
      * @param y
-     *            , value of which y has to be translated
-     * @param first
-     *            , true, if you what this node is the almost top node of the
-     *            subgraph you want to move.
+     *            position the node shall be moved to
      */
-    public void update(int x, int y, boolean first) {
-        int updateX;
-        int updateY;
-        if (x >= 2) {
-            updateX = x;
-        } else {
-            hitBorder = true;
-            updateX = 1;
-        }
-        if (y >= 2)
-            updateY = y;
-        else {
-            updateY = 1;
-            hitBorder = true;
-        }
-
-        for (Node n : ideal) {
-            if (!n.isUpdateXPosible(x) || !n.isUpdateYPosible(y)) {
-                hitBorder = true;
-            }
-        }
-
-        if (!hitBorder) {
-            if (moveSubgraph && first) {
-                // calculate offset the node is moved, then move subgraph
-                int offsetX = (int) ((x - this.x) / LatticeView.zoomFactor);
-                int offsetY = (int) ((y - this.y) / LatticeView.zoomFactor);
+    public void update(int x, int y) {
+        // check if node can be moved with respect to node order
+        if (isUpdatePossible(y)) {
+            // move subgraph
+            if (moveSubgraph) {
+                // check if subgraph can be moved with respect to node order
                 for (Node n : ideal) {
-                    n.update(n.x + offsetX, n.y + offsetY, false);
+                    if (!n.isUpdatePossible(y)) {
+                        structureSafeMove = false;
+                    }
+                }
+                if (structureSafeMove) {
+                    // calculate offset the node is moved, then move subgraph
+                    int offsetX = (int) ((x - this.x) / LatticeView.zoomFactor);
+                    int offsetY = (int) ((y - this.y) / LatticeView.zoomFactor);
+                    for (Node n : ideal) {
+                        n.updatePosition(n.x + offsetX, n.y + offsetY);
+                    }
                 }
             }
-
-            this.setBounds(updateX, updateY, 15, 15);
-            this.x = updateX;
-            this.y = updateY;
-            positionLabels();
+            updatePosition(x, y);
+            structureSafeMove = true;
 
             if (getParent() != null) {
                 getParent().repaint();
             }
         }
-
-        hitBorder = false;
     }
 
-    public boolean isUpdateXPosible(int x) {
-        if (this.x > getParent().getWidth()) {
-            return true;
-        }
-        if (x >= 2 && x < getParent().getWidth()) {
-            return true;
-        }
-        return false;
+    /**
+     * Helper method to update node and label positions.
+     * 
+     * @param x
+     *            position the node shall be moved to
+     * @param y
+     *            position the node shall be moved to
+     */
+    private void updatePosition(int x, int y) {
+        this.setBounds(x, y, 15, 15);
+        this.x = x;
+        this.y = y;
+        positionLabels();
     }
 
-    public boolean isUpdateYPosible(int y) {
-        if (this.y > getParent().getHeight()) {
-            return true;
-        }
-        if (y >= 2 && y < getParent().getHeight()) {
-            for (Node n : this.ideal) {
-                if (y > n.getY() - 3) {
-                    return false;
-                }
-            }
-            for (Node n : this.filter) {
-                if (y < n.getY() + 3) {
-                    return false;
-                }
-            }
-            return true;
-        }
-        return false;
-    }
+    /**
+     * Checks if an update of this node is possible without changing the
+     * top-down-order of the nodes in the lattice.
+     * 
+     * @param y
+     *            position the node shall be moved to
+     * @return true if update is possible, false if not
+     */
+    public boolean isUpdatePossible(int y) {
+        return true;
+        /*
+         * if (y >= 2 && y < getParent().getHeight()) { for (Node n :
+         * this.ideal) { if (y > n.getY() - 3) { return false; } } for (Node n :
+         * this.filter) { if (y < n.getY() + 3) { return false; } } return true;
+         * } return false;
+         */}
 
     public ListSet<Node> getIdeal() {
         return ideal;
