@@ -24,6 +24,18 @@ public class LatticeViewInteractions extends MouseAdapter {
     private Timer timer;
     private boolean clicked = false;
     private LatticeGraphElement clickedOn;
+    private LatticeViewUndoManager undoManager;
+
+    /**
+     * Creates a mouse adapter.
+     * 
+     * @param undoManager
+     *            undo manager for lattice to add undoable edits when moving
+     *            elements
+     */
+    public LatticeViewInteractions(LatticeViewUndoManager undoManager) {
+        this.undoManager = undoManager;
+    }
 
     /**
      * {@inheritDoc}
@@ -96,6 +108,7 @@ public class LatticeViewInteractions extends MouseAdapter {
         if (timer != null) {
             timer.stop();
         }
+        undoManager.makeRedoable(clickedOn, originalElementPosX, originalElementPosY);
         clickedOn = null;
     }
 

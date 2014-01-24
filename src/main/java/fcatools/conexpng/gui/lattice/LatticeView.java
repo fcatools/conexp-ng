@@ -60,7 +60,7 @@ public class LatticeView extends View {
         }
         latticeGraphView = new LatticeGraphView(state);
         view = new WebScrollPane(latticeGraphView);
-        LatticeViewInteractions interactions = new LatticeViewInteractions();
+        LatticeViewInteractions interactions = new LatticeViewInteractions(state.getLatticeViewUndoManager());
         latticeGraphView.addMouseListener(interactions);
         latticeGraphView.addMouseMotionListener(interactions);
         latticeGraphView.addMouseWheelListener(interactions);

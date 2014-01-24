@@ -38,8 +38,10 @@ import fcatools.conexpng.Conf;
 import fcatools.conexpng.Main;
 import fcatools.conexpng.Util;
 import fcatools.conexpng.gui.contexteditor.ContextEditor;
+import fcatools.conexpng.gui.contexteditor.ContextEditorUndoManager;
 import fcatools.conexpng.gui.dependencies.DependencyView;
 import fcatools.conexpng.gui.lattice.LatticeView;
+import fcatools.conexpng.gui.lattice.LatticeViewUndoManager;
 
 // TODO: The code needs to be tidied up drastically
 public class MainFrame extends WebFrame {
@@ -134,6 +136,7 @@ public class MainFrame extends WebFrame {
         state.setStatusBar(statusBar);
         mainPanel.add(statusBar, BorderLayout.SOUTH);
         add(mainPanel);
+        add(new MainToolbar(this, state), BorderLayout.PAGE_START);
 
         tabPane.addChangeListener(new ChangeListener() {
             public void stateChanged(ChangeEvent e) {
@@ -164,10 +167,14 @@ public class MainFrame extends WebFrame {
             showDependeciesEditor();
             break;
         }
-        add(new MainToolbar(this, state), BorderLayout.PAGE_START);
     }
 
     public void showContextEditor() {
+        // change undo/redo button state
+        ContextEditorUndoManager undoManager = state.getContextEditorUndoManager();
+        MainToolbar.getRedoButton().setEnabled(undoManager.canRedo());
+        MainToolbar.getUndoButton().setEnabled(undoManager.canUndo());
+        // show context editor
         state.guiConf.lastTab = 0;
         removeOldView();
         contextView.setVisible(true);
@@ -179,6 +186,11 @@ public class MainFrame extends WebFrame {
     }
 
     public void showLatticeEditor() {
+        // change undo/redo button state
+        LatticeViewUndoManager undoManager = state.getLatticeViewUndoManager();
+        MainToolbar.getRedoButton().setEnabled(undoManager.canRedo());
+        MainToolbar.getUndoButton().setEnabled(undoManager.canUndo());
+        // show lattice view
         state.guiConf.lastTab = 1;
         removeOldView();
         latticeView.setVisible(true);

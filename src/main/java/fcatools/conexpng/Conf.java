@@ -45,7 +45,7 @@ public class Conf {
     public Conf lastConf;
     // undo manager
     private ContextEditorUndoManager contextEditorUndoManager = new ContextEditorUndoManager(this);
-    private LatticeViewUndoManager latticeViewUndoManager = new LatticeViewUndoManager(this);
+    private LatticeViewUndoManager latticeViewUndoManager = new LatticeViewUndoManager();
 
     private PropertyChangeSupport propertyChangeSupport;
 
