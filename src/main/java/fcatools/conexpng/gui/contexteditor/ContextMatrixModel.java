@@ -82,7 +82,7 @@ public class ContextMatrixModel extends AbstractTableModel implements Reorderabl
             state.saveConf();
             context.renameAttribute(oldName, newName);
             state.contextChanged();
-            state.makeRedoable();
+            state.getContextEditorUndoManager().makeRedoable();
             return true;
         }
     }
@@ -93,7 +93,7 @@ public class ContextMatrixModel extends AbstractTableModel implements Reorderabl
         } else {
             state.saveConf();
             context.renameObject(oldName, newName);
-            state.makeRedoable();
+            state.getContextEditorUndoManager().makeRedoable();
             state.contextChanged();
             return true;
         }
@@ -116,7 +116,7 @@ public class ContextMatrixModel extends AbstractTableModel implements Reorderabl
             e.printStackTrace();
         }
         context.addObjectAt(o, to);
-        state.makeRedoable();
+        state.getContextEditorUndoManager().makeRedoable();
     }
 
     public void reorderColumns(int from, int to) {
@@ -132,7 +132,7 @@ public class ContextMatrixModel extends AbstractTableModel implements Reorderabl
         state.saveConf();
         context.removeAttributeInternal(a);
         context.addAttributeAt(a, to);
-        state.makeRedoable();
+        state.getContextEditorUndoManager().makeRedoable();
     }
 
 }

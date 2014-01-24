@@ -165,7 +165,7 @@ public class AttributeExplorationExpert extends AbstractExpert<String, String, F
                 CounterExampleProvidedAction<String, String, FullObject<String, String>> action = new CounterExampleProvidedAction<>(
                         context, question, mce.getCounterexample());
                 fireExpertAction(action);
-                state.makeRedoable();
+                state.getContextEditorUndoManager().makeRedoable();
             } else if (n.equals("Accept implication")) {
                 QuestionConfirmedAction<String, String, FullObject<String, String>> action = new QuestionConfirmedAction<>();
                 action.setQuestion(question);

@@ -548,7 +548,7 @@ public class ContextEditor extends View {
             matrixModel.fireTableDataChanged();
             matrix.restoreSelection();
             state.contextChanged();
-            state.makeRedoable();
+            state.getContextEditorUndoManager().makeRedoable();
         }
     }
 
@@ -592,7 +592,7 @@ public class ContextEditor extends View {
             matrixModel.fireTableDataChanged();
             matrix.restoreSelection();
             state.contextChanged();
-            state.makeRedoable();
+            state.getContextEditorUndoManager().makeRedoable();
         }
 
         abstract void execute(int i1, int i2, int j1, int j2);
@@ -686,7 +686,7 @@ public class ContextEditor extends View {
             matrix.clearSelection();
             matrix.saveSelection();
             state.contextChanged();
-            state.makeRedoable();
+            state.getContextEditorUndoManager().makeRedoable();
         }
     }
 
@@ -705,7 +705,7 @@ public class ContextEditor extends View {
             addAttributeAt(index);
             matrix.restoreSelection();
             state.contextChanged();
-            state.makeRedoable();
+            state.getContextEditorUndoManager().makeRedoable();
         }
     }
 
@@ -724,7 +724,7 @@ public class ContextEditor extends View {
             addObjectAt(index);
             matrix.restoreSelection();
             state.contextChanged();
-            state.makeRedoable();
+            state.getContextEditorUndoManager().makeRedoable();
         }
     }
 
@@ -848,7 +848,7 @@ public class ContextEditor extends View {
             matrix.repaint();
             matrix.restoreSelection();
             state.contextChanged();
-            state.makeRedoable();
+            state.getContextEditorUndoManager().makeRedoable();
         }
     }
 
@@ -869,7 +869,7 @@ public class ContextEditor extends View {
             matrix.repaint();
             matrix.restoreSelection();
             state.contextChanged();
-            state.makeRedoable();
+            state.getContextEditorUndoManager().makeRedoable();
         }
     }
 
@@ -894,7 +894,7 @@ public class ContextEditor extends View {
             matrix.invalidate();
             matrix.repaint();
             state.contextChanged();
-            state.makeRedoable();
+            state.getContextEditorUndoManager().makeRedoable();
         }
     }
 
@@ -916,7 +916,7 @@ public class ContextEditor extends View {
             matrix.invalidate();
             matrix.repaint();
             state.contextChanged();
-            state.makeRedoable();
+            state.getContextEditorUndoManager().makeRedoable();
         }
     }
 

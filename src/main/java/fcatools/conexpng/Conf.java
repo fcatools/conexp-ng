@@ -9,17 +9,15 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
 
-import javax.swing.undo.AbstractUndoableEdit;
-import javax.swing.undo.UndoManager;
-import javax.swing.undo.UndoableEdit;
-
 import de.tudresden.inf.tcs.fcaapi.Concept;
 import de.tudresden.inf.tcs.fcaapi.FCAImplication;
 import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
 import de.tudresden.inf.tcs.fcalib.FullObject;
 import fcatools.conexpng.gui.MainToolbar;
 import fcatools.conexpng.gui.StatusBar;
+import fcatools.conexpng.gui.contexteditor.ContextEditorUndoManager;
 import fcatools.conexpng.gui.lattice.LatticeGraph;
+import fcatools.conexpng.gui.lattice.LatticeViewUndoManager;
 import fcatools.conexpng.model.AssociationRule;
 import fcatools.conexpng.model.FormalContext;
 
@@ -33,8 +31,7 @@ import fcatools.conexpng.model.FormalContext;
  * "Model" in an MVC context.
  * 
  */
-public class Conf extends UndoManager {
-    private static final long serialVersionUID = 1L;
+public class Conf {
     public String filePath;
     public Vector<String> lastOpened = new Vector<>(5);
     public FormalContext context;
@@ -45,6 +42,10 @@ public class Conf extends UndoManager {
     public Set<Concept<String, FullObject<String, String>>> concepts;
     public GUIConf guiConf;
     private StatusBar statusBar;
+    public Conf lastConf;
+    // undo manager
+    private ContextEditorUndoManager contextEditorUndoManager = new ContextEditorUndoManager(this);
+    private LatticeViewUndoManager latticeViewUndoManager = new LatticeViewUndoManager(this);
 
     private PropertyChangeSupport propertyChangeSupport;
 
@@ -105,10 +106,23 @@ public class Conf extends UndoManager {
         this.statusBar = statusBar;
     }
 
-    // Redo-Undo-Behavior
-    // ///////////////////////////////////////////////////////////
-    private Conf lastConf;
-    private boolean undoRedoInProgress;
+    /**
+     * Returns the context editor undo manager.
+     * 
+     * @return
+     */
+    public ContextEditorUndoManager getContextEditorUndoManager() {
+        return contextEditorUndoManager;
+    }
+
+    /**
+     * Returns the lattice view undo manager.
+     * 
+     * @return
+     */
+    public LatticeViewUndoManager getLatticeViewUndoManager() {
+        return latticeViewUndoManager;
+    }
 
     public void saveConf() {
         lastConf = copy(this);
@@ -124,45 +138,6 @@ public class Conf extends UndoManager {
             // should never happens
         }
         return copy;
-    }
-
-    @SuppressWarnings("serial")
-    public void makeRedoable() {
-        if (!undoRedoInProgress) {
-            UndoableEdit undoableEdit = new AbstractUndoableEdit() {
-                final Conf curConf = copy(Conf.this);
-                final Conf lastConf = copy(Conf.this.lastConf);
-
-                // Method that is called when we must redo the undone action
-                public void redo() throws javax.swing.undo.CannotRedoException {
-                    super.redo();
-                    context = curConf.context;
-                    undoRedoInProgress = true;
-                    newContext(context);
-                    undoRedoInProgress = false;
-                    MainToolbar.getRedoButton().setEnabled(canRedo());
-                    MainToolbar.getUndoButton().setEnabled(canUndo());
-                }
-
-                public void undo() throws javax.swing.undo.CannotUndoException {
-                    super.undo();
-                    context = lastConf.context;
-
-                    undoRedoInProgress = true;
-                    newContext(context);
-                    undoRedoInProgress = false;
-                    MainToolbar.getRedoButton().setEnabled(canRedo());
-                    MainToolbar.getUndoButton().setEnabled(canUndo());
-                }
-            };
-
-            // Add this undoable edit to the undo manager
-            addEdit(undoableEdit);
-            MainToolbar.getRedoButton().setEnabled(canRedo());
-            MainToolbar.getUndoButton().setEnabled(canUndo());
-        }
-        lastConf = copy(this);
-
     }
 
     // Communication

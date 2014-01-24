@@ -1,32 +1,30 @@
 package fcatools.conexpng.gui;
 
-import de.tudresden.inf.tcs.fcalib.FullObject;
-import de.tudresden.inf.tcs.fcalib.action.StartExplorationAction;
-import fcatools.conexpng.Conf;
-import fcatools.conexpng.Util;
-import fcatools.conexpng.gui.MainFrame.OverwritingFileDialog;
-import fcatools.conexpng.gui.MainFrame.StillCalculatingDialog;
-import fcatools.conexpng.gui.MainFrame.UnsavedChangesDialog;
-import fcatools.conexpng.io.CSVWriter;
-import fcatools.conexpng.io.CXTReader;
-import fcatools.conexpng.io.CXTWriter;
-import fcatools.conexpng.io.CEXReader;
-import fcatools.conexpng.io.CEXWriter;
-import fcatools.conexpng.io.CSVReader;
-import fcatools.conexpng.io.OALReader;
-import fcatools.conexpng.io.OALWriter;
+import static fcatools.conexpng.Util.loadIcon;
 
-import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.io.File;
+
+import javax.swing.AbstractAction;
+import javax.swing.JComponent;
+import javax.swing.KeyStroke;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.undo.UndoManager;
 
-import com.alee.laf.filechooser.WebFileChooser;
 import com.alee.extended.filefilter.FilesFilter;
 import com.alee.extended.panel.GridPanel;
 import com.alee.extended.panel.GroupPanel;
 import com.alee.extended.panel.WebButtonGroup;
 import com.alee.extended.panel.WebComponentPanel;
 import com.alee.laf.button.WebButton;
+import com.alee.laf.filechooser.WebFileChooser;
 import com.alee.laf.label.WebLabel;
 import com.alee.laf.list.WebList;
 import com.alee.laf.optionpane.WebOptionPane;
@@ -37,14 +35,21 @@ import com.alee.laf.toolbar.WebToolBar;
 import com.alee.managers.popup.PopupWay;
 import com.alee.managers.popup.WebButtonPopup;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.io.File;
-import static fcatools.conexpng.Util.loadIcon;
+import de.tudresden.inf.tcs.fcalib.FullObject;
+import de.tudresden.inf.tcs.fcalib.action.StartExplorationAction;
+import fcatools.conexpng.Conf;
+import fcatools.conexpng.Util;
+import fcatools.conexpng.gui.MainFrame.OverwritingFileDialog;
+import fcatools.conexpng.gui.MainFrame.StillCalculatingDialog;
+import fcatools.conexpng.gui.MainFrame.UnsavedChangesDialog;
+import fcatools.conexpng.io.CEXReader;
+import fcatools.conexpng.io.CEXWriter;
+import fcatools.conexpng.io.CSVReader;
+import fcatools.conexpng.io.CSVWriter;
+import fcatools.conexpng.io.CXTReader;
+import fcatools.conexpng.io.CXTWriter;
+import fcatools.conexpng.io.OALReader;
+import fcatools.conexpng.io.OALWriter;
 
 public class MainToolbar extends WebToolBar {
 
@@ -215,9 +220,7 @@ public class MainToolbar extends WebToolBar {
                 addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent arg0) {
-                        state.undo();
-                        getRedoButton().setEnabled(state.canRedo());
-                        getUndoButton().setEnabled(state.canUndo());
+                        undo();
                     }
                 });
             }
@@ -228,11 +231,7 @@ public class MainToolbar extends WebToolBar {
 
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                if (state.canUndo()) {
-                    state.undo();
-                    getRedoButton().setEnabled(state.canRedo());
-                    getUndoButton().setEnabled(state.canUndo());
-                }
+                undo();
             }
         });
 
@@ -244,9 +243,7 @@ public class MainToolbar extends WebToolBar {
                 addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent arg0) {
-                        state.redo();
-                        getRedoButton().setEnabled(state.canRedo());
-                        getUndoButton().setEnabled(state.canUndo());
+                        redo();
                     }
                 });
             }
@@ -257,11 +254,7 @@ public class MainToolbar extends WebToolBar {
 
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                if (state.canRedo()) {
-                    state.redo();
-                    getRedoButton().setEnabled(state.canRedo());
-                    getUndoButton().setEnabled(state.canUndo());
-                }
+                redo();
             }
         });
         add(undoButton);
@@ -361,6 +354,48 @@ public class MainToolbar extends WebToolBar {
         // getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
         // KeyEvent.VK_F1, "helpContext");
         // getActionMap().put("helpContext", new HelpAction());
+    }
+
+    /**
+     * Undo changes.
+     */
+    private void undo() {
+        // get current tab to use the right undo manager
+        UndoManager currentActiveUndoManager = null;
+        if (state.guiConf.lastTab == 0) {
+            currentActiveUndoManager = state.getContextEditorUndoManager();
+        } else if (state.guiConf.lastTab == 1) {
+            currentActiveUndoManager = state.getLatticeViewUndoManager();
+        }
+        // check if undo is possible
+        if (currentActiveUndoManager.canUndo()) {
+            // undo the changes in the undo manager
+            currentActiveUndoManager.undo();
+            // set button states
+            getRedoButton().setEnabled(currentActiveUndoManager.canRedo());
+            getUndoButton().setEnabled(currentActiveUndoManager.canUndo());
+        }
+    }
+
+    /**
+     * Redo changes.
+     */
+    private void redo() {
+        // get current tab to use the right undo manager
+        UndoManager currentActiveUndoManager = null;
+        if (state.guiConf.lastTab == 0) {
+            currentActiveUndoManager = state.getContextEditorUndoManager();
+        } else if (state.guiConf.lastTab == 1) {
+            currentActiveUndoManager = state.getLatticeViewUndoManager();
+        }
+        // check if redo is possible
+        if (currentActiveUndoManager.canRedo()) {
+            // redo the changes in the undo manager
+            currentActiveUndoManager.redo();
+            // set button states
+            getRedoButton().setEnabled(currentActiveUndoManager.canRedo());
+            getUndoButton().setEnabled(currentActiveUndoManager.canUndo());
+        }
     }
 
     public static WebButton getSaveButton() {

@@ -195,7 +195,7 @@ public class ClarificationReductionWorker extends AbstractWorker {
             matrix.saveSelection();
             state.contextChanged();
             if (reduction) {
-                state.makeRedoable();
+                state.getContextEditorUndoManager().makeRedoable();
             }
         }
         super.done();
