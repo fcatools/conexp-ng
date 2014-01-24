@@ -32,30 +32,28 @@ public class ContextEditorUndoManager extends UndoManager {
      * UndoableEdit.
      */
     public void makeRedoable() {
+        final Conf curConf = conf.copy(conf);
+        final Conf lastConf = conf.copy(conf.lastConf);
         if (!undoRedoInProgress) {
             UndoableEdit undoableEdit = new AbstractUndoableEdit() {
                 private static final long serialVersionUID = -4461145596327911434L;
-                final Conf curConf = conf.copy(conf);
-                final Conf lastConf = conf.copy(conf.lastConf);
 
-                // Method that is called when we must redo the undone action
                 public void redo() throws javax.swing.undo.CannotRedoException {
                     super.redo();
-                    conf.context = curConf.context;
                     undoRedoInProgress = true;
-                    conf.newContext(conf.context);
+                    conf.newContext(curConf.context);
                     undoRedoInProgress = false;
+                    // change undo/redo button state
                     MainToolbar.getRedoButton().setEnabled(canRedo());
                     MainToolbar.getUndoButton().setEnabled(canUndo());
                 }
 
                 public void undo() throws javax.swing.undo.CannotUndoException {
                     super.undo();
-                    conf.context = lastConf.context;
-
                     undoRedoInProgress = true;
-                    conf.newContext(conf.context);
+                    conf.newContext(lastConf.context);
                     undoRedoInProgress = false;
+                    // change undo/redo button state
                     MainToolbar.getRedoButton().setEnabled(canRedo());
                     MainToolbar.getUndoButton().setEnabled(canUndo());
                 }
@@ -67,7 +65,5 @@ public class ContextEditorUndoManager extends UndoManager {
             MainToolbar.getRedoButton().setEnabled(canRedo());
             MainToolbar.getUndoButton().setEnabled(canUndo());
         }
-        conf.lastConf = conf.copy(conf);
-
     }
 }
