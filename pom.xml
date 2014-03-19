@@ -4,7 +4,7 @@
   <groupId>fcatools.conexp-ng</groupId>
   <artifactId>conexp-ng</artifactId>
   <packaging>jar</packaging>
-  <version>0.7-SNAPSHOT</version>
+  <version>0.6-SNAPSHOT</version>
   <name>ConExp-NG</name>
   <url>https://github.com/fcatools/conexp-ng/wiki</url>
 
@@ -153,9 +153,9 @@
   	<url>https://github.com/fcatools/conexp-ng</url>
   </scm>
   <distributionManagement>
-    <site>
+    <repository>
       <id>conexp-ng-dist-mgmt</id>
       <url>http://fcatools.github.com/conexp-ng</url>
-    </site>
+    </repository>
   </distributionManagement>
 </project>
