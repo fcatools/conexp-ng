@@ -149,4 +149,9 @@
       </plugin>
     </plugins>
   </build>
+  <scm>
+  	<connection>scm:git:git@github.com:fcatools/conexp-ng.git</connection>
+  	<developerConnection>scm:git:git@github.com:fcatools/conexp-ng.git</developerConnection>
+  	<url>http://github.com/fcatools/conexp-ng</url>
+  </scm>
 </project>
