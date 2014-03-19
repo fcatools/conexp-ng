@@ -108,8 +108,12 @@ public class LatticeViewInteractions extends MouseAdapter {
         if (timer != null) {
             timer.stop();
         }
-        undoManager.makeRedoable(clickedOn, originalElementPosX, originalElementPosY);
-        clickedOn = null;
+        // register action with undo manager only if lattice graph element is
+        // moved, not if viewport is panned
+        if (clickedOn != null) {
+            undoManager.makeRedoable(clickedOn, originalElementPosX, originalElementPosY);
+            clickedOn = null;
+        }
     }
 
     /**
