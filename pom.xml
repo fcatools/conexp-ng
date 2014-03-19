@@ -154,8 +154,8 @@
   </scm>
   <distributionManagement>
     <repository>
-      <id>conexp-ng-dist-mgmt</id>
-      <url>http://fcatools.github.com/conexp-ng</url>
+      <id>deploy-to-file</id>
+      <url>file://${project.build.directory}</url>
     </repository>
   </distributionManagement>
 </project>
