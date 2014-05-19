@@ -24,9 +24,8 @@ import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
 import de.tudresden.inf.tcs.fcalib.FullObject;
 import de.tudresden.inf.tcs.fcalib.Implication;
 import de.tudresden.inf.tcs.fcalib.utils.ListSet;
-
-import fcatools.conexpng.GUIConf;
 import fcatools.conexpng.Conf;
+import fcatools.conexpng.GUIConf;
 import fcatools.conexpng.gui.lattice.LatticeGraph;
 import fcatools.conexpng.gui.lattice.Node;
 import fcatools.conexpng.model.AssociationRule;
@@ -91,6 +90,7 @@ public class CEXReader {
                 break;
             }
         }
+        parser.close();
         if (lattice == null) {
             lattice = new LatticeGraph();
         }

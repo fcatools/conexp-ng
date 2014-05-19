@@ -144,6 +144,7 @@ public class Main {
         }
         BufferedWriter br = new BufferedWriter(new FileWriter(file));
         p.store(br, "Properties of the user frame");
+        br.close();
     }
 
     // Restore location & size of UI & dir that was last opened from
@@ -152,6 +153,7 @@ public class Main {
         Properties p = new Properties();
         BufferedReader br = new BufferedReader(new FileReader(file));
         p.load(br);
+        br.close();
 
         int x = Integer.parseInt(p.getProperty("x"));
         int y = Integer.parseInt(p.getProperty("y"));
