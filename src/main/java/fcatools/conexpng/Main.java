@@ -1,19 +1,30 @@
 package fcatools.conexpng;
 
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Frame;
+import java.awt.Rectangle;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Properties;
+
+import javax.swing.UIManager;
+import javax.swing.border.EmptyBorder;
+
 import com.alee.laf.WebLookAndFeel;
 import com.google.common.collect.Sets;
+
 import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
 import de.tudresden.inf.tcs.fcalib.FullObject;
 import fcatools.conexpng.gui.MainFrame;
 import fcatools.conexpng.gui.lattice.LatticeGraph;
 import fcatools.conexpng.io.CEXReader;
+import fcatools.conexpng.io.LocaleHandler;
 import fcatools.conexpng.model.FormalContext;
-
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import java.awt.*;
-import java.io.*;
-import java.util.Properties;
 
 /**
  * 
@@ -41,6 +52,7 @@ public class Main {
         UIManager.put("Table.focusCellForeground", Color.black);
 
         final Conf state = new Conf();
+        LocaleHandler.readLocale();
 
         boolean firstStart = false;
         File optionsFile = new File(optionsFileName);
@@ -169,7 +181,7 @@ public class Main {
     }
 
     // http://stackoverflow.com/a/193987/283607
-    private static File getSettingsDirectory() {
+    public static File getSettingsDirectory() {
         String userHome = System.getProperty("user.home");
         if (userHome == null) {
             throw new IllegalStateException("user.home==null");
