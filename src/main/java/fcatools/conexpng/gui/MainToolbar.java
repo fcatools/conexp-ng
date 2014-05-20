@@ -9,6 +9,7 @@ import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.util.Locale;
 
 import javax.swing.AbstractAction;
 import javax.swing.JComponent;
@@ -38,6 +39,7 @@ import com.alee.managers.popup.WebButtonPopup;
 import de.tudresden.inf.tcs.fcalib.FullObject;
 import de.tudresden.inf.tcs.fcalib.action.StartExplorationAction;
 import fcatools.conexpng.Conf;
+import fcatools.conexpng.Main;
 import fcatools.conexpng.Util;
 import fcatools.conexpng.gui.MainFrame.OverwritingFileDialog;
 import fcatools.conexpng.gui.MainFrame.StillCalculatingDialog;
@@ -50,6 +52,8 @@ import fcatools.conexpng.io.CXTReader;
 import fcatools.conexpng.io.CXTWriter;
 import fcatools.conexpng.io.OALReader;
 import fcatools.conexpng.io.OALWriter;
+import fcatools.conexpng.io.locale.LocaleHandler;
+import fcatools.conexpng.io.locale.SupportedLanguages;
 
 public class MainToolbar extends WebToolBar {
 
@@ -323,6 +327,38 @@ public class MainToolbar extends WebToolBar {
         });
 
         addSeparator();
+        // language selector
+        getActionMap().put("changeLanguage", new OpenAction(true));
+        final WebButton languageButton = new WebButton(loadIcon("icons/arrow_down.png"));
+        right.setDrawFocus(false);
+        right.setToolTipText("Change language");
+        final WebButtonPopup languageButtonPopup = new WebButtonPopup(languageButton, PopupWay.downCenter);
+        WebList languageButtonPopupList = new WebList(SupportedLanguages.values());
+        languageButtonPopupList.setEditable(false);
+        languageButtonPopupList.addListSelectionListener(new ListSelectionListener() {
+            public void valueChanged(ListSelectionEvent e) {
+                WebList list = (WebList) e.getSource();
+                if (!e.getValueIsAdjusting() && !list.isSelectionEmpty()) {
+                    languageButtonPopup.hidePopup();
+                    // set the language and store selection in settings
+                    LocaleHandler.setSelectedLanguage(list.getSelectedValue().toString());
+                    Main.storeOptions(mainFrame, state);
+                    list.clearSelection();
+                }
+            }
+        });
+        languageButtonPopup.setContent(new GroupPanel(languageButtonPopupList));
+        languageButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (languageButtonPopup.isShowing()) {
+                    languageButtonPopup.hidePopup();
+                } else {
+                    languageButtonPopup.showPopup(right);
+                }
+            }
+        });
+        add(languageButton);
+
         add(new WebButton(loadIcon("icons/jlfgr/About24.gif")) {
             {
                 setDrawFocus(false);
@@ -526,6 +562,7 @@ public class MainToolbar extends WebToolBar {
                 } else if (ucd.isCancel())
                     return;
             }
+            System.out.println(Locale.getDefault());
             final WebFileChooser fc = new WebFileChooser(state.filePath);
             final WebDialog dialog = new WebDialog(mainFrame, "Open a file", true);
 

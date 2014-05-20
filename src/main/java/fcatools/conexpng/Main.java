@@ -5,13 +5,14 @@ import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Rectangle;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Properties;
 
+import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 
@@ -23,7 +24,7 @@ import de.tudresden.inf.tcs.fcalib.FullObject;
 import fcatools.conexpng.gui.MainFrame;
 import fcatools.conexpng.gui.lattice.LatticeGraph;
 import fcatools.conexpng.io.CEXReader;
-import fcatools.conexpng.io.LocaleHandler;
+import fcatools.conexpng.io.locale.LocaleHandler;
 import fcatools.conexpng.model.FormalContext;
 
 /**
@@ -42,6 +43,8 @@ public class Main {
     private static boolean fileOpened = false;
 
     public Main() {
+        System.setProperty("user.language", LocaleHandler.readLocale());
+
         WebLookAndFeel.install();
 
         // Disable border around focused cells as it does not fit into the
@@ -52,7 +55,6 @@ public class Main {
         UIManager.put("Table.focusCellForeground", Color.black);
 
         final Conf state = new Conf();
-        LocaleHandler.readLocale();
 
         boolean firstStart = false;
         File optionsFile = new File(optionsFileName);
@@ -114,9 +116,9 @@ public class Main {
         state.lattice = new LatticeGraph();
     }
 
-    // Store location & size of UI & dir that was last opened from
-    public static void storeOptions(Frame f, Conf state) throws Exception {
-        File file = new File(optionsFileName);
+    // Store settings: location & size of UI, dir that was last opened from,
+    // language
+    public static void storeOptions(Frame f, Conf state) {
         Properties p = new Properties();
         // restore the frame from 'full screen' first!
         f.setExtendedState(Frame.NORMAL);
@@ -142,9 +144,26 @@ public class Main {
             else
                 p.setProperty("lastOpened" + i, "");
         }
-        BufferedWriter br = new BufferedWriter(new FileWriter(file));
-        p.store(br, "Properties of the user frame");
-        br.close();
+        // store selected language
+        p.setProperty("locale", LocaleHandler.getSelectedLanguage());
+        FileOutputStream out = null;
+        // open stream to settings file
+        try {
+            out = new FileOutputStream(optionsFileName);
+        } catch (FileNotFoundException e) {
+            JOptionPane.showMessageDialog(null, e.getMessage() + " User settings not writable!", "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
+        // store settings in file
+        try {
+            p.store(out, "Settings");
+            out.close();
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(null, e.getMessage() + " Settings could not be written to file!",
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
     }
 
     // Restore location & size of UI & dir that was last opened from
