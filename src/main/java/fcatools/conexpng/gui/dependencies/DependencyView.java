@@ -33,6 +33,7 @@ import fcatools.conexpng.gui.StatusBarPropertyChangeListener;
 import fcatools.conexpng.gui.View;
 import fcatools.conexpng.gui.workers.AssociationWorker;
 import fcatools.conexpng.gui.workers.ImplicationWorker;
+import fcatools.conexpng.io.locale.LocaleHandler;
 import fcatools.conexpng.model.AssociationRule;
 
 public class DependencyView extends View {
@@ -264,7 +265,7 @@ public class DependencyView extends View {
                     }
                     try {
                         assopane.getDocument().insertString(assopane.getDocument().getLength(),
-                                "Associations (Luxenburger Base)\n", header);
+                                LocaleHandler.getString("DependencyView.writeAssociations.assopane.header"), header);
                         i = 0;
                         for (AssociationRule asso : t) {
                             buf = new StringBuffer();
@@ -324,7 +325,7 @@ public class DependencyView extends View {
                     }
                     try {
                         implpane.getDocument().insertString(implpane.getDocument().getLength(),
-                                "Implications (Duquenne-Guigues Base/Stem Base)\n", header);
+                                LocaleHandler.getString("DependencyView.writeImplications.implpane.header"), header);
 
                         for (FCAImplication<String> impl : z) {
                             support = state.context.supportCount(impl.getPremise());

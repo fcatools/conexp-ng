@@ -6,7 +6,7 @@ package fcatools.conexpng.io.locale;
  * @author Torsten Casselt
  */
 public enum SupportedLanguages {
-    EN, DE;
+    en, de;
 
     /**
      * Checks if given language is supported.

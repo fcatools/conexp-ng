@@ -1,5 +1,38 @@
 package fcatools.conexpng.gui;
 
+import static fcatools.conexpng.Util.addMenuItem;
+import static fcatools.conexpng.Util.clamp;
+import static fcatools.conexpng.Util.invokeAction;
+import static fcatools.conexpng.Util.mod;
+import static fcatools.conexpng.Util.showMessageDialog;
+import static javax.swing.KeyStroke.getKeyStroke;
+
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.Set;
+
+import javax.swing.AbstractAction;
+import javax.swing.ActionMap;
+import javax.swing.InputMap;
+import javax.swing.JComponent;
+import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
+
+import com.alee.laf.label.WebLabel;
+import com.alee.laf.menu.WebPopupMenu;
+import com.alee.laf.optionpane.WebOptionPane;
+import com.alee.laf.panel.WebPanel;
+import com.alee.laf.rootpane.WebDialog;
+import com.alee.laf.rootpane.WebFrame;
+import com.alee.laf.scroll.WebScrollPane;
+
 import de.tudresden.inf.tcs.fcaapi.FCAImplication;
 import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
 import de.tudresden.inf.tcs.fcalib.AbstractExpert;
@@ -10,26 +43,8 @@ import fcatools.conexpng.Conf;
 import fcatools.conexpng.Util;
 import fcatools.conexpng.gui.contexteditor.ContextMatrix;
 import fcatools.conexpng.gui.contexteditor.ContextMatrixModel;
+import fcatools.conexpng.io.locale.LocaleHandler;
 import fcatools.conexpng.model.FormalContext;
-
-import javax.swing.*;
-
-import com.alee.laf.label.WebLabel;
-import com.alee.laf.menu.WebPopupMenu;
-import com.alee.laf.optionpane.WebOptionPane;
-import com.alee.laf.panel.WebPanel;
-import com.alee.laf.rootpane.WebDialog;
-import com.alee.laf.rootpane.WebFrame;
-import com.alee.laf.scroll.WebScrollPane;
-
-import java.awt.*;
-import java.awt.event.*;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.util.Set;
-
-import static fcatools.conexpng.Util.*;
-import static javax.swing.KeyStroke.getKeyStroke;
 
 public class AttributeExplorationExpert extends AbstractExpert<String, String, FullObject<String, String>> {
 
@@ -45,7 +60,7 @@ public class AttributeExplorationExpert extends AbstractExpert<String, String, F
 
     @Override
     public void explorationFinished() {
-        showMessageDialog(frame, "Attribute Exploration is finished", false);
+        showMessageDialog(frame, LocaleHandler.getString("AttributeExplorationExpert.explorationFinished"), false);
     }
 
     @Override
@@ -70,10 +85,18 @@ public class AttributeExplorationExpert extends AbstractExpert<String, String, F
     @Override
     public void counterExampleInvalid(FullObject<String, String> counterexample, int reason) {
         if (reason == COUNTEREXAMPLE_INVALID) {
-            showMessageDialog(frame, counterexample.getIdentifier() + " doesn't respect the implication.", true);
+            showMessageDialog(
+                    frame,
+                    counterexample.getIdentifier()
+                            + LocaleHandler.getString("AttributeExplorationExpert.counterExampleInvalid.reasonInvalid"),
+                    true);
         }
         if (reason == COUNTEREXAMPLE_EXISTS) {
-            showMessageDialog(frame, counterexample.getIdentifier() + " already exists.", true);
+            showMessageDialog(
+                    frame,
+                    counterexample.getIdentifier()
+                            + LocaleHandler.getString("AttributeExplorationExpert.counterExampleInvalid.reasonExists"),
+                    true);
         }
 
     }
@@ -95,15 +118,20 @@ public class AttributeExplorationExpert extends AbstractExpert<String, String, F
 
     private void showQuestionDialog(final FCAImplication<String> question) {
 
-        String questionstring = question.getPremise().isEmpty() ? "Is it true, that all objects have the attribute(s) "
-                + getElements(question.getConclusion()) + "?" : "Is it true, that when an object has attribute(s) "
-                + getElements(question.getPremise()) + ", that it also has attribute(s) "
+        String questionstring = question.getPremise().isEmpty() ? LocaleHandler
+                .getString("AttributeExplorationExpert.showQuestionDialog.questionObjHaveAttr")
+                + getElements(question.getConclusion()) + "?" : LocaleHandler
+                .getString("AttributeExplorationExpert.showQuestionDialog.questionObjHasAttr.1")
+                + getElements(question.getPremise())
+                + LocaleHandler.getString("AttributeExplorationExpert.showQuestionDialog.questionObjHasAttr.2")
                 + getElements(question.getConclusion()) + "?";
-        Object[] options = { "Yes", "No", "Stop Attribute Exploration" };
+        Object[] options = { LocaleHandler.getString("yes"), LocaleHandler.getString("no"),
+                LocaleHandler.getString("AttributeExplorationExpert.showQuestionDialog.options.stopAttrExploration") };
         final WebOptionPane optionPane = new WebOptionPane(questionstring, WebOptionPane.QUESTION_MESSAGE,
                 WebOptionPane.YES_NO_CANCEL_OPTION);
         optionPane.setOptions(options);
-        final WebDialog dialog = new WebDialog(frame, "Confirm or reject implication", true);
+        final WebDialog dialog = new WebDialog(frame,
+                LocaleHandler.getString("AttributeExplorationExpert.showQuestionDialog.dialog"), true);
 
         dialog.setContentPane(optionPane);
         optionPane.addPropertyChangeListener(new PropertyChangeListener() {
@@ -118,12 +146,12 @@ public class AttributeExplorationExpert extends AbstractExpert<String, String, F
         Util.centerDialogInsideMainFrame(frame, dialog);
         dialog.setVisible(true);
         String n = (String) optionPane.getValue();
-        if (n.equals("Yes")) {
+        if (n.equals(LocaleHandler.getString("yes"))) {
             QuestionConfirmedAction<String, String, FullObject<String, String>> action = new QuestionConfirmedAction<>();
             action.setQuestion(question);
             action.setContext(context);
             fireExpertAction(action);
-        } else if (n.equals("No")) {
+        } else if (n.equals(LocaleHandler.getString("no"))) {
             requestCounterExample(question);
         } else {
             explorationFinished();
@@ -143,7 +171,8 @@ public class AttributeExplorationExpert extends AbstractExpert<String, String, F
         MiniContextEditor mce = new MiniContextEditor(question);
         final WebOptionPane pane = new WebOptionPane(mce, WebOptionPane.YES_NO_CANCEL_OPTION);
         pane.setMessageType(WebOptionPane.PLAIN_MESSAGE);
-        final WebDialog dialog = new WebDialog(frame, "Provide a counterexample", true);
+        final WebDialog dialog = new WebDialog(frame,
+                LocaleHandler.getString("AttributeExplorationExpert.showCounterExampleDialog.dialog"), true);
         pane.addPropertyChangeListener(new PropertyChangeListener() {
             public void propertyChange(PropertyChangeEvent e) {
                 if (dialog.isVisible() && (e.getSource() == pane)
@@ -153,20 +182,27 @@ public class AttributeExplorationExpert extends AbstractExpert<String, String, F
             }
         });
         dialog.setContentPane(pane);
-        Object[] options = { "Provide counterexample", "Accept implication", "Stop" };
+        Object[] options = {
+                LocaleHandler
+                        .getString("AttributeExplorationExpert.showCounterExampleDialog.options.provideCounterexample"),
+                LocaleHandler
+                        .getString("AttributeExplorationExpert.showCounterExampleDialog.options.acceptImplication"),
+                LocaleHandler.getString("stop") };
         pane.setOptions(options);
         dialog.pack();
         Util.centerDialogInsideMainFrame(frame, dialog);
         dialog.setVisible(true);
         String n = (String) pane.getValue();
         if (n != null)
-            if (n.equals("Provide counterexample")) {
+            if (n.equals(LocaleHandler
+                    .getString("AttributeExplorationExpert.showCounterExampleDialog.options.provideCounterexample"))) {
                 state.saveConf();
                 CounterExampleProvidedAction<String, String, FullObject<String, String>> action = new CounterExampleProvidedAction<>(
                         context, question, mce.getCounterexample());
                 fireExpertAction(action);
                 state.getContextEditorUndoManager().makeRedoable();
-            } else if (n.equals("Accept implication")) {
+            } else if (n.equals(LocaleHandler
+                    .getString("AttributeExplorationExpert.showCounterExampleDialog.options.acceptImplication"))) {
                 QuestionConfirmedAction<String, String, FullObject<String, String>> action = new QuestionConfirmedAction<>();
                 action.setQuestion(question);
                 action.setContext(context);
@@ -214,7 +250,10 @@ public class AttributeExplorationExpert extends AbstractExpert<String, String, F
             scrollPane.setPreferredSize(new Dimension(100, 60));
 
             setLayout(new BorderLayout(0, 10));
-            add(new WebLabel("Implication: " + question), BorderLayout.NORTH);
+            add(new WebLabel(
+                    LocaleHandler
+                            .getString("AttributeExplorationExpert.MiniContextEditor.MiniContextEditor.WabLabel.1")
+                            + question), BorderLayout.NORTH);
             add(scrollPane, BorderLayout.CENTER);
             MouseAdapter mouseAdapter = new MouseAdapter() {
                 public void mouseClicked(MouseEvent e) {
@@ -304,18 +343,26 @@ public class AttributeExplorationExpert extends AbstractExpert<String, String, F
              * addMenuItem(cellPopupMenu, "Copy", new CopyAction());
              * addMenuItem(cellPopupMenu, "Paste", new PasteAction());
              */
-            addMenuItem(cellPopupMenu, "Select all", new SelectAllAction());
+            addMenuItem(cellPopupMenu, LocaleHandler.getString("ContextEditor.createContextMenuActions.selectAll"),
+                    new SelectAllAction());
             // --------
             cellPopupMenu.add(new WebPopupMenu.Separator());
             // --------
-            addMenuItem(cellPopupMenu, "Fill", new FillAction());
-            addMenuItem(cellPopupMenu, "Clear", new ClearAction());
-            addMenuItem(cellPopupMenu, "Invert", new InvertAction());
+            addMenuItem(cellPopupMenu, LocaleHandler.getString("ContextEditor.createContextMenuActions.fill"),
+                    new FillAction());
+            addMenuItem(cellPopupMenu, LocaleHandler.getString("ContextEditor.createContextMenuActions.clear"),
+                    new ClearAction());
+            addMenuItem(cellPopupMenu, LocaleHandler.getString("ContextEditor.createContextMenuActions.invert"),
+                    new InvertAction());
 
             // ------------------------
             // Object cell context menu
             // ------------------------
-            addMenuItem(objectCellPopupMenu, "Rename", new ActionListener() {
+            addMenuItem(
+                    objectCellPopupMenu,
+                    LocaleHandler
+                            .getString("AttributeExplorationExpert.MiniContextEditor.createContextMenuActions.renameRowHeader"),
+                    new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     matrix.renameRowHeader(lastActiveRowIndex);
                 }

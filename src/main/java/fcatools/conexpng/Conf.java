@@ -18,6 +18,7 @@ import fcatools.conexpng.gui.StatusBar;
 import fcatools.conexpng.gui.contexteditor.ContextEditorUndoManager;
 import fcatools.conexpng.gui.lattice.LatticeGraph;
 import fcatools.conexpng.gui.lattice.LatticeViewUndoManager;
+import fcatools.conexpng.io.locale.LocaleHandler;
 import fcatools.conexpng.model.AssociationRule;
 import fcatools.conexpng.model.FormalContext;
 
@@ -237,11 +238,18 @@ public class Conf {
 
     public enum StatusMessage {
 
-        LOADINGFILE("Loading the context"), SAVINGFILE("Saving the context"), CALCULATINGASSOCIATIONS(
-                "Calculating the associations"), CALCULATINGIMPLICATIONS("Calculating the implications"), CALCULATINGCONCEPTS(
-                "Calculating the concepts"), CALCULATINGLATTICE("Calculating the lattice"), CLARIFYINGOBJECTS(
-                "Clarifying objects"), CLARIFYINGATTRIBUTES("Clarifying attributes"), CLARIFYING("Clarifying…"), REDUCINGOBJECTS(
-                "Reducing objects"), REDUCINGATTRIBUTES("Reducing attributes"), REDUCING("Reducing…");
+        LOADINGFILE(LocaleHandler.getString("Conf.StatusMessage.loadingFile")), SAVINGFILE(LocaleHandler
+                .getString("Conf.StatusMessage.savingFile")), CALCULATINGASSOCIATIONS(LocaleHandler
+                .getString("Conf.StatusMessage.calcAsso")), CALCULATINGIMPLICATIONS(LocaleHandler
+                .getString("Conf.StatusMessage.calcImpl")), CALCULATINGCONCEPTS(LocaleHandler
+                .getString("Conf.StatusMessage.calcConcepts")), CALCULATINGLATTICE(LocaleHandler
+                .getString("Conf.StatusMessage.calcLattice")), CLARIFYINGOBJECTS(LocaleHandler
+                .getString("Conf.StatusMessage.clarifyingObj")), CLARIFYINGATTRIBUTES(LocaleHandler
+                .getString("Conf.StatusMessage.clarifyingAttr")), CLARIFYING(LocaleHandler
+                .getString("Conf.StatusMessage.clarifying")), REDUCINGOBJECTS(LocaleHandler
+                .getString("Conf.StatusMessage.reducingObj")), REDUCINGATTRIBUTES(LocaleHandler
+                .getString("Conf.StatusMessage.reducingAttr")), REDUCING(LocaleHandler
+                .getString("Conf.StatusMessage.reducing"));
 
         private StatusMessage(String name) {
             this.name = name;

@@ -9,7 +9,6 @@ import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.util.Locale;
 
 import javax.swing.AbstractAction;
 import javax.swing.JComponent;
@@ -75,7 +74,7 @@ public class MainToolbar extends WebToolBar {
 
         @Override
         public String getDescription() {
-            return "Cex-Files";
+            return LocaleHandler.getString("MainToolbar.cexFilter.getDescription");
         }
     };
 
@@ -92,7 +91,7 @@ public class MainToolbar extends WebToolBar {
 
         @Override
         public String getDescription() {
-            return "Context-Files";
+            return LocaleHandler.getString("MainToolbar.otherFilter.getDescription");
         }
     };
 
@@ -106,30 +105,31 @@ public class MainToolbar extends WebToolBar {
 
         setToolbarStyle(ToolbarStyle.attached);
         setFloatable(false);
-        add(new WebButton(loadIcon("icons/jlfgr/New24.gif")) {
+        WebButton newContextButton = new WebButton(loadIcon("icons/jlfgr/New24.gif")) {
             {
                 setDrawFocus(false);
-                setToolTipText("New context... (CTRL+N)");
+                setToolTipText(LocaleHandler.getString("MainToolbar.MainToolbar.newContextButton.toolTip"));
                 addActionListener(new NewAction());
             }
-        });
+        };
+        add(newContextButton);
         getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
                 KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.CTRL_DOWN_MASK), "newContext");
         getActionMap().put("newContext", new NewAction());
-        WebButton left = new WebButton(loadIcon("icons/jlfgr/Open24.gif")) {
+        WebButton openButtonLeft = new WebButton(loadIcon("icons/jlfgr/Open24.gif")) {
             {
                 setDrawFocus(false);
-                setToolTipText("Open a CEX-file (CTRL+O)");
+                setToolTipText(LocaleHandler.getString("MainToolbar.MainToolbar.openButtonLeft.toolTip"));
                 addActionListener(new OpenAction(true));
             }
         };
         getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
                 KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK), "openContext");
         getActionMap().put("openContext", new OpenAction(true));
-        final WebButton right = new WebButton(loadIcon("icons/arrow_down.png"));
-        right.setDrawFocus(false);
-        right.setToolTipText("Open a previous CEX-file");
-        final WebButtonPopup popup = new WebButtonPopup(right, PopupWay.downRight);
+        final WebButton openButtonRight = new WebButton(loadIcon("icons/arrow_down.png"));
+        openButtonRight.setDrawFocus(false);
+        openButtonRight.setToolTipText(LocaleHandler.getString("MainToolbar.MainToolbar.openButtonRight.toolTip"));
+        final WebButtonPopup popup = new WebButtonPopup(openButtonRight, PopupWay.downRight);
         WebList list = new WebList(state.lastOpened);
         list.setVisibleRowCount(4);
         list.setEditable(false);
@@ -155,16 +155,16 @@ public class MainToolbar extends WebToolBar {
             }
         });
         popup.setContent(new GroupPanel(list));
-        right.addActionListener(new ActionListener() {
+        openButtonRight.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if (popup.isShowing()) {
                     popup.hidePopup();
                 } else {
-                    popup.showPopup(right);
+                    popup.showPopup(openButtonRight);
                 }
             }
         });
-        add(new WebButtonGroup(true, left, right));
+        add(new WebButtonGroup(true, openButtonLeft, openButtonRight));
 
         addSeparator();
         saveButton = new WebButton(loadIcon("icons/jlfgr/Save24.gif")) {
@@ -172,45 +172,48 @@ public class MainToolbar extends WebToolBar {
                 setDrawFocus(false);
                 setEnabled(false);
                 addActionListener(new SaveAction(false, true));
-                setToolTipText("Save the context in a CEX-file (CTRL+S)");
+                setToolTipText(LocaleHandler.getString("MainToolbar.MainToolbar.saveButton.toolTip"));
             }
         };
         add(saveButton);
         getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
                 KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK), "saveContext");
         getActionMap().put("saveContext", new SaveAction(false, true));
-        add(new WebButton(loadIcon("icons/jlfgr/SaveAs24.gif")) {
+        WebButton saveAsButton = new WebButton(loadIcon("icons/jlfgr/SaveAs24.gif")) {
             {
                 setDrawFocus(false);
-                setToolTipText("Save as a CEX-file (CTRL+SHIFT+S)");
+                setToolTipText(LocaleHandler.getString("MainToolbar.MainToolbar.saveAsButton.toolTip"));
                 addActionListener(new SaveAction(true, true));
             }
-        });
+        };
+        add(saveAsButton);
         getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
                 KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK),
                 "saveAsContext");
         getActionMap().put("saveAsContext", new SaveAction(true, true));
 
         addSeparator();
-        add(new WebButton(loadIcon("icons/jlfgr/Import24.gif")) {
+        WebButton importButton = new WebButton(loadIcon("icons/jlfgr/Import24.gif")) {
             {
                 setDrawFocus(false);
                 addActionListener(new OpenAction(false));
-                setToolTipText("Import a context (CTRL+SHIFT+I)");
+                setToolTipText(LocaleHandler.getString("MainToolbar.MainToolbar.importButton.toolTip"));
             }
-        });
+        };
+        add(importButton);
         getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
                 KeyStroke.getKeyStroke(KeyEvent.VK_I, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK),
                 "importContext");
         getActionMap().put("importContext", new OpenAction(false));
-        add(new WebButton(loadIcon("icons/jlfgr/Export24.gif")) {
+        WebButton exportButton = new WebButton(loadIcon("icons/jlfgr/Export24.gif")) {
             {
                 setDrawFocus(false);
-                setToolTipText("Export this context (CTRL+SHIFT+E)");
+                setToolTipText(LocaleHandler.getString("MainToolbar.MainToolbar.exportButton.toolTip"));
                 addActionListener(new SaveAction(true, false));
                 setEnabled(true);
             }
-        });
+        };
+        add(exportButton);
         getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
                 KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK),
                 "exportContext");
@@ -220,7 +223,7 @@ public class MainToolbar extends WebToolBar {
             {
                 setEnabled(false);
                 setDrawFocus(false);
-                setToolTipText("Undo");
+                setToolTipText(LocaleHandler.getString("MainToolbar.MainToolbar.undoButton.toolTip"));
                 addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent arg0) {
@@ -243,7 +246,7 @@ public class MainToolbar extends WebToolBar {
             {
                 setEnabled(false);
                 setDrawFocus(false);
-                setToolTipText("Redo");
+                setToolTipText(LocaleHandler.getString("MainToolbar.MainToolbar.redoButton.toolTip"));
                 addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent arg0) {
@@ -264,21 +267,24 @@ public class MainToolbar extends WebToolBar {
         add(undoButton);
         add(redoButton);
         addSeparator();
-        add(new WebButton(loadIcon("icons/jlfgr/TipOfTheDay24.gif")) {
+        WebButton showNumberOfConceptsButton = new WebButton(loadIcon("icons/jlfgr/TipOfTheDay24.gif")) {
             {
                 setDrawFocus(false);
                 setEnabled(true);
-                setToolTipText("Show the number of concepts (CTRL+SHIFT+C)");
+                setToolTipText(LocaleHandler.getString("MainToolbar.MainToolbar.showNumberOfConceptsButton.toolTip"));
                 addActionListener(new ActionListener() {
 
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        Util.showMessageDialog(mainFrame, "The number of concepts is " + state.getNumberOfConcepts()
+                        Util.showMessageDialog(mainFrame,
+                                LocaleHandler.getString("MainToolbar.MainToolbar.showNumberOfConceptsButton.action")
+                                        + state.getNumberOfConcepts()
                                 + ".", false);
                     }
                 });
             }
-        });
+        };
+        add(showNumberOfConceptsButton);
         getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
                 KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK),
                 "countContext");
@@ -286,13 +292,16 @@ public class MainToolbar extends WebToolBar {
 
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                Util.showMessageDialog(mainFrame, "The number of concepts is " + state.getNumberOfConcepts() + ".",
+                Util.showMessageDialog(
+                        mainFrame,
+                        LocaleHandler.getString("MainToolbar.MainToolbar.showNumberOfConceptsButton.action")
+                                + state.getNumberOfConcepts() + ".",
                         false);
             }
         });
-        add(new WebButton(loadIcon("icons/jlfgr/Replace24.gif")) {
+        WebButton attrExplButton = new WebButton(loadIcon("icons/jlfgr/Replace24.gif")) {
             {
-                setToolTipText("Start Attribute Exploration (CTRL+SHIFT+A)");
+                setToolTipText(LocaleHandler.getString("MainToolbar.MainToolbar.attrExplButton.toolTip"));
                 setDrawFocus(false);
                 addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent arg0) {
@@ -309,7 +318,8 @@ public class MainToolbar extends WebToolBar {
                     }
                 });
             }
-        });
+        };
+        add(attrExplButton);
         getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
                 KeyStroke.getKeyStroke(KeyEvent.VK_A, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK),
                 "aexplorationContext");
@@ -328,10 +338,9 @@ public class MainToolbar extends WebToolBar {
 
         addSeparator();
         // language selector
-        getActionMap().put("changeLanguage", new OpenAction(true));
         final WebButton languageButton = new WebButton(loadIcon("icons/arrow_down.png"));
-        right.setDrawFocus(false);
-        right.setToolTipText("Change language");
+        languageButton.setDrawFocus(false);
+        languageButton.setToolTipText(LocaleHandler.getString("MainToolbar.MainToolbar.languageButton.toolTip"));
         final WebButtonPopup languageButtonPopup = new WebButtonPopup(languageButton, PopupWay.downCenter);
         WebList languageButtonPopupList = new WebList(SupportedLanguages.values());
         languageButtonPopupList.setEditable(false);
@@ -353,40 +362,38 @@ public class MainToolbar extends WebToolBar {
                 if (languageButtonPopup.isShowing()) {
                     languageButtonPopup.hidePopup();
                 } else {
-                    languageButtonPopup.showPopup(right);
+                    languageButtonPopup.showPopup(languageButton);
                 }
             }
         });
         add(languageButton);
 
-        add(new WebButton(loadIcon("icons/jlfgr/About24.gif")) {
+        WebButton aboutButton = new WebButton(loadIcon("icons/jlfgr/About24.gif")) {
             {
                 setDrawFocus(false);
                 setEnabled(true);
-                setToolTipText("About");
+                setToolTipText(LocaleHandler.getString("MainToolbar.MainToolbar.aboutButton.toolTip"));
                 addActionListener(new ActionListener() {
 
                     @Override
                     public void actionPerformed(ActionEvent arg0) {
                         Util.showMessageDialog(
                                 mainFrame,
-                                "ConExp-NG is a simple GUI-centric tool for the study & research of Formal Concept Analysis (FCA)\n"
-                                        + "that allows you to create formal contexts, draw concept lattices and explore dependencies between attributes.\n"
-                                        + "ConExp-NG, whose name stands for Concept Explorer Next Generation, is not an entirely original creation\n"
-                                        + "but a modern reimplementation of a similar tool by the name of Concept Explorer with a focus on usability,\n"
-                                        + "maintainability and extensibility. The documentation is located at: https://github.com/fcatools/conexp-ng/wiki.",
+                                LocaleHandler.getString("MainToolbar.MainToolbar.aboutButton.aboutText"),
                                 false);
                     }
                 });
             }
-        });
-        add(new WebButton(loadIcon("icons/jlfgr/Help24.gif")) {
+        };
+        add(aboutButton);
+        WebButton helpButton = new WebButton(loadIcon("icons/jlfgr/Help24.gif")) {
             {
                 setDrawFocus(false);
                 setEnabled(true);
-                setToolTipText("Help");
+                setToolTipText(LocaleHandler.getString("MainToolbar.MainToolbar.helpButton.toolTip"));
             }
-        });
+        };
+        add(helpButton);
         // getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
         // KeyEvent.VK_F1, "helpContext");
         // getActionMap().put("helpContext", new HelpAction());
@@ -496,7 +503,8 @@ public class MainToolbar extends WebToolBar {
                 final WebFileChooser fc = new WebFileChooser();
                 fc.setCurrentDirectory(state.filePath.substring(0,
                         state.filePath.lastIndexOf(System.getProperty("file.separator"))));
-                final WebDialog dialog = new WebDialog(mainFrame, "Save file as", true);
+                final WebDialog dialog = new WebDialog(mainFrame,
+                        LocaleHandler.getString("MainToolbar.SaveAction.actionPerformed.dialog"), true);
                 dialog.setContentPane(fc);
                 fc.setMultiSelectionEnabled(false);
                 fc.setAcceptAllFileFilterUsed(false);
@@ -562,9 +570,9 @@ public class MainToolbar extends WebToolBar {
                 } else if (ucd.isCancel())
                     return;
             }
-            System.out.println(Locale.getDefault());
             final WebFileChooser fc = new WebFileChooser(state.filePath);
-            final WebDialog dialog = new WebDialog(mainFrame, "Open a file", true);
+            final WebDialog dialog = new WebDialog(mainFrame,
+                    LocaleHandler.getString("MainToolbar.OpenAction.actionPerformed.dialog"), true);
 
             fc.setDialogType(WebFileChooser.OPEN_DIALOG);
             fc.addActionListener(new ActionListener() {
@@ -644,11 +652,14 @@ public class MainToolbar extends WebToolBar {
             obj.setValue(4);
 
             WebComponentPanel panel = new WebComponentPanel();
-            panel.addElement(new GridPanel(new WebLabel("#Attributes:"), attr));
-            panel.addElement(new GridPanel(new WebLabel("#Objects:"), obj));
+            panel.addElement(new GridPanel(new WebLabel(LocaleHandler
+                    .getString("MainToolbar.NewAction.actionPerformed.panel.WebLabel.1")), attr));
+            panel.addElement(new GridPanel(new WebLabel(LocaleHandler
+                    .getString("MainToolbar.NewAction.actionPerformed.panel.WebLabel.2")), obj));
             final WebOptionPane pane = new WebOptionPane(panel, WebOptionPane.OK_OPTION);
             pane.setMessageType(WebOptionPane.PLAIN_MESSAGE);
-            final WebDialog dialog = new WebDialog(mainFrame, "New Context", true);
+            final WebDialog dialog = new WebDialog(mainFrame,
+                    LocaleHandler.getString("MainToolbar.NewAction.actionPerformed.dialog"), true);
             pane.addPropertyChangeListener(new PropertyChangeListener() {
                 public void propertyChange(PropertyChangeEvent e) {
                     if (dialog.isVisible() && (e.getSource() == pane)
@@ -658,7 +669,7 @@ public class MainToolbar extends WebToolBar {
                 }
             });
             dialog.setContentPane(pane);
-            Object[] options = { "Okay" };
+            Object[] options = { LocaleHandler.getString("ok") };
             pane.setOptions(options);
             dialog.pack();
             Util.centerDialogInsideMainFrame(mainFrame, dialog);

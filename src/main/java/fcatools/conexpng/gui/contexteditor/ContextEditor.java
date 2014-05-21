@@ -41,6 +41,7 @@ import fcatools.conexpng.ContextChangeEvents;
 import fcatools.conexpng.gui.StatusBarPropertyChangeListener;
 import fcatools.conexpng.gui.View;
 import fcatools.conexpng.gui.workers.ClarificationReductionWorker;
+import fcatools.conexpng.io.locale.LocaleHandler;
 
 /**
  * The class responsible for displaying and interacting with ConExpNG's context
@@ -266,30 +267,38 @@ public class ContextEditor extends View {
     private void createButtonActions() {
         ActionMap am = matrix.getActionMap();
         WebButtonGroup group;
-        group = new WebButtonGroup(WebButtonGroup.VERTICAL, true, createButton("addObject", "Add Object",
+        group = new WebButtonGroup(WebButtonGroup.VERTICAL, true, createButton("addObject",
+                LocaleHandler.getString("ContextEditor.createButtonActions.addObject"),
                 "icons/context editor/add_object.png", am.get("addObjectAtEnd")), createButton("clarifyObjects",
-                "Clarify Objects", "icons/context editor/clarify_objects.png", am.get("clarifyObjects")), createButton(
-                "reduceObjects", "Reduce Objects", "icons/context editor/reduce_objects.png", am.get("reduceObjects")));
+                LocaleHandler.getString("ContextEditor.createButtonActions.clarifyObjects"),
+                "icons/context editor/clarify_objects.png", am.get("clarifyObjects")), createButton("reduceObjects",
+                LocaleHandler.getString("ContextEditor.createButtonActions.reduceObjects"),
+                "icons/context editor/reduce_objects.png", am.get("reduceObjects")));
         group.setButtonsDrawFocus(false);
         toolbar.add(group);
         toolbar.addSeparator();
-        group = new WebButtonGroup(WebButtonGroup.VERTICAL, true, createButton("addAttribute", "Add Attribute",
+        group = new WebButtonGroup(WebButtonGroup.VERTICAL, true, createButton("addAttribute",
+                LocaleHandler.getString("ContextEditor.createButtonActions.addAttribute"),
                 "icons/context editor/add_attribute.png", am.get("addAttributeAtEnd")), createButton(
-                "clarifyAttributes", "Clarify Attributes", "icons/context editor/clarify_attributes.png",
-                am.get("clarifyAttributes")), createButton("reduceAttributes", "Reduce Attributes",
+                "clarifyAttributes", LocaleHandler.getString("ContextEditor.createButtonActions.clarifyAttributes"),
+                "icons/context editor/clarify_attributes.png", am.get("clarifyAttributes")), createButton(
+                "reduceAttributes", LocaleHandler.getString("ContextEditor.createButtonActions.reduceAttributes"),
                 "icons/context editor/reduce_attributes.png", am.get("reduceAttributes")));
         group.setButtonsDrawFocus(false);
         toolbar.add(group);
         toolbar.addSeparator();
-        group = new WebButtonGroup(WebButtonGroup.VERTICAL, true, createButton("reduceContext", "Reduce Context",
+        group = new WebButtonGroup(WebButtonGroup.VERTICAL, true, createButton("reduceContext",
+                LocaleHandler.getString("ContextEditor.createButtonActions.reduceContext"),
                 "icons/context editor/reduce_context.png", am.get("reduce")), createButton("transposeContext",
-                "Transpose Context", "icons/context editor/transpose.png", am.get("transpose")));
+                LocaleHandler.getString("ContextEditor.createButtonActions.transposeContext"),
+                "icons/context editor/transpose.png", am.get("transpose")));
         group.setButtonsDrawFocus(false);
         toolbar.add(group);
         toolbar.addSeparator();
         group = new WebButtonGroup(WebButtonGroup.VERTICAL, false, createToggleButton("compactMatrix",
-                "Compact Matrix", "icons/context editor/compact.png", (ItemListener) am.get("compact")),
-                createToggleButton("showArrowRelations", "Show Arrow Relations",
+                LocaleHandler.getString("ContextEditor.createButtonActions.compactMatrix"),
+                "icons/context editor/compact.png", (ItemListener) am.get("compact")), createToggleButton(
+                "showArrowRelations", LocaleHandler.getString("ContextEditor.createButtonActions.showArrowRelations"),
                         "icons/context editor/show_arrow_relations.png", null) // TODO
         );
         group.setButtonsDrawFocus(false);
@@ -301,28 +310,50 @@ public class ContextEditor extends View {
         // ------------------------
         // Inner cells context menu
         // ------------------------
-        addMenuItem(cellPopupMenu, "Select all", am.get("selectAll"));
+        addMenuItem(cellPopupMenu, LocaleHandler.getString("ContextEditor.createContextMenuActions.selectAll"),
+                am.get("selectAll"));
         cellPopupMenu.add(new WebPopupMenu.Separator());
-        addMenuItem(cellPopupMenu, "Fill", am.get("fill"));
-        addMenuItem(cellPopupMenu, "Clear", am.get("clear"));
-        addMenuItem(cellPopupMenu, "Invert", am.get("invert"));
+        addMenuItem(cellPopupMenu, LocaleHandler.getString("ContextEditor.createContextMenuActions.fill"),
+                am.get("fill"));
+        addMenuItem(cellPopupMenu, LocaleHandler.getString("ContextEditor.createContextMenuActions.clear"),
+                am.get("clear"));
+        addMenuItem(cellPopupMenu, LocaleHandler.getString("ContextEditor.createContextMenuActions.invert"),
+                am.get("invert"));
         cellPopupMenu.add(new WebPopupMenu.Separator());
-        addMenuItem(cellPopupMenu, "Remove attribute(s)", am.get("removeSelectedAttributes"));
-        addMenuItem(cellPopupMenu, "Remove object(s)", am.get("removeSelectedObjects"));
+        addMenuItem(cellPopupMenu,
+                LocaleHandler.getString("ContextEditor.createContextMenuActions.removeSelectedAttributes"),
+                am.get("removeSelectedAttributes"));
+        addMenuItem(cellPopupMenu,
+                LocaleHandler.getString("ContextEditor.createContextMenuActions.removeSelectedObjects"),
+                am.get("removeSelectedObjects"));
         // ------------------------
         // Object cell context menu
         // ------------------------
-        addMenuItem(objectCellPopupMenu, "Rename", am.get("renameObject"));
-        addMenuItem(objectCellPopupMenu, "Remove", am.get("removeObject"));
-        addMenuItem(objectCellPopupMenu, "Add above", am.get("addObjectAbove"));
-        addMenuItem(objectCellPopupMenu, "Add below", am.get("addObjectBelow"));
+        addMenuItem(objectCellPopupMenu,
+                LocaleHandler.getString("ContextEditor.createContextMenuActions.renameObject"), am.get("renameObject"));
+        addMenuItem(objectCellPopupMenu,
+                LocaleHandler.getString("ContextEditor.createContextMenuActions.removeObject"), am.get("removeObject"));
+        addMenuItem(objectCellPopupMenu,
+                LocaleHandler.getString("ContextEditor.createContextMenuActions.addObjectAbove"),
+                am.get("addObjectAbove"));
+        addMenuItem(objectCellPopupMenu,
+                LocaleHandler.getString("ContextEditor.createContextMenuActions.addObjectBelow"),
+                am.get("addObjectBelow"));
         // ---------------------------
         // Attribute cell context menu
         // ---------------------------
-        addMenuItem(attributeCellPopupMenu, "Rename", am.get("renameAttribute"));
-        addMenuItem(attributeCellPopupMenu, "Remove", am.get("removeAttribute"));
-        addMenuItem(attributeCellPopupMenu, "Add left", am.get("addAttributeLeft"));
-        addMenuItem(attributeCellPopupMenu, "Add right", am.get("addAttributeRight"));
+        addMenuItem(attributeCellPopupMenu,
+                LocaleHandler.getString("ContextEditor.createContextMenuActions.renameAttribute"),
+                am.get("renameAttribute"));
+        addMenuItem(attributeCellPopupMenu,
+                LocaleHandler.getString("ContextEditor.createContextMenuActions.removeAttribute"),
+                am.get("removeAttribute"));
+        addMenuItem(attributeCellPopupMenu,
+                LocaleHandler.getString("ContextEditor.createContextMenuActions.addAttributeLeft"),
+                am.get("addAttributeLeft"));
+        addMenuItem(attributeCellPopupMenu,
+                LocaleHandler.getString("ContextEditor.createContextMenuActions.addAttributeRight"),
+                am.get("addAttributeRight"));
     }
 
     private void createMouseActions() {

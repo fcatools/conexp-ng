@@ -42,6 +42,7 @@ import fcatools.conexpng.gui.contexteditor.ContextEditorUndoManager;
 import fcatools.conexpng.gui.dependencies.DependencyView;
 import fcatools.conexpng.gui.lattice.LatticeView;
 import fcatools.conexpng.gui.lattice.LatticeViewUndoManager;
+import fcatools.conexpng.io.locale.LocaleHandler;
 
 // TODO: The code needs to be tidied up drastically
 public class MainFrame extends WebFrame {
@@ -126,10 +127,15 @@ public class MainFrame extends WebFrame {
         associationView = new DependencyView(state);
         associationView.setVisible(false);
 
-        addTab(tabPane, contextView, "icons/tabs/context_editor.png", "Context", "Edit Context (CTRL + E)", 0);
-        addTab(tabPane, latticeView, "icons/tabs/lattice_editor.png", "Lattice", "Show Lattice (CTRL + L)", 1);
-        addTab(tabPane, associationView, "icons/tabs/dependencies_editor.png", "Dependencies",
-                "Calculate Dependencies (CTRL + D)", 2);
+        addTab(tabPane, contextView, "icons/tabs/context_editor.png",
+                LocaleHandler.getString("MainFrame.MainFrame.tab.0.title"),
+                LocaleHandler.getString("MainFrame.MainFrame.tab.0.toolTip"), 0);
+        addTab(tabPane, latticeView, "icons/tabs/lattice_editor.png",
+                LocaleHandler.getString("MainFrame.MainFrame.tab.1.title"),
+                LocaleHandler.getString("MainFrame.MainFrame.tab.1.toolTip"), 1);
+        addTab(tabPane, associationView, "icons/tabs/dependencies_editor.png",
+                LocaleHandler.getString("MainFrame.MainFrame.tab.2.title"),
+                LocaleHandler.getString("MainFrame.MainFrame.tab.2.toolTip"), 2);
 
         statusBar = new StatusBar();
         statusBar.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, new Color(140, 140, 140)));
@@ -150,7 +156,7 @@ public class MainFrame extends WebFrame {
                     showLatticeEditor();
                     break;
                 case 2:
-                    showDependeciesEditor();
+                    showDependenciesEditor();
                     break;
                 }
             }
@@ -164,7 +170,7 @@ public class MainFrame extends WebFrame {
             showLatticeEditor();
             break;
         case 2:
-            showDependeciesEditor();
+            showDependenciesEditor();
             break;
         }
     }
@@ -178,7 +184,7 @@ public class MainFrame extends WebFrame {
         state.guiConf.lastTab = 0;
         removeOldView();
         contextView.setVisible(true);
-        viewTitleLabel.setText("Context Editor" + MARGIN);
+        viewTitleLabel.setText(LocaleHandler.getString("MainFrame.showContextEditor.viewTitleLabel") + MARGIN);
         mainPanel.add(contextView, BorderLayout.CENTER);
         validate();
         revalidate();
@@ -194,18 +200,18 @@ public class MainFrame extends WebFrame {
         state.guiConf.lastTab = 1;
         removeOldView();
         latticeView.setVisible(true);
-        viewTitleLabel.setText("Lattice Editor" + MARGIN);
+        viewTitleLabel.setText(LocaleHandler.getString("MainFrame.showLatticeEditor.viewTitleLabel") + MARGIN);
         mainPanel.add(latticeView, BorderLayout.CENTER);
         validate();
         revalidate();
         repaint();
     }
 
-    public void showDependeciesEditor() {
+    public void showDependenciesEditor() {
         state.guiConf.lastTab = 2;
         removeOldView();
         associationView.setVisible(true);
-        viewTitleLabel.setText("Dependencies Editor" + MARGIN);
+        viewTitleLabel.setText(LocaleHandler.getString("MainFrame.showDependenciesEditor.viewTitleLabel") + MARGIN);
         mainPanel.add(associationView, BorderLayout.CENTER);
         validate();
         revalidate();
@@ -295,9 +301,13 @@ public class MainFrame extends WebFrame {
         private boolean no;
 
         public StillCalculatingDialog() {
-            super(MainFrame.this, "Still calculating", true);
-            final WebOptionPane pane = new WebOptionPane("Some calculations haven't finished now. Do you want to wait?");
-            Object[] options = { "I will wait", "I don't care" };
+            super(MainFrame.this, LocaleHandler
+                    .getString("MainFrame.StillCalculatingDialog.StillCalculatingDialog.title"), true);
+            final WebOptionPane pane = new WebOptionPane(
+                    LocaleHandler.getString("MainFrame.StillCalculatingDialog.StillCalculatingDialog.pane"));
+            Object[] options = {
+                    LocaleHandler.getString("MainFrame.StillCalculatingDialog.StillCalculatingDialog.options.wait"),
+                    LocaleHandler.getString("MainFrame.StillCalculatingDialog.StillCalculatingDialog.options.dontCare") };
             pane.setOptions(options);
             pane.setMessageType(WebOptionPane.INFORMATION_MESSAGE);
             pane.addPropertyChangeListener(new PropertyChangeListener() {
@@ -315,7 +325,8 @@ public class MainFrame extends WebFrame {
             Util.centerDialogInsideMainFrame(MainFrame.this, this);
             setVisible(true);
             String n = (String) pane.getValue();
-            if (n.equals("I will wait")) {
+            if (n.equals(LocaleHandler
+                    .getString("MainFrame.StillCalculatingDialog.StillCalculatingDialog.options.wait"))) {
                 yes = true;
                 no = false;
             } else {
@@ -339,9 +350,10 @@ public class MainFrame extends WebFrame {
         private boolean no;
 
         public OverwritingFileDialog(File file) {
-            super(MainFrame.this, "Overwriting existing file?", true);
-            Object[] options = { "Yes", "No" };
-            final WebOptionPane optionPane = new WebOptionPane("Do you really want to overwrite " + file.getName()
+            super(MainFrame.this, LocaleHandler.getString("MainFrame.OverwritingFileDialog.title"), true);
+            Object[] options = { LocaleHandler.getString("yes"), LocaleHandler.getString("no") };
+            final WebOptionPane optionPane = new WebOptionPane(
+                    LocaleHandler.getString("MainFrame.OverwritingFileDialog.optionPane") + file.getName()
                     + "?", WebOptionPane.QUESTION_MESSAGE, WebOptionPane.YES_NO_OPTION);
             optionPane.setOptions(options);
 
@@ -359,10 +371,10 @@ public class MainFrame extends WebFrame {
             Util.centerDialogInsideMainFrame(MainFrame.this, this);
             setVisible(true);
             String n = (String) optionPane.getValue();
-            if (n.equals("Yes")) {
+            if (n.equals(LocaleHandler.getString("yes"))) {
                 yes = true;
                 no = false;
-            } else if (n.equals("No")) {
+            } else if (n.equals(LocaleHandler.getString("no"))) {
                 no = true;
                 yes = false;
             }
@@ -385,9 +397,12 @@ public class MainFrame extends WebFrame {
         private boolean no;
 
         public UnsavedChangesDialog() {
-            super(MainFrame.this, "Context was modified", true);
-            Object[] options = { "Yes", "No", "Cancel" };
-            final WebOptionPane optionPane = new WebOptionPane("Do want to save the changes you made to the context?",
+            super(MainFrame.this, LocaleHandler.getString("MainFrame.UnsavedChangesDialog.UnsavedChangesDialog.title"),
+                    true);
+            Object[] options = { LocaleHandler.getString("yes"), LocaleHandler.getString("no"),
+                    LocaleHandler.getString("cancel") };
+            final WebOptionPane optionPane = new WebOptionPane(
+                    LocaleHandler.getString("MainFrame.UnsavedChangesDialog.UnsavedChangesDialog.optionPane"),
                     WebOptionPane.QUESTION_MESSAGE, WebOptionPane.YES_NO_CANCEL_OPTION);
             optionPane.setOptions(options);
 
@@ -404,15 +419,15 @@ public class MainFrame extends WebFrame {
             Util.centerDialogInsideMainFrame(MainFrame.this, this);
             setVisible(true);
             String n = (String) optionPane.getValue();
-            if (n.equals("Yes")) {
+            if (n.equals(LocaleHandler.getString("yes"))) {
                 yes = true;
                 no = false;
                 cancel = false;
-            } else if (n.equals("Cancel")) {
+            } else if (n.equals(LocaleHandler.getString("cancel"))) {
                 cancel = true;
                 no = false;
                 yes = false;
-            } else if (n.equals("No")) {
+            } else if (n.equals(LocaleHandler.getString("no"))) {
                 cancel = false;
                 no = true;
                 yes = false;

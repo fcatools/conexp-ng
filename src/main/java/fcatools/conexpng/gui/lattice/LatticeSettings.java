@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
+
 import com.alee.extended.panel.WebAccordion;
 import com.alee.laf.checkbox.WebCheckBox;
 import com.alee.laf.label.WebLabel;
@@ -16,6 +17,7 @@ import com.alee.laf.scroll.WebScrollPane;
 
 import de.tudresden.inf.tcs.fcalib.FullObject;
 import fcatools.conexpng.Conf;
+import fcatools.conexpng.io.locale.LocaleHandler;
 import fcatools.conexpng.model.FormalContext;
 
 /**
@@ -38,9 +40,9 @@ public class LatticeSettings extends WebAccordion {
         this.context = state.context;
         this.attributeCheckBoxes = new ArrayList<>();
         this.objectCheckBoxes = new ArrayList<>();
-        this.addPane(0, "Lattice", getLatticePanel());
-        this.addPane(1, "Objects", getObjectPanel());
-        this.addPane(2, "Attributes", getAttributePanel());
+        this.addPane(0, LocaleHandler.getString("LatticeSettings.LatticeSettings.pane.0"), getLatticePanel());
+        this.addPane(1, LocaleHandler.getString("LatticeSettings.LatticeSettings.pane.1"), getObjectPanel());
+        this.addPane(2, LocaleHandler.getString("LatticeSettings.LatticeSettings.pane.2"), getAttributePanel());
     }
 
     private WebScrollPane getLatticePanel() {
@@ -59,10 +61,12 @@ public class LatticeSettings extends WebAccordion {
 
         gbc.gridx = 0;
         gbc.gridy++;
-        panel.add(new WebLabel("Edges:"), gbc);
-        final WebRadioButton noneEdges = new WebRadioButton("none");
+        panel.add(new WebLabel(LocaleHandler.getString("LatticeSettings.getLatticePanel.WebLabel.1")), gbc);
+        final WebRadioButton noneEdges = new WebRadioButton(
+                LocaleHandler.getString("LatticeSettings.getLatticePanel.noneEdges"));
         gbc.gridy++;
-        final WebRadioButton showEdges = new WebRadioButton("show");
+        final WebRadioButton showEdges = new WebRadioButton(
+                LocaleHandler.getString("LatticeSettings.getLatticePanel.showEdges"));
         showEdges.setSelected(true);
         noneEdges.addActionListener(new ActionListener() {
 
@@ -100,13 +104,14 @@ public class LatticeSettings extends WebAccordion {
         gbo.anchor = GridBagConstraints.WEST;
         gbo.gridx = 0;
         gbo.gridy = 1;
-        panelObjects.add(new WebLabel("Objects:"), gbo);
+        panelObjects
+                .add(new WebLabel(LocaleHandler.getString("LatticeSettings.getLatticeObjectPanel.WebLabel.1")), gbo);
         gbo.gridy = 2;
         final WebRadioButton noneObjects = new WebRadioButton();
-        noneObjects.setText("none");
+        noneObjects.setText(LocaleHandler.getString("LatticeSettings.getLatticeObjectPanel.noneObjects"));
 
         final WebRadioButton labelsObjects = new WebRadioButton();
-        labelsObjects.setText("labels");
+        labelsObjects.setText(LocaleHandler.getString("LatticeSettings.getLatticeObjectPanel.labelsObjects"));
         labelsObjects.setSelected(true);
         state.guiConf.showObjectLabel = true;
 
@@ -143,12 +148,13 @@ public class LatticeSettings extends WebAccordion {
         gba.anchor = GridBagConstraints.WEST;
         gba.gridx = 0;
         gba.gridy = 1;
-        panelAttributes.add(new WebLabel("Attributes:"), gba);
+        panelAttributes.add(new WebLabel(LocaleHandler.getString("LatticeSettings.getLatticeAttrPanel.WebLabel.1")),
+                gba);
         gba.gridy = 2;
         final WebRadioButton noneAttributes = new WebRadioButton();
-        noneAttributes.setText("none");
+        noneAttributes.setText(LocaleHandler.getString("LatticeSettings.getLatticeAttrPanel.noneAttributes"));
         final WebRadioButton labelsAttributes = new WebRadioButton();
-        labelsAttributes.setText("labels");
+        labelsAttributes.setText(LocaleHandler.getString("LatticeSettings.getLatticeAttrPanel.labelsAttributes"));
         labelsAttributes.setSelected(true);
         state.guiConf.showAttributLabel = true;
 
@@ -251,9 +257,9 @@ public class LatticeSettings extends WebAccordion {
         this.context = state.context;
         this.removePane(1);
         objectCheckBoxes.clear();
-        this.addPane(1, "Objects", getObjectPanel());
+        this.addPane(1, LocaleHandler.getString("LatticeSettings.LatticeSettings.pane.1"), getObjectPanel());
         this.removePane(2);
         attributeCheckBoxes.clear();
-        this.addPane(2, "Attributes", getAttributePanel());
+        this.addPane(2, LocaleHandler.getString("LatticeSettings.LatticeSettings.pane.2"), getAttributePanel());
     }
 }

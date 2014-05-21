@@ -1,6 +1,19 @@
 package fcatools.conexpng;
 
-import javax.swing.*;
+import java.awt.Dimension;
+import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.io.FileNotFoundException;
+import java.net.URL;
+
+import javax.swing.Action;
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
+import javax.swing.JOptionPane;
 
 import com.alee.laf.button.WebButton;
 import com.alee.laf.button.WebToggleButton;
@@ -10,14 +23,7 @@ import com.alee.laf.optionpane.WebOptionPane;
 import com.alee.laf.rootpane.WebDialog;
 import com.alee.laf.rootpane.WebFrame;
 
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.io.FileNotFoundException;
-import java.net.URL;
+import fcatools.conexpng.io.locale.LocaleHandler;
 
 public class Util {
 
@@ -78,18 +84,21 @@ public class Util {
 
     public static void handleIOExceptions(WebFrame parent, Exception ex, String path) {
         if (ex instanceof FileNotFoundException) {
-            showMessageDialog(parent, "Can not find this file: " + path, true);
+            showMessageDialog(parent, LocaleHandler.getString("Util.handleIOExceptions.FileNotFoundException") + path,
+                    true);
         } else {
-            showMessageDialog(parent, "The file seems to be corrupt: " + ex.getMessage(), true);
+            showMessageDialog(parent,
+                    LocaleHandler.getString("Util.handleIOExceptions.otherExceptions") + ex.getMessage(), true);
         }
     }
 
     public static void showMessageDialog(WebFrame parent, String message, boolean error) {
         final WebOptionPane pane = new WebOptionPane(message);
-        Object[] options = { "Okay" };
+        Object[] options = { LocaleHandler.getString("ok") };
         pane.setOptions(options);
         pane.setMessageType(error ? WebOptionPane.ERROR_MESSAGE : WebOptionPane.INFORMATION_MESSAGE);
-        final WebDialog dialog = new WebDialog(parent, error ? "Error" : "Message");
+        final WebDialog dialog = new WebDialog(parent, error ? LocaleHandler.getString("error")
+                : LocaleHandler.getString("info"));
         pane.addPropertyChangeListener(new PropertyChangeListener() {
             public void propertyChange(PropertyChangeEvent e) {
                 if (dialog.isVisible() && (e.getSource() == pane)

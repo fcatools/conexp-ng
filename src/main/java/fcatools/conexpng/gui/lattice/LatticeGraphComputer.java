@@ -15,6 +15,7 @@ import de.tudresden.inf.tcs.fcalib.FullObject;
 import de.tudresden.inf.tcs.fcalib.utils.ListSet;
 import fcatools.conexpng.gui.lattice.algorithms.ILatticeGraphAlgorithm;
 import fcatools.conexpng.gui.lattice.algorithms.TrivialLatticeGraphAlgorithm;
+import fcatools.conexpng.io.locale.LocaleHandler;
 
 /**
  * This class representing the conncetion between the view and the lattice
@@ -45,7 +46,7 @@ public class LatticeGraphComputer {
 
     public void chooseAlgorithm(String name) {
         if (!algorithms.containsKey(name)) {
-            System.err.println("The chosen algorithm doesn't exists!");
+            System.err.println(LocaleHandler.getString("LatticeGraphComputer.chooseAlgorithm.error"));
         } else {
             usedAlgorithm = algorithms.get(name);
         }

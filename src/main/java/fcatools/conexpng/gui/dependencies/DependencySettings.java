@@ -1,6 +1,23 @@
 package fcatools.conexpng.gui.dependencies;
 
-import javax.swing.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.RenderingHints;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.ButtonGroup;
+import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -11,13 +28,7 @@ import com.alee.laf.slider.WebSlider;
 import com.alee.laf.text.WebTextField;
 
 import fcatools.conexpng.GUIConf;
-
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
+import fcatools.conexpng.io.locale.LocaleHandler;
 
 public class DependencySettings extends JPanel {
 
@@ -54,13 +65,15 @@ public class DependencySettings extends JPanel {
             g.setPaint(gray);
             g.fillArc(0, 5, 140, 140, 0, 360);
             g.setPaint(gray.darker().darker());
-            g.drawString("#Association rules = " + all, 0, 165);
+            g.drawString(LocaleHandler.getString("DependencySettings.DependencySettings.piechart.paint.drawString.1")
+                    + all, 0, 165);
 
             Color green = new Color(150, 220, 150);
             g.setColor(green);
             g.fillArc(0, 5, 140, 140, 90, degree);
             g.setColor(green.darker().darker());
-            g.drawString("#With support = " + current, 0, 180);
+            g.drawString(LocaleHandler.getString("DependencySettings.DependencySettings.piechart.paint.drawString.2")
+                    + current, 0, 180);
         }
     };
 
@@ -84,7 +97,7 @@ public class DependencySettings extends JPanel {
         gbc.insets = new Insets(10, 5, 0, 0);
         gbc.gridx = 0;
         gbc.gridy = 0;
-        WebLabel title = new WebLabel("Associations Settings");
+        WebLabel title = new WebLabel(LocaleHandler.getString("DependencySettings.DependencySettings.title"));
         add(title, gbc);
         gbc.gridy = 1;
         gbc.anchor = GridBagConstraints.WEST;
@@ -110,19 +123,19 @@ public class DependencySettings extends JPanel {
         piechart.setPreferredSize(new Dimension(150, 200));
         add(piechart, gbc);
         gbc.gridy = 6;
-        add(new WebLabel("Together with Implications"), gbc);
+        add(new WebLabel(LocaleHandler.getString("DependencySettings.DependencySettings.WebLabel.1")), gbc);
         gbc.gridy = 7;
-        add(new WebLabel("Sorting by:"), gbc);
+        add(new WebLabel(LocaleHandler.getString("DependencySettings.DependencySettings.WebLabel.2")), gbc);
         Action sortAction = new SortAction();
         WebRadioButton lexicalSorting = new WebRadioButton();
         lexicalSorting.setAction(sortAction);
-        lexicalSorting.setText("Lexical order");
+        lexicalSorting.setText(LocaleHandler.getString("DependencySettings.DependencySettings.lexicalSorting"));
         lexicalSorting.setMnemonic(KeyEvent.VK_L);
         lexicalSorting.setActionCommand("LexicalOrder");
 
         WebRadioButton supportSorting = new WebRadioButton();
         supportSorting.setAction(sortAction);
-        supportSorting.setText("Support");
+        supportSorting.setText(LocaleHandler.getString("DependencySettings.DependencySettings.supportSorting"));
         supportSorting.setMnemonic(KeyEvent.VK_S);
         supportSorting.setActionCommand("Support");
         if (state.lexsorting)

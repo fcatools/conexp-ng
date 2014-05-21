@@ -5,6 +5,7 @@ import java.util.Set;
 import de.tudresden.inf.tcs.fcaapi.Concept;
 import de.tudresden.inf.tcs.fcalib.FullObject;
 import de.tudresden.inf.tcs.fcalib.utils.ListSet;
+import fcatools.conexpng.io.locale.LocaleHandler;
 
 /**
  * This class implemented the Concept interface of the fcalib.
@@ -32,6 +33,7 @@ public class LatticeConcept implements Concept<String, FullObject<String, String
 
     @Override
     public String toString() {
-        return "Objects: " + extent + "\nAttributes: " + intent + "\n";
+        return LocaleHandler.getString("LatticeConcept.toString.objects") + extent + "\n"
+                + LocaleHandler.getString("LatticeConcept.toString.attributes") + intent + "\n";
     }
 }

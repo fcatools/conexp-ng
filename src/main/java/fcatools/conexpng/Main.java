@@ -151,7 +151,9 @@ public class Main {
         try {
             out = new FileOutputStream(optionsFileName);
         } catch (FileNotFoundException e) {
-            JOptionPane.showMessageDialog(null, e.getMessage() + " User settings not writable!", "Error",
+            JOptionPane.showMessageDialog(null,
+                    e.getMessage() + LocaleHandler.getString("Main.storeOptions.streamError"),
+                    LocaleHandler.getString("error"),
                     JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
         }
@@ -160,8 +162,9 @@ public class Main {
             p.store(out, "Settings");
             out.close();
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(null, e.getMessage() + " Settings could not be written to file!",
-                    "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null,
+                    e.getMessage() + LocaleHandler.getString("Main.storeOptions.storeError"),
+                    LocaleHandler.getString("error"), JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
         }
     }

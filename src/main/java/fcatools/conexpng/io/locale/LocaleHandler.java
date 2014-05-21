@@ -45,7 +45,7 @@ public class LocaleHandler {
 				in.close();
 			} catch (IOException e) {
 				JOptionPane.showMessageDialog(null, e.getMessage()
-						+ " Fall back to defaults (en)!", "Error",
+ + " Fall back to default language!", "Error",
 						JOptionPane.ERROR_MESSAGE);
 				e.printStackTrace();
                 localeDefault = true;
@@ -55,13 +55,13 @@ public class LocaleHandler {
                 localeDefault = true;
             }
 		} else {
-			// fall back to defaults (en)
+            // fall back to defaults
             localeDefault = true;
 		}
         if (localeDefault) {
             LOCALE_RESOURCE_BUNDLE = ResourceBundle.getBundle(LOCALE_BUNDLE_NAME, new Locale(getSelectedLanguage()));
         } else {
-            setSelectedLanguage(SETTINGS_RESOURCE_BUNDLE.getString("locale"));
+            SELECTED_LANGUAGE = SETTINGS_RESOURCE_BUNDLE.getString("locale");
             LOCALE_RESOURCE_BUNDLE = ResourceBundle.getBundle(LOCALE_BUNDLE_NAME,
                     new Locale(SETTINGS_RESOURCE_BUNDLE.getString("locale")));
         }
@@ -99,8 +99,12 @@ public class LocaleHandler {
     public static void setSelectedLanguage(String locale) {
         if (SupportedLanguages.contains(locale)) {
             SELECTED_LANGUAGE = locale;
+            JOptionPane.showMessageDialog(null, getString("LocaleHandler.setSelectedLanguage.localeChanged.1") + locale
+                    + getString("LocaleHandler.setSelectedLanguage.localeChanged.2"), getString("info"),
+                    JOptionPane.INFORMATION_MESSAGE);
         } else {
-            JOptionPane.showMessageDialog(null, "Given locale " + locale + " does not exist!", "Error",
+            JOptionPane.showMessageDialog(null, getString("LocaleHandler.setSelectedLanguage.localeNotChanged.1")
+                    + locale + getString("LocaleHandler.setSelectedLanguage.localeNotChanged.2"), getString("error"),
                     JOptionPane.ERROR_MESSAGE);
         }
     }
