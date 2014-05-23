@@ -267,38 +267,38 @@ public class ContextEditor extends View {
     private void createButtonActions() {
         ActionMap am = matrix.getActionMap();
         WebButtonGroup group;
-        group = new WebButtonGroup(WebButtonGroup.VERTICAL, true, createButton("addObject",
-                LocaleHandler.getString("ContextEditor.createButtonActions.addObject"),
-                "icons/context editor/add_object.png", am.get("addObjectAtEnd")), createButton("clarifyObjects",
-                LocaleHandler.getString("ContextEditor.createButtonActions.clarifyObjects"),
-                "icons/context editor/clarify_objects.png", am.get("clarifyObjects")), createButton("reduceObjects",
-                LocaleHandler.getString("ContextEditor.createButtonActions.reduceObjects"),
+        group = new WebButtonGroup(WebButtonGroup.VERTICAL, true, createButton(
+                LocaleHandler.getString("ContextEditor.createButtonActions.addObject"), "addObject",
+                "icons/context editor/add_object.png", am.get("addObjectAtEnd")), createButton(
+                LocaleHandler.getString("ContextEditor.createButtonActions.clarifyObjects"), "clarifyObjects",
+                "icons/context editor/clarify_objects.png", am.get("clarifyObjects")), createButton(
+                LocaleHandler.getString("ContextEditor.createButtonActions.reduceObjects"), "reduceObjects",
                 "icons/context editor/reduce_objects.png", am.get("reduceObjects")));
         group.setButtonsDrawFocus(false);
         toolbar.add(group);
         toolbar.addSeparator();
-        group = new WebButtonGroup(WebButtonGroup.VERTICAL, true, createButton("addAttribute",
-                LocaleHandler.getString("ContextEditor.createButtonActions.addAttribute"),
+        group = new WebButtonGroup(WebButtonGroup.VERTICAL, true, createButton(
+                LocaleHandler.getString("ContextEditor.createButtonActions.addAttribute"), "addAttribute",
                 "icons/context editor/add_attribute.png", am.get("addAttributeAtEnd")), createButton(
-                "clarifyAttributes", LocaleHandler.getString("ContextEditor.createButtonActions.clarifyAttributes"),
+                LocaleHandler.getString("ContextEditor.createButtonActions.clarifyAttributes"), "clarifyAttributes",
                 "icons/context editor/clarify_attributes.png", am.get("clarifyAttributes")), createButton(
-                "reduceAttributes", LocaleHandler.getString("ContextEditor.createButtonActions.reduceAttributes"),
+                LocaleHandler.getString("ContextEditor.createButtonActions.reduceAttributes"), "reduceAttributes",
                 "icons/context editor/reduce_attributes.png", am.get("reduceAttributes")));
         group.setButtonsDrawFocus(false);
         toolbar.add(group);
         toolbar.addSeparator();
-        group = new WebButtonGroup(WebButtonGroup.VERTICAL, true, createButton("reduceContext",
-                LocaleHandler.getString("ContextEditor.createButtonActions.reduceContext"),
-                "icons/context editor/reduce_context.png", am.get("reduce")), createButton("transposeContext",
-                LocaleHandler.getString("ContextEditor.createButtonActions.transposeContext"),
+        group = new WebButtonGroup(WebButtonGroup.VERTICAL, true, createButton(
+                LocaleHandler.getString("ContextEditor.createButtonActions.reduceContext"), "reduceContext",
+                "icons/context editor/reduce_context.png", am.get("reduce")), createButton(
+                LocaleHandler.getString("ContextEditor.createButtonActions.transposeContext"), "transposeContext",
                 "icons/context editor/transpose.png", am.get("transpose")));
         group.setButtonsDrawFocus(false);
         toolbar.add(group);
         toolbar.addSeparator();
-        group = new WebButtonGroup(WebButtonGroup.VERTICAL, false, createToggleButton("compactMatrix",
-                LocaleHandler.getString("ContextEditor.createButtonActions.compactMatrix"),
+        group = new WebButtonGroup(WebButtonGroup.VERTICAL, false, createToggleButton(
+                LocaleHandler.getString("ContextEditor.createButtonActions.compactMatrix"), "compactMatrix",
                 "icons/context editor/compact.png", (ItemListener) am.get("compact")), createToggleButton(
-                "showArrowRelations", LocaleHandler.getString("ContextEditor.createButtonActions.showArrowRelations"),
+                LocaleHandler.getString("ContextEditor.createButtonActions.showArrowRelations"), "showArrowRelations",
                         "icons/context editor/show_arrow_relations.png", null) // TODO
         );
         group.setButtonsDrawFocus(false);
