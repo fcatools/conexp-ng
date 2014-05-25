@@ -147,7 +147,7 @@ public class LatticeView extends View {
 
         WebButton resetGraphPosition = Util.createButton(
                 LocaleHandler.getString("LatticeView.LatticeView.resetGraphPosition"), "resetGraphPosition",
-                "icons/lattice-view/transform-scale.png");
+                "icons/jlfgr/Home24.gif");
         resetGraphPosition.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
@@ -158,7 +158,7 @@ public class LatticeView extends View {
         toolbar.add(resetGraphPosition);
 
         WebButton panUp = Util.createButton(LocaleHandler.getString("LatticeView.LatticeView.panUp"), "panUp",
-                "icons/lattice-view/draw-triangle3.png");
+                "icons/jlfgr/Up24.gif");
         panUp.addMouseListener(new MouseAdapter() {
             Timer timer;
 
@@ -186,7 +186,7 @@ public class LatticeView extends View {
         toolbar.add(panUp);
 
         WebButton panDown = Util.createButton(LocaleHandler.getString("LatticeView.LatticeView.panDown"), "panDown",
-                "icons/lattice-view/draw-triangle4.png");
+                "icons/jlfgr/Down24.gif");
         panDown.addMouseListener(new MouseAdapter() {
             Timer timer;
 
@@ -214,7 +214,7 @@ public class LatticeView extends View {
         toolbar.add(panDown);
 
         WebButton panLeft = Util.createButton(LocaleHandler.getString("LatticeView.LatticeView.panLeft"), "panLeft",
-                "icons/lattice-view/draw-triangle1.png");
+                "icons/jlfgr/Back24.gif");
         panLeft.addMouseListener(new MouseAdapter() {
             Timer timer;
 
@@ -242,7 +242,7 @@ public class LatticeView extends View {
         toolbar.add(panLeft);
 
         WebButton panRight = Util.createButton(LocaleHandler.getString("LatticeView.LatticeView.panRight"), "panRight",
-                "icons/lattice-view/draw-triangle2.png");
+                "icons/jlfgr/Forward24.gif");
         panRight.addMouseListener(new MouseAdapter() {
             Timer timer;
 
@@ -271,7 +271,7 @@ public class LatticeView extends View {
 
         WebButton zoomOriginal = Util.createButton(LocaleHandler.getString("LatticeView.LatticeView.zoomOriginal"),
                 "zoomOriginal",
-                "icons/lattice-view/zoom-original.png");
+ "icons/jlfgr/Zoom24.gif");
         zoomOriginal.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
@@ -282,7 +282,7 @@ public class LatticeView extends View {
         toolbar.add(zoomOriginal);
 
         WebButton zoomIn = Util.createButton(LocaleHandler.getString("LatticeView.LatticeView.zoomIn"), "zoomIn",
-                "icons/lattice-view/zoom-in-2.png");
+                "icons/jlfgr/ZoomIn24.gif");
         zoomIn.addMouseListener(new MouseAdapter() {
             Timer timer;
 
@@ -311,7 +311,7 @@ public class LatticeView extends View {
         toolbar.add(zoomIn);
 
         WebButton zoomOut = Util.createButton(LocaleHandler.getString("LatticeView.LatticeView.zoomOut"), "zoomOut",
-                "icons/lattice-view/zoom-out-2.png");
+                "icons/jlfgr/ZoomOut24.gif");
         zoomOut.addMouseListener(new MouseAdapter() {
             Timer timer;
 
