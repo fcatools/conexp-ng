@@ -248,17 +248,18 @@ public class Node extends JPanel implements LatticeGraphElement {
      * @return true if update is possible, false if not
      */
     public boolean isUpdatePossible(int y) {
-        // FIXME: Issue #140 and #125
-        // check if parents are still below this node after position update
-        /*
-         * for (Node n : getParentNodes()) { if (n.getY() - LatticeView.radius *
-         * 2 < y) { return false; } }
-         */
-        // check if children are still above this node after position update
-        /*
-         * for (Node n : getChildNodes()) { if (n.getY() + LatticeView.radius *
-         * 2 > y) { return false; } }
-         */
+        // check if parents are still above this node after position update
+        for (Node n : getParentNodes()) {
+            if (n.getY() + LatticeView.radius * 2 > y) {
+                return false;
+            }
+        }
+        // check if children are still below this node after position update
+        for (Node n : getChildNodes()) {
+            if (n.getY() - LatticeView.radius * 2 < y) {
+                return false;
+            }
+        }
         return true;
     }
 

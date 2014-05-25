@@ -115,7 +115,9 @@ public class LatticeGraphComputer {
             for (Node v : n.getChildNodes()) {
                 if (v.getLevel() == 0 || v.getLevel() == n.getLevel()) {
                     v.setLevel(n.getLevel() + 1);
-                    v.update((int) (Math.random() * 500), 100 * v.getLevel());
+                    graph.setMaxLevel(v.getLevel());
+                    v.setX((int) (Math.random() * 500));
+                    v.setY(100 * v.getLevel());
                     v.positionLabels();
                     q.add(v);
                 }

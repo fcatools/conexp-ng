@@ -17,6 +17,7 @@ public class LatticeGraph {
 
     private List<Node> nodes;
     private List<Edge> edges;
+    private int maxLevel;
 
     /**
      *
@@ -86,6 +87,17 @@ public class LatticeGraph {
         this.edges = edges;
     }
 
+    /**
+     * Sets maximum level of nodes in this graph. Needed to calculate the level
+     * in {@link #addEdges(Set)} method.
+     * 
+     * @param maxLevel
+     *            maximum level of nodes in this graph
+     */
+    public void setMaxLevel(int maxLevel) {
+        this.maxLevel = maxLevel;
+    }
+
     public boolean missingEdges() {
         return edges.isEmpty() && nodes.size() > 1;
     }
@@ -111,10 +123,10 @@ public class LatticeGraph {
                 v.setVisibleAttributes(e.getV().getVisibleAttributes());
                 u.setVisibleObjects(e.getU().getVisibleObjects());
                 v.setVisibleObjects(e.getV().getVisibleObjects());
-                u.setLevel(e.getU().getLevel());
-                v.setLevel(e.getV().getLevel());
-                u.addChildNode(v);
-                v.addParentNode(u);
+                u.setLevel(temp.maxLevel - e.getU().getLevel());
+                v.setLevel(temp.maxLevel - e.getV().getLevel());
+                v.addChildNode(u);
+                u.addParentNode(v);
                 if (u.getAttributesLabel().getX() == 0 && u.getAttributesLabel().getY() == 0)
                     u.getAttributesLabel().setXY(e.getU().getAttributesLabel().getX(),
                             e.getU().getAttributesLabel().getY());
