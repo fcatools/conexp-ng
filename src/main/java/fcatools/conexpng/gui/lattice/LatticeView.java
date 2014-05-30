@@ -213,34 +213,6 @@ public class LatticeView extends View {
         });
         toolbar.add(panDown);
 
-        WebButton panLeft = Util.createButton(LocaleHandler.getString("LatticeView.LatticeView.panLeft"), "panLeft",
-                "icons/jlfgr/Back24.gif");
-        panLeft.addMouseListener(new MouseAdapter() {
-            Timer timer;
-
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                timer.stop();
-            }
-            @Override
-            public void mousePressed(MouseEvent e) {
-                // timer used to fire the event as long as the mouse button is
-                // pressed
-                timer = new Timer(0, new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent arg0) {
-                        LatticeGraphView v = latticeGraphView;
-                        int offsetX = (int) LatticeGraphView.getOffset().getX();
-                        int offsetY = (int) LatticeGraphView.getOffset().getY();
-                        LatticeGraphView.setOffset(offsetX - 1, offsetY);
-                        v.repaint();
-                    }
-                });
-                timer.start();
-            }
-        });
-        toolbar.add(panLeft);
-
         WebButton panRight = Util.createButton(LocaleHandler.getString("LatticeView.LatticeView.panRight"), "panRight",
                 "icons/jlfgr/Forward24.gif");
         panRight.addMouseListener(new MouseAdapter() {
@@ -268,6 +240,34 @@ public class LatticeView extends View {
             }
         });
         toolbar.add(panRight);
+
+        WebButton panLeft = Util.createButton(LocaleHandler.getString("LatticeView.LatticeView.panLeft"), "panLeft",
+                "icons/jlfgr/Back24.gif");
+        panLeft.addMouseListener(new MouseAdapter() {
+            Timer timer;
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                timer.stop();
+            }
+            @Override
+            public void mousePressed(MouseEvent e) {
+                // timer used to fire the event as long as the mouse button is
+                // pressed
+                timer = new Timer(0, new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent arg0) {
+                        LatticeGraphView v = latticeGraphView;
+                        int offsetX = (int) LatticeGraphView.getOffset().getX();
+                        int offsetY = (int) LatticeGraphView.getOffset().getY();
+                        LatticeGraphView.setOffset(offsetX - 1, offsetY);
+                        v.repaint();
+                    }
+                });
+                timer.start();
+            }
+        });
+        toolbar.add(panLeft);
 
         WebButton zoomOriginal = Util.createButton(LocaleHandler.getString("LatticeView.LatticeView.zoomOriginal"),
                 "zoomOriginal",
