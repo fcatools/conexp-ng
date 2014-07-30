@@ -36,6 +36,9 @@ public class FreeseLatticeGraphAlgorithm implements ILatticeGraphAlgorithm {
 
         primePointer = -1;
         nodes = graph.getNodes();
+        if (nodes.isEmpty()) {
+            return graph;
+        }
         attractionFactor = ATTRACTION_CONSTANT / Math.sqrt(nodes.size());
         repulsionFactor = REPULSION_CONSTANT / Math.sqrt(nodes.size());
         attraction_I = 0.5 * attractionFactor;
@@ -102,8 +105,9 @@ public class FreeseLatticeGraphAlgorithm implements ILatticeGraphAlgorithm {
      */
     private int nextPrime() {
         primePointer++;
-        if (primePointer == PRIMES.length)
+        if (primePointer == PRIMES.length) {
             primePointer = 0;
+        }
         return PRIMES[primePointer];
     }
 
