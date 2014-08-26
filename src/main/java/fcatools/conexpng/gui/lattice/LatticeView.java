@@ -54,9 +54,9 @@ public class LatticeView extends View {
     public LatticeView(final Conf state, MainFrame mainframe) {
         super(state);
         this.mainFrame = mainframe;
-        alg = new LatticeGraphComputer();
         if (state.lattice.isEmpty()) {
-            state.lattice = alg.computeLatticeGraph(new ListSet<Concept<String, FullObject<String, String>>>(),
+            state.lattice = LatticeGraphComputer.computeLatticeGraph(
+                    new ListSet<Concept<String, FullObject<String, String>>>(),
                     new Rectangle(800, 600));
         }
         latticeGraphView = new LatticeGraphView(state);

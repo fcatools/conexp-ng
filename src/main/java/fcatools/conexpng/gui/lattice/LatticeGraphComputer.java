@@ -19,34 +19,35 @@ import fcatools.conexpng.gui.lattice.algorithms.TrivialLatticeGraphAlgorithm;
 import fcatools.conexpng.io.locale.LocaleHandler;
 
 /**
- * This class representing the conncetion between the view and the lattice
- * drawing algorithms. All this algorithms have to be implemented the
- * ILatticeGraphAlgorithm and after that, they have to be added to this class.
- * 
+ * This class computes the lattice graph. It contains the available algorithms
+ * for lattice layout and provides methods to change the default.
  */
 public class LatticeGraphComputer {
 
-    private LatticeGraph graph;
-    private Set<Concept<String, FullObject<String, String>>> lattConcepts;
-    private HashMap<String, ILatticeGraphAlgorithm> algorithms;
-    private ILatticeGraphAlgorithm usedAlgorithm;
-    private int screenWidth;
-    private int screenHeight;
+    private static LatticeGraph graph;
+    private static Set<Concept<String, FullObject<String, String>>> lattConcepts;
+    private static HashMap<String, ILatticeGraphAlgorithm> algorithms;
+    private static ILatticeGraphAlgorithm usedAlgorithm;
+    private static int screenWidth;
+    private static int screenHeight;
 
     /**
-     * 
-     * @param set
-     * @param bounds
-     * @return
+     * Initialize: Create algorithms, select default.
      */
-    public LatticeGraphComputer() {
+    public static void init() {
         algorithms = new HashMap<>();
         algorithms.put("Trivial", new TrivialLatticeGraphAlgorithm());
         algorithms.put("Freese", new FreeseLatticeGraphAlgorithm());
         usedAlgorithm = algorithms.get("Freese");
     }
 
-    public void chooseAlgorithm(String name) {
+    /**
+     * Change the selected algorithm.
+     * 
+     * @param name
+     *            name of algorithm
+     */
+    public static void chooseAlgorithm(String name) {
         if (!algorithms.containsKey(name)) {
             System.err.println(LocaleHandler.getString("LatticeGraphComputer.chooseAlgorithm.error"));
         } else {
@@ -55,7 +56,7 @@ public class LatticeGraphComputer {
     }
 
     /**
-     * this method computes the lattice graph.
+     * This method computes the lattice graph.
      * 
      * @param concepts
      *            set of concepts of the lattice.
@@ -63,21 +64,22 @@ public class LatticeGraphComputer {
      *            of the viewport
      * @return the lattice graph which has to be drawn
      */
-    public LatticeGraph computeLatticeGraph(Set<Concept<String, FullObject<String, String>>> concepts, Rectangle bounds) {
-        this.lattConcepts = concepts;
-        this.screenWidth = bounds.width;
-        this.screenHeight = bounds.height;
+    public static LatticeGraph computeLatticeGraph(Set<Concept<String, FullObject<String, String>>> concepts,
+            Rectangle bounds) {
+        lattConcepts = concepts;
+        screenWidth = bounds.width;
+        screenHeight = bounds.height;
         initGraph();
         graph.computeAllIdeals();
         computeVisibleObjectsAndAttributes();
-        this.graph = usedAlgorithm.computeLatticeGraphPositions(graph, screenWidth, screenHeight);
+        graph = usedAlgorithm.computeLatticeGraphPositions(graph, screenWidth, screenHeight);
         return graph;
     }
 
     /**
      * Initialize the graph.
      */
-    public void initGraph() {
+    public static void initGraph() {
         graph = new LatticeGraph();
 
         Iterator<Concept<String, FullObject<String, String>>> iter = lattConcepts.iterator();
@@ -134,7 +136,7 @@ public class LatticeGraphComputer {
      * @param superEx
      * @return
      */
-    public boolean isSubconcept(Set<String> subEx, Set<String> superEx) {
+    public static boolean isSubconcept(Set<String> subEx, Set<String> superEx) {
         if (subEx == superEx) {
             return false;
         }
@@ -155,7 +157,7 @@ public class LatticeGraphComputer {
      * @param superEx
      * @return
      */
-    public boolean isLowerNeighbour(Set<String> subEx, Set<String> superEx) {
+    public static boolean isLowerNeighbour(Set<String> subEx, Set<String> superEx) {
         if (subEx == superEx) {
             return false;
         }
@@ -177,7 +179,7 @@ public class LatticeGraphComputer {
         return true;
     }
 
-    public void computeVisibleObjectsAndAttributes() {
+    public static void computeVisibleObjectsAndAttributes() {
         // calc which obj/attr has to be shown
         Set<String> usedObj = new TreeSet<>();
         Set<String> usedAttr = new TreeSet<>();
@@ -228,9 +230,4 @@ public class LatticeGraphComputer {
             }
         }
     }
-
-    public void addAlgorithm(String name, ILatticeGraphAlgorithm alg) {
-        this.algorithms.put(name, alg);
-    }
-
 }

@@ -469,7 +469,7 @@ public class MainToolbar extends WebToolBar {
         private void saveFile(String path) {
             try {
                 if (!cex) {
-                    if (!path.contains("."))
+                    if (!path.contains(".cxt") && !path.contains(".oal") && !path.contains(".csv"))
                         path = path.concat(".cxt");
                     if (path.endsWith("cxt"))
                         new CXTWriter(state, path);
@@ -478,7 +478,7 @@ public class MainToolbar extends WebToolBar {
                     else if (path.endsWith("csv"))
                         new CSVWriter(state, path);
                 } else {
-                    if (!path.contains("."))
+                    if (!path.contains(".cex"))
                         path = path.concat(".cex");
 
                     new CEXWriter(state, path);

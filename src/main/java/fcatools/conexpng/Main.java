@@ -23,6 +23,7 @@ import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
 import de.tudresden.inf.tcs.fcalib.FullObject;
 import fcatools.conexpng.gui.MainFrame;
 import fcatools.conexpng.gui.lattice.LatticeGraph;
+import fcatools.conexpng.gui.lattice.LatticeGraphComputer;
 import fcatools.conexpng.io.CEXReader;
 import fcatools.conexpng.io.locale.LocaleHandler;
 import fcatools.conexpng.model.FormalContext;
@@ -55,6 +56,9 @@ public class Main {
         UIManager.put("Table.focusCellForeground", Color.black);
 
         final Conf state = new Conf();
+
+        // initialize lattice algorithms
+        LatticeGraphComputer.init();
 
         boolean firstStart = false;
         File optionsFile = new File(optionsFileName);

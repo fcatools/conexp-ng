@@ -10,6 +10,7 @@ import de.tudresden.inf.tcs.fcalib.FullObject;
 import de.tudresden.inf.tcs.fcalib.utils.ListSet;
 import fcatools.conexpng.Conf;
 import fcatools.conexpng.Conf.StatusMessage;
+import fcatools.conexpng.gui.lattice.LatticeGraphComputer;
 import fcatools.conexpng.gui.lattice.LatticeSettings;
 import fcatools.conexpng.gui.lattice.LatticeView;
 import fcatools.conexpng.model.FormalContext;
@@ -194,10 +195,8 @@ public class ConceptWorker extends AbstractWorker {
                 state.startCalculation(StatusMessage.CALCULATINGLATTICE);
                 setProgress(99);
                 setProgressBarMessage(StatusMessage.CALCULATINGLATTICE.toString());
-                state.lattice = view.getAlg().computeLatticeGraph(state.concepts, view.getBounds());
-            } else {
-                state.lattice.addEdges(state.concepts);
             }
+            state.lattice = LatticeGraphComputer.computeLatticeGraph(state.concepts, view.getBounds());
             view.updateLatticeGraph();
             if (lattice) {
                 ((LatticeSettings) view.getSettings()).update(state);
