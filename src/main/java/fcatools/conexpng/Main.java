@@ -25,6 +25,9 @@ import fcatools.conexpng.gui.MainFrame;
 import fcatools.conexpng.gui.lattice.LatticeGraph;
 import fcatools.conexpng.gui.lattice.LatticeGraphComputer;
 import fcatools.conexpng.io.CEXReader;
+import fcatools.conexpng.io.CSVReader;
+import fcatools.conexpng.io.CXTReader;
+import fcatools.conexpng.io.OALReader;
 import fcatools.conexpng.io.locale.LocaleHandler;
 import fcatools.conexpng.model.FormalContext;
 
@@ -91,10 +94,11 @@ public class Main {
         f.setVisible(true);
 
         // Force various GUI components to update
-        if (fileOpened)
+        if (fileOpened) {
             state.loadedFile();
-        else
+        } else {
             state.contextChanged();
+        }
         state.saveConf();
     }
 
@@ -196,8 +200,20 @@ public class Main {
         if (new File(lastOpened).isFile()) {
             state.filePath = lastOpened;
             try {
-                new CEXReader(state, state.filePath);
-                fileOpened = true;
+                // open context
+                if (state.filePath.endsWith(".cex")) {
+                    new CEXReader(state, state.filePath);
+                    fileOpened = true;
+                } else if (state.filePath.endsWith(".csv")) {
+                    new CSVReader(state, state.filePath);
+                    fileOpened = true;
+                } else if (state.filePath.endsWith(".cxt")) {
+                    new CXTReader(state, state.filePath);
+                    fileOpened = true;
+                } else if (state.filePath.endsWith(".oal")) {
+                    new OALReader(state, state.filePath);
+                    fileOpened = true;
+                }
             } catch (Exception e) {
                 exception = e;
             }

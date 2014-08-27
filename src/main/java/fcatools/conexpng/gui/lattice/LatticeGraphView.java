@@ -12,32 +12,11 @@ import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Writer;
-import java.net.MalformedURLException;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import javax.swing.SwingUtilities;
 
-import org.apache.batik.dom.GenericDOMImplementation;
-import org.apache.batik.dom.svg.SVGDOMImplementation;
-import org.apache.batik.svggen.SVGGraphics2D;
 import org.apache.batik.swing.JSVGCanvas;
-import org.apache.batik.transcoder.Transcoder;
-import org.apache.batik.transcoder.TranscoderException;
-import org.apache.batik.transcoder.TranscoderInput;
-import org.apache.batik.transcoder.TranscoderOutput;
-import org.apache.batik.transcoder.image.JPEGTranscoder;
-import org.apache.batik.transcoder.image.PNGTranscoder;
-import org.apache.fop.svg.PDFTranscoder;
-import org.w3c.dom.DOMImplementation;
-import org.w3c.dom.Document;
 
 import fcatools.conexpng.Conf;
 
@@ -259,113 +238,6 @@ public class LatticeGraphView extends JSVGCanvas {
                 g.setColor(Color.RED);
                 g.drawOval(x - 1, y - 1, radius * 2 + 2, radius * 2 + 2);
             }
-        }
-    }
-
-    /**
-     * This method creates an output file of the lattice.
-     * 
-     * @param path
-     */
-    public void exportLattice(String path) {
-        DOMImplementation domImpl = GenericDOMImplementation.getDOMImplementation();
-
-        String svgNS = SVGDOMImplementation.SVG_NAMESPACE_URI;
-        Document document = domImpl.createDocument(svgNS, "svg", null);
-
-        SVGGraphics2D svgGenerator = new SVGGraphics2D(document);
-        this.paint(svgGenerator);
-
-        Writer out;
-        String svg_URI_input;
-        try {
-
-            // calculating the output file size
-            int maxWidth = 0;
-            int maxHeight = 0;
-            for (Node n : state.lattice.getNodes()) {
-                if (maxWidth < n.getX()) {
-                    maxWidth = n.getX();
-                }
-                if (maxHeight < n.getY()) {
-                    maxHeight = n.getY();
-                }
-                if (state.guiConf.showAttributLabel) {
-                    if (maxWidth < n.getAttributesLabel().getX()) {
-                        maxWidth = n.getAttributesLabel().getX();
-                    }
-                    if (maxHeight < n.getAttributesLabel().getY()) {
-                        maxHeight = n.getAttributesLabel().getY();
-                    }
-                }
-                if (state.guiConf.showObjectLabel) {
-                    if (maxWidth < n.getObjectsLabel().getX()) {
-                        maxWidth = n.getObjectsLabel().getX();
-                    }
-                    if (maxHeight < n.getObjectsLabel().getY()) {
-                        maxHeight = n.getObjectsLabel().getY();
-                    }
-                }
-
-            }
-            // default case: create a svg file.
-            if (!(path.contains(".pdf") || path.contains(".jpg") || path.contains(".jpeg") || path.contains(".png"))) {
-                File svg = new File(path + ".svg");
-                out = new FileWriter(svg);
-                svgGenerator.stream(out, true);
-
-            } else {
-                File temp = new File("test_batik.svg");
-                out = new FileWriter(temp);
-                svgGenerator.stream(out, true);
-
-                svg_URI_input = Paths.get("test_batik.svg").toUri().toString();
-                TranscoderInput input_svg_image = new TranscoderInput(svg_URI_input);
-                OutputStream ostream;
-                ostream = new FileOutputStream(path);
-
-                Rectangle r = new Rectangle(maxWidth + 30, maxHeight + 30);
-                TranscoderOutput output_file = new TranscoderOutput(ostream);
-                Transcoder transcoder = null;
-
-                if (path.contains(".pdf")) {
-                    transcoder = new PDFTranscoder();
-                    transcoder.addTranscodingHint(PDFTranscoder.KEY_WIDTH, new Float(r.width));
-                    transcoder.addTranscodingHint(PDFTranscoder.KEY_HEIGHT, new Float(r.height));
-                    transcoder.addTranscodingHint(PDFTranscoder.KEY_AOI, r);
-
-                } else if (path.contains(".jpg") || path.contains(".jpeg")) {
-                    transcoder = new JPEGTranscoder();
-                    transcoder.addTranscodingHint(JPEGTranscoder.KEY_QUALITY, new Float(.8));
-                    transcoder.addTranscodingHint(JPEGTranscoder.KEY_WIDTH, new Float(r.width));
-                    transcoder.addTranscodingHint(JPEGTranscoder.KEY_HEIGHT, new Float(r.height));
-                    transcoder.addTranscodingHint(JPEGTranscoder.KEY_AOI, r);
-
-                } else {
-                    transcoder = new PNGTranscoder();
-                    transcoder.addTranscodingHint(PNGTranscoder.KEY_WIDTH, new Float(r.width));
-                    transcoder.addTranscodingHint(PNGTranscoder.KEY_HEIGHT, new Float(r.height));
-                    transcoder.addTranscodingHint(PNGTranscoder.KEY_AOI, r);
-                }
-
-                transcoder.transcode(input_svg_image, output_file);
-                ostream.flush();
-                ostream.close();
-                temp.delete();
-            }
-
-        } catch (MalformedURLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (FileNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (TranscoderException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         }
     }
 

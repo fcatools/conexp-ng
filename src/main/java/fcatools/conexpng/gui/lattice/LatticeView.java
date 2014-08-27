@@ -6,19 +6,19 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
-import java.io.File;
 import java.util.HashSet;
 
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JToggleButton;
+import javax.swing.KeyStroke;
 import javax.swing.Timer;
 
 import com.alee.laf.button.WebButton;
-import com.alee.laf.filechooser.WebFileChooser;
-import com.alee.laf.rootpane.WebDialog;
 import com.alee.laf.scroll.WebScrollPane;
 
 import de.tudresden.inf.tcs.fcaapi.Concept;
@@ -28,9 +28,9 @@ import fcatools.conexpng.Conf;
 import fcatools.conexpng.Conf.ContextChangeEvent;
 import fcatools.conexpng.Util;
 import fcatools.conexpng.gui.MainFrame;
-import fcatools.conexpng.gui.MainFrame.OverwritingFileDialog;
 import fcatools.conexpng.gui.StatusBarPropertyChangeListener;
 import fcatools.conexpng.gui.View;
+import fcatools.conexpng.gui.actions.OpenSaveExportAction;
 import fcatools.conexpng.gui.workers.ConceptWorker;
 import fcatools.conexpng.io.locale.LocaleHandler;
 
@@ -54,7 +54,7 @@ public class LatticeView extends View {
     public LatticeView(final Conf state, MainFrame mainframe) {
         super(state);
         this.mainFrame = mainframe;
-        if (state.lattice.isEmpty()) {
+        if (state.lattice == null || state.lattice.isEmpty()) {
             state.lattice = LatticeGraphComputer.computeLatticeGraph(
                     new ListSet<Concept<String, FullObject<String, String>>>(),
                     new Rectangle(800, 600));
@@ -70,51 +70,12 @@ public class LatticeView extends View {
 
         JButton export = Util.createButton(LocaleHandler.getString("LatticeView.LatticeView.export"), "export",
                 "conexp/cameraFlash.gif");
-        export.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                final WebFileChooser fc = new WebFileChooser();
-                fc.setCurrentDirectory(state.filePath.substring(0,
-                        state.filePath.lastIndexOf(System.getProperty("file.separator"))));
-                final WebDialog dialog = new WebDialog(mainFrame, LocaleHandler
-                        .getString("LatticeView.LatticeView.export.dialog"), true);
-                dialog.setContentPane(fc);
-                fc.setMultiSelectionEnabled(false);
-                fc.setAcceptAllFileFilterUsed(false);
-                fc.setFileSelectionMode(WebFileChooser.FILES_ONLY);
-                fc.setDialogType(WebFileChooser.SAVE_DIALOG);
-                fc.addActionListener(new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        String state = (String) e.getActionCommand();
-                        if ((state.equals(WebFileChooser.APPROVE_SELECTION) && fc.getSelectedFile() != null)) {
-                            File file = fc.getSelectedFile();
-                            String path = file.getAbsolutePath();
-                            if (file.exists()) {
-                                OverwritingFileDialog ofd = mainFrame.new OverwritingFileDialog(file);
-                                if (ofd.isYes()) {
-                                    latticeGraphView.exportLattice(path);
-                                    dialog.setVisible(false);
-                                }
-                            } else {
-                                latticeGraphView.exportLattice(path);
-                                dialog.setVisible(false);
-                            }
-                        } else if (state.equals(WebFileChooser.CANCEL_SELECTION)) {
-                            dialog.setVisible(false);
-                            return;
-                        }
-                    }
-                });
-                dialog.pack();
-                Util.centerDialogInsideMainFrame(mainFrame, dialog);
-                dialog.setVisible(true);
-
-                if (fc.getSelectedFile() == null)
-                    return;
-
-            }
-        });
+        OpenSaveExportAction exportLatticeAction = new OpenSaveExportAction(mainFrame, state, latticeGraphView);
+        export.addActionListener(exportLatticeAction);
+        // add shortcut
+        getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_F12, 0),
+                "exportLatticeGraph");
+        getActionMap().put("exportLatticeGraph", exportLatticeAction);
         toolbar.add(export);
 
         JToggleButton move = Util.createToggleButton(LocaleHandler.getString("LatticeView.LatticeView.move"), "move",

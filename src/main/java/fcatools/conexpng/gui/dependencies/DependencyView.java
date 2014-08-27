@@ -184,11 +184,11 @@ public class DependencyView extends View {
                 break;
             }
             case LOADEDFILE: {
-                if (!state.associations.isEmpty())
+                if (state.associations != null && !state.associations.isEmpty())
                     writeAssociations(state.guiConf.assoscrollpos);
                 else
                     updateAssociationsLater = true;
-                if (!state.implications.isEmpty())
+                if (state.implications != null && !state.implications.isEmpty())
                     writeImplications(state.guiConf.implscrollpos);
                 else
                     updateImplicationsLater = true;
@@ -239,7 +239,7 @@ public class DependencyView extends View {
     }
 
     public void writeAssociations(final int assoscrollpos) {
-        if (!state.associations.isEmpty())
+        if (state.associations != null && !state.associations.isEmpty())
             SwingUtilities.invokeLater(new Runnable() {
 
                 @Override
@@ -302,7 +302,7 @@ public class DependencyView extends View {
     // ////////////////////////////////////////////////////////////////////////////////////////
 
     public void writeImplications(final int implscrollpos) {
-        if (!state.implications.isEmpty()) {
+        if (state.implications != null && !state.implications.isEmpty()) {
             SwingUtilities.invokeLater(new Runnable() {
 
                 @Override

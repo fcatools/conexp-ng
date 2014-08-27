@@ -37,6 +37,7 @@ import com.alee.laf.tabbedpane.WebTabbedPane;
 import fcatools.conexpng.Conf;
 import fcatools.conexpng.Main;
 import fcatools.conexpng.Util;
+import fcatools.conexpng.gui.actions.CloseAction;
 import fcatools.conexpng.gui.contexteditor.ContextEditor;
 import fcatools.conexpng.gui.contexteditor.ContextEditorUndoManager;
 import fcatools.conexpng.gui.dependencies.DependencyView;
@@ -70,7 +71,7 @@ public class MainFrame extends WebFrame {
             public void windowClosing(WindowEvent we) {
                 try {
                     Main.storeOptions(MainFrame.this, state);
-                    CloseAction close = new CloseAction();
+                    CloseAction close = new CloseAction(MainFrame.this, state);
                     close.actionPerformed(null);
                     if (!close.canceled())
                         System.exit(0);
@@ -266,33 +267,6 @@ public class MainFrame extends WebFrame {
             tabPane.setSelectedIndex(tabnr);
         }
 
-    }
-
-    @SuppressWarnings("serial")
-    public class CloseAction extends AbstractAction {
-
-        private boolean canceled;
-
-        @Override
-        public void actionPerformed(ActionEvent arg0) {
-            if (!state.canBeSaved()) {
-                StillCalculatingDialog scd = new StillCalculatingDialog();
-                if (scd.isYes())
-                    return;
-            }
-            if (state.unsavedChanges) {
-                UnsavedChangesDialog usd = new UnsavedChangesDialog();
-                if (usd.isYes()) {
-                    new MainToolbar(MainFrame.this, state).new SaveAction(false, true).actionPerformed(arg0);
-                } else if (usd.isCancel()) {
-                    canceled = true;
-                }
-            }
-        }
-
-        public boolean canceled() {
-            return canceled;
-        }
     }
 
     @SuppressWarnings("serial")
