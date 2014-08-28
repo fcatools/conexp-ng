@@ -7,10 +7,10 @@ import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.OutputStream;
 import java.io.Writer;
-import java.nio.file.Paths;
 
 import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
@@ -239,34 +239,31 @@ public class OpenSaveExportAction extends AbstractAction {
                     Document document = domImpl.createDocument(svgNS, "svg", null);
                     SVGGraphics2D svgGenerator = new SVGGraphics2D(document);
                     latticeGraphView.paint(svgGenerator);
-                    Writer out;
-                    String svgUriInput;
                     Transcoder transcoder = null;
                     if (path.endsWith(".pdf")) {
                         transcoder = new PDFTranscoder();
                         transcoder.addTranscodingHint(PDFTranscoder.KEY_WIDTH, new Float(r.width));
                         transcoder.addTranscodingHint(PDFTranscoder.KEY_HEIGHT, new Float(r.height));
                         transcoder.addTranscodingHint(PDFTranscoder.KEY_AOI, r);
-                    } else if (!path.endsWith(".svg")) {
-                        path = path.concat(".svg");
-                    }
-                    File svg = null;
-                    if (path.endsWith(".svg")) {
-                        svg = new File(path);
-                    } else {
-                        svg = new File("test_batik.svg");
-                    }
-                    out = new FileWriter(svg);
-                    svgGenerator.stream(out, true);
-                    if (path.endsWith(".pdf")) {
-                        svgUriInput = Paths.get("test_batik.svg").toUri().toString();
-                        TranscoderInput inputSvgImage = new TranscoderInput(svgUriInput);
+                        // use temp file to store svg file
+                        File tmpFile = File.createTempFile("exported_lattice.svg", ".tmp");
+                        Writer tmpOut = new FileWriter(tmpFile);
+                        svgGenerator.stream(tmpOut, true);
+                        tmpOut.close();
+                        TranscoderInput inputSvgImage = new TranscoderInput(new FileReader(tmpFile));
                         OutputStream ostream = new FileOutputStream(path);
                         TranscoderOutput outputFile = new TranscoderOutput(ostream);
                         transcoder.transcode(inputSvgImage, outputFile);
-                        ostream.flush();
                         ostream.close();
-                        svg.delete();
+                        tmpFile.delete();
+                    } else {
+                        // save as svg, concat svg extension if not already there
+                        if (!path.endsWith(".svg")) {
+                            path = path.concat(".svg");
+                        }
+                        Writer out = new FileWriter(new File(path));
+                        svgGenerator.stream(out, true);
+                        out.close();
                     }
                 }
             } else {
