@@ -1,8 +1,10 @@
 package fcatools.conexpng.gui.actions;
 
 import java.awt.Dimension;
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
@@ -10,6 +12,7 @@ import java.io.OutputStream;
 import java.io.Writer;
 import java.nio.file.Paths;
 
+import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
@@ -20,8 +23,6 @@ import org.apache.batik.svggen.SVGGraphics2D;
 import org.apache.batik.transcoder.Transcoder;
 import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
-import org.apache.batik.transcoder.image.JPEGTranscoder;
-import org.apache.batik.transcoder.image.PNGTranscoder;
 import org.apache.fop.svg.PDFTranscoder;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
@@ -223,58 +224,50 @@ public class OpenSaveExportAction extends AbstractAction {
                 }
             } else if (type.equals(DialogType.EXPORT)) {
                 // export lattice
-                DOMImplementation domImpl = GenericDOMImplementation.getDOMImplementation();
-                String svgNS = SVGDOMImplementation.SVG_NAMESPACE_URI;
-                Document document = domImpl.createDocument(svgNS, "svg", null);
-                SVGGraphics2D svgGenerator = new SVGGraphics2D(document);
-                latticeGraphView.paint(svgGenerator);
-                Writer out;
-                String svgUriInput;
-                Transcoder transcoder = null;
-                if (path.endsWith(".pdf")) {
-                    Dimension d = calculateMaxDimension();
-                    Rectangle r = new Rectangle(d.width + 30, d.height + 30);
-                    transcoder = new PDFTranscoder();
-                    transcoder.addTranscodingHint(PDFTranscoder.KEY_WIDTH, new Float(r.width));
-                    transcoder.addTranscodingHint(PDFTranscoder.KEY_HEIGHT, new Float(r.height));
-                    transcoder.addTranscodingHint(PDFTranscoder.KEY_AOI, r);
-                } else if (path.endsWith(".jpg") || path.endsWith(".jpeg")) {
-                    Dimension d = calculateMaxDimension();
-                    Rectangle r = new Rectangle(d.width + 30, d.height + 30);
-                    transcoder = new JPEGTranscoder();
-                    transcoder.addTranscodingHint(JPEGTranscoder.KEY_QUALITY, new Float(.8));
-                    transcoder.addTranscodingHint(JPEGTranscoder.KEY_WIDTH, new Float(r.width));
-                    transcoder.addTranscodingHint(JPEGTranscoder.KEY_HEIGHT, new Float(r.height));
-                    transcoder.addTranscodingHint(JPEGTranscoder.KEY_AOI, r);
-                } else if (path.endsWith(".png")) {
-                    Dimension d = calculateMaxDimension();
-                    Rectangle r = new Rectangle(d.width + 30, d.height + 30);
-                    transcoder = new PNGTranscoder();
-                    transcoder.addTranscodingHint(PNGTranscoder.KEY_WIDTH, new Float(r.width));
-                    transcoder.addTranscodingHint(PNGTranscoder.KEY_HEIGHT, new Float(r.height));
-                    transcoder.addTranscodingHint(PNGTranscoder.KEY_AOI, r);
+                Dimension d = calculateMaxDimension();
+                Rectangle r = new Rectangle(d.width + 30, d.height + 30);
+                if (path.endsWith(".jpg") || path.endsWith(".jpeg") || path.endsWith(".png")) {
+                    // using TYPE_3BYTE_BGR as workaround for OpenJDK, don't
+                    // change it
+                    BufferedImage bi = new BufferedImage(r.width, r.height, BufferedImage.TYPE_3BYTE_BGR);
+                    Graphics2D g = bi.createGraphics();
+                    latticeGraphView.paint(g);
+                    ImageIO.write(bi, path.endsWith(".png") ? "PNG" : "JPG", new File(path));
                 } else {
-                    if (!path.endsWith(".svg")) {
+                    DOMImplementation domImpl = GenericDOMImplementation.getDOMImplementation();
+                    String svgNS = SVGDOMImplementation.SVG_NAMESPACE_URI;
+                    Document document = domImpl.createDocument(svgNS, "svg", null);
+                    SVGGraphics2D svgGenerator = new SVGGraphics2D(document);
+                    latticeGraphView.paint(svgGenerator);
+                    Writer out;
+                    String svgUriInput;
+                    Transcoder transcoder = null;
+                    if (path.endsWith(".pdf")) {
+                        transcoder = new PDFTranscoder();
+                        transcoder.addTranscodingHint(PDFTranscoder.KEY_WIDTH, new Float(r.width));
+                        transcoder.addTranscodingHint(PDFTranscoder.KEY_HEIGHT, new Float(r.height));
+                        transcoder.addTranscodingHint(PDFTranscoder.KEY_AOI, r);
+                    } else if (!path.endsWith(".svg")) {
                         path = path.concat(".svg");
                     }
-                }
-                File svg = null;
-                if (path.endsWith(".svg")) {
-                    svg = new File(path);
-                } else {
-                    svg = new File("test_batik.svg");
-                }
-                out = new FileWriter(svg);
-                svgGenerator.stream(out, true);
-                if (!path.endsWith(".svg")) {
-                    svgUriInput = Paths.get("test_batik.svg").toUri().toString();
-                    TranscoderInput inputSvgImage = new TranscoderInput(svgUriInput);
-                    OutputStream ostream = new FileOutputStream(path);
-                    TranscoderOutput outputFile = new TranscoderOutput(ostream);
-                    transcoder.transcode(inputSvgImage, outputFile);
-                    ostream.flush();
-                    ostream.close();
-                    svg.delete();
+                    File svg = null;
+                    if (path.endsWith(".svg")) {
+                        svg = new File(path);
+                    } else {
+                        svg = new File("test_batik.svg");
+                    }
+                    out = new FileWriter(svg);
+                    svgGenerator.stream(out, true);
+                    if (path.endsWith(".pdf")) {
+                        svgUriInput = Paths.get("test_batik.svg").toUri().toString();
+                        TranscoderInput inputSvgImage = new TranscoderInput(svgUriInput);
+                        OutputStream ostream = new FileOutputStream(path);
+                        TranscoderOutput outputFile = new TranscoderOutput(ostream);
+                        transcoder.transcode(inputSvgImage, outputFile);
+                        ostream.flush();
+                        ostream.close();
+                        svg.delete();
+                    }
                 }
             } else {
                 // save context
