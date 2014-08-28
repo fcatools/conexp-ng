@@ -90,6 +90,7 @@ public class Util {
             showMessageDialog(parent,
                     LocaleHandler.getString("Util.handleIOExceptions.otherExceptions") + ex.getMessage(), true);
         }
+        ex.printStackTrace();
     }
 
     public static void showMessageDialog(WebFrame parent, String message, boolean error) {
