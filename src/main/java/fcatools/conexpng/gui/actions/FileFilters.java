@@ -1,6 +1,10 @@
 package fcatools.conexpng.gui.actions;
 
-import javax.swing.filechooser.FileNameExtensionFilter;
+import java.io.File;
+
+import javax.swing.ImageIcon;
+
+import com.alee.extended.filefilter.AbstractFileFilter;
 
 import fcatools.conexpng.io.locale.LocaleHandler;
 
@@ -15,22 +19,158 @@ public class FileFilters {
         cex, csv, cxt, jpg, jpeg, oal, pdf, png, svg
     };
 
-    public static FileNameExtensionFilter cexFilter = new FileNameExtensionFilter(
-            LocaleHandler.getString("FileFilters.cexFilter.getDescription"), "cex");
-    public static FileNameExtensionFilter csvFilter = new FileNameExtensionFilter(
-            LocaleHandler.getString("FileFilters.csvFilter.getDescription"), "csv");
-    public static FileNameExtensionFilter cxtFilter = new FileNameExtensionFilter(
-            LocaleHandler.getString("FileFilters.cxtFilter.getDescription"), "cxt");
-    public static FileNameExtensionFilter jpgFilter = new FileNameExtensionFilter(
-            LocaleHandler.getString("FileFilters.jpgFilter.getDescription"), "jpg", "jpeg");
-    public static FileNameExtensionFilter oalFilter = new FileNameExtensionFilter(
-            LocaleHandler.getString("FileFilters.oalFilter.getDescription"), "oal");
-    public static FileNameExtensionFilter pdfFilter = new FileNameExtensionFilter(
-            LocaleHandler.getString("FileFilters.pdfFilter.getDescription"), "pdf");
-    public static FileNameExtensionFilter pngFilter = new FileNameExtensionFilter(
-            LocaleHandler.getString("FileFilters.pngFilter.getDescription"), "png");
-    public static FileNameExtensionFilter svgFilter = new FileNameExtensionFilter(
-            LocaleHandler.getString("FileFilters.svgFilter.getDescription"), "svg");
+    public static AbstractFileFilter cexFilter = new AbstractFileFilter() {
+
+        @Override
+        public boolean accept(File pathname) {
+            return !pathname.isHidden() && !pathname.isDirectory() && pathname.getName().endsWith(".cex");
+        }
+
+        @Override
+        public String getDescription() {
+            return LocaleHandler.getString("FileFilters.cexFilter.getDescription");
+        }
+
+        @Override
+        public ImageIcon getIcon() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+    };
+
+    public static AbstractFileFilter csvFilter = new AbstractFileFilter() {
+
+        @Override
+        public boolean accept(File pathname) {
+            return !pathname.isHidden() && !pathname.isDirectory() && pathname.getName().endsWith(".csv");
+        }
+
+        @Override
+        public String getDescription() {
+            return LocaleHandler.getString("FileFilters.csvFilter.getDescription");
+        }
+
+        @Override
+        public ImageIcon getIcon() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+    };
+
+    public static AbstractFileFilter cxtFilter = new AbstractFileFilter() {
+
+        @Override
+        public boolean accept(File pathname) {
+            return !pathname.isHidden() && !pathname.isDirectory() && pathname.getName().endsWith(".cxt");
+        }
+
+        @Override
+        public String getDescription() {
+            return LocaleHandler.getString("FileFilters.cxtFilter.getDescription");
+        }
+
+        @Override
+        public ImageIcon getIcon() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+    };
+
+    public static AbstractFileFilter jpgFilter = new AbstractFileFilter() {
+
+        @Override
+        public boolean accept(File pathname) {
+            return !pathname.isHidden() && !pathname.isDirectory()
+                    && (pathname.getName().endsWith(".jpg") || pathname.getName().endsWith(".jpeg"));
+        }
+
+        @Override
+        public String getDescription() {
+            return LocaleHandler.getString("FileFilters.jpgFilter.getDescription");
+        }
+
+        @Override
+        public ImageIcon getIcon() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+    };
+
+    public static AbstractFileFilter oalFilter = new AbstractFileFilter() {
+
+        @Override
+        public boolean accept(File pathname) {
+            return !pathname.isHidden() && !pathname.isDirectory() && pathname.getName().endsWith(".oal");
+        }
+
+        @Override
+        public String getDescription() {
+            return LocaleHandler.getString("FileFilters.oalFilter.getDescription");
+        }
+
+        @Override
+        public ImageIcon getIcon() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+    };
+
+    public static AbstractFileFilter pdfFilter = new AbstractFileFilter() {
+
+        @Override
+        public boolean accept(File pathname) {
+            return !pathname.isHidden() && !pathname.isDirectory() && pathname.getName().endsWith(".pdf");
+        }
+
+        @Override
+        public String getDescription() {
+            return LocaleHandler.getString("FileFilters.pdfFilter.getDescription");
+        }
+
+        @Override
+        public ImageIcon getIcon() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+    };
+
+    public static AbstractFileFilter pngFilter = new AbstractFileFilter() {
+
+        @Override
+        public boolean accept(File pathname) {
+            return !pathname.isHidden() && !pathname.isDirectory() && pathname.getName().endsWith(".png");
+        }
+
+        @Override
+        public String getDescription() {
+            return LocaleHandler.getString("FileFilters.pngFilter.getDescription");
+        }
+
+        @Override
+        public ImageIcon getIcon() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+    };
+
+    public static AbstractFileFilter svgFilter = new AbstractFileFilter() {
+
+        @Override
+        public boolean accept(File pathname) {
+            return !pathname.isHidden() && !pathname.isDirectory() && pathname.getName().endsWith(".svg");
+        }
+
+        @Override
+        public String getDescription() {
+            return LocaleHandler.getString("FileFilters.svgFilter.getDescription");
+        }
+
+        @Override
+        public ImageIcon getIcon() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+    };
 
     /**
      * Checks if given file name has a supported extension.
