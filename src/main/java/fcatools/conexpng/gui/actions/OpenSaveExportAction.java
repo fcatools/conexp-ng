@@ -17,7 +17,6 @@ import java.io.Writer;
 import javax.imageio.ImageIO;
 import javax.swing.AbstractAction;
 import javax.swing.JOptionPane;
-import javax.swing.filechooser.FileFilter;
 import javax.xml.stream.XMLStreamException;
 
 import org.apache.batik.dom.GenericDOMImplementation;
@@ -31,6 +30,7 @@ import org.apache.fop.svg.PDFTranscoder;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 
+import com.alee.extended.filefilter.AbstractFileFilter;
 import com.alee.laf.filechooser.WebFileChooser;
 
 import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
@@ -131,7 +131,7 @@ public class OpenSaveExportAction extends AbstractAction {
         }
         // save immediately without file chooser if file is already known
         if (type.equals(DialogType.SAVE) && !state.filePath.endsWith("untitled.cex")) {
-            saveContext(state.filePath);
+            saveContext(state.filePath, null);
             return;
         }
         // create file chooser, override approveSelection to ensure that an existing file is not overwritten
@@ -141,18 +141,28 @@ public class OpenSaveExportAction extends AbstractAction {
             @Override
             public void approveSelection() {
                 File f = getSelectedFile();
-                // check if file with added cex/svg extension exists in case an extension is added automatically (no suitable extension existing)
+                // add extension in case no suitable extension already exists
                 String fName = f.getAbsolutePath();
                 if (!FileFilters.hasSupportedExtension(fName)) {
-                    for (FileFilter ff : getChoosableFileFilters()) {
-                        if (ff.equals(FileFilters.cexFilter)) {
-                            f = new File(fName.concat(".cex"));
-                            break;
-                        } else if (ff.equals(FileFilters.svgFilter)) {
-                            f = new File(fName.concat(".svg"));
-                            break;
-                        }
+                    AbstractFileFilter activeFileFilter = getActiveFileFilter();
+                    if (activeFileFilter.equals(FileFilters.cexFilter)) {
+                        f = new File(fName.concat(".cex"));
+                    } else if (activeFileFilter.equals(FileFilters.csvFilter)) {
+                        f = new File(fName.concat(".csv"));
+                    } else if (activeFileFilter.equals(FileFilters.cxtFilter)) {
+                        f = new File(fName.concat(".cxt"));
+                    } else if (activeFileFilter.equals(FileFilters.jpgFilter)) {
+                        f = new File(fName.concat(".jpg"));
+                    } else if (activeFileFilter.equals(FileFilters.oalFilter)) {
+                        f = new File(fName.concat(".oal"));
+                    } else if (activeFileFilter.equals(FileFilters.pdfFilter)) {
+                        f = new File(fName.concat(".pdf"));
+                    } else if (activeFileFilter.equals(FileFilters.pngFilter)) {
+                        f = new File(fName.concat(".png"));
+                    } else if (activeFileFilter.equals(FileFilters.svgFilter)) {
+                        f = new File(fName.concat(".svg"));
                     }
+                    setSelectedFile(f);
                 }
                 if (f.exists() && getDialogType() == SAVE_DIALOG) {
                     int result = JOptionPane.showConfirmDialog(this,
@@ -209,7 +219,7 @@ public class OpenSaveExportAction extends AbstractAction {
             fcRet = fc.showSaveDialog(mainFrame);
         }
         if (fcRet == WebFileChooser.APPROVE_OPTION) {
-            handleFile(fc.getSelectedFile());
+            handleFile(fc.getSelectedFile(), fc.getActiveFileFilter());
         }
     }
 
@@ -218,15 +228,18 @@ public class OpenSaveExportAction extends AbstractAction {
      * 
      * @param selectedFile
      *            file that was selected in the file chooser
+     * @param activeFileFilter
+     *            selected file filter to determine desired file type if no
+     *            extension is specified
      */
-    private void handleFile(File selectedFile) {
+    private void handleFile(File selectedFile, AbstractFileFilter activeFileFilter) {
         String path = selectedFile.getAbsolutePath();
         if (type.equals(DialogType.OPEN)) {
             openContext(mainFrame, state, path);
         } else if (type.equals(DialogType.EXPORT)) {
-            exportLattice(path);
+            exportLattice(path, activeFileFilter);
         } else {
-            saveContext(path);
+            saveContext(path, activeFileFilter);
         }
     }
 
@@ -264,52 +277,76 @@ public class OpenSaveExportAction extends AbstractAction {
      * 
      * @param path
      *            to export lattice to
+     * @param activeFileFilter
+     *            selected file filter to determine desired file type if no
+     *            extension is specified
      */
-    private void exportLattice(String path) {
+    private void exportLattice(String path, AbstractFileFilter activeFileFilter) {
         // export lattice
+        if (path.endsWith(".jpg") || path.endsWith(".jpeg") || path.endsWith(".png")) {
+            exportLatticeAsPixelGraphic(path);
+        } else if (path.endsWith(".svg") || path.endsWith(".pdf")) {
+            exportLatticeAsVectorGraphic(path);
+        }
+    }
+
+
+    /**
+     * Exports the lattice as a pixel graphic.
+     * 
+     * @param path
+     *            to save image to
+     */
+    private void exportLatticeAsPixelGraphic(String path) {
         try {
             Dimension d = latticeGraphView.getSize();
-            if (path.endsWith(".jpg") || path.endsWith(".jpeg") || path.endsWith(".png")) {
-                // using TYPE_3BYTE_BGR as workaround for OpenJDK, don't
-                // change it
-                BufferedImage bi = new BufferedImage(d.width, d.height, BufferedImage.TYPE_3BYTE_BGR);
-                Graphics2D g = bi.createGraphics();
-                latticeGraphView.paint(g);
-                ImageIO.write(bi, path.endsWith(".png") ? "PNG" : "JPG", new File(path));
+            // using TYPE_3BYTE_BGR as workaround for OpenJDK, don't
+            // change it
+            BufferedImage bi = new BufferedImage(d.width, d.height, BufferedImage.TYPE_3BYTE_BGR);
+            Graphics2D g = bi.createGraphics();
+            latticeGraphView.paint(g);
+            ImageIO.write(bi, path.endsWith(".png") ? "PNG" : "JPG", new File(path));
+        } catch (IOException e) {
+            Util.handleIOExceptions(mainFrame, e, path, Util.FileOperationType.EXPORT);
+        }
+    }
+
+    /**
+     * Exports lattice as vector graphics.
+     * 
+     * @param path
+     *            to save image to
+     */
+    private void exportLatticeAsVectorGraphic(String path) {
+        try {
+            DOMImplementation domImpl = GenericDOMImplementation.getDOMImplementation();
+            String svgNS = SVGDOMImplementation.SVG_NAMESPACE_URI;
+            Document document = domImpl.createDocument(svgNS, "svg", null);
+            SVGGraphics2D svgGenerator = new SVGGraphics2D(document);
+            latticeGraphView.paint(svgGenerator);
+            if (path.endsWith(".pdf")) {
+                // use temp file to store svg file
+                File tmpFile = File.createTempFile("exported_lattice.svg", ".tmp");
+                Writer out = new FileWriter(tmpFile);
+                svgGenerator.stream(out, true);
+                out.close();
+                Dimension d = latticeGraphView.getSize();
+                Transcoder transcoder = new PDFTranscoder();
+                transcoder.addTranscodingHint(PDFTranscoder.KEY_WIDTH, new Float(d.width));
+                transcoder.addTranscodingHint(PDFTranscoder.KEY_HEIGHT, new Float(d.height));
+                transcoder.addTranscodingHint(PDFTranscoder.KEY_AOI, new Rectangle(d.width, d.height));
+                TranscoderInput inputSvgImage = new TranscoderInput(new FileReader(tmpFile));
+                OutputStream ostream = new FileOutputStream(path);
+                TranscoderOutput outputFile = new TranscoderOutput(ostream);
+                transcoder.transcode(inputSvgImage, outputFile);
+                ostream.close();
+                tmpFile.delete();
             } else {
-                DOMImplementation domImpl = GenericDOMImplementation.getDOMImplementation();
-                String svgNS = SVGDOMImplementation.SVG_NAMESPACE_URI;
-                Document document = domImpl.createDocument(svgNS, "svg", null);
-                SVGGraphics2D svgGenerator = new SVGGraphics2D(document);
-                latticeGraphView.paint(svgGenerator);
-                Transcoder transcoder = null;
-                if (path.endsWith(".pdf")) {
-                    transcoder = new PDFTranscoder();
-                    transcoder.addTranscodingHint(PDFTranscoder.KEY_WIDTH, new Float(d.width));
-                    transcoder.addTranscodingHint(PDFTranscoder.KEY_HEIGHT, new Float(d.height));
-                    transcoder.addTranscodingHint(PDFTranscoder.KEY_AOI, new Rectangle(d.width, d.height));
-                    // use temp file to store svg file
-                    File tmpFile = File.createTempFile("exported_lattice.svg", ".tmp");
-                    Writer tmpOut = new FileWriter(tmpFile);
-                    svgGenerator.stream(tmpOut, true);
-                    tmpOut.close();
-                    TranscoderInput inputSvgImage = new TranscoderInput(new FileReader(tmpFile));
-                    OutputStream ostream = new FileOutputStream(path);
-                    TranscoderOutput outputFile = new TranscoderOutput(ostream);
-                    transcoder.transcode(inputSvgImage, outputFile);
-                    ostream.close();
-                    tmpFile.delete();
-                } else {
-                    // save as svg, concat svg extension if not already there
-                    if (!path.endsWith(".svg")) {
-                        path = path.concat(".svg");
-                    }
-                    Writer out = new FileWriter(new File(path));
-                    svgGenerator.stream(out, true);
-                    out.close();
-                }
+                Writer out = new FileWriter(new File(path));
+                svgGenerator.stream(out, true);
+                out.close();
             }
-        } catch (IOException | TranscoderException e) {
+        } catch (TranscoderException | IOException e) {
             Util.handleIOExceptions(mainFrame, e, path, Util.FileOperationType.EXPORT);
         }
     }
@@ -368,22 +405,21 @@ public class OpenSaveExportAction extends AbstractAction {
      * 
      * @param path
      *            to save context to
+     * @param activeFileFilter
+     *            selected file filter to determine desired file type if no
+     *            extension is specified
      */
-    private void saveContext(String path) {
+    private void saveContext(String path, AbstractFileFilter activeFileFilter) {
         // save context
         try {
-            if (path.endsWith(".csv")) {
+            if (path.endsWith(".cex")) {
+                new CEXWriter(state, path);
+            } else if (path.endsWith(".csv")) {
                 new CSVWriter(state, path);
             } else if (path.endsWith(".cxt")) {
                 new CXTWriter(state, path);
             } else if (path.endsWith(".oal")) {
                 new OALWriter(state, path);
-            } else {
-                // save context as cex if no extension is specified
-                if (!path.endsWith(".cex")) {
-                    path = path.concat(".cex");
-                }
-                new CEXWriter(state, path);
             }
             state.setNewFile(path);
             state.unsavedChanges = false;
