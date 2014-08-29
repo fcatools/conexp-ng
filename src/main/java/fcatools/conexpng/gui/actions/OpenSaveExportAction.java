@@ -2,6 +2,7 @@ package fcatools.conexpng.gui.actions;
 
 import java.awt.Dimension;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
@@ -40,6 +41,7 @@ import fcatools.conexpng.gui.MainFrame.StillCalculatingDialog;
 import fcatools.conexpng.gui.MainFrame.UnsavedChangesDialog;
 import fcatools.conexpng.gui.MainToolbar;
 import fcatools.conexpng.gui.lattice.LatticeGraphView;
+import fcatools.conexpng.gui.lattice.LatticeView;
 import fcatools.conexpng.gui.lattice.Node;
 import fcatools.conexpng.io.CEXReader;
 import fcatools.conexpng.io.CEXWriter;
@@ -262,12 +264,11 @@ public class OpenSaveExportAction extends AbstractAction {
     private void exportLattice(String path) {
         // export lattice
         try {
-            Dimension d = calculateMaxDimension();
-            Rectangle r = new Rectangle(d.width + 30, d.height + 30);
+            Dimension d = latticeGraphView.getSize();
             if (path.endsWith(".jpg") || path.endsWith(".jpeg") || path.endsWith(".png")) {
                 // using TYPE_3BYTE_BGR as workaround for OpenJDK, don't
                 // change it
-                BufferedImage bi = new BufferedImage(r.width, r.height, BufferedImage.TYPE_3BYTE_BGR);
+                BufferedImage bi = new BufferedImage(d.width, d.height, BufferedImage.TYPE_3BYTE_BGR);
                 Graphics2D g = bi.createGraphics();
                 latticeGraphView.paint(g);
                 ImageIO.write(bi, path.endsWith(".png") ? "PNG" : "JPG", new File(path));
@@ -280,9 +281,9 @@ public class OpenSaveExportAction extends AbstractAction {
                 Transcoder transcoder = null;
                 if (path.endsWith(".pdf")) {
                     transcoder = new PDFTranscoder();
-                    transcoder.addTranscodingHint(PDFTranscoder.KEY_WIDTH, new Float(r.width));
-                    transcoder.addTranscodingHint(PDFTranscoder.KEY_HEIGHT, new Float(r.height));
-                    transcoder.addTranscodingHint(PDFTranscoder.KEY_AOI, r);
+                    transcoder.addTranscodingHint(PDFTranscoder.KEY_WIDTH, new Float(d.width));
+                    transcoder.addTranscodingHint(PDFTranscoder.KEY_HEIGHT, new Float(d.height));
+                    transcoder.addTranscodingHint(PDFTranscoder.KEY_AOI, new Rectangle(d.width, d.height));
                     // use temp file to store svg file
                     File tmpFile = File.createTempFile("exported_lattice.svg", ".tmp");
                     Writer tmpOut = new FileWriter(tmpFile);
@@ -311,33 +312,47 @@ public class OpenSaveExportAction extends AbstractAction {
 
     /**
      * Calculates maximum width and height of lattice graph for pixel graphics.
+     * Not used anymore because only the visible view port is exported.
      * 
      * @return dimension consisting of max width and height
      */
+    @SuppressWarnings("unused")
+    @Deprecated
     private Dimension calculateMaxDimension() {
         int maxWidth = 0;
         int maxHeight = 0;
+        Point offset = LatticeGraphView.getOffset();
+        double zoom = LatticeView.zoomFactor;
+        // real width/height after applying offset and zoom factor
+        int realWidth = 0;
+        int realHeight = 0;
         for (Node n : state.lattice.getNodes()) {
+            realWidth = (int) Math.ceil(n.getX() * zoom + offset.getX());
             if (maxWidth < n.getX()) {
                 maxWidth = n.getX();
             }
-            if (maxHeight < n.getY()) {
-                maxHeight = n.getY();
+            realHeight = (int) Math.ceil(n.getY() * zoom + offset.getY());
+            if (maxHeight < realHeight) {
+                maxHeight = realHeight;
             }
             if (state.guiConf.showAttributLabel) {
-                if (maxWidth < n.getAttributesLabel().getX()) {
-                    maxWidth = n.getAttributesLabel().getX();
+                realWidth = (int) Math.ceil(n.getAttributesLabel().getX() * zoom + offset.getX());
+                if (maxWidth < realWidth) {
+                    maxWidth = realWidth;
                 }
-                if (maxHeight < n.getAttributesLabel().getY()) {
-                    maxHeight = n.getAttributesLabel().getY();
+                realHeight = (int) Math.ceil(n.getAttributesLabel().getY() * zoom + offset.getY());
+                if (maxHeight < realHeight) {
+                    maxHeight = realHeight;
                 }
             }
             if (state.guiConf.showObjectLabel) {
-                if (maxWidth < n.getObjectsLabel().getX()) {
-                    maxWidth = n.getObjectsLabel().getX();
+                realWidth = (int) Math.ceil(n.getObjectsLabel().getX() * zoom + offset.getX());
+                if (maxWidth < realWidth) {
+                    maxWidth = realWidth;
                 }
-                if (maxHeight < n.getObjectsLabel().getY()) {
-                    maxHeight = n.getObjectsLabel().getY();
+                realHeight = (int) Math.ceil(n.getObjectsLabel().getY() * zoom + offset.getY());
+                if (maxHeight < realHeight) {
+                    maxHeight = realHeight;
                 }
             }
         }
