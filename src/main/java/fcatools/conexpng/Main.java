@@ -22,12 +22,9 @@ import com.google.common.collect.Sets;
 import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
 import de.tudresden.inf.tcs.fcalib.FullObject;
 import fcatools.conexpng.gui.MainFrame;
+import fcatools.conexpng.gui.actions.OpenSaveExportAction;
 import fcatools.conexpng.gui.lattice.LatticeGraph;
 import fcatools.conexpng.gui.lattice.LatticeGraphComputer;
-import fcatools.conexpng.io.CEXReader;
-import fcatools.conexpng.io.CSVReader;
-import fcatools.conexpng.io.CXTReader;
-import fcatools.conexpng.io.OALReader;
 import fcatools.conexpng.io.locale.LocaleHandler;
 import fcatools.conexpng.model.FormalContext;
 
@@ -43,8 +40,8 @@ public class Main {
     public static final String settingsDirName = ".conexp-ng";
     public static final String optionsFileName = new File(getSettingsDirectory(), "options.prop").getPath();
     private static Rectangle r;
-    private static Exception exception = null;
     private static boolean fileOpened = false;
+    private final MainFrame f;
 
     public Main() {
         System.setProperty("user.language", LocaleHandler.readLocale());
@@ -79,12 +76,9 @@ public class Main {
 
         // Create main window and take care of correctly saving and restoring
         // the last window location
-        final MainFrame f = new MainFrame(state);
+        f = new MainFrame(state);
         f.setTitle("ConExp-NG - \"" + state.filePath + "\"");
         f.setMinimumSize(new Dimension(1000, 660));
-        if (exception != null) {
-            Util.handleIOExceptions(f, exception, state.filePath);
-        }
         if (firstStart) {
             f.setSize(1000, 660);
             f.setLocationByPlatform(true);
@@ -199,24 +193,9 @@ public class Main {
         }
         if (new File(lastOpened).isFile()) {
             state.filePath = lastOpened;
-            try {
-                // open context
-                if (state.filePath.endsWith(".cex")) {
-                    new CEXReader(state, state.filePath);
-                    fileOpened = true;
-                } else if (state.filePath.endsWith(".csv")) {
-                    new CSVReader(state, state.filePath);
-                    fileOpened = true;
-                } else if (state.filePath.endsWith(".cxt")) {
-                    new CXTReader(state, state.filePath);
-                    fileOpened = true;
-                } else if (state.filePath.endsWith(".oal")) {
-                    new OALReader(state, state.filePath);
-                    fileOpened = true;
-                }
-            } catch (Exception e) {
-                exception = e;
-            }
+            // open context
+            OpenSaveExportAction.openContext(f, state, state.filePath);
+            fileOpened = true;
         } else {
             showExample(state);
             state.filePath = System.getProperty("user.home") + System.getProperty("file.separator") + "untitled.cex";

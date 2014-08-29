@@ -8,12 +8,16 @@ import java.awt.event.ItemListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.URL;
 
 import javax.swing.Action;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
+import javax.xml.stream.XMLStreamException;
+
+import org.apache.batik.transcoder.TranscoderException;
 
 import com.alee.laf.button.WebButton;
 import com.alee.laf.button.WebToggleButton;
@@ -26,6 +30,15 @@ import com.alee.laf.rootpane.WebFrame;
 import fcatools.conexpng.io.locale.LocaleHandler;
 
 public class Util {
+
+    /**
+     * Enumeration that encapsulates all classes where I/O errors could happen
+     * 
+     * @author Torsten Casselt
+     */
+    public static enum FileOperationType {
+        EXPORT, OPEN, SAVE
+    };
 
     public static WebButton createButton(String tooltip, String name, String iconPath) {
         WebButton b = new WebButton();
@@ -82,13 +95,41 @@ public class Util {
         dialog.setLocation(x, y);
     }
 
-    public static void handleIOExceptions(WebFrame parent, Exception ex, String path) {
+    /**
+     * Shows error messages for various I/O errors.
+     * 
+     * @param parent
+     *            to attach error dialogs to
+     * @param ex
+     *            exception that occurred
+     * @param path
+     *            path that were accessed when exception occurred
+     * @param fot
+     *            file operation type when error occurred
+     */
+    public static void handleIOExceptions(WebFrame parent, Exception ex, String path, FileOperationType fot) {
+        String errorMessage;
         if (ex instanceof FileNotFoundException) {
             showMessageDialog(parent, LocaleHandler.getString("Util.handleIOExceptions.FileNotFoundException") + path,
                     true);
-        } else {
+        } else if (ex instanceof IOException) {
+            errorMessage = fot.equals(FileOperationType.OPEN) ? LocaleHandler
+                    .getString("Util.handleIOExceptions.open.IOException") + ex.getMessage() : LocaleHandler
+                    .getString("Util.handleIOExceptions.save.IOException") + ex.getMessage();
+            showMessageDialog(parent, errorMessage, true);
+        } else if (ex instanceof TranscoderException) {
             showMessageDialog(parent,
-                    LocaleHandler.getString("Util.handleIOExceptions.otherExceptions") + ex.getMessage(), true);
+                    LocaleHandler.getString("Util.handleIOExceptions.TranscoderException") + ex.getMessage(), true);
+        } else if (ex instanceof XMLStreamException) {
+            errorMessage = fot.equals(FileOperationType.OPEN) ? LocaleHandler
+                    .getString("Util.handleIOExceptions.open.XMLStreamException") + ex.getMessage() : LocaleHandler
+                    .getString("Util.handleIOExceptions.save.XMLStreamException") + ex.getMessage();
+            showMessageDialog(parent, errorMessage, true);
+        } else {
+            errorMessage = fot.equals(FileOperationType.OPEN) ? LocaleHandler
+                    .getString("Util.handleIOExceptions.open.otherExceptions") + ex.getMessage() : LocaleHandler
+                    .getString("Util.handleIOExceptions.otherExceptions") + ex.getMessage();
+            showMessageDialog(parent, errorMessage, true);
         }
         ex.printStackTrace();
     }

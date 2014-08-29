@@ -31,7 +31,6 @@ import fcatools.conexpng.Util;
 import fcatools.conexpng.gui.MainFrame.StillCalculatingDialog;
 import fcatools.conexpng.gui.actions.NewAction;
 import fcatools.conexpng.gui.actions.OpenSaveExportAction;
-import fcatools.conexpng.io.CEXReader;
 import fcatools.conexpng.io.locale.LocaleHandler;
 import fcatools.conexpng.io.locale.SupportedLanguages;
 
@@ -94,12 +93,8 @@ public class MainToolbar extends WebToolBar {
                     }
                     String path = String.copyValueOf(((String) ((WebList) e.getSource()).getSelectedValue())
                             .toCharArray());
-                    try {
-                        new CEXReader(state, path);
-
-                    } catch (Exception e1) {
-                        Util.handleIOExceptions(mainFrame, e1, path);
-                    }
+                    // open context
+                    OpenSaveExportAction.openContext(mainFrame, state, path);
                     ((WebList) e.getSource()).clearSelection();
                 }
             }
