@@ -129,7 +129,8 @@ public class OpenSaveExportAction extends AbstractAction {
         }
         // save immediately without file chooser if file is already known
         if (type.equals(DialogType.SAVE) && !state.filePath.endsWith("untitled.cex")) {
-            // saveFile(MainToolbar.this.state.filePath);
+            saveContext(state.filePath);
+            return;
         }
         // create file chooser, override approveSelection to ensure that an existing file is not overwritten
         final WebFileChooser fc = new WebFileChooser() {
@@ -217,17 +218,9 @@ public class OpenSaveExportAction extends AbstractAction {
         if (type.equals(DialogType.OPEN)) {
             openContext(mainFrame, state, path);
         } else if (type.equals(DialogType.EXPORT)) {
-            try {
-                exportLattice(path);
-            } catch (IOException | TranscoderException e) {
-                Util.handleIOExceptions(mainFrame, e, path, Util.FileOperationType.EXPORT);
-            }
+            exportLattice(path);
         } else {
-            try {
-                saveContext(path);
-            } catch (IOException | XMLStreamException e) {
-                Util.handleIOExceptions(mainFrame, e, path, Util.FileOperationType.SAVE);
-            }
+            saveContext(path);
         }
     }
 
@@ -265,52 +258,54 @@ public class OpenSaveExportAction extends AbstractAction {
      * 
      * @param path
      *            to export lattice to
-     * @throws IOException
-     * @throws TranscoderException
      */
-    private void exportLattice(String path) throws IOException, TranscoderException {
+    private void exportLattice(String path) {
         // export lattice
-        Dimension d = calculateMaxDimension();
-        Rectangle r = new Rectangle(d.width + 30, d.height + 30);
-        if (path.endsWith(".jpg") || path.endsWith(".jpeg") || path.endsWith(".png")) {
-            // using TYPE_3BYTE_BGR as workaround for OpenJDK, don't
-            // change it
-            BufferedImage bi = new BufferedImage(r.width, r.height, BufferedImage.TYPE_3BYTE_BGR);
-            Graphics2D g = bi.createGraphics();
-            latticeGraphView.paint(g);
-            ImageIO.write(bi, path.endsWith(".png") ? "PNG" : "JPG", new File(path));
-        } else {
-            DOMImplementation domImpl = GenericDOMImplementation.getDOMImplementation();
-            String svgNS = SVGDOMImplementation.SVG_NAMESPACE_URI;
-            Document document = domImpl.createDocument(svgNS, "svg", null);
-            SVGGraphics2D svgGenerator = new SVGGraphics2D(document);
-            latticeGraphView.paint(svgGenerator);
-            Transcoder transcoder = null;
-            if (path.endsWith(".pdf")) {
-                transcoder = new PDFTranscoder();
-                transcoder.addTranscodingHint(PDFTranscoder.KEY_WIDTH, new Float(r.width));
-                transcoder.addTranscodingHint(PDFTranscoder.KEY_HEIGHT, new Float(r.height));
-                transcoder.addTranscodingHint(PDFTranscoder.KEY_AOI, r);
-                // use temp file to store svg file
-                File tmpFile = File.createTempFile("exported_lattice.svg", ".tmp");
-                Writer tmpOut = new FileWriter(tmpFile);
-                svgGenerator.stream(tmpOut, true);
-                tmpOut.close();
-                TranscoderInput inputSvgImage = new TranscoderInput(new FileReader(tmpFile));
-                OutputStream ostream = new FileOutputStream(path);
-                TranscoderOutput outputFile = new TranscoderOutput(ostream);
-                transcoder.transcode(inputSvgImage, outputFile);
-                ostream.close();
-                tmpFile.delete();
+        try {
+            Dimension d = calculateMaxDimension();
+            Rectangle r = new Rectangle(d.width + 30, d.height + 30);
+            if (path.endsWith(".jpg") || path.endsWith(".jpeg") || path.endsWith(".png")) {
+                // using TYPE_3BYTE_BGR as workaround for OpenJDK, don't
+                // change it
+                BufferedImage bi = new BufferedImage(r.width, r.height, BufferedImage.TYPE_3BYTE_BGR);
+                Graphics2D g = bi.createGraphics();
+                latticeGraphView.paint(g);
+                ImageIO.write(bi, path.endsWith(".png") ? "PNG" : "JPG", new File(path));
             } else {
-                // save as svg, concat svg extension if not already there
-                if (!path.endsWith(".svg")) {
-                    path = path.concat(".svg");
+                DOMImplementation domImpl = GenericDOMImplementation.getDOMImplementation();
+                String svgNS = SVGDOMImplementation.SVG_NAMESPACE_URI;
+                Document document = domImpl.createDocument(svgNS, "svg", null);
+                SVGGraphics2D svgGenerator = new SVGGraphics2D(document);
+                latticeGraphView.paint(svgGenerator);
+                Transcoder transcoder = null;
+                if (path.endsWith(".pdf")) {
+                    transcoder = new PDFTranscoder();
+                    transcoder.addTranscodingHint(PDFTranscoder.KEY_WIDTH, new Float(r.width));
+                    transcoder.addTranscodingHint(PDFTranscoder.KEY_HEIGHT, new Float(r.height));
+                    transcoder.addTranscodingHint(PDFTranscoder.KEY_AOI, r);
+                    // use temp file to store svg file
+                    File tmpFile = File.createTempFile("exported_lattice.svg", ".tmp");
+                    Writer tmpOut = new FileWriter(tmpFile);
+                    svgGenerator.stream(tmpOut, true);
+                    tmpOut.close();
+                    TranscoderInput inputSvgImage = new TranscoderInput(new FileReader(tmpFile));
+                    OutputStream ostream = new FileOutputStream(path);
+                    TranscoderOutput outputFile = new TranscoderOutput(ostream);
+                    transcoder.transcode(inputSvgImage, outputFile);
+                    ostream.close();
+                    tmpFile.delete();
+                } else {
+                    // save as svg, concat svg extension if not already there
+                    if (!path.endsWith(".svg")) {
+                        path = path.concat(".svg");
+                    }
+                    Writer out = new FileWriter(new File(path));
+                    svgGenerator.stream(out, true);
+                    out.close();
                 }
-                Writer out = new FileWriter(new File(path));
-                svgGenerator.stream(out, true);
-                out.close();
             }
+        } catch (IOException | TranscoderException e) {
+            Util.handleIOExceptions(mainFrame, e, path, Util.FileOperationType.EXPORT);
         }
     }
 
@@ -354,26 +349,28 @@ public class OpenSaveExportAction extends AbstractAction {
      * 
      * @param path
      *            to save context to
-     * @throws IOException
-     * @throws XMLStreamException
      */
-    private void saveContext(String path) throws IOException, XMLStreamException {
+    private void saveContext(String path) {
         // save context
-        if (path.endsWith(".csv")) {
-            new CSVWriter(state, path);
-        } else if (path.endsWith(".cxt")) {
-            new CXTWriter(state, path);
-        } else if (path.endsWith(".oal")) {
-            new OALWriter(state, path);
-        } else {
-            // save context as cex if no extension is specified
-            if (!path.endsWith(".cex")) {
-                path = path.concat(".cex");
+        try {
+            if (path.endsWith(".csv")) {
+                new CSVWriter(state, path);
+            } else if (path.endsWith(".cxt")) {
+                new CXTWriter(state, path);
+            } else if (path.endsWith(".oal")) {
+                new OALWriter(state, path);
+            } else {
+                // save context as cex if no extension is specified
+                if (!path.endsWith(".cex")) {
+                    path = path.concat(".cex");
+                }
+                new CEXWriter(state, path);
             }
-            new CEXWriter(state, path);
+            state.setNewFile(path);
+            state.unsavedChanges = false;
+            MainToolbar.getSaveButton().setEnabled(false);
+        } catch (IOException | XMLStreamException e) {
+            Util.handleIOExceptions(mainFrame, e, path, Util.FileOperationType.SAVE);
         }
-        state.setNewFile(path);
-        state.unsavedChanges = false;
-        MainToolbar.getSaveButton().setEnabled(false);
     }
 }
