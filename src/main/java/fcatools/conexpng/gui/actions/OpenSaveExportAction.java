@@ -191,11 +191,15 @@ public class OpenSaveExportAction extends AbstractAction {
             fc.addChoosableFileFilter(FileFilters.pdfFilter);
             fc.addChoosableFileFilter(FileFilters.pngFilter);
             fc.addChoosableFileFilter(FileFilters.jpgFilter);
+            // set default file filter
+            fc.setFileFilter(FileFilters.svgFilter);
         } else {
             fc.addChoosableFileFilter(FileFilters.cexFilter);
             fc.addChoosableFileFilter(FileFilters.csvFilter);
             fc.addChoosableFileFilter(FileFilters.cxtFilter);
             fc.addChoosableFileFilter(FileFilters.oalFilter);
+            // set default file filter
+            fc.setFileFilter(FileFilters.cexFilter);
         }
         // show file chooser
         int fcRet;
