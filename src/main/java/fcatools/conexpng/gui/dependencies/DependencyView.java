@@ -235,6 +235,7 @@ public class DependencyView extends View {
         associationWorker = new AssociationWorker(this, state, state.guiConf.support, 0, progressBarId);
         associationWorker.addPropertyChangeListener(new StatusBarPropertyChangeListener(progressBarId, state
                 .getStatusBar()));
+        state.getStatusBar().addCalculation(progressBarId, associationWorker);
         associationWorker.execute();
     }
 
@@ -361,6 +362,7 @@ public class DependencyView extends View {
         implicationWorker = new ImplicationWorker(this, progressBarId);
         implicationWorker.addPropertyChangeListener(new StatusBarPropertyChangeListener(progressBarId, state
                 .getStatusBar()));
+        state.getStatusBar().addCalculation(progressBarId, implicationWorker);
         implicationWorker.execute();
     }
 }

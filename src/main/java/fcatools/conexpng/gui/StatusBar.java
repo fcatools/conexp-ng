@@ -2,14 +2,20 @@ package fcatools.conexpng.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
 
 import com.alee.laf.panel.WebPanel;
 import com.alee.laf.progressbar.WebProgressBar;
+
+import fcatools.conexpng.gui.workers.AbstractWorker;
+import fcatools.conexpng.io.locale.LocaleHandler;
 
 /**
  * Status bar of this program. Displays progress information on calculations.
@@ -19,6 +25,7 @@ import com.alee.laf.progressbar.WebProgressBar;
 @SuppressWarnings("serial")
 public class StatusBar extends WebPanel {
 
+    private Map<Long, AbstractWorker> calculationMap = new HashMap<Long, AbstractWorker>();
     private Map<Long, WebProgressBar> progressBarMap = new HashMap<Long, WebProgressBar>();
     private Long id = 0L;
     private WebPanel panel;
@@ -89,6 +96,19 @@ public class StatusBar extends WebPanel {
     }
 
     /**
+     * Adds a calculation to the status bar to be able to cancel it with a
+     * button.
+     * 
+     * @param id
+     *            of progress bar
+     * @param aw
+     *            worker with calculation
+     */
+    public void addCalculation(Long id, AbstractWorker aw) {
+        calculationMap.put(id, aw);
+    }
+
+    /**
      * Creates a progress bar and returns the id with which it is saved.
      * 
      * @return id of progress bar
@@ -96,6 +116,21 @@ public class StatusBar extends WebPanel {
     public long startCalculation() {
         WebProgressBar pb = new WebProgressBar();
         pb.setStringPainted(true);
+        pb.setLayout(new BoxLayout(pb, BoxLayout.LINE_AXIS));
+        pb.add(Box.createHorizontalGlue());
+        JButton cancelButton = new JButton("x");
+        // save current id as final value for action listener to use; else it
+        // would take the current value at runtime
+        final Long currId = id;
+        cancelButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                calculationMap.get(currId).cancel(true);
+            }
+        });
+        cancelButton.setToolTipText(LocaleHandler.getString("StatusBar.startCalculation.cancelButton.toolTip"));
+        pb.add(cancelButton);
         panel.add(pb);
         progressBarMap.put(id, pb);
         return id++;

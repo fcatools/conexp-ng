@@ -372,6 +372,7 @@ public class LatticeView extends View {
                 Long progressBarId = state.getStatusBar().startCalculation();
                 cc = new ConceptWorker(this, true, progressBarId);
                 cc.addPropertyChangeListener(new StatusBarPropertyChangeListener(progressBarId, state.getStatusBar()));
+                state.getStatusBar().addCalculation(progressBarId, cc);
                 cc.execute();
                 break;
             }
@@ -389,6 +390,7 @@ public class LatticeView extends View {
                     ConceptWorker coca = new ConceptWorker(this, false, progressBarId);
                     coca.addPropertyChangeListener(new StatusBarPropertyChangeListener(progressBarId, state
                             .getStatusBar()));
+                    state.getStatusBar().addCalculation(progressBarId, coca);
                     coca.execute();
                 } else {
                     state.lattice.addEdges(state.concepts);
@@ -405,6 +407,7 @@ public class LatticeView extends View {
             Long progressBarId = state.getStatusBar().startCalculation();
             cc = new ConceptWorker(this, true, progressBarId);
             cc.addPropertyChangeListener(new StatusBarPropertyChangeListener(progressBarId, state.getStatusBar()));
+            state.getStatusBar().addCalculation(progressBarId, cc);
             cc.execute();
         }
         latticeGraphView.repaint();

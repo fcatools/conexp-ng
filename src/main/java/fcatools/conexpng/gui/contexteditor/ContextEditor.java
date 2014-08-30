@@ -649,68 +649,79 @@ public class ContextEditor extends View {
 
     class ClarifyObjectsAction extends AbstractAction {
         public void actionPerformed(ActionEvent e) {
-            if (matrix.isRenaming)
+            if (matrix.isRenaming) {
                 return;
+            }
             Long progressBarId = state.getStatusBar().startCalculation();
             ClarificationReductionWorker crw = new ClarificationReductionWorker(state, matrix, progressBarId, true,
                     false, false);
             crw.addPropertyChangeListener(new StatusBarPropertyChangeListener(progressBarId, state.getStatusBar()));
+            state.getStatusBar().addCalculation(progressBarId, crw);
             crw.execute();
         }
     }
 
     class ClarifyAttributesAction extends AbstractAction {
         public void actionPerformed(ActionEvent e) {
-            if (matrix.isRenaming)
+            if (matrix.isRenaming) {
                 return;
+            }
             Long progressBarId = state.getStatusBar().startCalculation();
             ClarificationReductionWorker crw = new ClarificationReductionWorker(state, matrix, progressBarId, false,
                     false, false);
             crw.addPropertyChangeListener(new StatusBarPropertyChangeListener(progressBarId, state.getStatusBar()));
+            state.getStatusBar().addCalculation(progressBarId, crw);
             crw.execute();
         }
     }
 
     class ReduceObjectsAction extends AbstractAction {
         public void actionPerformed(ActionEvent e) {
-            if (matrix.isRenaming)
+            if (matrix.isRenaming) {
                 return;
+            }
             Long progressBarId = state.getStatusBar().startCalculation();
             ClarificationReductionWorker crw = new ClarificationReductionWorker(state, matrix, progressBarId, true,
                     true, false);
             crw.addPropertyChangeListener(new StatusBarPropertyChangeListener(progressBarId, state.getStatusBar()));
+            state.getStatusBar().addCalculation(progressBarId, crw);
             crw.execute();
         }
     }
 
     class ReduceAttributesAction extends AbstractAction {
         public void actionPerformed(ActionEvent e) {
-            if (matrix.isRenaming)
+            if (matrix.isRenaming) {
                 return;
+            }
             Long progressBarId = state.getStatusBar().startCalculation();
             ClarificationReductionWorker crw = new ClarificationReductionWorker(state, matrix, progressBarId, false,
                     true, false);
             crw.addPropertyChangeListener(new StatusBarPropertyChangeListener(progressBarId, state.getStatusBar()));
+            state.getStatusBar().addCalculation(progressBarId, crw);
             crw.execute();
         }
     }
 
     class ReduceAction extends AbstractAction {
         public void actionPerformed(ActionEvent e) {
-            if (matrix.isRenaming)
+            if (matrix.isRenaming) {
                 return;
+            }
             Long progressBarId = state.getStatusBar().startCalculation();
             ClarificationReductionWorker crw = new ClarificationReductionWorker(state, matrix, progressBarId, false,
                     false, true);
             crw.addPropertyChangeListener(new StatusBarPropertyChangeListener(progressBarId, state.getStatusBar()));
+            state.getStatusBar().addCalculation(progressBarId, crw);
             crw.execute();
         }
     }
 
     class TransposeAction extends AbstractAction {
         public void actionPerformed(ActionEvent e) {
-            if (matrix.isRenaming)
+            if (matrix.isRenaming) {
                 return;
+            }
             state.saveConf();
             state.context.transpose();
             matrixModel.fireTableStructureChanged();
@@ -729,8 +740,9 @@ public class ContextEditor extends View {
         }
 
         public void actionPerformed(ActionEvent e) {
-            if (matrix.isRenaming)
+            if (matrix.isRenaming) {
                 return;
+            }
             state.saveConf();
             matrix.saveSelection();
             addAttributeAt(index);
@@ -748,8 +760,9 @@ public class ContextEditor extends View {
         }
 
         public void actionPerformed(ActionEvent e) {
-            if (matrix.isRenaming)
+            if (matrix.isRenaming) {
                 return;
+            }
             state.saveConf();
             matrix.saveSelection();
             addObjectAt(index);
@@ -761,8 +774,9 @@ public class ContextEditor extends View {
 
     class AddAttributeAfterActiveAction extends AbstractAction {
         public void actionPerformed(ActionEvent e) {
-            if (matrix.isRenaming)
+            if (matrix.isRenaming) {
                 return;
+            }
             invokeAction(ContextEditor.this, new AddAttributeAtAction(lastActiveColumnIndex));
             lastActiveColumnIndex += 1;
             matrix.selectCell(lastActiveRowIndex, lastActiveColumnIndex);
@@ -772,8 +786,9 @@ public class ContextEditor extends View {
 
     class AddAttributeBeforeActiveAction extends AbstractAction {
         public void actionPerformed(ActionEvent e) {
-            if (matrix.isRenaming)
+            if (matrix.isRenaming) {
                 return;
+            }
             invokeAction(ContextEditor.this, new AddAttributeAtAction(lastActiveColumnIndex - 1));
         }
     }
@@ -789,8 +804,9 @@ public class ContextEditor extends View {
 
     class AddObjectAfterActiveAction extends AbstractAction {
         public void actionPerformed(ActionEvent e) {
-            if (matrix.isRenaming)
+            if (matrix.isRenaming) {
                 return;
+            }
             invokeAction(ContextEditor.this, new AddObjectAtAction(lastActiveRowIndex));
             lastActiveRowIndex += 1;
             matrix.selectCell(lastActiveRowIndex, lastActiveColumnIndex);
@@ -800,8 +816,9 @@ public class ContextEditor extends View {
 
     class AddObjectBeforeActiveAction extends AbstractAction {
         public void actionPerformed(ActionEvent e) {
-            if (matrix.isRenaming)
+            if (matrix.isRenaming) {
                 return;
+            }
             invokeAction(ContextEditor.this, new AddObjectAtAction(lastActiveRowIndex - 1));
         }
     }
@@ -817,10 +834,12 @@ public class ContextEditor extends View {
 
     class RenameActiveObjectAction extends AbstractAction {
         public void actionPerformed(ActionEvent e) {
-            if (matrix.isRenaming)
+            if (matrix.isRenaming) {
                 return;
-            if (state.context.getObjectCount() == 0)
+            }
+            if (state.context.getObjectCount() == 0) {
                 return;
+            }
             // This code is the way it is to work around the inability of
             // flushing the keyboard buffer in Swing
             final String name = state.context.getObjectAtIndex(lastActiveRowIndex - 1).getIdentifier();
@@ -839,10 +858,12 @@ public class ContextEditor extends View {
 
     class RenameActiveAttributeAction extends AbstractAction {
         public void actionPerformed(ActionEvent e) {
-            if (matrix.isRenaming)
+            if (matrix.isRenaming) {
                 return;
-            if (state.context.getObjectCount() == 0)
+            }
+            if (state.context.getObjectCount() == 0) {
                 return;
+            }
             // This code is the way it is to work around the inability of
             // flushing the keyboard buffer in Swing
             final String name = state.context.getAttributeAtIndex(lastActiveColumnIndex - 1);
@@ -861,16 +882,19 @@ public class ContextEditor extends View {
 
     class RemoveActiveObjectAction extends AbstractAction {
         public void actionPerformed(ActionEvent e) {
-            if (matrix.isRenaming)
+            if (matrix.isRenaming) {
                 return;
-            if (state.context.getObjectCount() == 0)
+            }
+            if (state.context.getObjectCount() == 0) {
                 return;
+            }
             matrix.saveSelection();
             try {
                 state.saveConf();
                 state.context.removeObject(state.context.getObjectAtIndex(lastActiveRowIndex - 1).getIdentifier());
-                if (lastActiveRowIndex - 1 >= state.context.getObjectCount())
+                if (lastActiveRowIndex - 1 >= state.context.getObjectCount()) {
                     lastActiveRowIndex--;
+                }
             } catch (IllegalObjectException e1) {
                 e1.printStackTrace();
             }
@@ -885,16 +909,19 @@ public class ContextEditor extends View {
 
     class RemoveActiveAttributeAction extends AbstractAction {
         public void actionPerformed(ActionEvent e) {
-            if (matrix.isRenaming)
+            if (matrix.isRenaming) {
                 return;
-            if (state.context.getAttributeCount() == 0)
+            }
+            if (state.context.getAttributeCount() == 0) {
                 return;
+            }
             matrix.saveSelection();
             state.saveConf();
             state.context.removeAttribute(state.context.getAttributeAtIndex(lastActiveColumnIndex - 1));
             matrix.updateColumnWidths(lastActiveColumnIndex);
-            if (lastActiveColumnIndex - 1 >= state.context.getAttributeCount())
+            if (lastActiveColumnIndex - 1 >= state.context.getAttributeCount()) {
                 lastActiveColumnIndex--;
+            }
             matrixModel.fireTableStructureChanged();
             matrix.invalidate();
             matrix.repaint();
@@ -906,10 +933,12 @@ public class ContextEditor extends View {
 
     class RemoveSelectedObjectsAction extends AbstractAction {
         public void actionPerformed(ActionEvent e) {
-            if (matrix.isRenaming)
+            if (matrix.isRenaming) {
                 return;
-            if (state.context.getAttributeCount() == 0)
+            }
+            if (state.context.getAttributeCount() == 0) {
                 return;
+            }
             matrix.saveSelection();
             int i = Math.min(matrix.getLastSelectedRowsStartIndex(), matrix.getLastSelectedRowsEndIndex()) - 1;
             int d = Math.abs(matrix.getLastSelectedRowsStartIndex() - matrix.getLastSelectedRowsEndIndex()) + 1;
@@ -931,10 +960,12 @@ public class ContextEditor extends View {
 
     class RemoveSelectedAttributesAction extends AbstractAction {
         public void actionPerformed(ActionEvent e) {
-            if (matrix.isRenaming)
+            if (matrix.isRenaming) {
                 return;
-            if (state.context.getAttributeCount() == 0)
+            }
+            if (state.context.getAttributeCount() == 0) {
                 return;
+            }
             matrix.saveSelection();
             int i = Math.min(matrix.getLastSelectedColumnsStartIndex(), matrix.getLastSelectedColumnsEndIndex()) - 1;
             int d = Math.abs(matrix.getLastSelectedColumnsStartIndex() - matrix.getLastSelectedColumnsEndIndex()) + 1;
@@ -971,8 +1002,9 @@ public class ContextEditor extends View {
     private void addAttributeAt(final int i) {
         String collisionFreeName = "attr" + i;
         while (true) {
-            if (!state.context.existsAttributeAlready(collisionFreeName))
+            if (!state.context.existsAttributeAlready(collisionFreeName)) {
                 break;
+            }
             collisionFreeName = collisionFreeName + "'";
         }
         state.context.addAttributeAt(collisionFreeName, i);
@@ -987,8 +1019,9 @@ public class ContextEditor extends View {
     private void addObjectAt(final int i) {
         String collisionFreeName = "obj" + i;
         while (true) {
-            if (!state.context.existsObjectAlready(collisionFreeName))
+            if (!state.context.existsObjectAlready(collisionFreeName)) {
                 break;
+            }
             collisionFreeName = collisionFreeName + "'";
         }
         FullObject<String, String> newObject = new FullObject<>(collisionFreeName);
