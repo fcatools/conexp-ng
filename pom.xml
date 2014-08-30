@@ -37,8 +37,8 @@
     <!-- Web Look and Feel -->
     <dependency>
       <groupId>de.sciss</groupId>
-      <artifactId>weblaf</artifactId>
-      <version>1.27</version>
+      <artifactId>weblaf-core</artifactId>
+      <version>1.28</version>
     </dependency>
     <!-- Guava -->
     <dependency>
@@ -86,6 +86,11 @@
       <groupId>org.apache.xmlgraphics</groupId>
       <artifactId>batik-codec</artifactId>
       <version>1.7</version>
+    </dependency>
+    <dependency>
+    	<groupId>de.sciss</groupId>
+    	<artifactId>weblaf-ui</artifactId>
+    	<version>1.28</version>
     </dependency>
   </dependencies>
 

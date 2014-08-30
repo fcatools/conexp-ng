@@ -30,8 +30,8 @@ import org.apache.fop.svg.PDFTranscoder;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 
-import com.alee.extended.filefilter.AbstractFileFilter;
 import com.alee.laf.filechooser.WebFileChooser;
+import com.alee.utils.filefilter.AbstractFileFilter;
 
 import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
 import fcatools.conexpng.Conf;

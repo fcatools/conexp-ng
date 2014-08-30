@@ -4,7 +4,7 @@ import java.io.File;
 
 import javax.swing.ImageIcon;
 
-import com.alee.extended.filefilter.AbstractFileFilter;
+import com.alee.utils.filefilter.AbstractFileFilter;
 
 import fcatools.conexpng.io.locale.LocaleHandler;
 
