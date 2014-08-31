@@ -4,7 +4,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
@@ -25,7 +24,6 @@ import de.tudresden.inf.tcs.fcalib.FullObject;
 import de.tudresden.inf.tcs.fcalib.Implication;
 import de.tudresden.inf.tcs.fcalib.utils.ListSet;
 import fcatools.conexpng.Conf;
-import fcatools.conexpng.GUIConf;
 import fcatools.conexpng.gui.lattice.LatticeGraph;
 import fcatools.conexpng.gui.lattice.Node;
 import fcatools.conexpng.model.AssociationRule;
@@ -36,7 +34,6 @@ public class CEXReader {
 
     private FormalContext context;
     private LatticeGraph lattice;
-    private GUIConf guistate;
     private Set<AssociationRule> associations;
     private Set<FCAImplication<String>> implications;
     private Set<Concept<String, FullObject<String, String>>> concepts;
@@ -44,7 +41,6 @@ public class CEXReader {
     public CEXReader(Conf state, String path) throws XMLStreamException, IllegalObjectException, IOException,
             NumberFormatException, IllegalArgumentException, IllegalAccessException, NoSuchFieldException,
             SecurityException {
-        guistate = new GUIConf();
         concepts = new ListSet<>();
         associations = new TreeSet<>();
         implications = new HashSet<>();
@@ -78,8 +74,6 @@ public class CEXReader {
                     addObjects(parser);
                 if (name(element, "Lattice"))
                     addLattice(parser);
-                if (name(element, "Settings"))
-                    addGuiState(parser);
                 if (name(element, "Implications"))
                     addImplications(parser);
                 if (name(element, "Associations"))
@@ -94,11 +88,7 @@ public class CEXReader {
         if (lattice == null) {
             lattice = new LatticeGraph();
         }
-        if (guistate.columnWidths == null) {
-            guistate.columnWidths = new HashMap<>();
-        }
         state.concepts = concepts;
-        state.guiConf = guistate;
         state.associations = associations;
         state.implications = implications;
         state.lattice = lattice;
@@ -185,39 +175,6 @@ public class CEXReader {
                 break;
             case XMLStreamConstants.END_ELEMENT:
                 if (event.asEndElement().getName().toString().equals("Associations"))
-                    return;
-            }
-        }
-    }
-
-    private void addGuiState(XMLEventReader parser) throws XMLStreamException, NumberFormatException,
-            IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
-        while (parser.hasNext()) {
-            XMLEvent event = parser.nextEvent();
-            if (event.getEventType() == XMLStreamConstants.START_ELEMENT) {
-                StartElement element = event.asStartElement();
-                if (name(element, "ColumnWidths"))
-                    getColumnWidths(parser);
-                else {
-                    String name = element.getName().toString();
-
-                    String temp = "";
-                    while ((event = parser.nextEvent()).isCharacters()) {
-                        temp += event.asCharacters().getData();
-                    }
-                    if (guistate.getClass().getField(name).getType() == Integer.TYPE)
-                        guistate.getClass().getField(name).setInt(guistate, Integer.parseInt(temp));
-                    else if (guistate.getClass().getField(name).getType() == Boolean.TYPE)
-                        guistate.getClass().getField(name).setBoolean(guistate, Boolean.parseBoolean(temp));
-                    else if (guistate.getClass().getField(name).getType() == Double.TYPE)
-                        guistate.getClass().getField(name).setDouble(guistate, Double.parseDouble(temp));
-                    else if (guistate.getClass().getField(name).getClass().equals(String.class))
-                        guistate.getClass().getField(name).set(guistate, temp);
-
-                }
-            }
-            if (event.getEventType() == XMLStreamConstants.END_ELEMENT) {
-                if (event.asEndElement().getName().toString().equals("Settings"))
                     return;
             }
         }
@@ -467,32 +424,6 @@ public class CEXReader {
                 return n;
         }
         return null;
-    }
-
-    private void getColumnWidths(XMLEventReader parser) throws XMLStreamException {
-        guistate.columnWidths = new HashMap<>();
-        int column = 0, width = 0;
-        while (parser.hasNext()) {
-            XMLEvent event = parser.nextEvent();
-            switch (event.getEventType()) {
-            case XMLStreamConstants.START_ELEMENT:
-                StartElement element = event.asStartElement();
-                if (name(element, "Column")) {
-                    column = Integer.parseInt(element.getAttributeByName(new QName("Number")).getValue());
-                    event = parser.nextEvent();
-                    String temp = "";
-                    while ((event = parser.nextEvent()).isCharacters()) {
-                        temp += event.asCharacters().getData();
-                    }
-                    width = Integer.parseInt(temp);
-                    guistate.columnWidths.put(column, width);
-                }
-                break;
-            case XMLStreamConstants.END_ELEMENT:
-                if (event.asEndElement().getName().toString().equals("ColumnWidths"))
-                    return;
-            }
-        }
     }
 
     private boolean name(StartElement element, String string) {

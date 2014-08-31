@@ -1,19 +1,19 @@
 package fcatools.conexpng.io;
 
-import de.tudresden.inf.tcs.fcaapi.FCAImplication;
-import de.tudresden.inf.tcs.fcalib.FullObject;
-import fcatools.conexpng.Conf;
-import fcatools.conexpng.gui.lattice.Node;
-import fcatools.conexpng.model.AssociationRule;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.util.HashMap;
 
 import javax.xml.stream.XMLEventFactory;
 import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.lang.reflect.Field;
-import java.util.HashMap;
+
+import de.tudresden.inf.tcs.fcaapi.FCAImplication;
+import de.tudresden.inf.tcs.fcalib.FullObject;
+import fcatools.conexpng.Conf;
+import fcatools.conexpng.gui.lattice.Node;
+import fcatools.conexpng.model.AssociationRule;
 
 public class CEXWriter {
 
@@ -42,14 +42,13 @@ public class CEXWriter {
         addContext(writer);
         addAssociations(writer);
         addImplications(writer);
-        addGUIState(writer);
-        addLatice(writer);
+        addLattice(writer);
         writer.add(eventFactory.createEndElement("", "", "ConceptualSystem"));
         writer.add(eventFactory.createEndDocument());
         writer.close();
     }
 
-    private void addLatice(XMLEventWriter writer) throws XMLStreamException {
+    private void addLattice(XMLEventWriter writer) throws XMLStreamException {
         writer.add(eventFactory.createStartElement("", "", "Lattices"));
         writer.add(eventFactory.createStartElement("", "", "Lattice"));
         if (!state.context.getDontConsideredAttr().isEmpty()) {
@@ -233,47 +232,6 @@ public class CEXWriter {
             }
             writer.add(eventFactory.createEndElement("", "", "Associations"));
         }
-    }
-
-    private void addGUIState(XMLEventWriter writer) throws XMLStreamException {
-        writer.add(eventFactory.createStartElement("", "", "Settings"));
-
-        for (Field f : state.guiConf.getClass().getDeclaredFields()) {
-            if (f.getName().equals("columnWidths")) {
-                addColumnWidths(writer);
-                continue;
-            }
-            try {
-                writer.add(eventFactory.createStartElement("", "", f.getName()));
-                writer.add(eventFactory.createCharacters("" + f.get(state.guiConf)));
-                writer.add(eventFactory.createEndElement("", "", f.getName()));
-
-            } catch (IllegalArgumentException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
-        writer.add(eventFactory.createEndElement("", "", "Settings"));
-    }
-
-    private void addColumnWidths(XMLEventWriter writer) throws XMLStreamException {
-        writer.add(eventFactory.createStartElement("", "", "ColumnWidths"));
-
-        for (int column : state.guiConf.columnWidths.keySet()) {
-            writer.add(eventFactory.createStartElement("", "", "Column"));
-            writer.add(eventFactory.createAttribute("Number", "" + column));
-            writer.add(eventFactory.createStartElement("", "", "Width"));
-
-            writer.add(eventFactory.createCharacters("" + state.guiConf.columnWidths.get(column)));
-
-            writer.add(eventFactory.createEndElement("", "", "Width"));
-            writer.add(eventFactory.createEndElement("", "", "Column"));
-        }
-        writer.add(eventFactory.createEndElement("", "", "ColumnWidths"));
-
     }
 
     private void addContext(XMLEventWriter writer) throws XMLStreamException {

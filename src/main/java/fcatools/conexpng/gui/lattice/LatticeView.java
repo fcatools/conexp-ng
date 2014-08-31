@@ -340,8 +340,9 @@ public class LatticeView extends View {
             ContextChangeEvent cce = (ContextChangeEvent) evt;
             switch (cce.getName()) {
             case CANCELCALCULATIONS: {
-                if (cc != null)
+                if (cc != null) {
                     cc.cancel(true);
+                }
                 break;
             }
             case CONTEXTCHANGED: {
@@ -359,10 +360,11 @@ public class LatticeView extends View {
                 break;
             }
             case LOADEDFILE: {
-                if (state.lattice.isEmpty())
+                if (state.lattice.isEmpty()) {
                     updateLater = true;
-                else
+                } else {
                     loadedfile = true;
+                }
                 break;
             }
             case TEMPORARYCONTEXTCHANGED: {

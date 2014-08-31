@@ -37,7 +37,7 @@ public class Util {
      * @author Torsten Casselt
      */
     public static enum FileOperationType {
-        EXPORT, OPEN, SAVE
+        EXPORT, OPEN, SAVE, GUI
     };
 
     public static WebButton createButton(String tooltip, String name, String iconPath) {
@@ -109,7 +109,9 @@ public class Util {
      */
     public static void handleIOExceptions(WebFrame parent, Exception ex, String path, FileOperationType fot) {
         String errorMessage;
-        if (ex instanceof FileNotFoundException) {
+        if (fot.equals(FileOperationType.GUI)) {
+            showMessageDialog(parent, LocaleHandler.getString("Util.handleIOExceptions.GUI") + path, true);
+        } else if (ex instanceof FileNotFoundException) {
             showMessageDialog(parent, LocaleHandler.getString("Util.handleIOExceptions.FileNotFoundException") + path,
                     true);
         } else if (ex instanceof IOException) {
@@ -152,7 +154,11 @@ public class Util {
         dialog.setModal(true);
         dialog.setContentPane(pane);
         dialog.pack();
-        centerDialogInsideMainFrame(parent, dialog);
+        // check for null because error messages must be shown even on
+        // application start when main frame does not exist already
+        if (parent != null) {
+            centerDialogInsideMainFrame(parent, dialog);
+        }
         dialog.setVisible(true);
     }
 

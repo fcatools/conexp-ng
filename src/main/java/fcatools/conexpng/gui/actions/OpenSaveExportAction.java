@@ -49,6 +49,8 @@ import fcatools.conexpng.io.CSVReader;
 import fcatools.conexpng.io.CSVWriter;
 import fcatools.conexpng.io.CXTReader;
 import fcatools.conexpng.io.CXTWriter;
+import fcatools.conexpng.io.GUIReader;
+import fcatools.conexpng.io.GUIWriter;
 import fcatools.conexpng.io.OALReader;
 import fcatools.conexpng.io.OALWriter;
 import fcatools.conexpng.io.locale.LocaleHandler;
@@ -265,7 +267,11 @@ public class OpenSaveExportAction extends AbstractAction {
                 new CXTReader(state, path);
             } else if (path.endsWith(".oal")) {
                 new OALReader(state, path);
+            } else {
+                // cannot happen
+                return;
             }
+            new GUIReader(state, path);
             // disable save button after context is loaded; since context is
             // loaded on application start, too, a null check is necessary
             // because the gui is not created at this point
@@ -274,7 +280,7 @@ public class OpenSaveExportAction extends AbstractAction {
             }
         } catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException
                 | SecurityException | XMLStreamException | IllegalObjectException | IOException e) {
-            Util.handleIOExceptions(mainFrame, e, path, Util.FileOperationType.OPEN);
+            Util.handleIOExceptions(mainFrame != null ? mainFrame : null, e, path, Util.FileOperationType.OPEN);
         }
     }
 
@@ -426,11 +432,16 @@ public class OpenSaveExportAction extends AbstractAction {
                 new CXTWriter(state, path);
             } else if (path.endsWith(".oal")) {
                 new OALWriter(state, path);
+            } else {
+                // cannot happen
+                return;
             }
+            // save gui state
+            new GUIWriter(state, path);
             state.setNewFile(path);
             state.unsavedChanges = false;
             MainToolbar.getSaveButton().setEnabled(false);
-        } catch (IOException | XMLStreamException e) {
+        } catch (IOException | XMLStreamException | IllegalArgumentException | IllegalAccessException e) {
             Util.handleIOExceptions(mainFrame, e, path, Util.FileOperationType.SAVE);
         }
     }
