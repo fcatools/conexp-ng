@@ -27,6 +27,7 @@ public class ClarificationReductionWorker extends AbstractWorker {
     private ContextMatrix matrix;
     private boolean type, reduction;
     private boolean contextReduction;
+    private boolean clarificationInProgress, reductionInProgress;
 
     /**
      * Creates the worker.
@@ -64,6 +65,7 @@ public class ClarificationReductionWorker extends AbstractWorker {
         // start calculation and set progress bar
         state.startCalculation(type ? StatusMessage.CLARIFYINGOBJECTS : contextReduction ? StatusMessage.CLARIFYING
                 : StatusMessage.CLARIFYINGATTRIBUTES);
+        clarificationInProgress = true;
         setProgressBarMessage(type ? StatusMessage.CLARIFYINGOBJECTS.toString()
                 : contextReduction ? StatusMessage.CLARIFYING.toString() : StatusMessage.CLARIFYINGATTRIBUTES
                         .toString());
@@ -89,6 +91,7 @@ public class ClarificationReductionWorker extends AbstractWorker {
         // end calculation
         state.endCalculation(type ? StatusMessage.CLARIFYINGOBJECTS : contextReduction ? StatusMessage.CLARIFYING
                 : StatusMessage.CLARIFYINGATTRIBUTES);
+        clarificationInProgress = false;
     }
 
     /**
@@ -98,6 +101,7 @@ public class ClarificationReductionWorker extends AbstractWorker {
         // start calculation and set progress bar
         state.startCalculation(type ? StatusMessage.REDUCINGOBJECTS : contextReduction ? StatusMessage.REDUCING
                 : StatusMessage.REDUCINGATTRIBUTES);
+        reductionInProgress = true;
         setProgressBarMessage(type ? StatusMessage.REDUCINGOBJECTS.toString()
                 : contextReduction ? StatusMessage.REDUCING.toString() : StatusMessage.REDUCINGATTRIBUTES.toString());
         int progress = 0;
@@ -149,6 +153,7 @@ public class ClarificationReductionWorker extends AbstractWorker {
         // end calculation
         state.endCalculation(type ? StatusMessage.REDUCINGOBJECTS : contextReduction ? StatusMessage.REDUCING
                 : StatusMessage.REDUCINGATTRIBUTES);
+        reductionInProgress = false;
     }
 
     @Override
@@ -197,8 +202,15 @@ public class ClarificationReductionWorker extends AbstractWorker {
             if (reduction) {
                 state.getContextEditorUndoManager().makeRedoable();
             }
+        } else if (clarificationInProgress) {
+            // cancel clarification
+            state.endCalculation(type ? StatusMessage.CLARIFYINGOBJECTS : contextReduction ? StatusMessage.CLARIFYING
+                    : StatusMessage.CLARIFYINGATTRIBUTES);
+        } else if (reductionInProgress) {
+            // cancel reduction
+            state.endCalculation(type ? StatusMessage.REDUCINGOBJECTS : contextReduction ? StatusMessage.REDUCING
+                    : StatusMessage.REDUCINGATTRIBUTES);
         }
         super.done();
     }
-
 }
