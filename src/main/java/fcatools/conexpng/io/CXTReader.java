@@ -1,15 +1,15 @@
 package fcatools.conexpng.io;
 
-import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
-import de.tudresden.inf.tcs.fcalib.FullObject;
-import fcatools.conexpng.Conf;
-import fcatools.conexpng.model.FormalContext;
-
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
+
+import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
+import de.tudresden.inf.tcs.fcalib.FullObject;
+import fcatools.conexpng.Conf;
+import fcatools.conexpng.model.FormalContext;
 
 public class CXTReader {
 
@@ -77,10 +77,8 @@ public class CXTReader {
         }
 
         state.guiConf.columnWidths = new HashMap<>();
-
-        path = path.substring(0, path.lastIndexOf(System.getProperty("file.separator")) + 1) + "untitled.cex";
-
         state.setNewFile(path);
         state.newContext(context);
+        state.loadedFile();
     }
 }

@@ -14,6 +14,7 @@ import fcatools.conexpng.Conf;
 import fcatools.conexpng.model.FormalContext;
 
 public class CSVReader {
+
     public CSVReader(Conf state, String path) throws IllegalObjectException, IOException {
         FileInputStream fis = new FileInputStream(path);
         BufferedReader br = new BufferedReader(new InputStreamReader(fis));
@@ -34,11 +35,11 @@ public class CSVReader {
             }
             context.addObject(new FullObject<String, String>(obj[0], attrForObj));
         }
-
         br.close();
+
         state.guiConf.columnWidths = new HashMap<>();
-        path = path.substring(0, path.lastIndexOf(System.getProperty("file.separator")) + 1) + "untitled.cex";
         state.setNewFile(path);
         state.newContext(context);
+        state.loadedFile();
     }
 }

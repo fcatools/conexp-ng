@@ -266,6 +266,12 @@ public class OpenSaveExportAction extends AbstractAction {
             } else if (path.endsWith(".oal")) {
                 new OALReader(state, path);
             }
+            // disable save button after context is loaded; since context is
+            // loaded on application start, too, a null check is necessary
+            // because the gui is not created at this point
+            if (mainFrame != null) {
+                MainToolbar.getSaveButton().setEnabled(false);
+            }
         } catch (IllegalArgumentException | IllegalAccessException | NoSuchFieldException
                 | SecurityException | XMLStreamException | IllegalObjectException | IOException e) {
             Util.handleIOExceptions(mainFrame, e, path, Util.FileOperationType.OPEN);

@@ -77,14 +77,16 @@ public class Conf {
     }
 
     public void setNewFile(String filepath) {
-        if (filePath.equals(filepath))
+        if (filePath.equals(filepath)) {
             return;
+        }
         lastOpened.remove(filepath);
         lastOpened.remove(filePath);
         if (new File(filePath).exists()) {
             lastOpened.add(0, this.filePath);
-            if (lastOpened.size() > 5)
+            if (lastOpened.size() > 5) {
                 lastOpened.remove(5);
+            }
         }
         filePath = filepath;
     }
@@ -224,7 +226,7 @@ public class Conf {
 
     private void firePropertyChange(ContextChangeEvents cce, Object oldValue, Object newValue) {
         if (propertyChangeSupport.getPropertyChangeListeners().length != 0) {
-            if (cce != ContextChangeEvents.LOADEDFILE) {
+            if (cce != ContextChangeEvents.LOADEDFILE && cce != ContextChangeEvents.CANCELCALCULATIONS) {
                 unsavedChanges = true;
                 MainToolbar.getSaveButton().setEnabled(true);
             }
