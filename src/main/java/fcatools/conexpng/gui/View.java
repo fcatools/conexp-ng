@@ -23,7 +23,7 @@ public abstract class View extends WebPanel implements PropertyChangeListener {
 
     protected WebToolBar toolbar;
 
-    protected JComponent view, settings;
+    protected JComponent view, settingsPanel;
 
     protected WebPanel panel;
 
@@ -46,7 +46,7 @@ public abstract class View extends WebPanel implements PropertyChangeListener {
         }
         panel.add(view, BorderLayout.CENTER);
 
-        splitPane = new WebSplitPane(HORIZONTAL_SPLIT, settings, panel);
+        splitPane = new WebSplitPane(HORIZONTAL_SPLIT, settingsPanel, panel);
         splitPane.setOneTouchExpandable(true);
         splitPane.setContinuousLayout(true);
         add(splitPane);
@@ -67,7 +67,7 @@ public abstract class View extends WebPanel implements PropertyChangeListener {
      * @return
      */
     public JComponent getSettings() {
-        return settings;
+        return settingsPanel;
     }
 
     @Override

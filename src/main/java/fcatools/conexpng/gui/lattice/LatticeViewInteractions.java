@@ -50,13 +50,13 @@ public class LatticeViewInteractions extends MouseAdapter {
                 @Override
                 public void actionPerformed(ActionEvent arg0) {
                     if (e.getButton() == MouseEvent.BUTTON1) {
-                        LatticeView.zoomFactor += 0.01;
+                        LatticeView.setZoomFactor(LatticeView.getZoomFactor() + 0.01);
                     } else if (e.getButton() == MouseEvent.BUTTON3) {
-                        LatticeView.zoomFactor -= 0.01;
+                        LatticeView.setZoomFactor(LatticeView.getZoomFactor() - 0.01);
                     }
                     // reset zoom factor to 0 if too low
-                    if (LatticeView.zoomFactor < 0) {
-                        LatticeView.zoomFactor = 0;
+                    if (LatticeView.getZoomFactor() < 0) {
+                        LatticeView.setZoomFactor(0);
                     }
                     // repaint
                     view.repaint();
@@ -72,7 +72,7 @@ public class LatticeViewInteractions extends MouseAdapter {
         Point2D point = e.getPoint();
         // remove zoom and offset to reach the model
         AffineTransform trans = new AffineTransform();
-        trans.scale(LatticeView.zoomFactor, LatticeView.zoomFactor);
+        trans.scale(LatticeView.getZoomFactor(), LatticeView.getZoomFactor());
         trans.translate(LatticeGraphView.getOffset().getX(), LatticeGraphView.getOffset().getY());
         try {
             trans.inverseTransform(point, point);
@@ -124,8 +124,8 @@ public class LatticeViewInteractions extends MouseAdapter {
     public void mouseDragged(MouseEvent e) {
         if (clickedOn != null) {
             // update position of the element with respect to drag start point
-            clickedOn.update((int) (originalElementPosX + (e.getX() - dragBeginX) / LatticeView.zoomFactor),
-                    (int) (originalElementPosY + (e.getY() - dragBeginY) / LatticeView.zoomFactor));
+            clickedOn.update((int) (originalElementPosX + (e.getX() - dragBeginX) / LatticeView.getZoomFactor()),
+                    (int) (originalElementPosY + (e.getY() - dragBeginY) / LatticeView.getZoomFactor()));
         } else {
             // move lattice view
             LatticeGraphView view = (LatticeGraphView) e.getSource();

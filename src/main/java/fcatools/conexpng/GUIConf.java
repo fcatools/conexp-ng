@@ -3,39 +3,52 @@ package fcatools.conexpng;
 import java.util.HashMap;
 import java.util.Map;
 
+import fcatools.conexpng.gui.MainFrame;
+import fcatools.conexpng.io.GUIReader;
+
 /**
- * This class stores all the states of the GUI-elements, which you want to save
- * in the cex-file. You can only save simple datatypes, if you want to store a
- * complex one, you havt to do this: 1. you have to provide a representing
- * toString()-method 2. a method to parse such a string and build an object of
- * that datastructure 3. modify the {@link CEXReader} and use this parse-method
- * in it
+ * This class stores the states of the GUI elements, which are saved in the GUI
+ * file related to the context file. Each entry is set in the corresponding GUI
+ * element on creation and (for loading GUI states at runtime) in
+ * {@link MainFrame#updateGUI()} <br>
+ * <br>
+ * If a complex data type needs to be saved, there are several tasks to
+ * complete: <br>
+ * <br>
+ * 1. Implement a representing toString()-method <br>
+ * 2. Implement a method to parse such a string and build an object of the data
+ * type <br>
+ * 3. Modify the {@link GUIReader}: Add a case in the parse method
  * 
  * @author DavidBormann
- * 
  */
 public class GUIConf {
 
     // general
     public int lastTab = 0;
 
-    // Dependencies
+    // dependencies
     public double support = 0.5;
     public double confidence = 0.1;
-    public boolean lexsorting = false;
-    public int splitpanepos = 206;
-    public int assoscrollpos = 0;
-    public int implscrollpos = 0;
-    public int dependenciessettingssplitpos = 170;
+    public boolean lexSorting = false;
+    public int assoImplSplitPanePos = 206;
+    public int assoScrollPos = 0;
+    public int implScrollPos = 0;
+    public int dependenciesSettingsSplitPos = 170;
 
-    // Contexteditor
+    // context
     public Map<Integer, Integer> columnWidths = new HashMap<>();
+    public boolean compactMatrix = false;
+    public boolean showArrowRelations = false;
 
-    // Latticeview
-    public int latticesettingssplitpos = 170;
+    // lattice
+    public int latticeSettingsSplitPos = 170;
     public boolean showObjectLabel = true;
-    public boolean showAttributLabel = true;
+    public boolean showAttributeLabel = true;
     public boolean showEdges = true;
     public boolean idealHighlighting = false;
+    public double zoomFactor = 1.0;
+    public double xOffset = 0.0;
+    public double yOffset = 0.0;
 
 }

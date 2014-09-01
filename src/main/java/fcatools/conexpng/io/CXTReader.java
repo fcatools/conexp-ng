@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.HashMap;
 
 import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
 import de.tudresden.inf.tcs.fcalib.FullObject;
@@ -76,9 +75,7 @@ public class CXTReader {
             throw new IOException("file starts not with a \"B\"");
         }
 
-        state.guiConf.columnWidths = new HashMap<>();
         state.setNewFile(path);
         state.newContext(context);
-        state.loadedFile();
     }
 }

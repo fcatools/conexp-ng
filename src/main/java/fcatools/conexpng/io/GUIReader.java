@@ -16,6 +16,7 @@ import javax.xml.stream.events.XMLEvent;
 
 import fcatools.conexpng.Conf;
 import fcatools.conexpng.GUIConf;
+import fcatools.conexpng.gui.MainFrame;
 
 /**
  * Parses the gui state and restores it for the given context.
@@ -29,6 +30,8 @@ public class GUIReader {
     /**
      * Creates a GUIReader.
      * 
+     * @param mainFrame
+     *            to update window after loading gui state
      * @param state
      *            to save the parsed GUIConf class to
      * @param path
@@ -41,7 +44,8 @@ public class GUIReader {
      * @throws IllegalArgumentException
      * @throws NumberFormatException
      */
-    public GUIReader(Conf state, String path) throws XMLStreamException, FileNotFoundException, NumberFormatException,
+    public GUIReader(MainFrame mainFrame, Conf state, String path) throws XMLStreamException, FileNotFoundException,
+            NumberFormatException,
             IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
         // check if gui file already exists, if not it is ignored
         if (new File(path.concat(".gui")).exists()) {
@@ -69,7 +73,11 @@ public class GUIReader {
             guiConf.columnWidths = new HashMap<>();
         }
         state.guiConf = guiConf;
-        // TODO rebuild/update window
+        // update window if gui state was loaded when application already
+        // started and main frame was built
+        if (mainFrame != null) {
+            mainFrame.updateGUI();
+        }
     }
 
     /**

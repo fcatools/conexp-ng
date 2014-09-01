@@ -94,7 +94,6 @@ public class CEXReader {
         state.lattice = lattice;
         state.context = context;
         state.setNewFile(path);
-        state.loadedFile();
     }
 
     private void addImplications(XMLEventReader parser) throws XMLStreamException, IOException {

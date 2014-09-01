@@ -67,7 +67,12 @@ public class LatticeSettings extends WebAccordion {
         gbc.gridy++;
         final WebRadioButton showEdges = new WebRadioButton(
                 LocaleHandler.getString("LatticeSettings.getLatticePanel.showEdges"));
-        showEdges.setSelected(true);
+        // select if edges shall be displayed based on GUIConf
+        if (state.guiConf.showEdges) {
+            showEdges.setSelected(true);
+        } else {
+            noneEdges.setSelected(true);
+        }
         noneEdges.addActionListener(new ActionListener() {
 
             @Override
@@ -112,8 +117,13 @@ public class LatticeSettings extends WebAccordion {
 
         final WebRadioButton labelsObjects = new WebRadioButton();
         labelsObjects.setText(LocaleHandler.getString("LatticeSettings.getLatticeObjectPanel.labelsObjects"));
-        labelsObjects.setSelected(true);
-        state.guiConf.showObjectLabel = true;
+
+        // select if edges shall be displayed based on GUIConf
+        if (state.guiConf.showObjectLabel) {
+            labelsObjects.setSelected(true);
+        } else {
+            noneObjects.setSelected(true);
+        }
 
         noneObjects.addActionListener(new ActionListener() {
             @Override
@@ -155,13 +165,18 @@ public class LatticeSettings extends WebAccordion {
         noneAttributes.setText(LocaleHandler.getString("LatticeSettings.getLatticeAttrPanel.noneAttributes"));
         final WebRadioButton labelsAttributes = new WebRadioButton();
         labelsAttributes.setText(LocaleHandler.getString("LatticeSettings.getLatticeAttrPanel.labelsAttributes"));
-        labelsAttributes.setSelected(true);
-        state.guiConf.showAttributLabel = true;
+
+        // select if edges shall be displayed based on GUIConf
+        if (state.guiConf.showAttributeLabel) {
+            labelsAttributes.setSelected(true);
+        } else {
+            noneAttributes.setSelected(true);
+        }
 
         noneAttributes.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                state.guiConf.showAttributLabel = false;
+                state.guiConf.showAttributeLabel = false;
                 noneAttributes.setSelected(true);
                 labelsAttributes.setSelected(false);
                 state.showLabelsChanged();
@@ -171,7 +186,7 @@ public class LatticeSettings extends WebAccordion {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                state.guiConf.showAttributLabel = true;
+                state.guiConf.showAttributeLabel = true;
                 labelsAttributes.setSelected(true);
                 noneAttributes.setSelected(false);
                 state.showLabelsChanged();
@@ -254,6 +269,8 @@ public class LatticeSettings extends WebAccordion {
      * @param state
      */
     public void update(Conf state) {
+        this.removePane(0);
+        this.addPane(0, LocaleHandler.getString("LatticeSettings.LatticeSettings.pane.0"), getLatticePanel());
         this.context = state.context;
         this.removePane(1);
         objectCheckBoxes.clear();

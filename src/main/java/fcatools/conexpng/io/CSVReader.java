@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.HashMap;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -37,9 +36,7 @@ public class CSVReader {
         }
         br.close();
 
-        state.guiConf.columnWidths = new HashMap<>();
         state.setNewFile(path);
         state.newContext(context);
-        state.loadedFile();
     }
 }

@@ -206,8 +206,8 @@ public class Node extends JPanel implements LatticeGraphElement, Comparable<Node
             // move subgraph
             if (moveSubgraph) {
                 // calculate offset the node is moved
-                int offsetX = (int) ((x - this.x) / LatticeView.zoomFactor);
-                int offsetY = (int) ((y - this.y) / LatticeView.zoomFactor);
+                int offsetX = (int) ((x - this.x) / LatticeView.getZoomFactor());
+                int offsetY = (int) ((y - this.y) / LatticeView.getZoomFactor());
                 // check if subgraph can be moved with respect to node order
                 for (Node n : ideal) {
                     if (!n.isUpdatePossible(n.y + offsetY)) {

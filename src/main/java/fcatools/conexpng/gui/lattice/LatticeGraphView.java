@@ -32,9 +32,8 @@ import fcatools.conexpng.Conf;
 public class LatticeGraphView extends JSVGCanvas {
 
     private static final long serialVersionUID = -8623872314193862285L;
-    private Conf state;
+    private static Conf state;
     private ArrayList<Node> lastIdeal;
-    private boolean idealHighlighting;
     private boolean move;
     private static Font font = new Font("Monospaced", Font.PLAIN, 12);
     private Stroke drawingStroke = new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0,
@@ -42,7 +41,8 @@ public class LatticeGraphView extends JSVGCanvas {
     private static Point offset = new Point(0, 0);
 
     public LatticeGraphView(Conf state) {
-        this.state = state;
+        LatticeGraphView.state = state;
+        setOffset(state.guiConf.xOffset, state.guiConf.yOffset);
         this.lastIdeal = new ArrayList<Node>();
     }
 
@@ -73,6 +73,8 @@ public class LatticeGraphView extends JSVGCanvas {
      */
     public static void setOffset(double x, double y) {
         offset.setLocation(x, y);
+        state.guiConf.xOffset = x;
+        state.guiConf.yOffset = y;
     }
 
     /**
@@ -98,7 +100,7 @@ public class LatticeGraphView extends JSVGCanvas {
         Graphics2D g = (Graphics2D) g0;
         // zoom and pan view
         AffineTransform trans = new AffineTransform();
-        trans.scale(LatticeView.zoomFactor, LatticeView.zoomFactor);
+        trans.scale(LatticeView.getZoomFactor(), LatticeView.getZoomFactor());
         trans.translate(offset.getX(), offset.getY());
         g.transform(trans);
 
@@ -117,9 +119,10 @@ public class LatticeGraphView extends JSVGCanvas {
         if (!state.lattice.getEdges().isEmpty() && state.guiConf.showEdges) {
             for (Edge e : state.lattice.getEdges()) {
                 g.setColor(Color.BLACK);
-                if (e.getU().isPartOfAnIdeal() && e.getV().isPartOfAnIdeal() && idealHighlighting) {
+                if (e.getU().isPartOfAnIdeal() && e.getV().isPartOfAnIdeal() && state.guiConf.idealHighlighting) {
                     g.setColor(Color.BLUE);
-                } else if (!(e.getU().isPartOfAnIdeal() && e.getV().isPartOfAnIdeal()) && idealHighlighting) {
+                } else if (!(e.getU().isPartOfAnIdeal() && e.getV().isPartOfAnIdeal())
+                        && state.guiConf.idealHighlighting) {
                     g.setColor(Color.LIGHT_GRAY);
                 }
                 g.drawLine(e.getU().getX() + radius, e.getU().getY() + radius, e.getV().getX() + radius, e.getV()
@@ -168,7 +171,7 @@ public class LatticeGraphView extends JSVGCanvas {
             }
 
             // analog like objects
-            if ((!n.getVisibleAttributes().isEmpty()) && state.guiConf.showAttributLabel) {
+            if ((!n.getVisibleAttributes().isEmpty()) && state.guiConf.showAttributeLabel) {
                 g.setColor(Color.BLACK);
                 g.setStroke(drawingStroke);
                 g.drawLine(n.getAttributesLabel().getX() + n.getAttributesLabel().getBounds().width / 2, n
@@ -224,17 +227,17 @@ public class LatticeGraphView extends JSVGCanvas {
 
             // highlight an ideal if it selected
 
-            if (n.isPartOfAnIdeal() && idealHighlighting) {
+            if (n.isPartOfAnIdeal() && state.guiConf.idealHighlighting) {
                 lastIdeal.add(n);
                 g.setColor(Color.BLUE);
                 g.drawOval(x, y, radius * 2, radius * 2);
-            } else if ((!n.isPartOfAnIdeal()) && idealHighlighting) {
+            } else if ((!n.isPartOfAnIdeal()) && state.guiConf.idealHighlighting) {
                 g.setColor(Color.LIGHT_GRAY);
                 g.drawOval(x, y, radius * 2, radius * 2);
             }
 
             // highlight the node if it is the node that was clicked on.
-            if (n.isClickedOn() && idealHighlighting) {
+            if (n.isClickedOn() && state.guiConf.idealHighlighting) {
                 g.setColor(Color.RED);
                 g.drawOval(x - 1, y - 1, radius * 2 + 2, radius * 2 + 2);
             }
@@ -259,9 +262,4 @@ public class LatticeGraphView extends JSVGCanvas {
             n.moveSubgraph(change);
         }
     }
-
-    public void idealHighlighting(boolean change) {
-        this.idealHighlighting = change;
-    }
-
 }

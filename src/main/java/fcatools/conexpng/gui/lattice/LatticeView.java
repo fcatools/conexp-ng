@@ -26,6 +26,7 @@ import de.tudresden.inf.tcs.fcalib.FullObject;
 import de.tudresden.inf.tcs.fcalib.utils.ListSet;
 import fcatools.conexpng.Conf;
 import fcatools.conexpng.Conf.ContextChangeEvent;
+import fcatools.conexpng.GUIConf;
 import fcatools.conexpng.Util;
 import fcatools.conexpng.gui.MainFrame;
 import fcatools.conexpng.gui.StatusBarPropertyChangeListener;
@@ -44,16 +45,21 @@ public class LatticeView extends View {
     private static final long serialVersionUID = 1660117627650529212L;
 
     public static int radius = 7;
-    public static double zoomFactor = 1;
+    private static double zoomFactor;
     private LatticeGraphComputer alg;
     private MainFrame mainFrame;
     private LatticeGraphView latticeGraphView;
+    private JToggleButton showIdealButton;
 
     private boolean updateLater;
 
+    private static GUIConf guiConf;
+
     public LatticeView(final Conf state, MainFrame mainframe) {
         super(state);
+        guiConf = state.guiConf;
         this.mainFrame = mainframe;
+        zoomFactor = state.guiConf.zoomFactor;
         if (state.lattice == null || state.lattice.isEmpty()) {
             state.lattice = LatticeGraphComputer.computeLatticeGraph(
                     new ListSet<Concept<String, FullObject<String, String>>>(),
@@ -65,8 +71,8 @@ public class LatticeView extends View {
         latticeGraphView.addMouseListener(interactions);
         latticeGraphView.addMouseMotionListener(interactions);
         latticeGraphView.addMouseWheelListener(interactions);
-        settings = new LatticeSettings(state);
-        settings.setMinimumSize(new Dimension(170, 400));
+        settingsPanel = new LatticeSettings(state);
+        settingsPanel.setMinimumSize(new Dimension(170, 400));
 
         JButton export = Util.createButton(LocaleHandler.getString("LatticeView.LatticeView.export"), "export",
                 "conexp/cameraFlash.gif");
@@ -92,19 +98,19 @@ public class LatticeView extends View {
         });
         toolbar.add(move);
 
-        JToggleButton showIdeal = Util.createToggleButton(LocaleHandler.getString("LatticeView.LatticeView.showIdeal"),
+        showIdealButton = Util.createToggleButton(LocaleHandler.getString("LatticeView.LatticeView.showIdeal"),
                 "ideal", "conexp/contextIcon.gif");
-        showIdeal.addActionListener(new ActionListener() {
+        showIdealButton.addActionListener(new ActionListener() {
             private boolean last = false;
 
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 last = !last;
-                latticeGraphView.idealHighlighting(last);
+                state.guiConf.idealHighlighting = last;
                 latticeGraphView.repaint();
             }
         });
-        toolbar.add(showIdeal);
+        toolbar.add(showIdealButton);
 
         WebButton resetGraphPosition = Util.createButton(
                 LocaleHandler.getString("LatticeView.LatticeView.resetGraphPosition"), "resetGraphPosition",
@@ -236,7 +242,7 @@ public class LatticeView extends View {
         zoomOriginal.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                LatticeView.zoomFactor = 1;
+                LatticeView.setZoomFactor(1);
                 latticeGraphView.repaint();
             }
         });
@@ -258,10 +264,10 @@ public class LatticeView extends View {
                 timer = new Timer(0, new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent arg0) {
-                        LatticeView.zoomFactor += 0.01;
+                        LatticeView.setZoomFactor(LatticeView.getZoomFactor() + 0.01);
                         // reset zoom factor to 0 if too low
-                        if (LatticeView.zoomFactor < 0) {
-                            LatticeView.zoomFactor = 0;
+                        if (LatticeView.getZoomFactor() < 0) {
+                            LatticeView.setZoomFactor(0);
                         }
                         latticeGraphView.repaint();
                     }
@@ -287,10 +293,10 @@ public class LatticeView extends View {
                 timer = new Timer(0, new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent arg0) {
-                        LatticeView.zoomFactor -= 0.01;
+                        LatticeView.setZoomFactor(LatticeView.getZoomFactor() - 0.01);
                         // reset zoom factor to 0 if too low
-                        if (LatticeView.zoomFactor < 0) {
-                            LatticeView.zoomFactor = 0;
+                        if (LatticeView.getZoomFactor() < 0) {
+                            LatticeView.setZoomFactor(0);
                         }
                         latticeGraphView.repaint();
                     }
@@ -301,7 +307,7 @@ public class LatticeView extends View {
         toolbar.add(zoomOut);
 
         super.init();
-        splitPane.setDividerLocation(state.guiConf.latticesettingssplitpos);
+        setSplitPanePosition();
         splitPane.addDividerListener(new ComponentListener() {
             @Override
             public void componentShown(ComponentEvent arg0) {
@@ -313,7 +319,7 @@ public class LatticeView extends View {
 
             @Override
             public void componentMoved(ComponentEvent arg0) {
-                state.guiConf.latticesettingssplitpos = splitPane.getDividerLocation();
+                state.guiConf.latticeSettingsSplitPos = splitPane.getDividerLocation();
             }
 
             @Override
@@ -323,12 +329,40 @@ public class LatticeView extends View {
     }
 
     /**
+     * Set split pane divider position.
+     */
+    private void setSplitPanePosition() {
+        splitPane.setDividerLocation(state.guiConf.latticeSettingsSplitPos);
+    }
+
+    /**
      * Returns the used lattice graph algorithm.
      * 
      * @return lattice graph algorithm
      */
     public LatticeGraphComputer getAlg() {
         return alg;
+    }
+
+    /**
+     * Getter for zoom factor.
+     * 
+     * @return zoom factor
+     */
+    public static double getZoomFactor() {
+        return zoomFactor;
+    }
+
+    /**
+     * Setter for zoom factor
+     * 
+     * @param zoom
+     *            new zoom factor
+     */
+    public static void setZoomFactor(double zoom) {
+        // round to two decimal places
+        zoomFactor = Math.round(zoom * 100) / 100.0;
+        guiConf.zoomFactor = zoomFactor;
     }
 
     boolean loadedfile = false;
@@ -399,7 +433,6 @@ public class LatticeView extends View {
                     updateLatticeGraph();
                 }
             }
-            ((LatticeSettings) settings).update(state);
         }
         if (isVisible() && updateLater) {
             updateLater = false;
@@ -420,5 +453,18 @@ public class LatticeView extends View {
      */
     public void updateLatticeGraph() {
         latticeGraphView.updateLatticeGraph();
+    }
+
+    /**
+     * Updates the GUI after a new GUIConf is loaded.
+     */
+    public void updateGUI() {
+        // refresh guiConf in static scope
+        guiConf = state.guiConf;
+        setZoomFactor(state.guiConf.zoomFactor);
+        LatticeGraphView.setOffset(state.guiConf.xOffset, state.guiConf.yOffset);
+        setSplitPanePosition();
+        showIdealButton.setSelected(state.guiConf.idealHighlighting);
+        ((LatticeSettings) settingsPanel).update(state);
     }
 }

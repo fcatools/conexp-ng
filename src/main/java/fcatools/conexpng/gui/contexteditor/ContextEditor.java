@@ -31,6 +31,7 @@ import javax.swing.Timer;
 import javax.swing.border.EmptyBorder;
 
 import com.alee.extended.panel.WebButtonGroup;
+import com.alee.laf.button.WebToggleButton;
 import com.alee.laf.menu.WebPopupMenu;
 
 import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
@@ -79,6 +80,8 @@ public class ContextEditor extends View {
     final WebPopupMenu cellPopupMenu;
     final WebPopupMenu objectCellPopupMenu;
     final WebPopupMenu attributeCellPopupMenu;
+
+    WebToggleButton compactMatrixButton, showArrowRelationsButton;
 
     // For remembering which header cell has been right-clicked
     // For movement inside the matrix
@@ -295,14 +298,37 @@ public class ContextEditor extends View {
         group.setButtonsDrawFocus(false);
         toolbar.add(group);
         toolbar.addSeparator();
-        group = new WebButtonGroup(WebButtonGroup.VERTICAL, false, createToggleButton(
+        compactMatrixButton = createToggleButton(
                 LocaleHandler.getString("ContextEditor.createButtonActions.compactMatrix"), "compactMatrix",
-                "icons/context editor/compact.png", (ItemListener) am.get("compact")), createToggleButton(
+                "icons/context editor/compact.png", (ItemListener) am.get("compact"));
+        showArrowRelationsButton = createToggleButton(
                 LocaleHandler.getString("ContextEditor.createButtonActions.showArrowRelations"), "showArrowRelations",
-                        "icons/context editor/show_arrow_relations.png", null) // TODO
-        );
+                "icons/context editor/show_arrow_relations.png", null); // TODO
+        updateButtonSelection();
+        group = new WebButtonGroup(WebButtonGroup.VERTICAL, false, compactMatrixButton, showArrowRelationsButton);
         group.setButtonsDrawFocus(false);
         toolbar.add(group);
+    }
+
+    /**
+     * Updates the toggle button selection of compactMatrixButton and
+     * showArrowRelationsButton to reflect the GUIConf state.
+     */
+    public void updateButtonSelection() {
+        // compact matrix
+        if (state.guiConf.compactMatrix) {
+            compactMatrixButton.setSelected(true);
+            matrix.compact();
+        } else {
+            compactMatrixButton.setSelected(false);
+            matrix.uncompact();
+        }
+        // show arrow relations
+        if (state.guiConf.showArrowRelations) {
+            showArrowRelationsButton.setSelected(true);
+        } else {
+            showArrowRelationsButton.setSelected(false);
+        }
     }
 
     private void createContextMenuActions() {
@@ -985,8 +1011,10 @@ public class ContextEditor extends View {
     class CompactAction extends AbstractAction implements ItemListener {
         public void itemStateChanged(ItemEvent e) {
             if (e.getStateChange() == ItemEvent.SELECTED) {
+                state.guiConf.compactMatrix = true;
                 matrix.compact();
             } else {
+                state.guiConf.compactMatrix = false;
                 matrix.uncompact();
             }
         }

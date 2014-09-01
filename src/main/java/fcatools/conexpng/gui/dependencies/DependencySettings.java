@@ -44,6 +44,9 @@ public class DependencySettings extends JPanel {
     WebTextField confField = new WebTextField("");
     WebSlider confSlider = new WebSlider(0, 100, 0);
 
+    WebRadioButton lexicalSorting = new WebRadioButton();
+    WebRadioButton supportSorting = new WebRadioButton();
+
     // Only for testing
     private int current = 0, all = 0;
 
@@ -79,16 +82,9 @@ public class DependencySettings extends JPanel {
 
     private GUIConf state;
 
-    public void setGuiConf(GUIConf guiConf) {
-        state = guiConf;
-    }
-
     public DependencySettings(GUIConf state) {
         this.state = state;
-        supField.setText("" + state.support);
-        minSupSlider.setValue((int) (state.support * 100));
-        confField.setText("" + state.confidence);
-        confSlider.setValue((int) (state.confidence * 100));
+        setSliderValues();
         propertyChangeSupport = new PropertyChangeSupport(this);
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -127,21 +123,18 @@ public class DependencySettings extends JPanel {
         gbc.gridy = 7;
         add(new WebLabel(LocaleHandler.getString("DependencySettings.DependencySettings.WebLabel.2")), gbc);
         Action sortAction = new SortAction();
-        WebRadioButton lexicalSorting = new WebRadioButton();
+
         lexicalSorting.setAction(sortAction);
         lexicalSorting.setText(LocaleHandler.getString("DependencySettings.DependencySettings.lexicalSorting"));
         lexicalSorting.setMnemonic(KeyEvent.VK_L);
         lexicalSorting.setActionCommand("LexicalOrder");
 
-        WebRadioButton supportSorting = new WebRadioButton();
         supportSorting.setAction(sortAction);
         supportSorting.setText(LocaleHandler.getString("DependencySettings.DependencySettings.supportSorting"));
         supportSorting.setMnemonic(KeyEvent.VK_S);
         supportSorting.setActionCommand("Support");
-        if (state.lexsorting)
-            lexicalSorting.setSelected(true);
-        else
-            supportSorting.setSelected(true);
+
+        setSorting();
         // Group the radio buttons.
         ButtonGroup group = new ButtonGroup();
         group.add(lexicalSorting);
@@ -154,6 +147,37 @@ public class DependencySettings extends JPanel {
         minSupSlider.addChangeListener(new SliderListener(true));
         confField.addKeyListener(new TextFieldAction(false));
         supField.addKeyListener(new TextFieldAction(true));
+    }
+
+    /**
+     * Sets support and confidence slider values and text.
+     */
+    public void setSliderValues() {
+        supField.setText("" + state.support);
+        minSupSlider.setValue((int) (state.support * 100));
+        confField.setText("" + state.confidence);
+        confSlider.setValue((int) (state.confidence * 100));
+    }
+
+    /**
+     * Sets sorting.
+     */
+    public void setSorting() {
+        if (state.lexSorting) {
+            lexicalSorting.setSelected(true);
+        } else {
+            supportSorting.setSelected(true);
+        }
+    }
+
+    /**
+     * Sets the current GUI state.
+     * 
+     * @param guiConf
+     *            current GUI state
+     */
+    public void setGuiConf(GUIConf guiConf) {
+        state = guiConf;
     }
 
     public void update(int numberOfCurrentAssocitaionrules, int numberOfAllCurrentAssocitaionrules) {
@@ -184,17 +208,17 @@ public class DependencySettings extends JPanel {
         @Override
         public void actionPerformed(ActionEvent arg0) {
             if (arg0.getActionCommand().equals("LexicalOrder")) {
-                if (state.lexsorting)
+                if (state.lexSorting)
                     return;
                 else {
-                    state.lexsorting = !state.lexsorting;
+                    state.lexSorting = !state.lexSorting;
                     myFirePropertyChange("ToggleSortingOrder", null, null);
                 }
             } else {
-                if (!state.lexsorting)
+                if (!state.lexSorting)
                     return;
                 else {
-                    state.lexsorting = !state.lexsorting;
+                    state.lexSorting = !state.lexSorting;
                     myFirePropertyChange("ToggleSortingOrder", null, null);
                 }
             }

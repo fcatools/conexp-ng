@@ -7,6 +7,7 @@ import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -36,6 +37,7 @@ import com.alee.utils.filefilter.AbstractFileFilter;
 import de.tudresden.inf.tcs.fcaapi.exception.IllegalObjectException;
 import fcatools.conexpng.Conf;
 import fcatools.conexpng.Util;
+import fcatools.conexpng.Util.FileOperationType;
 import fcatools.conexpng.gui.MainFrame;
 import fcatools.conexpng.gui.MainFrame.StillCalculatingDialog;
 import fcatools.conexpng.gui.MainFrame.UnsavedChangesDialog;
@@ -237,7 +239,16 @@ public class OpenSaveExportAction extends AbstractAction {
     private void handleFile(File selectedFile, AbstractFileFilter activeFileFilter) {
         String path = selectedFile.getAbsolutePath();
         if (type.equals(DialogType.OPEN)) {
+            // save old GUI state
+            if (!state.filePath.endsWith("untitled.cex")) {
+                try {
+                    new GUIWriter(state, state.filePath);
+                } catch (FileNotFoundException | IllegalArgumentException | IllegalAccessException | XMLStreamException e) {
+                    Util.handleIOExceptions(mainFrame, e, state.filePath, FileOperationType.GUI);
+                }
+            }
             openContext(mainFrame, state, path);
+            state.loadedFile();
         } else if (type.equals(DialogType.EXPORT)) {
             exportLattice(path, activeFileFilter);
         } else {
@@ -271,7 +282,7 @@ public class OpenSaveExportAction extends AbstractAction {
                 // cannot happen
                 return;
             }
-            new GUIReader(state, path);
+            new GUIReader(mainFrame, state, path);
             // disable save button after context is loaded; since context is
             // loaded on application start, too, a null check is necessary
             // because the gui is not created at this point
@@ -375,7 +386,7 @@ public class OpenSaveExportAction extends AbstractAction {
         int maxWidth = 0;
         int maxHeight = 0;
         Point offset = LatticeGraphView.getOffset();
-        double zoom = LatticeView.zoomFactor;
+        double zoom = LatticeView.getZoomFactor();
         // real width/height after applying offset and zoom factor
         int realWidth = 0;
         int realHeight = 0;
@@ -388,7 +399,7 @@ public class OpenSaveExportAction extends AbstractAction {
             if (maxHeight < realHeight) {
                 maxHeight = realHeight;
             }
-            if (state.guiConf.showAttributLabel) {
+            if (state.guiConf.showAttributeLabel) {
                 realWidth = (int) Math.ceil(n.getAttributesLabel().getX() * zoom + offset.getX());
                 if (maxWidth < realWidth) {
                     maxWidth = realWidth;
@@ -437,11 +448,15 @@ public class OpenSaveExportAction extends AbstractAction {
                 return;
             }
             // save gui state
-            new GUIWriter(state, path);
+            try {
+                new GUIWriter(state, path);
+            } catch (FileNotFoundException | XMLStreamException | IllegalArgumentException | IllegalAccessException e) {
+                Util.handleIOExceptions(mainFrame, e, path, FileOperationType.GUI);
+            }
             state.setNewFile(path);
             state.unsavedChanges = false;
             MainToolbar.getSaveButton().setEnabled(false);
-        } catch (IOException | XMLStreamException | IllegalArgumentException | IllegalAccessException e) {
+        } catch (IOException | XMLStreamException | IllegalArgumentException e) {
             Util.handleIOExceptions(mainFrame, e, path, Util.FileOperationType.SAVE);
         }
     }

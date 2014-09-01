@@ -60,6 +60,8 @@ public class DependencyView extends View {
 
     private final String EOL = System.getProperty("line.separator");
 
+    private DependencySettings settings;
+
     public DependencyView(final Conf state) {
         super(state);
 
@@ -83,7 +85,7 @@ public class DependencyView extends View {
         scroll2.getViewport().addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                state.guiConf.assoscrollpos = scroll2.getVerticalScrollBar().getValue();
+                state.guiConf.assoScrollPos = scroll2.getVerticalScrollBar().getValue();
             }
         });
 
@@ -91,13 +93,13 @@ public class DependencyView extends View {
         scroll1.getViewport().addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                state.guiConf.implscrollpos = scroll1.getVerticalScrollBar().getValue();
+                state.guiConf.implScrollPos = scroll1.getVerticalScrollBar().getValue();
             }
         });
-        final WebSplitPane splitPane = new WebSplitPane(WebSplitPane.VERTICAL_SPLIT, scroll1, scroll2);
-        splitPane.setOneTouchExpandable(true);
-        splitPane.setContinuousLayout(true);
-        splitPane.addDividerListener(new ComponentListener() {
+        final WebSplitPane assoImplSplitPane = new WebSplitPane(WebSplitPane.VERTICAL_SPLIT, scroll1, scroll2);
+        assoImplSplitPane.setOneTouchExpandable(true);
+        assoImplSplitPane.setContinuousLayout(true);
+        assoImplSplitPane.addDividerListener(new ComponentListener() {
             @Override
             public void componentShown(ComponentEvent arg0) {
             }
@@ -108,24 +110,24 @@ public class DependencyView extends View {
 
             @Override
             public void componentMoved(ComponentEvent arg0) {
-                state.guiConf.splitpanepos = splitPane.getDividerLocation();
+                state.guiConf.assoImplSplitPanePos = assoImplSplitPane.getDividerLocation();
             }
 
             @Override
             public void componentHidden(ComponentEvent arg0) {
             }
         });
-        view = splitPane;
-        splitPane.setDividerLocation(state.guiConf.splitpanepos);
+        view = assoImplSplitPane;
 
-        settings = new WebPanel(new BorderLayout());
+        settingsPanel = new WebPanel(new BorderLayout());
 
-        settings.add(new DependencySettings(state.guiConf), BorderLayout.NORTH);
-        settings.getComponent(0).addPropertyChangeListener(this);
-        settings.setMinimumSize(new Dimension(190, 400));
+        settings = new DependencySettings(state.guiConf);
+        settingsPanel.add(settings, BorderLayout.NORTH);
+        settingsPanel.getComponent(0).addPropertyChangeListener(this);
+        settingsPanel.setMinimumSize(new Dimension(190, 400));
         toolbar = null;
         super.init();
-        this.splitPane.setDividerLocation(state.guiConf.dependenciessettingssplitpos);
+        setSplitPanePositions();
         this.splitPane.addDividerListener(new ComponentListener() {
             @Override
             public void componentShown(ComponentEvent arg0) {
@@ -137,13 +139,35 @@ public class DependencyView extends View {
 
             @Override
             public void componentMoved(ComponentEvent arg0) {
-                state.guiConf.dependenciessettingssplitpos = DependencyView.this.splitPane.getDividerLocation();
+                state.guiConf.dependenciesSettingsSplitPos = DependencyView.this.splitPane.getDividerLocation();
             }
 
             @Override
             public void componentHidden(ComponentEvent arg0) {
             }
         });
+    }
+
+    /**
+     * Set split pane divider positions.
+     */
+    private void setSplitPanePositions() {
+        ((WebSplitPane) view).setDividerLocation(state.guiConf.assoImplSplitPanePos);
+        this.splitPane.setDividerLocation(state.guiConf.dependenciesSettingsSplitPos);
+    }
+
+    /**
+     * Updates the GUI after a new GUIConf is loaded.
+     */
+    public void updateGUI() {
+        // support and confidence
+        settings.setSliderValues();
+        // lexical or support sorting
+        settings.setSorting();
+        // split pane divider positions
+        setSplitPanePositions();
+        // implication and association pane scroll positions don't need to be
+        // updated, they are updated when calculating
     }
 
     public SimpleAttributeSet dependencyStyle(double support, double confidence) {
@@ -171,7 +195,7 @@ public class DependencyView extends View {
                 assopane.clear();
                 updateAssociationsLater = true;
                 updateImplicationsLater = true;
-                ((DependencySettings) settings.getComponent(0)).setGuiConf(state.guiConf);
+                ((DependencySettings) settingsPanel.getComponent(0)).setGuiConf(state.guiConf);
                 break;
             }
             case CONTEXTCHANGED: {
@@ -185,14 +209,14 @@ public class DependencyView extends View {
             }
             case LOADEDFILE: {
                 if (state.associations != null && !state.associations.isEmpty())
-                    writeAssociations(state.guiConf.assoscrollpos);
+                    writeAssociations(state.guiConf.assoScrollPos);
                 else
                     updateAssociationsLater = true;
                 if (state.implications != null && !state.implications.isEmpty())
-                    writeImplications(state.guiConf.implscrollpos);
+                    writeImplications(state.guiConf.implScrollPos);
                 else
                     updateImplicationsLater = true;
-                ((DependencySettings) settings.getComponent(0)).setGuiConf(state.guiConf);
+                ((DependencySettings) settingsPanel.getComponent(0)).setGuiConf(state.guiConf);
                 break;
             }
             default:
@@ -250,7 +274,7 @@ public class DependencyView extends View {
                     assopane.setText("");
                     ArrayList<AssociationRule> t = new ArrayList<>(state.associations);
 
-                    if (!state.guiConf.lexsorting) {
+                    if (!state.guiConf.lexSorting) {
                         Collections.sort(t, new Comparator<AssociationRule>() {
                             @Override
                             public int compare(AssociationRule o1, AssociationRule o2) {
@@ -290,7 +314,7 @@ public class DependencyView extends View {
                         }
                         ((WebScrollPane) ((WebSplitPane) view).getBottomComponent()).getVerticalScrollBar().setValue(
                                 assoscrollpos);
-                        ((DependencySettings) settings.getComponent(0)).update(i, state.associations.size());
+                        ((DependencySettings) settingsPanel.getComponent(0)).update(i, state.associations.size());
                     } catch (BadLocationException e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
@@ -313,7 +337,7 @@ public class DependencyView extends View {
                     int support = 0;
                     implpane.setText("");
                     ArrayList<FCAImplication<String>> z = new ArrayList<>(state.implications);
-                    if (!state.guiConf.lexsorting) {
+                    if (!state.guiConf.lexSorting) {
                         Collections.sort(z, new Comparator<FCAImplication<String>>() {
 
                             @Override

@@ -110,7 +110,8 @@ public class Util {
     public static void handleIOExceptions(WebFrame parent, Exception ex, String path, FileOperationType fot) {
         String errorMessage;
         if (fot.equals(FileOperationType.GUI)) {
-            showMessageDialog(parent, LocaleHandler.getString("Util.handleIOExceptions.GUI") + path, true);
+            showMessageDialog(parent, LocaleHandler.getString("Util.handleIOExceptions.GUI") + path.concat(".gui"),
+                    true);
         } else if (ex instanceof FileNotFoundException) {
             showMessageDialog(parent, LocaleHandler.getString("Util.handleIOExceptions.FileNotFoundException") + path,
                     true);

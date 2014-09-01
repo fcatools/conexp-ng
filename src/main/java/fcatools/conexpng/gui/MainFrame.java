@@ -35,6 +35,7 @@ import com.alee.laf.tabbedpane.TabbedPaneStyle;
 import com.alee.laf.tabbedpane.WebTabbedPane;
 
 import fcatools.conexpng.Conf;
+import fcatools.conexpng.GUIConf;
 import fcatools.conexpng.Main;
 import fcatools.conexpng.Util;
 import fcatools.conexpng.gui.actions.CloseAction;
@@ -56,9 +57,9 @@ public class MainFrame extends WebFrame {
     private WebPanel mainPanel;
     private WebTabbedPane tabPane;
     private WebLabel viewTitleLabel;
-    private View contextView;
-    private View latticeView;
-    private View associationView;
+    private ContextEditor contextView;
+    private LatticeView latticeView;
+    private DependencyView associationView;
     private Conf state;
     private StatusBar statusBar;
 
@@ -162,6 +163,13 @@ public class MainFrame extends WebFrame {
                 }
             }
         });
+        selectLastUsedTab();
+    }
+
+    /**
+     * Selects the last used/opened tab given by {@link GUIConf#lastTab}.
+     */
+    private void selectLastUsedTab() {
         tabPane.setSelectedIndex(state.guiConf.lastTab);
         switch (state.guiConf.lastTab) {
         case 0:
@@ -421,6 +429,23 @@ public class MainFrame extends WebFrame {
             return cancel;
         }
 
+    }
+
+    /**
+     * Updates the GUI after a new GUIConf is loaded.
+     */
+    public void updateGUI() {
+        // general
+        selectLastUsedTab();
+
+        // dependencies
+        associationView.updateGUI();
+
+        // context
+        contextView.updateButtonSelection();
+
+        // lattice
+        latticeView.updateGUI();
     }
 
 }
