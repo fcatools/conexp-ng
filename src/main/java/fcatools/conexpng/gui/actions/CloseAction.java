@@ -67,7 +67,7 @@ public class CloseAction extends AbstractAction {
                 new GUIWriter(state, state.filePath);
             }
         } catch (IOException | XMLStreamException | IllegalArgumentException | IllegalAccessException e) {
-            Util.handleIOExceptions(mainFrame, e, state.filePath, Util.FileOperationType.GUI);
+            Util.handleIOExceptions(mainFrame, e, state.filePath, Util.FileOperationType.GUISAVE);
         }
     }
 

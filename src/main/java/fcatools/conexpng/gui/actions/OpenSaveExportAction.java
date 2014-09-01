@@ -244,7 +244,7 @@ public class OpenSaveExportAction extends AbstractAction {
                 try {
                     new GUIWriter(state, state.filePath);
                 } catch (FileNotFoundException | IllegalArgumentException | IllegalAccessException | XMLStreamException e) {
-                    Util.handleIOExceptions(mainFrame, e, state.filePath, FileOperationType.GUI);
+                    Util.handleIOExceptions(mainFrame, e, state.filePath, FileOperationType.GUISAVE);
                 }
             }
             openContext(mainFrame, state, path);
@@ -282,7 +282,11 @@ public class OpenSaveExportAction extends AbstractAction {
                 // cannot happen
                 return;
             }
-            new GUIReader(mainFrame, state, path);
+            try {
+                new GUIReader(mainFrame, state, path);
+            } catch (FileNotFoundException | IllegalArgumentException | IllegalAccessException | XMLStreamException e) {
+                Util.handleIOExceptions(mainFrame, e, state.filePath, FileOperationType.GUIOPEN);
+            }
             // disable save button after context is loaded; since context is
             // loaded on application start, too, a null check is necessary
             // because the gui is not created at this point
@@ -451,7 +455,7 @@ public class OpenSaveExportAction extends AbstractAction {
             try {
                 new GUIWriter(state, path);
             } catch (FileNotFoundException | XMLStreamException | IllegalArgumentException | IllegalAccessException e) {
-                Util.handleIOExceptions(mainFrame, e, path, FileOperationType.GUI);
+                Util.handleIOExceptions(mainFrame, e, path, FileOperationType.GUISAVE);
             }
             state.setNewFile(path);
             state.unsavedChanges = false;
