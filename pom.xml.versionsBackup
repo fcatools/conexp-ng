@@ -1,0 +1,171 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>fcatools.conexp-ng</groupId>
+  <artifactId>conexp-ng</artifactId>
+  <packaging>jar</packaging>
+  <version>0.6.1-SNAPSHOT</version>
+  <name>ConExp-NG</name>
+  <url>https://github.com/fcatools/conexp-ng/wiki</url>
+
+  <properties>
+    <maven.compiler.source>1.7</maven.compiler.source>
+    <maven.compiler.target>1.7</maven.compiler.target>
+    <slf4j.version>1.7.5</slf4j.version>
+    <!-- PROJECT ENCODING PROPERTIES -->
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+  </properties>
+
+  <repositories>
+    <!-- In Project repository -->
+    <repository>
+      <id>in-project</id>
+      <name>In Project Repo</name>
+      <url>file://${project.basedir}/libs</url>
+    </repository>
+  </repositories>
+
+  <dependencies>
+    <!-- Testing -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.11</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- Web Look and Feel -->
+    <dependency>
+      <groupId>weblaf</groupId>
+      <artifactId>weblaf</artifactId>
+      <version>1.4</version>
+    </dependency>
+    <!-- Guava -->
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>14.0.1</version>
+    </dependency>
+    <!-- combinatoricslib -->
+    <dependency>
+      <groupId>com.googlecode.combinatoricslib</groupId>
+      <artifactId>combinatoricslib</artifactId>
+      <version>2.0</version>
+      <scope>compile</scope>
+    </dependency>
+    <!-- log4j -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>1.7.5</version>
+    </dependency>
+    <!-- FCAlib -->
+    <dependency>
+      <groupId>fcalib</groupId>
+      <artifactId>fcalib</artifactId>
+      <version>0.10.2</version>
+    </dependency>
+    <!-- FCAApi -->
+    <dependency>
+      <groupId>fcaapi</groupId>
+      <artifactId>fcaapi</artifactId>
+      <version>0.10.2</version>
+    </dependency>
+    <!-- Batik -->
+    <dependency>
+      <groupId>org.apache.xmlgraphics</groupId>
+      <artifactId>batik-transcoder</artifactId>
+      <version>1.7</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.xmlgraphics</groupId>
+      <artifactId>batik-swing</artifactId>
+      <version>1.7</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.xmlgraphics</groupId>
+      <artifactId>batik-codec</artifactId>
+      <version>1.7</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <!-- Exec -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.2.1</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <mainClass>fcatools.conexpng.Main</mainClass>
+          <executable>java</executable>
+          <arguments>
+            <argument>-Xdock:name=ConExp-NG</argument>
+            <argument>-classpath</argument>
+            <!-- automatically creates the classpath using all project dependencies,
+                 also adding the project build directory -->
+            <classpath />
+            <argument>fcatools.conexpng.Main</argument>
+          </arguments>
+        </configuration>
+      </plugin>
+      <!-- JAR -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>2.1</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <transformers>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                  <mainClass>fcatools.conexpng.Main</mainClass>
+                </transformer>
+              </transformers>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- JavaDoc -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.9</version>
+        <configuration>
+        </configuration>
+      </plugin>
+      <!-- Release -->
+      <plugin>
+	    <groupId>org.apache.maven.plugins</groupId>
+	    <artifactId>maven-release-plugin</artifactId>
+	    <version>2.5</version>
+	    <configuration>
+	        <tagNameFormat>v@{project.version}</tagNameFormat>
+	    </configuration>
+	  </plugin>
+    </plugins>
+  </build>
+  <scm>
+  	<connection>scm:git:git@github.com:fcatools/conexp-ng.git</connection>
+  	<developerConnection>scm:git:git@github.com:fcatools/conexp-ng.git</developerConnection>
+  	<url>https://github.com/fcatools/conexp-ng</url>
+    <tag>HEAD</tag>
+  </scm>
+  <distributionManagement>
+    <repository>
+      <id>deploy-to-file</id>
+      <url>file://${project.build.directory}</url>
+    </repository>
+  </distributionManagement>
+</project>
