@@ -13,6 +13,7 @@ import java.util.TreeSet;
 import de.tudresden.inf.tcs.fcaapi.Concept;
 import de.tudresden.inf.tcs.fcalib.FullObject;
 import de.tudresden.inf.tcs.fcalib.utils.ListSet;
+import fcatools.conexpng.gui.lattice.algorithms.ExternalFreeseLatticeGraphAlgorithm;
 import fcatools.conexpng.gui.lattice.algorithms.FreeseLatticeGraphAlgorithm;
 import fcatools.conexpng.gui.lattice.algorithms.ILatticeGraphAlgorithm;
 import fcatools.conexpng.gui.lattice.algorithms.TrivialLatticeGraphAlgorithm;
@@ -38,7 +39,8 @@ public class LatticeGraphComputer {
         algorithms = new HashMap<>();
         algorithms.put("Trivial", new TrivialLatticeGraphAlgorithm());
         algorithms.put("Freese", new FreeseLatticeGraphAlgorithm());
-        usedAlgorithm = algorithms.get("Freese");
+        algorithms.put("ExternalFreese", new ExternalFreeseLatticeGraphAlgorithm());
+        usedAlgorithm = algorithms.get("ExternalFreese");
     }
 
     /**

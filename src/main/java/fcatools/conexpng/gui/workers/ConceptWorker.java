@@ -196,7 +196,7 @@ public class ConceptWorker extends AbstractWorker {
                 setProgress(99);
                 setProgressBarMessage(StatusMessage.CALCULATINGLATTICE.toString());
             }
-            state.lattice = LatticeGraphComputer.computeLatticeGraph(state.concepts, view.getBounds());
+            state.lattice = LatticeGraphComputer.computeLatticeGraph(state.concepts, view.getLatticeGraphViewBounds());
             view.updateLatticeGraph();
             if (lattice) {
                 ((LatticeSettings) view.getSettings()).update(state);
