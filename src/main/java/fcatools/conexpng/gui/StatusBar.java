@@ -18,7 +18,7 @@ import fcatools.conexpng.gui.workers.AbstractWorker;
 import fcatools.conexpng.io.locale.LocaleHandler;
 
 /**
- * Status bar of this program. Displays progress information on calculations.
+ * Status bar of this program. Displays progress information on calculations. Designed as a singleton.
  * 
  * @author Torsten Casselt
  */
@@ -29,11 +29,12 @@ public class StatusBar extends WebPanel {
     private Map<Long, WebProgressBar> progressBarMap = new HashMap<Long, WebProgressBar>();
     private Long id = 0L;
     private WebPanel panel;
+    private static StatusBar statusBar;
 
     /**
      * Creates the status bar.
      */
-    public StatusBar() {
+    private StatusBar() {
         setLayout(new BorderLayout());
         setPreferredSize(new Dimension(100, 20));
         panel = new WebPanel();
@@ -42,6 +43,16 @@ public class StatusBar extends WebPanel {
         panel.add(Box.createHorizontalGlue());
         add(panel, BorderLayout.CENTER);
         setVisible(false);
+    };
+
+    /**
+     * Creates the status bar if it does not exist already and returns it.
+     */
+    public static StatusBar getInstance() {
+        if (statusBar == null) {
+            statusBar = new StatusBar();
+        }
+        return statusBar;
     }
 
     /**
@@ -126,7 +137,9 @@ public class StatusBar extends WebPanel {
 
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                calculationMap.get(currId).cancel(true);
+                if (calculationMap.get(currId) != null) {
+                    calculationMap.get(currId).cancel(true);
+                }
             }
         });
         cancelButton.setToolTipText(LocaleHandler.getString("StatusBar.startCalculation.cancelButton.toolTip"));

@@ -365,6 +365,16 @@ public class LatticeView extends View {
         guiConf.zoomFactor = zoomFactor;
     }
 
+    /**
+     * Returns the current bounds of the lattice graph view to scale the lattice
+     * correctly.
+     * 
+     * @return bounds of the lattice graph view
+     */
+    public Rectangle getLatticeGraphViewBounds() {
+        return latticeGraphView.getBounds();
+    }
+
     boolean loadedfile = false;
     ConceptWorker cc;
 

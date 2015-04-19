@@ -139,7 +139,7 @@ public class MainFrame extends WebFrame {
                 LocaleHandler.getString("MainFrame.MainFrame.tab.2.title"),
                 LocaleHandler.getString("MainFrame.MainFrame.tab.2.toolTip"), 2);
 
-        statusBar = new StatusBar();
+        statusBar = StatusBar.getInstance();
         statusBar.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, new Color(140, 140, 140)));
         state.setStatusBar(statusBar);
         mainPanel.add(statusBar, BorderLayout.SOUTH);

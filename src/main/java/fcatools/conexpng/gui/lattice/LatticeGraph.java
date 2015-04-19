@@ -216,4 +216,24 @@ public class LatticeGraph {
         return nodes.isEmpty();
     }
 
+    /**
+     * Returns the direct upper neighbors of each node in a list of lists. First
+     * list are the direct upper neighbors of first node and so on.
+     * 
+     * @return list of lists of upper neighbors of all nodes
+     */
+    public List<List<Node>> getUpperNeighbors() {
+        List<List<Node>> list = new ArrayList<List<Node>>();
+        for (Node currentNode : nodes) {
+            List<Node> neighborList = new ArrayList<Node>();
+            for (Node n : nodes) {
+                if (n.compareTo(currentNode) == 1) {
+                    neighborList.add(n);
+                }
+            }
+            list.add(neighborList);
+        }
+        return list;
+    }
+
 }
