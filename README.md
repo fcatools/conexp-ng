@@ -11,3 +11,5 @@ Explorer][1] with a focus on usability, maintainability and extensibility.
  [1]: http://sourceforge.net/projects/conexp/ "Concept Explorer"
 
 The documentation is located at: <https://github.com/fcatools/conexp-ng/wiki>.
+
+ConExp-NG is licensed under the GNU General Public License v3.0. See document [LICENSE](LICENSE).
